@@ -137,5 +137,5 @@ geoff_geometry::Point3d GetCameraPoint()
 		bp::def("glRotatef", cad_glRotatef);
 		bp::def("SetCameraPoint", SetCameraPoint);
 		bp::def("GetCameraPoint", GetCameraPoint);
-		bp::def("NewFrame", NewFrame);
+		bp::def("NewFrame", NewFrame, bp::return_value_policy<bp::reference_existing_object>);
 	}

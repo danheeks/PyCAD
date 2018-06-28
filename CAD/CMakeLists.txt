@@ -62,7 +62,6 @@ include_directories(OPENGL_INCLUDE_DIR)
 # this defines the source-files for library
 set(CAD_SRC
     PythonStuff.cpp
-    GraphicsCanvas.cpp
 )
 
 
