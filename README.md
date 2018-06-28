@@ -28,7 +28,8 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..\
 make
 
 ### try the test.py ###
-python ../test.py
+python\
+import cad
 
 ### problems June 2018 ###
 I'm getting\ 
