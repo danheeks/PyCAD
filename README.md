@@ -1,7 +1,7 @@
 # PyCAD
 Experiments in making a CAD software on the Raspberry Pi, using Python, with wxPython boost-python, OpenGL and my geometry derived from HeeksCNC project.
 This will involve building a CAD python module and a GEOM python module
-I am hoping that wxPython and CAD can share objects, so that I can do
+I am hoping that wxPython and CAD can share objects, so that I can do\
 import wx\
 import cad\
 frame = wx.Frame(None, -1, 'test')\
