@@ -24,7 +24,7 @@ git clone https://github.com/danheeks/PyCAD.git
 cd PyCAD/CAD\
 mkdir build\
 cd build\
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..\
+cmake ..\
 make
 
 ### try the test.py ###
