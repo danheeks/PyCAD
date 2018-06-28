@@ -25,7 +25,6 @@
 #include <boost/python/call.hpp>
 
 #include "../Geom/geometry.h"
-#include "GraphicsCanvas.h"
 
 namespace bp = boost::python;
 
@@ -121,12 +120,9 @@ void SetCameraPoint(const geoff_geometry::Point3d& p)
 	camera_point = p;
 }
 
-
-
-
-static boost::shared_ptr<CGraphicsCanvas> initGraphicsCanvas(wxWindow* parent)
+wxFrame* NewFrame()
 {
-	return boost::shared_ptr<CGraphicsCanvas>(new CGraphicsCanvas(parent));
+	return new wxFrame(NULL, -1, _T("test"));
 }
 
 geoff_geometry::Point3d GetCameraPoint()
@@ -141,9 +137,5 @@ geoff_geometry::Point3d GetCameraPoint()
 		bp::def("glRotatef", cad_glRotatef);
 		bp::def("SetCameraPoint", SetCameraPoint);
 		bp::def("GetCameraPoint", GetCameraPoint);
-
-
-		bp::class_<CGraphicsCanvas, boost::noncopyable>("GraphicsCanvas")
-			.def("__init__", bp::make_constructor(&initGraphicsCanvas))
-			;
+		bp::def("NewFrame", NewFrame);
 	}
