@@ -32,7 +32,9 @@ python\
 import cad
 
 ### problems June 2018 ###
+I have simplified PyCAD to just have one file, with a function "NewFrame", which returns a wxFrame object
 I'm getting\ 
 Traceback (most recent call last):\
   File "<stdin>", line 1, in <module>\
-ImportError: ./cad.so: undefined symbol: _ZTI10wxGLCanvas
+ImportError: ./cad.so: undefined symbol: wxDefaultSize
+
