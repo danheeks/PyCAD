@@ -12,7 +12,7 @@ Start with a clean Raspbian installation
 
 ### Get essentials ###
 ```
-sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev libwxgtk2.8-dev
+sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev libwxgtk2.8-dev python-wxgtk2.8
 ```
 
 ### Fetch sources ###
