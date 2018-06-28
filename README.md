@@ -21,7 +21,7 @@ git clone https://github.com/danheeks/PyCAD.git
 ```
 
 ### build CAD python module ###
-cd PyCAD/trunk/CAD\
+cd PyCAD/CAD\
 mkdir build\
 cd build\
 cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..\
