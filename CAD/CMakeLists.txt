@@ -62,6 +62,7 @@ include_directories(OPENGL_INCLUDE_DIR)
 # this defines the source-files for library
 set(CAD_SRC
     PythonStuff.cpp
+    GraphicsCanvas.cpp
 )
 
 
@@ -93,7 +94,7 @@ endif(DEFINED INCLUDE_INSTALL_DIR)
       ${CAD_SRC}
   )
 
-target_link_libraries(cad ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+target_link_libraries(cad ${Boost_LIBRARIES} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 set_target_properties(cad PROPERTIES PREFIX "") 
 
 # this figures out where to install the Python modules
