@@ -5,7 +5,7 @@ I am hoping that wxPython and CAD can share objects, so that I can do
 import wx\
 import cad\
 frame = wx.Frame(None, -1, 'test')\
-graphics_canvas = cad.GraphicsCanvas(frame)\
+graphics_canvas = cad.GraphicsCanvas(frame)
 
 ## How to build ##
 Start with a clean Raspbian installation
@@ -25,7 +25,7 @@ cd PyCAD/trunk/CAD\
 mkdir build\
 cd build\
 cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..\
-make\
+make
 
 ### try the test.py ###
 python ../test.py
@@ -34,4 +34,4 @@ python ../test.py
 I'm getting\ 
 Traceback (most recent call last):\
   File "<stdin>", line 1, in <module>\
-ImportError: ./cad.so: undefined symbol: _ZTI14wxEventFunctor\
+ImportError: ./cad.so: undefined symbol: _ZTI14wxEventFunctor
