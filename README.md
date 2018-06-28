@@ -34,4 +34,4 @@ python ../test.py
 I'm getting\ 
 Traceback (most recent call last):\
   File "<stdin>", line 1, in <module>\
-ImportError: ./cad.so: undefined symbol: _ZTI14wxEventFunctor
+ImportError: ./cad.so: undefined symbol: _ZTI10wxGLCanvas
