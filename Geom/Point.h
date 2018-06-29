@@ -42,7 +42,7 @@ public:
 	void Transform(const geoff_geometry::Matrix &m)
 	{
 		geoff_geometry::Point p(x,y);
-		p = p.Transform(m);
+		p = p.Transformed(m);
 		x = p.x;
 		y = p.y;
 	}

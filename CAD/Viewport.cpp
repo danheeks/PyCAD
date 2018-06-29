@@ -1,4 +1,6 @@
-# include "stdafx.h""
+#include "stdafx.h"
+#include "Viewport.h"
+#include "InputMode.h"
 
 CViewport::CViewport() :m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(0), m_h(0), m_view_point(this), m_need_update(false), m_need_refresh(false)
 {
@@ -20,7 +22,7 @@ void CViewport::glCommands()
 	glDrawBuffer(GL_BACK);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	if (theApp.m_antialiasing)
+	if (0/*theApp.m_antialiasing*/)
 	{
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
@@ -96,7 +98,7 @@ void CViewport::glCommands()
 	case BackgroundModeOneColor:
 	{
 		// clear the back buffer
-		theApp.background_color[0].glClearColor(theApp.m_antialiasing ? 0.0f : 1.0f);
+		theApp.background_color[0].glClearColor(/*theApp.m_antialiasing ? 0.0f : */1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	break;
@@ -112,9 +114,9 @@ void CViewport::glCommands()
 		// draw sky dome
 		glClear(GL_DEPTH_BUFFER_BIT);
 		double radius = m_view_point.m_far_plane * 0.5;
-		gp_Vec x(1, 0, 0);
-		gp_Vec y(0, 1, 0);
-		gp_Vec z(0, 0, 1);
+		geoff_geometry::Point3d x(1, 0, 0);
+		geoff_geometry::Point3d y(0, 1, 0);
+		geoff_geometry::Point3d z(0, 0, 1);
 		glShadeModel(GL_SMOOTH);
 		glBegin(GL_TRIANGLES);
 		glEnable(GL_CULL_FACE);
@@ -127,10 +129,10 @@ void CViewport::glCommands()
 			{
 				double vang0 = -1.5707963267948 + 0.7853981633974 * panel;
 				double vang1 = -1.5707963267948 + 0.7853981633974 * (panel + 1);
-				gp_Pnt p0 = m_view_point.m_lens_point.XYZ() + (radius * x * cos(ang0) * cos(vang0)).XYZ() + (radius * y * sin(ang0) * cos(vang0)).XYZ() + (radius * z * sin(vang0)).XYZ();
-				gp_Pnt p1 = m_view_point.m_lens_point.XYZ() + (radius * x * cos(ang1) * cos(vang0)).XYZ() + (radius * y * sin(ang1) * cos(vang0)).XYZ() + (radius * z * sin(vang0)).XYZ();
-				gp_Pnt p2 = m_view_point.m_lens_point.XYZ() + (radius * x * cos(ang0) * cos(vang1)).XYZ() + (radius * y * sin(ang0) * cos(vang1)).XYZ() + (radius * z * sin(vang1)).XYZ();
-				gp_Pnt p3 = m_view_point.m_lens_point.XYZ() + (radius * x * cos(ang1) * cos(vang1)).XYZ() + (radius * y * sin(ang1) * cos(vang1)).XYZ() + (radius * z * sin(vang1)).XYZ();
+				geoff_geometry::Point3d p0 = m_view_point.m_lens_point + (radius * x * cos(ang0) * cos(vang0)) + (radius * y * sin(ang0) * cos(vang0)) + (radius * z * sin(vang0));
+				geoff_geometry::Point3d p1 = m_view_point.m_lens_point + (radius * x * cos(ang1) * cos(vang0)) + (radius * y * sin(ang1) * cos(vang0)) + (radius * z * sin(vang0));
+				geoff_geometry::Point3d p2 = m_view_point.m_lens_point + (radius * x * cos(ang0) * cos(vang1)) + (radius * y * sin(ang0) * cos(vang1)) + (radius * z * sin(vang1));
+				geoff_geometry::Point3d p3 = m_view_point.m_lens_point + (radius * x * cos(ang1) * cos(vang1)) + (radius * y * sin(ang1) * cos(vang1)) + (radius * z * sin(vang1));
 				HeeksColor c0, c1;
 				switch (panel)
 				{
@@ -157,18 +159,18 @@ void CViewport::glCommands()
 				if (panel != 4)
 				{
 					c0.glColor();
-					glVertex3d(p0.X(), p0.Y(), p0.Z());
+					glVertex3d(p0.x, p0.y, p0.z);
 					c1.glColor();
-					glVertex3d(p3.X(), p3.Y(), p3.Z());
-					glVertex3d(p2.X(), p2.Y(), p2.Z());
+					glVertex3d(p3.x, p3.y, p3.z);
+					glVertex3d(p2.x, p2.y, p2.z);
 				}
 				if (panel != 0)
 				{
 					c0.glColor();
-					glVertex3d(p0.X(), p0.Y(), p0.Z());
-					glVertex3d(p1.X(), p1.Y(), p1.Z());
+					glVertex3d(p0.x, p0.y, p0.z);
+					glVertex3d(p1.x, p1.y, p1.z);
 					c1.glColor();
-					glVertex3d(p3.X(), p3.Y(), p3.Z());
+					glVertex3d(p3.x, p3.y, p3.z);
 				}
 
 
@@ -189,7 +191,7 @@ void CViewport::glCommands()
 	m_render_on_front_done = false;
 }
 
-
+#if 0
 void CViewport::DrawFront(void){
 	if (!m_render_on_front_done){
 		FrontRender();
@@ -244,26 +246,30 @@ void CViewport::EndXOR(void){
 	glDrawBuffer(m_save_buffer_for_XOR);
 	glFlush();
 }
+#endif
 
-void CViewport::ViewportOnMouse(wxMouseEvent& event)
+void CViewport::OnMouseEvent(MouseEvent& event)
 {
 	theApp.m_current_viewport = this;
 	this->m_need_refresh = false;
 	this->m_need_update = false;
-	if (event.LeftDown())
+	if (event.m_leftDown)
 	{
 		int a = 0;
 		a = 3;
 	}
-	theApp.input_mode_object->OnMouse(event);
+	if (theApp.input_mode_object)theApp.input_mode_object->OnMouse(event);
 
+#if 0
 	for (std::list< void(*)(wxMouseEvent&) >::iterator It = theApp.m_lbutton_up_callbacks.begin(); It != theApp.m_lbutton_up_callbacks.end(); It++)
 	{
 		void(*callbackfunc)(wxMouseEvent& event) = *It;
 		(*callbackfunc)(event);
 	}
+#endif
 }
 
+#if 0
 void CViewport::OnMagExtents(bool rotate, int margin)
 {
 	m_view_points.clear();
@@ -276,32 +282,54 @@ void CViewport::OnMagExtents(bool rotate, int margin)
 		StoreViewPoint();
 	}
 }
+#endif
+
+geoff_geometry::Point3d getClosestOrthogonal(const geoff_geometry::Point3d &v)
+{
+	double best_dp = 0;
+	geoff_geometry::Point3d best_v;
+
+	geoff_geometry::Point3d test_v[6] = { geoff_geometry::Point3d(1, 0, 0), geoff_geometry::Point3d(-1, 0, 0), geoff_geometry::Point3d(0, 1, 0), geoff_geometry::Point3d(0, -1, 0), geoff_geometry::Point3d(0, 0, 1), geoff_geometry::Point3d(0, 0, -1) };
+	for (int i = 0; i<6; i++)
+	{
+		double dp = test_v[i] * v;
+		if (dp > best_dp)
+		{
+			best_dp = dp;
+			best_v = test_v[i];
+		}
+	}
+	return best_v;
+}
 
 void CViewport::SetViewPoint(int margin){
 	if (m_orthogonal){
-		gp_Vec vz = getClosestOrthogonal(-m_view_point.forwards_vector());
-		gp_Vec v2 = m_view_point.m_vertical;
+		geoff_geometry::Point3d vz = getClosestOrthogonal(-m_view_point.forwards_vector());
+		geoff_geometry::Point3d v2 = m_view_point.m_vertical;
 		v2 = v2 + vz * (-(v2 * vz)); // remove any component in new vz direction	    
-		gp_Vec vy = getClosestOrthogonal(v2);
+		geoff_geometry::Point3d vy = getClosestOrthogonal(v2);
 		m_view_point.SetView(vy, vz, margin);
 		StoreViewPoint();
 		return;
 	}
 
-	gp_Vec vy(0, 1, 0), vz(0, 0, 1);
+	geoff_geometry::Point3d vy(0, 1, 0), vz(0, 0, 1);
 	m_view_point.SetView(vy, vz, margin);
 	StoreViewPoint();
 }
 
+#if 0
 void CViewport::InsertViewBox(const CBox& box)
 {
 	m_view_point.m_extra_view_box.Insert(box);
 }
+#endif
 
 void CViewport::StoreViewPoint(void){
 	m_view_points.push_back(m_view_point);
 }
 
+#if 0
 void CViewport::RestorePreviousViewPoint(void){
 	if (m_view_points.size()>0){
 		m_view_point = m_view_points.back();
@@ -341,11 +369,11 @@ void CViewport::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_dep
 	glFlush();
 }
 
-void CViewport::FindMarkedObject(const wxPoint &point, MarkedObject* marked_object){
+void CViewport::FindMarkedObject(const IPoint &point, MarkedObject* marked_object){
 	theApp.m_marked_list->FindMarkedObject(point, marked_object);
 }
 
-void CViewport::DrawWindow(wxRect &rect, bool allow_extra_bits){
+void CViewport::DrawWindow(IRect &rect, bool allow_extra_bits){
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -400,3 +428,5 @@ void CViewport::DrawWindow(wxRect &rect, bool allow_extra_bits){
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 }
+
+#endif

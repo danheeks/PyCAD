@@ -8,7 +8,7 @@ CVertex3D::CVertex3D(const geoff_geometry::Point3d& p)
 
 void CVertex3D::Transform(const geoff_geometry::Matrix& matrix)
 {
-	m_p.Transform(matrix);
+	m_p = m_p.Transformed(matrix);
 }
 
 void CCurve3D::append(const CVertex3D& vertex)

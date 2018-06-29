@@ -3,15 +3,12 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 #include "ViewPoint.h"
-#include "SelectMode.h"
-#include "GraphicsCanvas.h"
-#include "HeeksFrame.h"
-#include "CoordinateSystem.h"
+#include "Viewport.h"
 
 CViewPoint::CViewPoint(CViewport* viewport){
-	m_lens_point = gp_Pnt(0, 0, 200);
-	m_target_point = gp_Pnt(0, 0, 0);
-	m_vertical = gp_Vec(0, 1, 0);
+	m_lens_point = geoff_geometry::Point3d(0, 0, 200);
+	m_target_point = geoff_geometry::Point3d(0, 0, 0);
+	m_vertical = geoff_geometry::Point3d(0, 1, 0);
 	m_perspective = false;
 	m_pixel_scale = 10;
 	m_view_angle = 30;
@@ -46,104 +43,104 @@ const CViewPoint& CViewPoint::operator=(const CViewPoint &c){
 	return *this;
 }
 
-void CViewPoint::Turn(wxPoint point_diff){
+void CViewPoint::Turn(IPoint point_diff){
 	if(point_diff.x > 100)point_diff.x = 100;
 	else if(point_diff.x < -100)point_diff.x = -100;
 	if(point_diff.y > 100)point_diff.y = 100;
 	else if(point_diff.y < -100)point_diff.y = -100;
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	double c=(size.GetWidth()+size.GetHeight())/20;
 	Turn(point_diff.x/c, point_diff.y/c);
 }
 
 void CViewPoint::Turn(double ang_x, double ang_y){
-	gp_Vec f(m_lens_point, m_target_point);
-	double fl = f.Magnitude();
-	gp_Vec uu = m_vertical.Normalized();
-	gp_Vec r = (f ^ uu).Normalized();
-	m_lens_point = m_lens_point.XYZ() - r.XYZ() * sin(ang_x)*fl;
-	m_lens_point = m_lens_point.XYZ() + f.XYZ()*(1-cos(ang_x));
-	f = f.XYZ() + r.XYZ() * sin(ang_x) * fl;
-	f = f.XYZ() - f.XYZ() * (1-cos(ang_x));
+	geoff_geometry::Point3d f(m_lens_point, m_target_point);
+	double fl = f.magnitude();
+	geoff_geometry::Point3d uu = m_vertical.Normalized();
+	geoff_geometry::Point3d r = (f ^ uu).Normalized();
+	m_lens_point = m_lens_point - r * sin(ang_x)*fl;
+	m_lens_point = m_lens_point + f*(1-cos(ang_x));
+	f = f + r * sin(ang_x) * fl;
+	f = f - f * (1-cos(ang_x));
 	r = (f ^ uu).Normalized();
-	m_lens_point = m_lens_point.XYZ() + uu.XYZ() * sin(ang_y)*fl;
-	m_lens_point = m_lens_point.XYZ() + f.XYZ() * (1-cos(ang_y));
-	m_vertical = m_vertical.XYZ() + f.XYZ() * sin(ang_y)/fl;
-	m_vertical = m_vertical.XYZ() - uu.XYZ() * (1-cos(ang_y));
+	m_lens_point = m_lens_point + uu * sin(ang_y)*fl;
+	m_lens_point = m_lens_point + f * (1-cos(ang_y));
+	m_vertical = m_vertical + f * sin(ang_y)/fl;
+	m_vertical = m_vertical - uu * (1-cos(ang_y));
 }
 
-void CViewPoint::TurnVertical(wxPoint point_diff){
+void CViewPoint::TurnVertical(IPoint point_diff){
 	if(point_diff.x > 100)point_diff.x = 100;
 	else if(point_diff.x < -100)point_diff.x = -100;
 	if(point_diff.y > 100)point_diff.y = 100;
 	else if(point_diff.y < -100)point_diff.y = -100;
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	double c=(size.GetWidth()+size.GetHeight())/20;
 	TurnVertical(point_diff.x/c, point_diff.y/c);
 }
 
 void CViewPoint::TurnVertical(double ang_x, double ang_y){
-	gp_Vec f = m_target_point.XYZ() - m_lens_point.XYZ();
-	gp_Vec uu = m_vertical.Normalized();
-	gp_Vec r = (f ^ uu).Normalized();
-	gp_Pnt temp_target(m_target_point.X(), m_target_point.Y(), 0);
-	double dist = gp_Pnt(m_lens_point.X(), m_lens_point.Y(), 0).Distance(temp_target);
-	double a_old = atan2(m_lens_point.Y() - m_target_point.Y(), m_lens_point.X() - m_target_point.X());
+	geoff_geometry::Point3d f = m_target_point - m_lens_point;
+	geoff_geometry::Point3d uu = m_vertical.Normalized();
+	geoff_geometry::Point3d r = (f ^ uu).Normalized();
+	geoff_geometry::Point3d temp_target(m_target_point.x, m_target_point.y, 0);
+	double dist = geoff_geometry::Point3d(m_lens_point.x, m_lens_point.y, 0).Dist(temp_target);
+	double a_old = atan2(m_lens_point.y - m_target_point.y, m_lens_point.x - m_target_point.x);
 	double a_new = a_old - ang_x;
-	m_lens_point.SetX( m_target_point.X() + dist * cos(a_new));
-	m_lens_point.SetY( m_target_point.Y() + dist * sin(a_new));
-	gp_Pnt temp_vertical(m_vertical.X(), m_vertical.Y(), 0);
-	temp_target.SetX(0);
-	temp_target.SetY(0);
-	dist = temp_vertical.Distance(temp_target);
-	a_old = atan2(temp_vertical.Y() - temp_target.Y(), temp_vertical.X() - temp_target.X());
+	m_lens_point.x = m_target_point.x + dist * cos(a_new);
+	m_lens_point.y =  m_target_point.y + dist * sin(a_new);
+	geoff_geometry::Point3d temp_vertical(m_vertical.x, m_vertical.y, 0);
+	temp_target.x = 0;
+	temp_target.y = 0;
+	dist = temp_vertical.Dist(temp_target);
+	a_old = atan2(temp_vertical.y - temp_target.y, temp_vertical.x - temp_target.x);
 	a_new = a_old - ang_x;
-	m_vertical.SetX(temp_target.X() + dist * cos(a_new));
-	m_vertical.SetY(temp_target.Y() + dist * sin(a_new));
-	f = make_vector(m_lens_point, m_target_point);
+	m_vertical.x = temp_target.x + dist * cos(a_new);
+	m_vertical.y = temp_target.y + dist * sin(a_new);
+	f = geoff_geometry::Point3d(m_lens_point, m_target_point);
 	uu = m_vertical.Normalized();
 	r = (f ^ uu).Normalized();
-	if(ang_y>M_PI/2)ang_y = M_PI/2;
-	else if(ang_y<-M_PI/2)ang_y = -M_PI/2;
-	double fl = f.Magnitude();
+	if(ang_y>PI/2)ang_y = PI/2;
+	else if(ang_y<-PI/2)ang_y = -PI/2;
+	double fl = f.magnitude();
 	double div_magn = 1/fl;
 	bool beyond_vertical = false;
-	double z_increase = sin(ang_y)*f.Z()*div_magn - (1-cos(ang_y))*uu.Z();
-	if((m_vertical.Z() + z_increase )<0 && z_increase<0)beyond_vertical = true;
+	double z_increase = sin(ang_y)*f.z*div_magn - (1-cos(ang_y))*uu.z;
+	if((m_vertical.z + z_increase )<0 && z_increase<0)beyond_vertical = true;
 	double angle = ang_y/2;
-	m_lens_point = m_lens_point.XYZ() + uu.XYZ() * fl * sin(angle) + f.XYZ() * (1-cos(angle));
-	m_vertical = m_vertical.XYZ() + f.XYZ() * (sin(angle) * div_magn) + uu.XYZ() * ( cos(angle) - 1);
+	m_lens_point = m_lens_point + uu * fl * sin(angle) + f * (1-cos(angle));
+	m_vertical = m_vertical + f * (sin(angle) * div_magn) + uu * ( cos(angle) - 1);
 	if(beyond_vertical){
-		m_vertical.SetZ(0);
+		m_vertical.z = 0;
 		m_vertical.Normalize();
 		f = (m_vertical ^ r) * fl;
-		m_lens_point = m_target_point.XYZ() - f.XYZ();
+		m_lens_point = m_target_point - f;
 	}
 }
 
-void CViewPoint::Shift(const gp_Vec &tv){
-	gp_Vec r = rightwards_vector().Normalized();
-	gp_Vec f = forwards_vector().Normalized();
-	gp_Vec u = m_vertical.Normalized();
-	gp_Vec new_vector = r.XYZ() * tv.X() + f.XYZ() * tv.Z() + u.XYZ() * tv.Y();
-	m_lens_point = m_lens_point.XYZ() + new_vector.XYZ();
-	m_target_point = m_target_point.XYZ() + new_vector.XYZ();
+void CViewPoint::Shift(const geoff_geometry::Point3d &tv){
+	geoff_geometry::Point3d r = rightwards_vector().Normalized();
+	geoff_geometry::Point3d f = forwards_vector().Normalized();
+	geoff_geometry::Point3d u = m_vertical.Normalized();
+	geoff_geometry::Point3d new_vector = r * tv.x + f * tv.z + u * tv.y;
+	m_lens_point = m_lens_point + new_vector;
+	m_target_point = m_target_point + new_vector;
 }
 
-void CViewPoint::Shift(const wxPoint &point_diff, const wxPoint &point){
+void CViewPoint::Shift(const IPoint &point_diff, const IPoint &point){
 	double div_x = (double)(point_diff.x)/m_pixel_scale;
 	double div_y = (double)(point_diff.y)/m_pixel_scale;
-	gp_Vec f = m_target_point.XYZ() - m_lens_point.XYZ();
-	gp_Vec uu = m_vertical.Normalized();
-	gp_Vec r = (f ^ uu).Normalized();
-	m_target_point = m_target_point.XYZ() - r.XYZ() * div_x;
-	m_lens_point = m_lens_point.XYZ() - r.XYZ() * div_x;
-	m_target_point = m_target_point.XYZ() + uu.XYZ() * div_y;
-	m_lens_point = m_lens_point.XYZ() + uu.XYZ() * div_y;
+	geoff_geometry::Point3d f = m_target_point - m_lens_point;
+	geoff_geometry::Point3d uu = m_vertical.Normalized();
+	geoff_geometry::Point3d r = (f ^ uu).Normalized();
+	m_target_point = m_target_point - r * div_x;
+	m_lens_point = m_lens_point - r * div_x;
+	m_target_point = m_target_point + uu * div_y;
+	m_lens_point = m_lens_point + uu * div_y;
 }
 
-void CViewPoint::WindowMag(wxRect &window_box){
-	wxSize size = m_viewport->GetViewportSize();
+void CViewPoint::WindowMag(IRect &window_box){
+	IPoint size = m_viewport->GetViewportSize();
 	double width_ratio=fabs((double)(window_box.width)/(double)(size.GetWidth()));
 	double height_ratio=fabs((double)(window_box.height)/(double)(size.GetHeight()));
 	if(height_ratio>width_ratio)width_ratio=height_ratio;
@@ -153,13 +150,13 @@ void CViewPoint::WindowMag(wxRect &window_box){
 	double new_ycen = (double)window_box.y+(double)(window_box.height)*0.5;
 	double move_xcen = new_xcen-old_xcen;
 	double move_ycen = new_ycen-old_ycen;
-	gp_Vec f = m_target_point.XYZ() - m_lens_point.XYZ();
-	gp_Vec uu = m_vertical.Normalized();
-	gp_Vec r = (f ^ uu).Normalized();
-	m_target_point = m_target_point.XYZ() + r.XYZ() * move_xcen/m_pixel_scale;
-	m_lens_point = m_lens_point.XYZ() + r.XYZ() * move_xcen/m_pixel_scale;
-	m_target_point = m_target_point.XYZ() + uu.XYZ() * move_ycen/m_pixel_scale;
-	m_lens_point = m_lens_point.XYZ() + uu.XYZ() * move_ycen/m_pixel_scale;
+	geoff_geometry::Point3d f = m_target_point - m_lens_point;
+	geoff_geometry::Point3d uu = m_vertical.Normalized();
+	geoff_geometry::Point3d r = (f ^ uu).Normalized();
+	m_target_point = m_target_point + r * move_xcen/m_pixel_scale;
+	m_lens_point = m_lens_point + r * move_xcen/m_pixel_scale;
+	m_target_point = m_target_point + uu * move_ycen/m_pixel_scale;
+	m_lens_point = m_lens_point + uu * move_ycen/m_pixel_scale;
 	//m_pixel_scale/=width_ratio;
 
 	Scale(1.0/width_ratio);
@@ -174,19 +171,19 @@ void CViewPoint::Scale(double multiplier, bool use_initial_pixel_scale){
 	// for perspective, move forward
 	if(m_perspective)
 	{
-		gp_Vec f = m_target_point.XYZ() - m_lens_point.XYZ();
-		gp_Vec v= gp_Vec(f.XYZ() * (multiplier - 1));
-		m_lens_point = gp_Pnt(m_lens_point.XYZ() + v.XYZ());
-		if(m_lens_point.Distance(m_target_point) < 10){
-			m_target_point = gp_Pnt(m_lens_point.XYZ() + f.Normalized().XYZ() * 10);
+		geoff_geometry::Point3d f = m_target_point - m_lens_point;
+		geoff_geometry::Point3d v= geoff_geometry::Point3d(f * (multiplier - 1));
+		m_lens_point = geoff_geometry::Point3d(m_lens_point + v);
+		if(m_lens_point.Dist(m_target_point) < 10){
+			m_target_point = geoff_geometry::Point3d(m_lens_point + f.Normalized() * 10);
 		}
 	}
 }
 
-void CViewPoint::Scale(const wxPoint &point, bool reversed){
+void CViewPoint::Scale(const IPoint &point, bool reversed){
 	double mouse_ydiff = point.y - m_initial_point.y;
 	if(reversed)mouse_ydiff = -mouse_ydiff;
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	double fraction=(mouse_ydiff)/((double)(size.GetHeight()));
 	double multiplier = fraction;
 	bool increasing=(multiplier>0);
@@ -199,22 +196,22 @@ void CViewPoint::Scale(const wxPoint &point, bool reversed){
 }	
 
 void CViewPoint::Twist(double angle){
-	gp_Vec f = m_target_point.XYZ() - m_lens_point.XYZ();
-	gp_Vec uu = m_vertical.Normalized();
-	gp_Vec r = (f ^ uu).Normalized();
-	m_vertical = r.XYZ() * -sin(angle) + uu.XYZ() * cos(angle);
+	geoff_geometry::Point3d f = m_target_point - m_lens_point;
+	geoff_geometry::Point3d uu = m_vertical.Normalized();
+	geoff_geometry::Point3d r = (f ^ uu).Normalized();
+	m_vertical = r * -sin(angle) + uu * cos(angle);
 }
 
-void CViewPoint::Twist(wxPoint start, wxPoint point_diff){
-	gp_Vec f = m_target_point.XYZ() - m_lens_point.XYZ();
-	gp_Vec uu = m_vertical.Normalized();
-	gp_Vec r = (f ^ uu).Normalized();
-	gp_Pnt screen_target = glProject(m_target_point);
-	gp_Pnt screen_start((double)start.x, (double)start.y, 0);
-	gp_Pnt screen_end((double)(start.x + point_diff.x), (double)(start.y + point_diff.y), 0);
-	double old_angle = atan2(screen_start.Y() - screen_target.Y(), screen_start.X() - screen_target.X());
-	double angle = atan2(screen_end.Y() - screen_target.Y(), screen_end.X() - screen_target.X());
-	m_vertical = r.XYZ() * -sin(angle - old_angle) + uu.XYZ() * cos(angle - old_angle);
+void CViewPoint::Twist(IPoint start, IPoint point_diff){
+	geoff_geometry::Point3d f = m_target_point - m_lens_point;
+	geoff_geometry::Point3d uu = m_vertical.Normalized();
+	geoff_geometry::Point3d r = (f ^ uu).Normalized();
+	geoff_geometry::Point3d screen_target = glProject(m_target_point);
+	geoff_geometry::Point3d screen_start((double)start.x, (double)start.y, 0);
+	geoff_geometry::Point3d screen_end((double)(start.x + point_diff.x), (double)(start.y + point_diff.y), 0);
+	double old_angle = atan2(screen_start.y - screen_target.y, screen_start.x - screen_target.x);
+	double angle = atan2(screen_end.y - screen_target.y, screen_end.x - screen_target.x);
+	m_vertical = r * -sin(angle - old_angle) + uu * cos(angle - old_angle);
 }
 
 void CViewPoint::SetProjection2(bool use_depth_testing){
@@ -222,7 +219,7 @@ void CViewPoint::SetProjection2(bool use_depth_testing){
 	CBox box;
 	if(use_depth_testing)
 	{
-		wxGetApp().GetBox(box);
+		theApp.GetBox(box);
 		box.Insert(m_extra_depth_box);
 		box.Insert(m_extra_view_box);
 	}
@@ -240,8 +237,8 @@ void CViewPoint::SetProjection2(bool use_depth_testing){
 		double boxc[3];
 		box.Centre(boxc);
 		rad = box.Radius();
-		gp_Vec to_centre_of_box = make_vector(m_lens_point, make_point(boxc));
-		gp_Vec f = forwards_vector();
+		geoff_geometry::Point3d to_centre_of_box = geoff_geometry::Point3d(m_lens_point, geoff_geometry::Point3d(boxc));
+		geoff_geometry::Point3d f = forwards_vector();
 		f.Normalize();
 		double distance =to_centre_of_box*f;
 		if(m_section)rad /= 100;
@@ -249,7 +246,7 @@ void CViewPoint::SetProjection2(bool use_depth_testing){
 		m_far_plane = distance + rad;
 	}
 
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	double w = size.GetWidth()/m_pixel_scale;
 	double h = size.GetHeight()/m_pixel_scale;
 	double s = sqrt(w*w + h*h);
@@ -261,7 +258,7 @@ void CViewPoint::SetProjection2(bool use_depth_testing){
 	if(m_perspective)
 	{
 		double fovy = m_view_angle;
-		if(h>w && w>0) fovy = 2 * 180/M_PI * atan( tan(m_view_angle/2 * M_PI/180) * h/w );
+		if(h>w && w>0) fovy = 2 * 180/PI * atan( tan(m_view_angle/2 * PI/180) * h/w );
 		if(m_near_plane < m_far_plane / 200)m_near_plane = m_far_plane / 200;
 		gluPerspective(fovy, w/h, m_near_plane, m_far_plane);
 	}
@@ -275,7 +272,7 @@ void CViewPoint::SetProjection(bool use_depth_testing){
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	SetProjection2(use_depth_testing);
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	m_window_rect[0] = 0;
 	m_window_rect[1] = 0;
 	m_window_rect[2]=size.GetWidth();
@@ -284,8 +281,8 @@ void CViewPoint::SetProjection(bool use_depth_testing){
 	m_matrix_valid = true;
 }
 
-void CViewPoint::SetPickProjection(wxRect &pick_box){
-	wxSize size = m_viewport->GetViewportSize();
+void CViewPoint::SetPickProjection(IRect &pick_box){
+	IPoint size = m_viewport->GetViewportSize();
 	int vp[4] ={0, 0, size.GetWidth(), size.GetHeight()};
 	double box_width = pick_box.width;
 	double box_height = pick_box.height;
@@ -302,36 +299,36 @@ void CViewPoint::SetPickProjection(wxRect &pick_box){
 void CViewPoint::SetModelview(void){
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(m_lens_point.X(), m_lens_point.Y(), m_lens_point.Z(), m_target_point.X(), m_target_point.Y(), m_target_point.Z(), m_vertical.X(), m_vertical.Y(), m_vertical.Z());
+	gluLookAt(m_lens_point.x, m_lens_point.y, m_lens_point.z, m_target_point.x, m_target_point.y, m_target_point.z, m_vertical.x, m_vertical.y, m_vertical.z);
 	glGetDoublev (GL_MODELVIEW_MATRIX, m_modelm);
 }
 
 void CViewPoint::SetViewport(void)const{
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	glViewport(0, 0, size.GetWidth(), size.GetHeight());
 }
 
-void CViewPoint::SetView(const gp_Vec &unity, const gp_Vec &unitz, int margin){
-	m_target_point = gp_Pnt(0, 0, 0);
-	m_lens_point = m_target_point.XYZ() + unitz.XYZ();
+void CViewPoint::SetView(const geoff_geometry::Point3d &unity, const geoff_geometry::Point3d &unitz, int margin){
+	m_target_point = geoff_geometry::Point3d(0, 0, 0);
+	m_lens_point = m_target_point + unitz;
 	m_vertical = unity;
 	m_pixel_scale = 10;
 	SetViewAroundAllObjects(margin);
 }
 
-gp_Pnt CViewPoint::glUnproject(const gp_Pnt &v)const{
-	if(!m_matrix_valid)return gp_Pnt(0, 0, 0);
+geoff_geometry::Point3d CViewPoint::glUnproject(const geoff_geometry::Point3d &v)const{
+	if(!m_matrix_valid)return geoff_geometry::Point3d(0, 0, 0);
 	double x, y, z;
-	gluUnProject(v.X(), v.Y(), v.Z(), m_modelm, m_projm, m_window_rect, &x, &y, &z);
-	gp_Pnt temp(x, y, z);
+	gluUnProject(v.x, v.y, v.z, m_modelm, m_projm, m_window_rect, &x, &y, &z);
+	geoff_geometry::Point3d temp(x, y, z);
 	return temp;
 }
 
-gp_Pnt CViewPoint::glProject(const gp_Pnt &v)const{
-	if(!m_matrix_valid)return gp_Pnt(0, 0, 0);
+geoff_geometry::Point3d CViewPoint::glProject(const geoff_geometry::Point3d &v)const{
+	if(!m_matrix_valid)return geoff_geometry::Point3d(0, 0, 0);
 	double x, y, z;
-	gluProject(v.X(), v.Y(), v.Z(), m_modelm, m_projm, m_window_rect, &x, &y, &z);
-	gp_Pnt temp(x, y, z);
+	gluProject(v.x, v.y, v.z, m_modelm, m_projm, m_window_rect, &x, &y, &z);
+	geoff_geometry::Point3d temp(x, y, z);
 	return temp;
 }
 
@@ -342,34 +339,34 @@ void CViewPoint::SetPolygonOffset(void)const{
 void CViewPoint::SetViewAroundAllObjects(int margin){
 	CBox box;
 
-	wxGetApp().GetBox(box);
+	theApp.GetBox(box);
 	box.Insert(m_extra_view_box);
 
 	if(!box.m_valid)return;
-	gp_Vec r = rightwards_vector().Normalized();
+	geoff_geometry::Point3d r = rightwards_vector().Normalized();
 	CBox window;
-	wxSize size = m_viewport->GetViewportSize();
+	IPoint size = m_viewport->GetViewportSize();
 	double width_ratio = (double)(size.GetWidth())/(double)(size.GetHeight());
 	int width = size.GetWidth();
 	int height = size.GetHeight();
 	for(int i = 0; i<8; i++){
 		double p[3];
 		box.vert(i, p);
-		double x = r * make_vector(p);
-		double y = m_vertical * make_vector(p);
+		double x = r * geoff_geometry::Point3d(p);
+		double y = m_vertical * geoff_geometry::Point3d(p);
 		window.Insert(x, y, 0);
 	}
-	gp_Vec uf = make_vector(m_lens_point, m_target_point).Normalized();
+	geoff_geometry::Point3d uf = geoff_geometry::Point3d(m_lens_point, m_target_point).Normalized();
 	double boxc[3];
 	box.Centre(boxc);
-	double cx = r * make_vector(boxc);
-	double cy = m_vertical * make_vector(boxc);
+	double cx = r * geoff_geometry::Point3d(boxc);
+	double cy = m_vertical * geoff_geometry::Point3d(boxc);
 	double m = fabs((window.m_x[3] - cx)/(0.255341921221036 * width_ratio));
 	double y_dist =  fabs((window.m_x[4] - cy)/0.255341921221036);
 	if(y_dist>m)m = y_dist;
-	m += fabs(uf * make_vector(boxc));
-	m_target_point = make_point(boxc);
-	m_lens_point = m_target_point.XYZ() - (uf.XYZ() * m);
+	m += fabs(uf * geoff_geometry::Point3d(boxc));
+	m_target_point = geoff_geometry::Point3d(boxc);
+	m_lens_point = m_target_point - (uf * m);
 	double Width = window.Width();
 	double Height = window.Height();
 	double pw = width - margin;
@@ -385,22 +382,22 @@ void CViewPoint::SetViewAroundAllObjects(int margin){
 	m_section = false;
 }
 
-gp_Lin CViewPoint::SightLine(const wxPoint &point){
-	gp_Pnt screen_point(point.x, m_viewport->GetViewportSize().GetHeight()-point.y, 0);
-	gp_Pnt s = glUnproject(screen_point);
-	screen_point.SetZ(1);
-	gp_Pnt e = glUnproject(screen_point);
-	gp_Vec dir(s, e);
-	return gp_Lin(s, dir);
+geoff_geometry::Line CViewPoint::SightLine(const IPoint &point){
+	geoff_geometry::Point3d screen_point(point.x, m_viewport->GetViewportSize().GetHeight()-point.y, 0);
+	geoff_geometry::Point3d s = glUnproject(screen_point);
+	screen_point.z = 1;
+	geoff_geometry::Point3d e = glUnproject(screen_point);
+	geoff_geometry::Point3d dir(s, e);
+	return geoff_geometry::Line(s, dir);
 }
 
 int CViewPoint::ChooseBestPlane(int plane)const{
-	gp_Vec f = forwards_vector();
+	geoff_geometry::Point3d f = forwards_vector();
 	double dp[3];
-	gp_Trsf orimat = wxGetApp().GetDrawMatrix(false);
-	dp[0] = gp_Vec(0, 0, 1).Transformed(orimat) * f;
-	dp[1] = gp_Vec(0, 1, 0).Transformed(orimat) * f;
-	dp[2] = gp_Vec(1, 0, 0).Transformed(orimat) * f;
+	geoff_geometry::Matrix orimat = theApp.GetDrawMatrix(false);
+	dp[0] = geoff_geometry::Point3d(0, 0, 1).Transformed(orimat) * f;
+	dp[1] = geoff_geometry::Point3d(0, 1, 0).Transformed(orimat) * f;
+	dp[2] = geoff_geometry::Point3d(1, 0, 0).Transformed(orimat) * f;
 	double best_dp = 0.0;
 	int best_mode = -1;
 	double second_best_dp = 0.0;
@@ -451,24 +448,24 @@ int CViewPoint::ChooseBestPlane(int plane)const{
 	}
 }
 
-int CViewPoint::GetTwoAxes(gp_Vec& vx, gp_Vec& vy, bool flattened_onto_screen, int plane)const{
+int CViewPoint::GetTwoAxes(geoff_geometry::Point3d& vx, geoff_geometry::Point3d& vy, bool flattened_onto_screen, int plane)const{
 	int plane_mode = ChooseBestPlane(plane);
-	gp_Trsf orimat = wxGetApp().GetDrawMatrix(false);
+	geoff_geometry::Matrix orimat = theApp.GetDrawMatrix(false);
 
 	switch(plane_mode){
 	case 0:
-		vx = gp_Vec(1, 0, 0).Transformed(orimat);
-		vy = gp_Vec(0, 1, 0).Transformed(orimat);
+		vx = geoff_geometry::Point3d(1, 0, 0).Transformed(orimat);
+		vy = geoff_geometry::Point3d(0, 1, 0).Transformed(orimat);
 		break;
 
 	case 1:
-		vx = gp_Vec(1, 0, 0).Transformed(orimat);
-		vy = gp_Vec(0, 0, 1).Transformed(orimat);
+		vx = geoff_geometry::Point3d(1, 0, 0).Transformed(orimat);
+		vy = geoff_geometry::Point3d(0, 0, 1).Transformed(orimat);
 		break;
 
 	case 2:
-		vx = gp_Vec(0, 1, 0).Transformed(orimat);
-		vy = gp_Vec(0, 0, 1).Transformed(orimat);
+		vx = geoff_geometry::Point3d(0, 1, 0).Transformed(orimat);
+		vy = geoff_geometry::Point3d(0, 0, 1).Transformed(orimat);
 		break;
 	}
 
@@ -476,7 +473,7 @@ int CViewPoint::GetTwoAxes(gp_Vec& vx, gp_Vec& vy, bool flattened_onto_screen, i
 	double dpx = vx * m_vertical;
 	double dpy = vy * m_vertical;
 	if(fabs(dpx) > fabs(dpy)){
-		gp_Vec vtemp = vx;
+		geoff_geometry::Point3d vtemp = vx;
 		vx = vy;
 		vy = vtemp;
 	}
@@ -488,12 +485,12 @@ int CViewPoint::GetTwoAxes(gp_Vec& vx, gp_Vec& vy, bool flattened_onto_screen, i
 	}
 	
 	if(flattened_onto_screen){
-		gp_Vec f = forwards_vector().Normalized();
-		vx = gp_Vec(vx.XYZ() - (f * (f * vx)).XYZ()).Normalized();
-		vy = gp_Vec(vy.XYZ() - (f * (f * vy)).XYZ()).Normalized();
-		gp_Vec r = rightwards_vector();
+		geoff_geometry::Point3d f = forwards_vector().Normalized();
+		vx = geoff_geometry::Point3d(vx - (f * (f * vx))).Normalized();
+		vy = geoff_geometry::Point3d(vy - (f * (f * vy))).Normalized();
+		geoff_geometry::Point3d r = rightwards_vector();
 		if(fabs(vy * r) > fabs(vx * r)){
-			gp_Vec temp = vx;
+			geoff_geometry::Point3d temp = vx;
 			vx = vy;
 			vy = temp;
 		}
@@ -501,16 +498,16 @@ int CViewPoint::GetTwoAxes(gp_Vec& vx, gp_Vec& vy, bool flattened_onto_screen, i
 	return plane_mode;
 }
 
-void CViewPoint::Set90PlaneDrawMatrix(gp_Trsf &mat)const{
+void CViewPoint::Set90PlaneDrawMatrix(geoff_geometry::Matrix &mat)const{
 	int plane = ChooseBestPlane(0);
-	mat = wxGetApp().GetDrawMatrix(false);
+	mat = theApp.GetDrawMatrix(false);
 	switch(plane){
 	case 1:
-		mat = make_matrix(gp_Pnt(0, 0, 0).Transformed(mat), gp_Vec(1, 0, 0).Transformed(mat), gp_Vec(0, 0, 1).Transformed(mat));
+		mat = geoff_geometry::Matrix(geoff_geometry::Point3d(0, 0, 0).Transformed(mat), geoff_geometry::Point3d(1, 0, 0).Transformed(mat), geoff_geometry::Point3d(0, 0, 1).Transformed(mat));
 		break;
 		
 	case 2:
-		mat = make_matrix(gp_Pnt(0, 0, 0).Transformed(mat), gp_Vec(0, 1, 0).Transformed(mat), gp_Vec(0, 0, 1).Transformed(mat));
+		mat = geoff_geometry::Matrix(geoff_geometry::Point3d(0, 0, 0).Transformed(mat), geoff_geometry::Point3d(0, 1, 0).Transformed(mat), geoff_geometry::Point3d(0, 0, 1).Transformed(mat));
 		break;
 	}
 }

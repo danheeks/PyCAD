@@ -155,14 +155,14 @@ namespace geoff_geometry {
 		return true;
 	}
 
-	Point Point::Transform(const Matrix& m) {
+	Point Point::Transformed(const Matrix& m) {
 		// transform Point
 		Point ret;
 		m.Transform2d(&x, &ret.x);
 		ret.ok = true;
 		return ret;
 	}
-	Point3d Point3d::Transform(const Matrix& m) {
+	Point3d Point3d::Transformed(const Matrix& m) {
 		// transform Point
 		Point3d ret;
 		m.Transform(&x, &ret.x);
@@ -263,7 +263,7 @@ namespace geoff_geometry {
 
 		Point p0 = this->p;
 		Point p1(p0.x + v.getx(), p0.y + v.gety());
-		return CLine(p0.Transform(m), p1.Transform(m));
+		return CLine(p0.Transformed(m), p1.Transformed(m));
 	}
 
 
@@ -387,7 +387,7 @@ namespace geoff_geometry {
 		Point p0 = this->pc;
 		double scale;
 		if(m.GetScale(scale) == false) FAILURE(getMessage(L"Differential Scale not allowed for this method", GEOMETRY_ERROR_MESSAGES, MES_DIFFSCALE));
-		return Circle(p0.Transform(m), radius * scale);
+		return Circle(p0.Transformed(m), radius * scale);
 	}
 
 	Point	Circle::Intof(int LR, const Circle& c1) {

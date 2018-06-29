@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include "IPoint.h"
+
 class CViewport;
 
 class CViewPoint{
 private:
-	wxPoint m_initial_point;
+	IPoint m_initial_point;
 	double m_initial_pixel_scale;
 	bool m_perspective;
 	CViewport* m_viewport;
@@ -18,9 +20,9 @@ private:
 	
 public:
 	bool m_section;
-	gp_Pnt m_lens_point;
-	gp_Pnt m_target_point;
-	gp_Vec m_vertical;
+	geoff_geometry::Point3d m_lens_point;
+	geoff_geometry::Point3d m_target_point;
+	geoff_geometry::Point3d m_vertical;
 	double m_pixel_scale;  // not valid for perspective
 	double m_view_angle;  // only valid for perspective
 	double m_projm[16], m_modelm[16]; 
@@ -37,32 +39,32 @@ public:
 
 	const CViewPoint& operator=(const CViewPoint &c);
 
-	const gp_Vec rightwards_vector(void)const{return gp_Vec(m_lens_point, m_target_point) ^ m_vertical;}
-	const gp_Vec forwards_vector(void)const{return gp_Vec(m_lens_point, m_target_point);}
+	const geoff_geometry::Point3d rightwards_vector(void)const{return geoff_geometry::Point3d(m_lens_point, m_target_point) ^ m_vertical;}
+	const geoff_geometry::Point3d forwards_vector(void)const{return geoff_geometry::Point3d(m_lens_point, m_target_point);}
 	void Turn(double ang_x, double ang_y);
-	void Turn(wxPoint point_diff);
+	void Turn(IPoint point_diff);
 	void TurnVertical(double ang_x, double ang_y);
-	void TurnVertical(wxPoint point_diff);
-	void Shift(const gp_Vec &tv);
-	void Shift(const wxPoint &point_diff, const wxPoint &point);
+	void TurnVertical(IPoint point_diff);
+	void Shift(const geoff_geometry::Point3d &tv);
+	void Shift(const IPoint &point_diff, const IPoint &point);
 	void Scale(double multiplier, bool use_initial_pixel_scale = false);
-	void Scale(const wxPoint &point, bool reversed = false);
+	void Scale(const IPoint &point, bool reversed = false);
 	void Twist(double angle);
-	void Twist(wxPoint start, wxPoint point_diff);
+	void Twist(IPoint start, IPoint point_diff);
 	void SetViewport()const;
 	void SetProjection(bool use_depth_testing);
-	void SetPickProjection(wxRect &pick_box);
+	void SetPickProjection(IRect &pick_box);
 	void SetModelview(void);
-	void SetView(const gp_Vec &unity, const gp_Vec &unitz, int margin);
-	gp_Pnt glUnproject(const gp_Pnt &v)const;
-	gp_Pnt glProject(const gp_Pnt &v)const;
+	void SetView(const geoff_geometry::Point3d &unity, const geoff_geometry::Point3d &unitz, int margin);
+	geoff_geometry::Point3d glUnproject(const geoff_geometry::Point3d &v)const;
+	geoff_geometry::Point3d glProject(const geoff_geometry::Point3d &v)const;
 	void SetPolygonOffset(void)const;
-	void WindowMag(wxRect &window_box);
+	void WindowMag(IRect &window_box);
 	void SetViewAroundAllObjects(int margin);
-	void SetStartMousePoint(const wxPoint &point){m_initial_pixel_scale = m_pixel_scale; m_initial_point = point;}
-	gp_Lin SightLine(const wxPoint &point);
-	int GetTwoAxes(gp_Vec& vx, gp_Vec& vy, bool flattened_onto_screen, int plane)const;
-	void Set90PlaneDrawMatrix(gp_Trsf &mat)const;
+	void SetStartMousePoint(const IPoint &point){m_initial_pixel_scale = m_pixel_scale; m_initial_point = point;}
+	geoff_geometry::Line SightLine(const IPoint &point);
+	int GetTwoAxes(geoff_geometry::Point3d& vx, geoff_geometry::Point3d& vy, bool flattened_onto_screen, int plane)const;
+	void Set90PlaneDrawMatrix(geoff_geometry::Matrix &mat)const;
 	void SetPerspective(bool perspective);
 	bool GetPerspective(){return m_perspective;}
 };

@@ -231,7 +231,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		//~Point(){};
 
 		// methods
-		Point	Transform(const Matrix& m);											    // transform point
+		Point	Transformed(const Matrix& m);											    // transform point
 		double	Dist(const Point& p)const;														// distance between 2 points
 		double	DistSq(const Point& p)const;													// distance squared
 		double	Dist(const CLine& cl)const;													// distance p to cl
@@ -259,9 +259,13 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		inline	Point3d(const double* xyz) {x = xyz[0], y = xyz[1]; z = xyz[2];}
 		inline	Point3d( double xord, double yord, double zord = 0/*, bool okay = true*/) {	// Point p1(10,30.5);
 			x = xord; y = yord; z = zord;/* ok = okay;*/}
-		inline	Point3d( const Point3d& p ) {											// copy constructor  Point p1(p2);
-			x = p.x; y = p.y;  z = p.z;/* ok = p.ok;*/}
-		inline	Point3d( const Point& p ) {												// copy constructor  Point p1(p2);
+		inline	Point3d(const Point3d& p) {											// copy constructor  Point p1(p2);
+			x = p.x; y = p.y;  z = p.z;/* ok = p.ok;*/
+		}
+		inline	Point3d(const Point3d& p0, const Point3d& p1) {						// vector from p0 to p1
+			x = p1.x - p0.x; y = p1.y - p0.y;  z = p1.z - p0.z;/* ok = p.ok;*/
+		}
+		inline	Point3d(const Point& p) {												// copy constructor  Point p1(p2);
 			x = p.x; y = p.y;  z = 0; /*ok = p.ok;*/}
 		inline	Point3d( const Point& p, double zord ) {								// copy constructor  Point p1(p2, z);
 			x = p.x; y = p.y;  z = zord;/* ok = p.ok;*/}
@@ -294,13 +298,14 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		const Point3d& operator*=(double c){ x *= c; y *= c; z *= c; return *this; }								// scalar products
 
 		const Point3d Normalized()const{ double m = magnitude(); if (m < 1.0e-09) { return Point3d(0, 0, 0); } return Point3d(x / m, y / m, z / m); }
+		double Normalize(){ double m = magnitude(); if (m < 1.0e-09) { x = y = z = 0; return 0; } x /= m; y /= m; z /= m;	return m; }
 		inline	double magnitude(void)const{ return(sqrt(x * x + y * y + z * z)); }								// magnitude
 
 		// methods
 #ifdef PEPSDLL
 		void	ToPeps(int id, bool draw = true);									// copy Point to Peps
 #endif
-		Point3d Transform(const Matrix& m);
+		Point3d Transformed(const Matrix& m);
 		double Dist(const Point3d& p)const;													// distance between 2 points
 		double DistSq(const Point3d& p)const;													// distance squared between 2 points
 		Point3d	Mid(const Point3d& p, double factor = 0.5)const;									// midpoint

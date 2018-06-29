@@ -1,3 +1,5 @@
+#include "stdafx.h"
+
 
 #include <Python.h>
 
@@ -28,40 +30,18 @@
 
 namespace bp = boost::python;
 
-static void ViewportOnMouseEvent(CViewport &v, MouseEvent &e)
+bool OnInit()
 {
-	v.ViewportOnMouse(e);
-}
-
-
-static boost::shared_ptr<CGraphicsCanvas> initGraphicsCanvas(wxWindow* parent)
-{
-	return boost::shared_ptr<CGraphicsCanvas>(new CGraphicsCanvas(parent));
-}
-
-geoff_geometry::Point3d GetCameraPoint()
-{
-	return camera_point;
+	return theApp.OnInit();
 }
 
 	BOOST_PYTHON_MODULE(cad) {
 
-		bp::def("DoSomeOpenGL1", DoSomeOpenGL1);
-		bp::def("DoSomeOpenGL2", DoSomeOpenGL2);
-		bp::def("glRotatef", cad_glRotatef);
-		bp::def("SetCameraPoint", SetCameraPoint);
-		bp::def("GetCameraPoint", GetCameraPoint);
-
-
 		bp::class_<CViewport>("Viewport")
 			.def(bp::init<int, int>())
 			.def("glCommands", &CViewport::glCommands)
-			.def("DrawFront", &CViewport::DrawFront)
 			.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
-			.def("OnMouseEvent", &CViewport::ViewportOnMouse)
-			.def("SetViewPoint", &CViewport::SetViewPoint)
-			.def("InsertViewBox", &CViewport::InsertViewBox)
-			.def("OnMagExtents", &CViewport::OnMagExtents)
+			.def("OnMouseEvent", &CViewport::OnMouseEvent)
 			.def_readwrite("m_need_update", &CViewport::m_need_update)
 			.def_readwrite("m_need_refresh", &CViewport::m_need_refresh)
 			.def_readwrite("m_orthogonal", &CViewport::m_orthogonal)
@@ -83,4 +63,6 @@ geoff_geometry::Point3d GetCameraPoint()
 			.def_readwrite("m_wheelDelta", &MouseEvent::m_wheelDelta)
 			.def_readwrite("m_linesPerAction", &MouseEvent::m_linesPerAction)
 			;
+
+		bp::def("OnInit", OnInit);
 	}

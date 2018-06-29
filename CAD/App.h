@@ -1,4 +1,5 @@
 // not really an app, but a class with one global object to put global variables in and also is the list of objects to render
+#pragma once
 
 #include "HeeksColor.h"
 
@@ -11,7 +12,12 @@ enum BackgroundMode
 	BackgroundModeSkyDome
 };
 
-class CAapp : public ObjList
+class CViewport;
+class CViewPoint;
+class CInputMode;
+class CSelectMode;
+
+class CApp// : public ObjList
 	/*! \class The Application Class:
 	*
 	* not really an app, but a class with one global object to put global variables in and also is the list of objects to render */
@@ -37,11 +43,10 @@ private:
 #endif
 
 public:
-	HeeksCADapp();
-	HeeksCADapp(const HeeksCADapp& app);
-	~HeeksCADapp();
+	CApp();
+	~CApp();
 
-	Point cur_mouse_pos;
+	IPoint cur_mouse_pos;
 	HeeksColor current_color;
 #define NUM_BACKGROUND_COLORS 10
 	HeeksColor background_color[NUM_BACKGROUND_COLORS];
@@ -76,20 +81,28 @@ public:
 
 	//gp_Trsf digitizing_matrix;
 	CoordinateSystem *m_current_coordinate_system;
+#endif
 	CInputMode *input_mode_object;
+#if 0
 	MagDragWindow *magnification;
 	ViewRotating *viewrotating;
 	ViewZooming *viewzooming;
 	ViewPanning *viewpanning;
+#endif
 	CSelectMode *m_select_mode;
+#if 0
 	DigitizeMode *m_digitizing;
 	GripperMode* gripper_mode;
+#endif
 	int grid_mode;
+#if 0
 	Gripper *drag_gripper;
-	gp_Pnt grip_from, grip_to;
+	geoff_geometry::Point3d grip_from, grip_to;
 	Gripper *cursor_gripper;
 	CHeeksFrame *m_frame;
+#endif
 	CViewport *m_current_viewport;
+#if 0
 	MarkedList *m_marked_list;
 	bool m_doing_rollback;
 	wxString m_filepath;
@@ -116,7 +129,7 @@ public:
 	bool m_in_OpenFile;
 	bool m_mark_newly_added_objects;
 	wxString m_version_number;
-	std::list< void(*)(wxSizeEvent&) > m_on_graphics_size_list;
+	std::list< void(*)(IPointEvent&) > m_on_graphics_size_list;
 	std::list< void(*)(wxMouseEvent&) > m_lbutton_up_callbacks;
 	std::list< void(*)(bool) > m_on_save_callbacks;
 	std::list< bool(*)() > m_is_modified_callbacks;
@@ -139,7 +152,9 @@ public:
 	FileOpenOrImportType m_file_open_or_import_type;
 	bool m_inPaste;
 	double* m_file_open_matrix;
+#endif
 	double m_view_units; // units to display to the user ( but everything is stored as mm ), 1.0 for mm, 25.4 for inches
+#if 0
 	bool m_input_uses_modal_dialog;
 	bool m_dragging_moves_objects;
 	bool m_no_creation_mode; // set from a plugin, for making an exporter only application
@@ -199,28 +214,32 @@ public:
 	// HeeksObj's virtual functions
 	void GetBox(CBox &box);
 	void glCommands(bool select, bool marked, bool no_color);
-	bool CanAdd(HeeksObj* object){ return true; }
-	int GetType()const{ return DocumentType; }
+	//bool CanAdd(HeeksObj* object){ return true; }
+	//int GetType()const{ return DocumentType; }
 
+	bool OnInit();
 #if 0
-	virtual bool OnInit();
 	int OnExit();
 	void WriteConfig();
 	void CreateLights(void);
 	void DestroyLights(void);
-	void FindMarkedObject(const wxPoint &point, MarkedObject* marked_object);
+	void FindMarkedObject(const IPoint &point, MarkedObject* marked_object);
+#endif
 	void SetInputMode(CInputMode *i);
+#if 0
 	void Repaint(bool soon = false);
 	void RecalculateGLLists();
 	void SetLikeNewFile(void);
 	bool IsModified(void);
 	void SetAsModified();
 	void ClearHistory(void);
+#endif
 	void glCommandsAll(const CViewPoint &view_point);
 	double GetPixelScale(void);
-	void DoMoveOrCopyDropDownMenu(wxWindow *wnd, const wxPoint &point, MarkedObject* marked_object, HeeksObj* paste_into, HeeksObj* paste_before);
-	void GetDropDownTools(std::list<Tool*> &f_list, const wxPoint &point, MarkedObject* marked_object, bool dont_use_point_for_functions, bool control_pressed);
-	void DoDropDownMenu(wxWindow *wnd, const wxPoint &point, MarkedObject* marked_object, bool dont_use_point_for_functions, bool control_pressed);
+#if 0
+	void DoMoveOrCopyDropDownMenu(wxWindow *wnd, const IPoint &point, MarkedObject* marked_object, HeeksObj* paste_into, HeeksObj* paste_before);
+	void GetDropDownTools(std::list<Tool*> &f_list, const IPoint &point, MarkedObject* marked_object, bool dont_use_point_for_functions, bool control_pressed);
+	void DoDropDownMenu(wxWindow *wnd, const IPoint &point, MarkedObject* marked_object, bool dont_use_point_for_functions, bool control_pressed);
 	void GenerateIntersectionMenuOptions(std::list<Tool*> &f_list);
 	void on_menu_event(wxCommandEvent& event);
 	void DoUndoable(Undoable *);
@@ -274,7 +293,9 @@ public:
 	void WereModified(const std::list<HeeksObj*>& list);
 	void WereAdded(const std::list<HeeksObj*>& list);
 	void WereRemoved(const std::list<HeeksObj*>& list);
-	gp_Trsf GetDrawMatrix(bool get_the_appropriate_orthogonal);
+#endif
+	geoff_geometry::Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
+#if 0
 	void GetOptions(std::list<Property *> *list);
 	void DeleteMarkedItems();
 	void glColorEnsuringContrast(const HeeksColor &c);
@@ -286,8 +307,8 @@ public:
 	void ObserversThaw();
 	const wxChar* GetKnownFilesWildCardString(bool open, bool import_export)const;
 	const wxChar* GetKnownFilesCommaSeparatedList(bool open, bool import_export)const;
-	void GetTools(MarkedObject* marked_object, std::list<Tool*>& t_list, const wxPoint& point, bool control_pressed);
-	void GetTools2(MarkedObject* marked_object, std::list<Tool*>& t_list, const wxPoint& point, bool control_pressed, bool make_tool_list_container);
+	void GetTools(MarkedObject* marked_object, std::list<Tool*>& t_list, const IPoint& point, bool control_pressed);
+	void GetTools2(MarkedObject* marked_object, std::list<Tool*>& t_list, const IPoint& point, bool control_pressed, bool make_tool_list_container);
 	wxString GetExeFolder()const;
 	wxString GetResFolder()const;
 	void get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy));
@@ -322,8 +343,8 @@ public:
 	void SectioningDialog();
 	void RegisterOnGLCommands(void(*callbackfunc)());
 	void RemoveOnGLCommands(void(*callbackfunc)());
-	void RegisterOnGraphicsSize(void(*callbackfunc)(wxSizeEvent&));
-	void RemoveOnGraphicsSize(void(*callbackfunc)(wxSizeEvent&));
+	void RegisterOnGraphicsSize(void(*callbackfunc)(IPointEvent&));
+	void RemoveOnGraphicsSize(void(*callbackfunc)(IPointEvent&));
 	void RegisterOnMouseFn(void(*callbackfunc)(wxMouseEvent&));
 	void RemoveOnMouseFn(void(*callbackfunc)(wxMouseEvent&));
 	void RegisterOnSaveFn(void(*callbackfunc)(bool));
@@ -331,8 +352,10 @@ public:
 	void CreateTransformGLList(const std::list<HeeksObj*>& list, bool show_grippers_on_drag);
 	void DestroyTransformGLList();
 	bool IsPasteReady();
+#endif
 	void EnableBlend();
 	void DisableBlend();
+#if 0
 	void Paste(HeeksObj* paste_into, HeeksObj* paste_before);
 	bool CheckForNOrMore(const std::list<HeeksObj*> &list, int min_num, int type, const wxString& msg, const wxString& caption);
 	bool CheckForNOrMore(const std::list<HeeksObj*> &list, int min_num, int type1, int type2, const wxString& msg, const wxString& caption);
@@ -400,7 +423,7 @@ public:
 	void LinkXMLEndChild(TiXmlNode* root, TiXmlElement* pElem);
 	TiXmlElement* FirstNamedXMLChildElement(TiXmlElement* pElem, const char* name);
 	void RemoveXMLChild(TiXmlNode* pElem, TiXmlElement* child);
-	bool Digitize(const wxPoint &point, double* pos);
+	bool Digitize(const IPoint &point, double* pos);
 	bool GetLastDigitizePosition(double *pos);
 	void ObjectAreaString(HeeksObj* object, wxString &s);
 	const wxChar* GetFileFullPath();

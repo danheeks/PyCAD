@@ -64,7 +64,7 @@ boost::python::list getCurves(const CArea& area) {
 boost::python::tuple transformed_point(const geoff_geometry::Matrix &matrix, double x, double y, double z)
 {
 	geoff_geometry::Point3d p(x,y,z);
-	p = p.Transform(matrix);
+	p = p.Transformed(matrix);
 
 	return bp::make_tuple(p.x,p.y,p.z);
 }
@@ -76,7 +76,7 @@ void MatrixRotate(geoff_geometry::Matrix &matrix, double angle)
 
 void Point3dTransform(geoff_geometry::Point3d &p, const geoff_geometry::Matrix &matrix)
 {
-	p = p.Transform(matrix);
+	p = p.Transformed(matrix);
 }
 
 boost::python::object PlaneIntofPlane(const geoff_geometry::Plane &plane1, const geoff_geometry::Plane &plane2)
@@ -94,7 +94,7 @@ boost::python::object PlaneIntofPlane(const geoff_geometry::Plane &plane1, const
 
 void LineTransform(geoff_geometry::Line &line, const geoff_geometry::Matrix &matrix)
 {
-	line.p0 = line.p0.Transform(matrix);
+	line.p0 = line.p0.Transformed(matrix);
 	line.v.Transform(matrix);
 }
 
@@ -729,7 +729,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def(bp::init<geoff_geometry::Point3d>())
 		.def(bp::init<double, double, double>())///function Point3d///params float x, float y, float z///return Point3d///makes a new Point3d with given x, y, z values
 		.def("Transform", &Point3dTransform)
-		.def("Transformed", &geoff_geometry::Point3d::Transform)
+		.def("Transformed", &geoff_geometry::Point3d::Transformed)
 		.def_readwrite("x", &geoff_geometry::Point3d::x)
 		.def_readwrite("y", &geoff_geometry::Point3d::y)
 		.def_readwrite("z", &geoff_geometry::Point3d::z)

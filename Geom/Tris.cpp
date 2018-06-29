@@ -40,7 +40,7 @@ void CTri::Transform(const geoff_geometry::Matrix &mat)
 	for (int i = 0; i < 3; i++)
 	{
 		geoff_geometry::Point3d p(x[i][0], x[i][1], x[i][2]);
-		p = p.Transform(mat);
+		p = p.Transformed(mat);
 		x[i][0] = (float)p.x;
 		x[i][1] = (float)p.y;
 		x[i][2] = (float)p.z;
@@ -809,8 +809,8 @@ void CTris::ProjectSpan(const Span& span, std::list<geoff_geometry::Line>& lines
 		Span& span = *It;
 		geoff_geometry::Point3d s(span.m_p.x, span.m_p.y, 0.0);
 		geoff_geometry::Point3d e(span.m_v.m_p.x, span.m_v.m_p.y, 0.0);
-		s = s.Transform(tm);
-		e = e.Transform(tm);
+		s = s.Transformed(tm);
+		e = e.Transformed(tm);
 		lines.push_back(geoff_geometry::Line(s, e));
 	}
 }

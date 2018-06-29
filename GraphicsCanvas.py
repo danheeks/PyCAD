@@ -3,6 +3,7 @@ from wx import glcanvas
 import sys
 import math
 import cad
+import Mouse
 
 import os
 full_path_here = os.path.abspath( __file__ )
@@ -12,7 +13,7 @@ res_folder = full_path_here
 if slash != -1:
     res_folder = full_path_here[0:slash]
 
-class myGLCanvas(wxGLCanvas):
+class myGLCanvas(glcanvas.GLCanvas):
    def __init__(self, parent):
       glcanvas.GLCanvas.__init__(self, parent,-1, attribList=[glcanvas.WX_GL_RGBA, glcanvas.WX_GL_DOUBLEBUFFER, glcanvas.WX_GL_DEPTH_SIZE, 24])
       self.context = glcanvas.GLContext(self)
@@ -68,11 +69,10 @@ class myGLCanvas(wxGLCanvas):
                 self.AppendToolsToMenu(menu, tools)
                 self.PopupMenu(menu)
       else:
-         self.cad.OnMouseEvent(self.viewport, event)
-
-      if self.viewport.need_update: self.Update()
-      if self.viewport.need_refresh: self.Refresh()
-      event.Skip()
+        self.viewport.OnMouseEvent(Mouse.MouseEventFromWx(event))
+        if self.viewport.m_need_update: self.Update()
+        if self.viewport.m_need_refresh: self.Refresh()
+        event.Skip()
 
    def OnEraseBackground(self, event):
       pass # Do nothing, to avoid flashing on MSW

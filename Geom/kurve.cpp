@@ -340,10 +340,10 @@ namespace geoff_geometry {
 	}
 
 	void Span::Transform(const Matrix& m, bool setprops) {
-		p0 = p0.Transform(m);
-		p1 = p1.Transform(m);
+		p0 = p0.Transformed(m);
+		p1 = p1.Transformed(m);
 		if(dir != LINEAR) {
-			pc = pc.Transform(m);
+			pc = pc.Transformed(m);
 			if(m.m_mirrored == -1) FAILURE(L"Don't know mirror - use IsMirrored method on object");
 			if(m.m_mirrored) dir = -dir;
 		}
@@ -946,7 +946,7 @@ return;
 		inv_mat.Inverse();
 		
 		Point tp = p;
-		if(!m_unit)	tp = tp.Transform(inv_mat); // Inverse transform point (rather than transform each vertex!)
+		if(!m_unit)	tp = tp.Transformed(inv_mat); // Inverse transform point (rather than transform each vertex!)
 
 		nearSpanNumber = 0;
 
@@ -960,7 +960,7 @@ return;
 				pn = ps;
 			}
 		}
-		return pn.Transform(*this);
+		return pn.Transformed(*this);
 	}
 
 	void Kurve::ChangeStart(const Point *pNewStart, int startSpanno) {
@@ -1221,7 +1221,7 @@ return;
 						Matrix m;
 						sp.SplitMatrix(nSplits, &m);
 						for(int j = 1; j < nSplits; j++) {
-							sp.p0 = sp.p0.Transform(m);
+							sp.p0 = sp.p0.Transformed(m);
 							ko.Add(sp.p0);	
 						}
 

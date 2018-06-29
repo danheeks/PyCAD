@@ -37,7 +37,6 @@ include_directories(${Python_Includes})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package( Boost COMPONENTS python REQUIRED )  # find BOOST and boost-python
-find_package( wxWidgets )
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -53,16 +52,21 @@ find_package( OpenGL REQUIRED )
 message("opengl directory is")
 message(${OPENGL_INCLUDE_DIR})
 
-include(${wxWidgets_USE_FILE})
-
-
 
 include_directories(OPENGL_INCLUDE_DIR)
 
 # this defines the source-files for library
 set(CAD_SRC
+    App.cpp
+    ../Geom/Construction.cpp
+    ../Geom/Finite.cpp
+    Grid.cpp
+    HeeksColor.cpp
+    ../Geom/Matrix.cpp
     PythonStuff.cpp
-    GraphicsCanvas.cpp
+    SelectMode.cpp
+    ViewPoint.cpp
+    Viewport.cpp
 )
 
 
@@ -94,7 +98,7 @@ endif(DEFINED INCLUDE_INSTALL_DIR)
       ${CAD_SRC}
   )
 
-target_link_libraries(cad ${Boost_LIBRARIES} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+target_link_libraries(cad ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 set_target_properties(cad PROPERTIES PREFIX "") 
 
 # this figures out where to install the Python modules
