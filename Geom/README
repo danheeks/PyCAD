@@ -1,0 +1,19 @@
+to build geom.so in Linux
+
+
+tested on Raspberry Pi
+
+
+source code is in folder geom
+
+change to geom folder
+
+cd geom
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr ..
+make
+sudo make install
+
+
+you should end up with a geom.so file made

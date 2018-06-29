@@ -1,5 +1,3 @@
-#include "stdafx.h"
-
 
 #include <Python.h>
 
@@ -25,103 +23,15 @@
 #include <boost/python/call.hpp>
 
 #include "../Geom/geometry.h"
-#include "GraphicsCanvas.h"
+#include "Viewport.h"
+#include "Viewpoint.h"
 
 namespace bp = boost::python;
 
-void DoSomeOpenGL1(float x, float y)
+static void ViewportOnMouseEvent(CViewport &v, MouseEvent &e)
 {
-#if 1
-	// set viewing projection
-	glMatrixMode(GL_PROJECTION);
-	glFrustum(-0.8, 0.8, -0.8, 0.8, 0.4, 8.0);
-
-	// position viewer
-	glMatrixMode(GL_MODELVIEW);
-	glTranslatef(0.0, 0.0, -2.0);
-
-	// position object
-	glRotatef(y, 1.0, 0.0, 0.0);
-	glRotatef(x, 0.0, 1.0, 0.0);
-
-	glDepthFunc(GL_LESS);
-	glEnable(GL_DEPTH_TEST);
-	glLineWidth(1);
-	glDepthMask(1);
-	glEnable(GL_CULL_FACE);
-
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-#endif
+	v.ViewportOnMouse(e);
 }
-
-void DrawCube(float x)
-{
-	// draw six faces of a cube
-	glBegin(GL_QUADS);
-	glNormal3f(0.0, 0.0, 1.0);
-	glVertex3f(0.5 + x, 0.5, 0.5);
-	glVertex3f(-0.5 + x, 0.5, 0.5);
-	glVertex3f(-0.5 + x, -0.5, 0.5);
-	glVertex3f(0.5 + x, -0.5, 0.5);
-
-	glNormal3f(0.0, 0.0, -1.0);
-	glVertex3f(-0.5 + x, -0.5, -0.5);
-	glVertex3f(-0.5 + x, 0.5, -0.5);
-	glVertex3f(0.5 + x, 0.5, -0.5);
-	glVertex3f(0.5 + x, -0.5, -0.5);
-
-	glNormal3f(0.0, 1.0, 0.0);
-	glVertex3f(0.5 + x, 0.5, 0.5);
-	glVertex3f(0.5 + x, 0.5, -0.5);
-	glVertex3f(-0.5 + x, 0.5, -0.5);
-	glVertex3f(-0.5 + x, 0.5, 0.5);
-
-	glNormal3f(0.0, -1.0, 0.0);
-	glVertex3f(-0.5 + x, -0.5, -0.5);
-	glVertex3f(0.5 + x, -0.5, -0.5);
-	glVertex3f(0.5 + x, -0.5, 0.5);
-	glVertex3f(-0.5 + x, -0.5, 0.5);
-
-	glNormal3f(1.0, 0.0, 0.0);
-	glVertex3f(0.5 + x, 0.5, 0.5);
-	glVertex3f(0.5 + x, -0.5, 0.5);
-	glVertex3f(0.5 + x, -0.5, -0.5);
-	glVertex3f(0.5 + x, 0.5, -0.5);
-
-	glNormal3f(-1.0, 0.0, 0.0);
-	glVertex3f(-0.5 + x, -0.5, -0.5);
-	glVertex3f(-0.5 + x, -0.5, 0.5);
-	glVertex3f(-0.5 + x, 0.5, 0.5);
-	glVertex3f(-0.5 + x, 0.5, -0.5);
-	glEnd();
-}
-
-void DoSomeOpenGL2()
-{
-	//clear color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	DrawCube(0.0);
-
-	DrawCube(2.0);
-}
-
-void cad_glRotatef(float a, float b, float c, float d)
-{
-	glRotatef(a, b, c, d);
-}
-
-geoff_geometry::Point3d camera_point(0, 0, 0);
-
-void SetCameraPoint(const geoff_geometry::Point3d& p)
-{
-	camera_point = p;
-}
-
-
 
 
 static boost::shared_ptr<CGraphicsCanvas> initGraphicsCanvas(wxWindow* parent)
@@ -143,7 +53,34 @@ geoff_geometry::Point3d GetCameraPoint()
 		bp::def("GetCameraPoint", GetCameraPoint);
 
 
-		bp::class_<CGraphicsCanvas, boost::noncopyable>("GraphicsCanvas")
-			.def("__init__", bp::make_constructor(&initGraphicsCanvas))
+		bp::class_<CViewport>("Viewport")
+			.def(bp::init<int, int>())
+			.def("glCommands", &CViewport::glCommands)
+			.def("DrawFront", &CViewport::DrawFront)
+			.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
+			.def("OnMouseEvent", &CViewport::ViewportOnMouse)
+			.def("SetViewPoint", &CViewport::SetViewPoint)
+			.def("InsertViewBox", &CViewport::InsertViewBox)
+			.def("OnMagExtents", &CViewport::OnMagExtents)
+			.def_readwrite("m_need_update", &CViewport::m_need_update)
+			.def_readwrite("m_need_refresh", &CViewport::m_need_refresh)
+			.def_readwrite("m_orthogonal", &CViewport::m_orthogonal)
+			;
+
+		bp::class_<MouseEvent>("MouseEvent")
+			.def(bp::init<MouseEvent>())
+			.def_readwrite("m_event_type", &MouseEvent::m_event_type)
+			.def_readwrite("m_x", &MouseEvent::m_x)
+			.def_readwrite("m_y", &MouseEvent::m_y)
+			.def_readwrite("m_leftDown", &MouseEvent::m_leftDown)
+			.def_readwrite("m_middleDown", &MouseEvent::m_middleDown)
+			.def_readwrite("m_rightDown", &MouseEvent::m_rightDown)
+			.def_readwrite("m_controlDown", &MouseEvent::m_controlDown)
+			.def_readwrite("m_shiftDown", &MouseEvent::m_shiftDown)
+			.def_readwrite("m_altDown", &MouseEvent::m_altDown)
+			.def_readwrite("m_metaDown", &MouseEvent::m_metaDown)
+			.def_readwrite("m_wheelRotation", &MouseEvent::m_wheelRotation)
+			.def_readwrite("m_wheelDelta", &MouseEvent::m_wheelDelta)
+			.def_readwrite("m_linesPerAction", &MouseEvent::m_linesPerAction)
 			;
 	}
