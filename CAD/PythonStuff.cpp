@@ -26,7 +26,7 @@
 
 #include "../Geom/geometry.h"
 #include "Viewport.h"
-#include "Viewpoint.h"
+#include "ViewPoint.h"
 
 namespace bp = boost::python;
 
