@@ -1,18 +1,18 @@
 # PyCAD
-Experiments in making a CAD software on the Raspberry Pi, using Python, with wxPython boost-python, OpenGL and my geometry derived from HeeksCNC project.
-This will involve building a CAD python module and a GEOM python module
-I am hoping that wxPython and CAD can share objects, so that I can do\
-import wx\
-import cad\
-frame = wx.Frame(None, -1, 'test')\
-graphics_canvas = cad.GraphicsCanvas(frame)
+Experiments in making a CAD software on the Raspberry Pi, using Python, with wxPython boost-python, OpenGL and my geometry derived from HeeksCNC project.\
+This will involve building a CAD python module and a GEOM python module\
+The plan is that all the wx will be done with wxPython scripts.\
+The gl canvas will be created by wxPython.\
+The gl commands will be done in the c++ by my CAD module.\
+Cad object classes will be defined in Python, derived from a cad object base class defined in the cad module.\
+Cad objects will implement GetProperties, GetProperty, SetProperty, GetLines, GetTriangles, GetName, GetIcon, etc.
 
 ## How to build ##
 Start with a clean Raspbian installation
 
 ### Get essentials ###
 ```
-sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev libwxgtk2.8-dev python-wxgtk2.8 freeglut3-dev
+sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev freeglut3-dev
 ```
 
 ### Fetch sources ###
@@ -32,9 +32,7 @@ python\
 import cad
 
 ### problems June 2018 ###
-I have simplified PyCAD to just have one file, with a function "NewFrame", which returns a wxFrame object
-I'm getting\ 
-Traceback (most recent call last):\
-  File "<stdin>", line 1, in <module>\
-ImportError: ./cad.so: undefined symbol: wxDefaultSize
+I couldn't get cad module to share classes with wxPython, but cad will be more reusable when it doesn't have any wx in it.\
+So, I am writing GUI to be in wxPython and the cad to implement the rendering.\
+First test will be cad rendering the background and grid.
 
