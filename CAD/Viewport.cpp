@@ -111,6 +111,7 @@ void CViewport::glCommands()
 	break;
 	case BackgroundModeSkyDome:
 	{
+#if 0
 		// draw sky dome
 		glClear(GL_DEPTH_BUFFER_BIT);
 		double radius = m_view_point.m_far_plane * 0.5;
@@ -129,10 +130,10 @@ void CViewport::glCommands()
 			{
 				double vang0 = -1.5707963267948 + 0.7853981633974 * panel;
 				double vang1 = -1.5707963267948 + 0.7853981633974 * (panel + 1);
-				geoff_geometry::Point3d p0 = m_view_point.m_lens_point + (radius * x * cos(ang0) * cos(vang0)) + (radius * y * sin(ang0) * cos(vang0)) + (radius * z * sin(vang0));
-				geoff_geometry::Point3d p1 = m_view_point.m_lens_point + (radius * x * cos(ang1) * cos(vang0)) + (radius * y * sin(ang1) * cos(vang0)) + (radius * z * sin(vang0));
-				geoff_geometry::Point3d p2 = m_view_point.m_lens_point + (radius * x * cos(ang0) * cos(vang1)) + (radius * y * sin(ang0) * cos(vang1)) + (radius * z * sin(vang1));
-				geoff_geometry::Point3d p3 = m_view_point.m_lens_point + (radius * x * cos(ang1) * cos(vang1)) + (radius * y * sin(ang1) * cos(vang1)) + (radius * z * sin(vang1));
+				geoff_geometry::Point3d p0 = m_view_point.m_lens_point + (x * (radius * cos(ang0) * cos(vang0))) + (radius * y * sin(ang0) * cos(vang0)) + (radius * z * sin(vang0));
+				geoff_geometry::Point3d p1 = m_view_point.m_lens_point + (x * (radius * cos(ang1) * cos(vang0))) + (radius * y * sin(ang1) * cos(vang0)) + (radius * z * sin(vang0));
+				geoff_geometry::Point3d p2 = m_view_point.m_lens_point + (x * (radius * cos(ang0) * cos(vang1))) + (radius * y * sin(ang0) * cos(vang1)) + (radius * z * sin(vang1));
+				geoff_geometry::Point3d p3 = m_view_point.m_lens_point + (x * (radius * cos(ang1) * cos(vang1))) + (radius * y * sin(ang1) * cos(vang1)) + (radius * z * sin(vang1));
 				HeeksColor c0, c1;
 				switch (panel)
 				{
@@ -180,6 +181,7 @@ void CViewport::glCommands()
 		glShadeModel(GL_FLAT);
 		glDisable(GL_CULL_FACE);
 		glClear(GL_DEPTH_BUFFER_BIT);
+#endif
 	}
 	break;
 	}
