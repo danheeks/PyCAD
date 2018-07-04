@@ -2793,7 +2793,7 @@ std::wstring CApp::HeeksType(const int type) const
 	}
 
 	wchar_t buf[32];
-	wsprintf(buf, L"%d", type);
+	swprintf(buf, 32, L"%d", type);
 	return std::wstring(buf);
 }
 
