@@ -63,7 +63,7 @@ set(CAD_SRC
     DigitizedPoint.cpp
     DigitizeMode.cpp
     Drawing.cpp
-    dxf.xpp
+    dxf.cpp
     ../Geom/Finite.cpp
     glfont2.cpp
     Grid.cpp
