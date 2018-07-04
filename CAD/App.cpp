@@ -1214,7 +1214,11 @@ public:
 
 	void WriteObjFile(const std::wstring& filepath)
 	{
+#ifdef __WXMSW__
 		ofstream ofs(filepath);
+#else
+		ofstream ofs(Ttc(filepath.c_str()));
+#endif
 		if (!ofs)
 		{
 			std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
@@ -2664,10 +2668,10 @@ bool CApp::RegisterFileOpenHandler(const std::list<std::wstring> file_extensions
 		}
 
 #ifndef WIN32
-		extension.LowerCase();
+		lowerCase(extension);
 		valid_extensions.insert(extension);
 
-		extension.UpperCase();
+		UpperCase(extension);
 		valid_extensions.insert(extension);
 #else
 		lowerCase(extension);

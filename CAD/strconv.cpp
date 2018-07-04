@@ -111,6 +111,11 @@ void lowerCase(std::wstring &str)
 	std::transform(str.begin(), str.end(), str.begin(), ::tolower); // lower case
 }
 
+void upperCase(std::wstring &str)
+{
+	std::transform(str.begin(), str.end(), str.begin(), ::toupper); // upper case
+}
+
 bool startsWith(std::wstring const &fullString, std::wstring const &beginning)
 {
 	return fullString.compare(0, beginning.length(), beginning) == 0;

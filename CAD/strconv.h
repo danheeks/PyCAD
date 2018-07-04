@@ -21,5 +21,6 @@ bool AllNumeric( const std::wstring wxLine );
 bool endsWith(std::wstring const &fullString, std::wstring const &ending);
 bool startsWith(std::wstring const &fullString, std::wstring const &beginning);
 void lowerCase(std::wstring &str);
+void upperCase(std::wstring &str);
 bool contains(std::wstring const &fullString, std::wstring const &substring);
 

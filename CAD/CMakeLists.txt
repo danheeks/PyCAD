@@ -13,6 +13,8 @@ endif (CMAKE_BUILD_TOOL MATCHES "make")
 option(BUILD_TYPE
   "Build type: Release=ON/Debug=OFF  " ON)
 
+add_definitions(-DUNICODE)
+
 if (BUILD_TYPE)
     MESSAGE(STATUS " CMAKE_BUILD_TYPE = Release")
     set(CMAKE_BUILD_TYPE Release)
