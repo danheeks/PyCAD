@@ -28,8 +28,9 @@ cmake ..\
 make
 
 ### try the test.py ###
-python\
-import cad
+cp cad.so ../../
+cd ../../
+python test.py
 
 ### problems June 2018 ###
 I couldn't get cad module to share classes with wxPython, but cad will be more reusable when it doesn't have any wx in it.\
