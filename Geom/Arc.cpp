@@ -38,10 +38,10 @@ double CArc::IncludedAngle()const
 bool CArc::AlmostALine()const
 {
 	Point mid_point = MidParam(0.5);
-	if(Line(m_s, m_e - m_s).Dist(mid_point) <= Point::tolerance)
+	if(Line(m_s, m_e - m_s).Dist(mid_point) <= geoff_geometry::TOLERANCE)
 		return true;
 
-	const double max_arc_radius = 1.0 / Point::tolerance;
+	const double max_arc_radius = 1.0 / geoff_geometry::TOLERANCE;
 	double radius = m_c.dist(m_s);
 	if (radius > max_arc_radius)
 	{

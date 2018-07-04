@@ -33,7 +33,7 @@ public:
 	bool window_box_exists;
 	bool m_doing_a_main_loop;
 	bool m_just_one;
-//	wxString m_prompt_when_doing_a_main_loop;
+//	std::wstring m_prompt_when_doing_a_main_loop;
 	CClickPoint m_last_click_point;
 	//std::list<HeeksObj*> m_highlighted_objects;
 
@@ -60,6 +60,5 @@ public:
 	bool OnStart();
 	//void OnFrontRender();
 	//void GetProperties(std::list<Property *> *list);
-	//void GetTools(std::list<Tool*>* t_list, const Ipoint* p);
 	void OnRender();
 };

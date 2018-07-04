@@ -90,10 +90,10 @@ bool ConvertCurveToEdges(const CCurve& curve, std::vector<TopoDS_Edge> &edges)
 					BRep_Builder aBuilder;
 					TopoDS_Vertex start, end;
 
-					aBuilder.MakeVertex(start, gp_Pnt(span.m_p.x, span.m_p.y, 0.0), Point::tolerance);
+					aBuilder.MakeVertex(start, gp_Pnt(span.m_p.x, span.m_p.y, 0.0), geoff_geometry::TOLERANCE);
 					start.Orientation(TopAbs_REVERSED);
 
-					aBuilder.MakeVertex(end, gp_Pnt(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), Point::tolerance);
+					aBuilder.MakeVertex(end, gp_Pnt(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), geoff_geometry::TOLERANCE);
 					end.Orientation(TopAbs_FORWARD);
 
 					if (vertex.m_type == 0)

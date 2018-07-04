@@ -59,14 +59,52 @@ include_directories(OPENGL_INCLUDE_DIR)
 set(CAD_SRC
     App.cpp
     ../Geom/Construction.cpp
+    CoordinateSystem.cpp
+    DigitizedPoint.cpp
+    DigitizeMode.cpp
+    Drawing.cpp
+    dxf.xpp
     ../Geom/Finite.cpp
+    glfont2.cpp
     Grid.cpp
+    Gripper.cpp
+    GripperSelTransform.cpp
+    Group.cpp
+    HDxf.cpp
     HeeksColor.cpp
+    HeeksConfig.cpp
+    HeeksObj.cpp
+    History.cpp
+    HXml.cpp
+    LineArcDrawing.cpp
+    MagDragWindow.cpp
+    MarkedList.cpp
     ../Geom/Matrix.cpp
+    ObjList.cpp
+    Picking.cpp
+    PointOrWindow.cpp
+    Property.cpp
+    PropertyChange.cpp
     PythonStuff.cpp
+    RegularShapesDrawing.cpp
+    RemoveOrAddTool.cpp
+    Ruler.cpp
     SelectMode.cpp
+    StlSolid.cpp
+    strconv.cpp
+    svg.cpp
+    tinystr.cpp
+    tinyxml.cpp
+    tinyxmlerror.cpp
+    tinyxmlparser.cpp
+    TransformTool.cpp
+    TransformTools.cpp
+    ViewPanning.cpp
     ViewPoint.cpp
     Viewport.cpp
+    ViewRotating.cpp
+    ViewZooming.cpp
+    Window.cpp
 )
 
 

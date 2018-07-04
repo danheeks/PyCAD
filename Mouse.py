@@ -35,7 +35,5 @@ def MouseEventFromWx(w):
     e.m_wheelRotation = w.WheelRotation
     e.m_wheelDelta = w.WheelDelta
     e.m_linesPerAction = w.LinesPerAction
-    
-    print(e.m_event_type)
 
     return e

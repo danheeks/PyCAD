@@ -428,10 +428,10 @@ int COctTree::GetInsideOutside(const CTri* tri)
 
 bool COctEle::IntersectsBox(const CXRay& xray)
 {
-	if (xray.m_y < m_box.MinY() - Point::tolerance) return false;
-	if (xray.m_y > m_box.MaxY() + Point::tolerance) return false;
-	if (xray.m_z < m_box.MinZ() - Point::tolerance) return false;
-	if (xray.m_z > m_box.MaxZ() + Point::tolerance) return false;
+	if (xray.m_y < m_box.MinY() - geoff_geometry::TOLERANCE) return false;
+	if (xray.m_y > m_box.MaxY() + geoff_geometry::TOLERANCE) return false;
+	if (xray.m_z < m_box.MinZ() - geoff_geometry::TOLERANCE) return false;
+	if (xray.m_z > m_box.MaxZ() + geoff_geometry::TOLERANCE) return false;
 	return true;
 }
 

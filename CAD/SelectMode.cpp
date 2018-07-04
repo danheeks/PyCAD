@@ -75,31 +75,31 @@ static std::wstring str_for_GetHelpText;
 const wchar_t* CSelectMode::GetHelpText()
 {
 #if 0
-	str_for_GetHelpText = wxString(_("Left button for selecting objects"))
+	str_for_GetHelpText = std::wstring(_("Left button for selecting objects"))
 		+ _T("\n") + _("( with Ctrl key for extra objects)")
 		+ _T("\n") + _("( with Shift key for similar objects)")
 		+ _T("\n") + _("Drag with left button to window select");
 
-	if(theApp.m_dragging_moves_objects)str_for_GetHelpText.Append(wxString(_T("\n")) + _("or to move object if on an object"));
-	str_for_GetHelpText.Append(wxString(_T("\n")) + _("Mouse wheel to zoom in and out"));
+	if(theApp.m_dragging_moves_objects)str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("or to move object if on an object"));
+	str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Mouse wheel to zoom in and out"));
 
 	if(theApp.ctrl_does_rotate){
-		str_for_GetHelpText.Append(wxString(_T("\n")) + _("Middle button to pan view"));
-		str_for_GetHelpText.Append(wxString(_T("\n")) + _("( with Ctrl key to rotate view )"));
+		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Middle button to pan view"));
+		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("( with Ctrl key to rotate view )"));
 	}
 	else{
-		str_for_GetHelpText.Append(wxString(_T("\n")) + _("Middle button to rotate view"));
-		str_for_GetHelpText.Append(wxString(_T("\n")) + _("( with Ctrl key to pan view )"));
+		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Middle button to rotate view"));
+		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("( with Ctrl key to pan view )"));
 	}
 
-	str_for_GetHelpText.Append(wxString(_T("\n")) + _("Right button for object menu"));
-	str_for_GetHelpText.Append(wxString(_T("\n")) + _("See options window to hide this help"));
-	str_for_GetHelpText.Append(wxString(_T("\n")) + _T("( ") + _("view options") + _T("->") + _("screen text") + _T(" )"));
+	str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Right button for object menu"));
+	str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("See options window to hide this help"));
+	str_for_GetHelpText.Append(std::wstring(_T("\n")) + _T("( ") + _("view options") + _T("->") + _("screen text") + _T(" )"));
 
 	if(m_doing_a_main_loop)
 	{
-		str_for_GetHelpText.Append(wxString(_T("\n")) + _("Press Esc key to cancel"));
-		if(theApp.m_marked_list->size() > 0)str_for_GetHelpText.Append(wxString(_T("\n")) + _("Press Return key to accept selection"));
+		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Press Esc key to cancel"));
+		if(theApp.m_marked_list->size() > 0)str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Press Return key to accept selection"));
 	}
 #endif
 	return str_for_GetHelpText.c_str();
@@ -140,9 +140,9 @@ void CSelectMode::OnLeftDown( MouseEvent& event )
 					theApp.grip_from = theApp.m_digitizing->digitized_point.m_point;
 					theApp.grip_to = theApp.grip_from;
 					double from[3];
-					from[0] = theApp.grip_from.X();
-					from[1] = theApp.grip_from.Y();
-					from[2] = theApp.grip_from.Z();
+					from[0] = theApp.grip_from.x;
+					from[1] = theApp.grip_from.y;
+					from[2] = theApp.grip_from.z;
 
 					std::list<HeeksObj*> selected_objects;
 					for(std::list<HeeksObj*>::iterator It = theApp.m_marked_list->list().begin(); It != theApp.m_marked_list->list().end(); It++)
@@ -193,15 +193,15 @@ void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &ob
 			top = temp;
 		}
 
-		wxRect strip_boxes[4];
+		IRect strip_boxes[4];
 		// top
-		strip_boxes[0] = wxRect(window_box.x - 1, top, window_box.width + 2, 1);
+		strip_boxes[0] = IRect(window_box.x - 1, top, window_box.width + 2, 1);
 		// bottom
-		strip_boxes[1] = wxRect(window_box.x - 1, bottom - 1, window_box.width + 2, 1);
+		strip_boxes[1] = IRect(window_box.x - 1, bottom - 1, window_box.width + 2, 1);
 		// left
-		strip_boxes[2] = wxRect(window_box.x - 1, bottom, 1, height);
+		strip_boxes[2] = IRect(window_box.x - 1, bottom, 1, height);
 		// right
-		strip_boxes[3] = wxRect(window_box.x + window_box.width, bottom, 1, height);
+		strip_boxes[3] = IRect(window_box.x + window_box.width, bottom, 1, height);
 
 		for(int i = 0; i<4; i++)
 		{
@@ -303,7 +303,7 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 			{
 				theApp.m_marked_list->Add(object, true);
 				m_last_click_point = CClickPoint(IPoint(event.GetX(), event.GetY()), depth);
-				gp_Lin ray = theApp.m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
+				geoff_geometry::Line ray = theApp.m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
 				double ray_start[3], ray_direction[3];
 				extract(ray.Location(), ray_start);
 				extract(ray.Direction(), ray_direction);
@@ -425,9 +425,9 @@ void CSelectMode::OnDragging( MouseEvent& event )
 					theApp.grip_from = theApp.m_digitizing->digitized_point.m_point;
 					theApp.grip_to = theApp.grip_from;
 					double from[3];
-					from[0] = theApp.grip_from.X();
-					from[1] = theApp.grip_from.Y();
-					from[2] = theApp.grip_from.Z();
+					from[0] = theApp.grip_from.x;
+					from[1] = theApp.grip_from.y;
+					from[2] = theApp.grip_from.z;
 					theApp.drag_gripper->OnGripperGrabbed(selected_objects_dragged, theApp.m_show_grippers_on_drag, from);
 					theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
 					double to[3];
@@ -668,8 +668,8 @@ public:
 			wxMessageBox(_T("Error! The \"Stop Picking\" button shouldn't have been available!"));
 		}
 	}
-	const wxChar* GetTitle(){return _("Accept selection");}
-	wxString BitmapPath(){return _T("endpick");}
+	const wchar_t* GetTitle(){return _("Accept selection");}
+	std::wstring BitmapPath(){return _T("endpick");}
 };
 
 static EndPicking end_picking;
@@ -687,8 +687,8 @@ public:
 			wxMessageBox(_T("Error! The \"Cancel Picking\" button shouldn't have been available!"));
 		}
 	}
-	const wxChar* GetTitle(){return _("Cancel selection");}
-	wxString BitmapPath(){return _T("escpick");}
+	const wchar_t* GetTitle(){return _("Cancel selection");}
+	std::wstring BitmapPath(){return _T("escpick");}
 };
 
 static CancelPicking cancel_picking;
@@ -699,9 +699,9 @@ public:
 		theApp.m_marked_list->m_filter = -1;
 		theApp.m_frame->RefreshInputCanvas();
 	}
-	const wxChar* GetTitle(){return _("Pick Anything");}
-	wxString BitmapPath(){return _T("pickany");}
-	const wxChar* GetToolTip(){return _("Set the selection filter to all items");}
+	const wchar_t* GetTitle(){return _("Pick Anything");}
+	std::wstring BitmapPath(){return _T("pickany");}
+	const wchar_t* GetToolTip(){return _("Set the selection filter to all items");}
 };
 
 static PickAnything pick_anything;
@@ -712,9 +712,9 @@ public:
 		theApp.m_marked_list->m_filter = MARKING_FILTER_EDGE;
 		theApp.m_frame->RefreshInputCanvas();
 	}
-	const wxChar* GetTitle(){return _("Pick Edges");}
-	wxString BitmapPath(){return _T("pickedges");}
-	const wxChar* GetToolTip(){return _("Set the selection filter to only edges");}
+	const wchar_t* GetTitle(){return _("Pick Edges");}
+	std::wstring BitmapPath(){return _T("pickedges");}
+	const wchar_t* GetToolTip(){return _("Set the selection filter to only edges");}
 };
 
 static PickEdges pick_edges;
@@ -725,9 +725,9 @@ public:
 		theApp.m_marked_list->m_filter = MARKING_FILTER_FACE;
 		theApp.m_frame->RefreshInputCanvas();
 	}
-	const wxChar* GetTitle(){return _("Pick Faces");}
-	wxString BitmapPath(){return _T("pickfaces");}
-	const wxChar* GetToolTip(){return _("Set the selection filter to only faces");}
+	const wchar_t* GetTitle(){return _("Pick Faces");}
+	std::wstring BitmapPath(){return _T("pickfaces");}
+	const wchar_t* GetToolTip(){return _("Set the selection filter to only faces");}
 };
 
 static PickFaces pick_faces;

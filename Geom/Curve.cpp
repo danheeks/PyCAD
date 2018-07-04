@@ -9,7 +9,6 @@
 #include "geometry.h"
 
 const Point operator*(const double &d, const Point &p){ return p * d;}
-double Point::tolerance = 0.001;
 
 //static const double PI = 3.1415926535897932; duplicated in kurve/geometry.h
 
@@ -606,7 +605,7 @@ void CCurve::RemoveTinySpans() {
 	{
 		const CVertex& vertex = *VIt;
 
-		if(vertex.m_type != 0 || new_curve.m_vertices.back().m_p.dist(vertex.m_p) > Point::tolerance)
+		if(vertex.m_type != 0 || new_curve.m_vertices.back().m_p.dist(vertex.m_p) > geoff_geometry::TOLERANCE)
 		{
 			new_curve.m_vertices.push_back(vertex);
 		}
@@ -1052,7 +1051,7 @@ Point Span::NearestPointNotOnSpan(const Point& p)const
 	{
 		double radius = m_p.dist(m_v.m_c);
 		double r = p.dist(m_v.m_c);
-		if(r < Point::tolerance)return m_p;
+		if(r < geoff_geometry::TOLERANCE)return m_p;
 		Point vc = (m_v.m_c - p);
 		return p + vc * ((r - radius) / r);
 	}

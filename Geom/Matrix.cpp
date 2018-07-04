@@ -23,7 +23,7 @@ namespace geoff_geometry {
 	Matrix::Matrix(){
 		Unit();
 	}
-	Matrix::Matrix(double m[16]) {
+	Matrix::Matrix(const double m[16]) {
 		memcpy(e, m, sizeof(e));
 		this->IsUnit();
 		this->IsMirrored();
@@ -63,6 +63,13 @@ namespace geoff_geometry {
 		return true;
 	}
 
+	const Matrix Matrix::operator*(const Matrix &m)const
+	{
+		Matrix mat(*this);
+		mat.Multiply(m);
+		return mat;
+	}
+
 #if 0
 	const Matrix& Matrix::operator=( Matrix &m) {
 		for(int i = 0; i < 16; i++) e[i] = m.e[i];
@@ -85,6 +92,27 @@ namespace geoff_geometry {
 		// copy the matrix
 		memcpy(p, e, sizeof(e));
 	}
+
+	void	Matrix::GetTransposed(double* p) const
+	{
+		p[0] = e[0];
+		p[1] = e[4];
+		p[2] = e[8];
+		p[3] = e[12];
+		p[4] = e[1];
+		p[5] = e[5];
+		p[6] = e[9];
+		p[7] = e[13];
+		p[8] = e[2];
+		p[9] = e[6];
+		p[10] = e[10];
+		p[11] = e[14];
+		p[12] = e[3];
+		p[13] = e[7];
+		p[14] = e[11];
+		p[15] = e[15];
+	}
+	
 	void	Matrix::Put(double* p)
 	{
 		// assign the matrix
@@ -184,7 +212,7 @@ namespace geoff_geometry {
 		m_unit = false;
 		m_mirrored = -1;	// don't know
 	}
-	void	Matrix::Multiply(Matrix& m)
+	void	Matrix::Multiply(const Matrix& m)
 	{
 		// multiply this by give matrix - concatinate
 		int i, k, l;
@@ -642,4 +670,13 @@ namespace geoff_geometry {
 		tmMirrored->m_unit = false;
 		tmMirrored->m_mirrored = true;
 	}
+
+	 void Plane::Transform(const Matrix& m)
+	 {
+		 Point3d p = normal * d;
+		 normal.Transform(m);
+		 p = p.Transformed(m);
+		 normal.Normalize();
+		 d = Point3d(0, 0, 0) * normal;
+	 }
 }

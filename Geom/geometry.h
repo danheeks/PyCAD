@@ -158,7 +158,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 	public:
 		// constructors etc...
 		Matrix();													// create a unit matrix
-		Matrix(double m[16]);										// from an array
+		Matrix(const double m[16]);										// from an array
 		Matrix(const Point3d &origin, const Vector3d &x_axis, const Vector3d &y_axis);
 		Matrix(const Matrix& m);									// copy constructor
 
@@ -167,10 +167,12 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		//operators
 		bool operator==(const Matrix &m)const;
 		bool operator!=(const Matrix &m)const { return !(*this == m);}
+		const Matrix operator*(const Matrix &m)const;
 
 		// methods
 		void	Unit();												// unit matrix
 		void	Get(double* p) const;								// get the matrix into p
+		void	GetTransposed(double* p) const;						// get the matrix into p
 		void	Put(double*p);										// put p[16] into matrix
 		void	Translate(double x, double y, double z=0);			// Translation
 
@@ -183,7 +185,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	Scale(double scale);								// Scale
 		void	Scale(double scalex, double scaley, double scalez);
 
-		void	Multiply(Matrix& m);								// Multiply 2 Matrices
+		void	Multiply(const Matrix& m);								// Multiply 2 Matrices
 		//	void	Transform(Point& p);
 		void	Transform(double p0[3]) const;							// Transform p0 thro' this matrix
 		void	Transform(double p0[3], double p1[3]) const;				// Transform p0 to p1 thro' this matrix
@@ -733,7 +735,8 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		bool Intof(const Plane& pl0, const Plane& pl1, Point3d& intof)const;	// intersection of 3 planes
 		Point3d Near(const Point3d& p)const;							// returns near point to p on the plane
 		bool On(const geoff_geometry::Point3d &p)const;
-		void Mirrored(Matrix* m);										// returns a matrix for a mirror about this	
+		void Mirrored(Matrix* m);										// returns a matrix for a mirror about this
+		void Transform(const Matrix& m);
 	};
 
 
@@ -919,18 +922,6 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 //		void Kurve::AddEllipse(int dir, Plane *plEllipse, Vector3d *cylAxis, Point3d *cylCentre, double cylradius, Point3d *pStart, Point3d *pEnd, double tolerance);		/// elliptical curve - biarc in tolerance
 
 		void	Spiral(const Point& centre, double startAngle, double startRadius, double radiusRisePerRevolution, double endRadius);
-#ifdef PARASOLID
-		int ToPKcurve(PK_CURVE_t *curves, PK_INTERVAL_t *ranges, int start_spanno, int n_spans); // Convert to PK Curve
-
-		PK_BODY_t ToPKwire();												// Convert to PK Wire Body
-		PK_BODY_t ToPKwire(int start_spanno, int n_spans);
-
-		PK_BODY_t ToPKsheet(			);									// Convert to PK Sheet Body
-		PK_BODY_t ToPKextrudedBody(PK_VECTOR1_t path, bool solidbody = true);
-		// Convert to PK Body (open kurve >> sheet)
-		PK_BODY_t ToPKlofted_sheet_body(Kurve &sec);						// Convert 2 kurves to lofted sheet body
-		PK_BODY_t ToPKlofted_thickened_body(Kurve &sec, double thickness);
-#endif
 	};
 #ifdef WIN32
 #pragma warning(default:4522)

@@ -409,12 +409,12 @@ int get_oct_ele_count()
 
 static void set_tolerance(double tolerance)
 {
-	Point::tolerance = tolerance;
+	geoff_geometry::TOLERANCE = tolerance;
 }
 
 static double get_tolerance()
 {
-	return Point::tolerance;
+	return geoff_geometry::TOLERANCE;
 }
 
 static void set_accuracy(double accuracy)

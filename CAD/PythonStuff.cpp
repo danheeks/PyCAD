@@ -35,6 +35,12 @@ bool OnInit()
 	return theApp.OnInit();
 }
 
+void OnExit()
+{
+	theApp.OnExit();
+}
+
+
 	BOOST_PYTHON_MODULE(cad) {
 
 		bp::class_<CViewport>("Viewport")
@@ -65,4 +71,5 @@ bool OnInit()
 			;
 
 		bp::def("OnInit", OnInit);
+		bp::def("OnExit", OnExit);
 	}
