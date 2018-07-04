@@ -15,8 +15,8 @@ class Frame(wx.Frame):
         self.g = myGLCanvas(self)
 
         self.aui_manager.AddPane(self.g, wx.aui.AuiPaneInfo().Name('graphics').CentrePane().BestSize(wx.Size(800,600)))
-        self.g2 = myGLCanvas(self)
-        self.aui_manager.AddPane(self.g2, wx.aui.AuiPaneInfo().Name('Objects').Caption('Objects').Left().BestSize(wx.Size(300,200)).Position(0))
+        #self.g2 = myGLCanvas(self)
+        #self.aui_manager.AddPane(self.g2, wx.aui.AuiPaneInfo().Name('Objects').Caption('Objects').Left().BestSize(wx.Size(300,200)).Position(0))
 
         self.Center()
         self.aui_manager.Update()
