@@ -1308,7 +1308,7 @@ void CoordinateSystem::AxesToAngles(const geoff_geometry::Point3d &x, const geof
     EulGetOrd(order,i,j,k,h,n,s,f);
     if (s==1) {
 	double sy = sqrt(M[i][j]*M[i][j] + M[i][k]*M[i][k]);
-	if (sy > 16*FLT_EPSILON) {
+	if (sy > 16 * 1.192092896e-07F) {
 	    t_angle = atan2(M[i][j], M[i][k]);
 	    v_angle = atan2(sy, M[i][i]);
 	    h_angle = atan2(M[j][i], -M[k][i]);
@@ -1319,7 +1319,7 @@ void CoordinateSystem::AxesToAngles(const geoff_geometry::Point3d &x, const geof
 	}
     } else {
 	double cy = sqrt(M[i][i]*M[i][i] + M[j][i]*M[j][i]);
-	if (cy > 16*DBL_EPSILON) {
+	if (cy > 16 * 2.2204460492503131e-016) {
 	    t_angle = atan2(M[k][j], M[k][k]);
 	    v_angle = atan2(-M[k][i], cy);
 	    h_angle = atan2(M[j][i], M[i][i]);

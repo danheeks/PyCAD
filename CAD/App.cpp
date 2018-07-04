@@ -2671,7 +2671,7 @@ bool CApp::RegisterFileOpenHandler(const std::list<std::wstring> file_extensions
 		lowerCase(extension);
 		valid_extensions.insert(extension);
 
-		UpperCase(extension);
+		upperCase(extension);
 		valid_extensions.insert(extension);
 #else
 		lowerCase(extension);
