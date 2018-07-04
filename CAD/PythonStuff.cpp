@@ -40,6 +40,10 @@ void OnExit()
 	theApp.OnExit();
 }
 
+void CadImport(std::wstring fp)
+{
+	theApp.OpenFile(fp.c_str(), true);
+}
 
 	BOOST_PYTHON_MODULE(cad) {
 
@@ -72,4 +76,5 @@ void OnExit()
 
 		bp::def("OnInit", OnInit);
 		bp::def("OnExit", OnExit);
+		bp::def("Import", CadImport);
 	}

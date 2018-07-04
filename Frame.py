@@ -25,12 +25,17 @@ class Frame(wx.Frame):
         self.menuBar = wx.MenuBar()
         file_menu = wx.Menu()
         self.Bind(wx.EVT_MENU, self.OnNew, file_menu.Append(wx.ID_ANY, 'New', 'Start a new job'))
+        self.Bind(wx.EVT_MENU, self.OnSolid, file_menu.Append(wx.ID_ANY, 'Solid', 'Import a test solid'))
         self.menuBar.Append(file_menu, '&File')
         self.SetMenuBar(self.menuBar)
 
         
     def OnNew(self, e):
         wx.MessageBox('OnNew called')
+        
+    def OnSolid(self, e):
+        import cad
+        cad.Import('cutsphere.stl')
                                          
     
 
