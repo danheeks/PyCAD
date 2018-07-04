@@ -5,7 +5,7 @@ from GraphicsCanvas import myGLCanvas
 class Frame(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, -1, 'HeeksCAM ( Computer Aided Manufacturing )')
-        self.SetIcon(wx.Icon("HeeksCAD.ico"))
+        self.SetIcon(wx.Icon("HeeksCAD.ico", wx.BITMAP_TYPE_ICO))
         
         self.MakeMenus()
         
