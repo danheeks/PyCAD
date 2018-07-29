@@ -101,7 +101,6 @@ set(CAD_SRC
     tinyxmlerror.cpp
     tinyxmlparser.cpp
     TransformTool.cpp
-    TransformTools.cpp
     ViewPanning.cpp
     ViewPoint.cpp
     Viewport.cpp
