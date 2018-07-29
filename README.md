@@ -28,8 +28,8 @@ cmake ..\
 make
 
 ### try the test.py ###
-cp cad.so ../../
-cd ../../
+cp cad.so ../../\
+cd ../../\
 python test.py
 
 ### problems June 2018 ###
