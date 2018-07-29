@@ -8,6 +8,7 @@
 #include "Material.h"
 #include "strconv.h"
 #include "GripData.h"
+#include "Property.h"
 
 using namespace std;
 
@@ -258,9 +259,9 @@ const wchar_t* CStlSolid::GetIconFilePath()
 
 void CStlSolid::GetProperties(std::list<Property *> *list)
 {
-#if 0
-	list->push_back(new PropertyInt(_("Number of Triangles"), (int)(m_list.size()), this));
-#endif
+	wchar_t buf[32];
+	swprintf(buf, 32, L"%d", (int)(m_list.size()));
+	list->push_back(new PropertyStringReadOnly(L"Number of Triangles", buf));
 	HeeksObj::GetProperties(list);
 }
 
@@ -270,8 +271,11 @@ void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 
 	if (draw_faces)
 	{
-		glEnable(GL_LIGHTING);
-		Material(m_color).glMaterial(1.0);
+		if (!no_color)
+		{
+			glEnable(GL_LIGHTING);
+			Material(m_color).glMaterial(1.0);
+		}
 
 		if (m_gl_list)
 		{
@@ -321,7 +325,8 @@ void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 			glEndList();
 		}
 
-		glDisable(GL_LIGHTING);
+		if (!no_color)
+			glDisable(GL_LIGHTING);
 	}
 	
 	if (draw_edges)

@@ -5,7 +5,7 @@
 
 #include "PropertyChange.h"
 
-PropertyChangeString::PropertyChangeString(const std::wstring& value, PropertyString* property) :m_property(property)
+PropertyChangeString::PropertyChangeString(const std::wstring& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = m_property->GetString();
@@ -23,7 +23,7 @@ void PropertyChangeString::RollBack()
 	theApp.WasModified(m_property->m_object);
 }
 
-PropertyChangeDouble::PropertyChangeDouble(const double& value, PropertyDouble* property) :m_property(property)
+PropertyChangeDouble::PropertyChangeDouble(const double& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = m_property->GetDouble();
@@ -41,7 +41,7 @@ void PropertyChangeDouble::RollBack()
 	theApp.WasModified(m_property->m_object);
 }
 
-PropertyChangeLength::PropertyChangeLength(const double& value, PropertyLength* property) :m_property(property)
+PropertyChangeLength::PropertyChangeLength(const double& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = m_property->GetDouble();
@@ -59,7 +59,7 @@ void PropertyChangeLength::RollBack()
 	theApp.WasModified(m_property->m_object);
 }
 
-PropertyChangeInt::PropertyChangeInt(const int& value, PropertyInt* property) :m_property(property)
+PropertyChangeInt::PropertyChangeInt(const int& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = m_property->GetInt();
@@ -77,7 +77,7 @@ void PropertyChangeInt::RollBack()
 	theApp.WasModified(m_property->m_object);
 }
 
-PropertyChangeColor::PropertyChangeColor(const HeeksColor& value, PropertyColor* property) :m_property(property)
+PropertyChangeColor::PropertyChangeColor(const HeeksColor& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = ((PropertyColor*)property)->GetColor();
@@ -95,7 +95,7 @@ void PropertyChangeColor::RollBack()
 	theApp.WasModified(m_property->m_object);
 }
 
-PropertyChangeChoice::PropertyChangeChoice(const int& value, PropertyChoice* property) :m_property(property)
+PropertyChangeChoice::PropertyChangeChoice(const int& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = m_property->GetInt();
@@ -113,7 +113,7 @@ void PropertyChangeChoice::RollBack()
 	theApp.WasModified(m_property->m_object);
 }
 
-PropertyChangeCheck::PropertyChangeCheck(const bool& value, PropertyCheck* property) :m_property(property)
+PropertyChangeCheck::PropertyChangeCheck(const bool& value, Property* property) :m_property(property)
 {
 	m_value = value;
 	m_old = m_property->GetBool();

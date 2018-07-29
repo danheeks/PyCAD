@@ -17,6 +17,7 @@ const Property& Property::operator=(const Property &rhs)
 	m_editable = rhs.m_editable;
 	m_highlighted = rhs.m_highlighted;
 	m_object = rhs.m_object;
+	m_title = rhs.m_title;
 
 	return *this;
 }
@@ -24,6 +25,12 @@ const Property& Property::operator=(const Property &rhs)
 Property *PropertyCheck::MakeACopy(void)const{
 	PropertyCheck* new_object = new PropertyCheck(*this);
 	return new_object;
+}
+
+PropertyCheck::~PropertyCheck()
+{
+	int a = 0;
+	a = 3;
 }
 
 void PropertyCheckWithConfig::Set(bool value)

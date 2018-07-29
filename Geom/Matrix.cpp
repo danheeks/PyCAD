@@ -130,6 +130,11 @@ namespace geoff_geometry {
 		m_unit = false;
 	}
 
+	void Matrix::Translate(const Point3d& v)
+	{
+		Translate(v.x, v.y, v.z);
+	}
+
 	void	Matrix::Rotate(double angle, Vector3d *rotAxis) {
 		/// Rotation about rotAxis with angle
 		Rotate(sin(angle), cos(angle), rotAxis);

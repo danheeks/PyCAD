@@ -174,7 +174,8 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void	Get(double* p) const;								// get the matrix into p
 		void	GetTransposed(double* p) const;						// get the matrix into p
 		void	Put(double*p);										// put p[16] into matrix
-		void	Translate(double x, double y, double z=0);			// Translation
+		void	Translate(double x, double y, double z = 0);		// Translation
+		void	Translate(const Point3d& v);						// Translation
 
 		void	Rotate(double sinang, double cosang, Vector3d *rotAxis); // Rotation about rotAxis
 		void	Rotate(double angle, Vector3d *rotAxis);			// Rotation about rotAxis

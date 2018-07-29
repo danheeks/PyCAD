@@ -87,7 +87,7 @@ CApp::CApp()
 	m_marked_list = new MarkedList;
 	history = new MainHistory;
 	m_doing_rollback = false;
-	mouse_wheel_forward_away = true;
+	mouse_wheel_forward_away = false;
 	m_mouse_move_highlighting = true;
 	ctrl_does_rotate = false;
 	m_ruler = new HRuler();
@@ -114,7 +114,7 @@ CApp::CApp()
 	m_number_of_sample_points = 10;
 	m_property_grid_validation = false;
 	m_solid_view_mode = SolidViewFacesAndEdges;
-	m_dragging_moves_objects = false;
+	m_dragging_moves_objects = true;
 	m_no_creation_mode = false;
 	m_stl_solid_random_colors = false;
 	m_svg_unite = false;
@@ -144,8 +144,6 @@ CApp::CApp()
 
 	m_icon_texture_number = 0;
 	m_settings_restored = false;
-
-
 
 	m_current_viewport = NULL;
 }
@@ -1419,14 +1417,17 @@ bool CApp::SaveFile(const wchar_t *filepath, bool use_dialog, bool update_recent
 	return true;
 }
 
+extern void PythonOnRepaint(bool soon);
 
 void CApp::Repaint(bool soon)
 {
+	PythonOnRepaint(soon);
+}
+
 #if 0
 	if (soon)m_frame->m_graphics->RefreshSoon();
 	else m_frame->m_graphics->Refresh();
 #endif
-}
 
 void CApp::RecalculateGLLists()
 {
@@ -1528,7 +1529,7 @@ void CApp::glCommandsAll(const CViewPoint &view_point)
 	{
 		glPushMatrix();
 		double m[16];
-		m_drag_matrix.Get(m);
+		m_drag_matrix.GetTransposed(m);
 		glMultMatrixd(m);
 		glCallList(m_transform_gl_list);
 		glPopMatrix();
@@ -2828,4 +2829,11 @@ void CApp::RestoreDefaults()
 		(*callbackfunc)();
 	}
 	theApp.m_settings_restored = true;
+}
+
+
+const wchar_t* CApp::GetFileFullPath()
+{
+	if (theApp.m_untitled)return NULL;
+	return theApp.m_filepath.c_str();
 }

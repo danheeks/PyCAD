@@ -5,108 +5,96 @@
 
 class PropertyChangeString: public Undoable
 {
-	PropertyString* m_property;
+	Property* m_property;
 public:
 	std::wstring m_value;
 	std::wstring m_old;
 
-	PropertyChangeString(const std::wstring& value, PropertyString* property);
+	PropertyChangeString(const std::wstring& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();
 	const wchar_t* GetTitle(){return L"Property Change String";}
 };
 
-class PropertyDouble;
-
 class PropertyChangeDouble: public Undoable
 {
-	PropertyDouble* m_property;
+	Property* m_property;
 public:
 	double m_value;
 	double m_old;
 
-	PropertyChangeDouble(const double& value, PropertyDouble* property);
+	PropertyChangeDouble(const double& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();
 	const wchar_t* GetTitle(){return L"Property Change Double";}
 };
 
-class PropertyLength;
-
 class PropertyChangeLength: public Undoable
 {
-	PropertyLength* m_property;
+	Property* m_property;
 public:
 	double m_value;
 	double m_old;
 
-	PropertyChangeLength(const double& value, PropertyLength* property);
+	PropertyChangeLength(const double& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();
 	const wchar_t* GetTitle(){return L"Property Change Length";}
 };
 
-class PropertyInt;
-
 class PropertyChangeInt: public Undoable
 {
-	PropertyInt* m_property;
+	Property* m_property;
 public:
 	int m_value;
 	int m_old;
 
-	PropertyChangeInt(const int& value, PropertyInt* property);
+	PropertyChangeInt(const int& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();
 	const wchar_t* GetTitle(){return L"Property Change Int";}
 };
 
-class PropertyColor;
-
 class PropertyChangeColor: public Undoable
 {
-	PropertyColor* m_property;
+	Property* m_property;
 public:
 	HeeksColor m_value;
 	HeeksColor m_old;
 
-	PropertyChangeColor(const HeeksColor& value, PropertyColor* property);
+	PropertyChangeColor(const HeeksColor& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();
 	const wchar_t* GetTitle(){return L"Property Change Color";}
 };
 
-class PropertyChoice;
-
 class PropertyChangeChoice: public Undoable
 {
-	PropertyChoice* m_property;
+	Property* m_property;
 public:
 	int m_value;
 	int m_old;
 
-	PropertyChangeChoice(const int& value, PropertyChoice* property);
+	PropertyChangeChoice(const int& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();
 	const wchar_t* GetTitle(){return L"Property Change Choice";}
 };
 
-class PropertyCheck;
-
 class PropertyChangeCheck: public Undoable
 {
-	PropertyCheck* m_property;
+	Property* m_property;
 public:
 	bool m_value;
 	bool m_old;
 
-	PropertyChangeCheck(const bool& value, PropertyCheck* property);
+	PropertyChangeCheck(const bool& value, Property* property);
 
 	void Run(bool redo);
 	void RollBack();

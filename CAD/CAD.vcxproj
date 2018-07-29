@@ -133,7 +133,6 @@
     <ClCompile Include="tinyxmlerror.cpp" />
     <ClCompile Include="tinyxmlparser.cpp" />
     <ClCompile Include="TransformTool.cpp" />
-    <ClCompile Include="TransformTools.cpp" />
     <ClCompile Include="ViewPanning.cpp" />
     <ClCompile Include="ViewPoint.cpp" />
     <ClCompile Include="Viewport.cpp" />
@@ -188,7 +187,6 @@
     <ClInclude Include="tinystr.h" />
     <ClInclude Include="tinyxml.h" />
     <ClInclude Include="TransformTool.h" />
-    <ClInclude Include="TransformTools.h" />
     <ClInclude Include="Undoable.h" />
     <ClInclude Include="ViewPanning.h" />
     <ClInclude Include="ViewPoint.h" />

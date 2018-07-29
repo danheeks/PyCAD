@@ -5,22 +5,15 @@
 
 #include "SelectMode.h"
 #include "InputMode.h"
-#if 0
-#include "Tool.h"
 #include "MarkedObject.h"
-#endif
 #include "ViewPoint.h"
-#if 0
 #include "MagDragWindow.h"
 #include "MarkedList.h"
 #include "DigitizeMode.h"
 #include "Gripper.h"
-#include "GraphicsCanvas.h"
-#include "HeeksFrame.h"
 #include "GripperSelTransform.h"
-#include "InputModeCanvas.h"
-#endif
 #include "Viewport.h"
+#include "Material.h"
 
 CClickPoint::CClickPoint(const IPoint& point, unsigned long depth)
 {
@@ -105,16 +98,14 @@ const wchar_t* CSelectMode::GetHelpText()
 	return str_for_GetHelpText.c_str();
 }
 
-#if 0
 static GripperSelTransform drag_object_gripper(GripData(GripperTypeTranslate, 0, 0, 0), NULL);
-#endif
 
 void CSelectMode::OnLeftDown( MouseEvent& event )
 {
 	button_down_point = IPoint(event.GetX(), event.GetY());
 	CurrentPoint = button_down_point;
 	m_button_down = true;
-#if 0
+
 	m_highlighted_objects.clear();
 
 	if(theApp.m_dragging_moves_objects)
@@ -125,7 +116,7 @@ void CSelectMode::OnLeftDown( MouseEvent& event )
 		{
 			HeeksObj* object = marked_object.GetFirstOfTopOnly();
 
-			if (event.ShiftDown())
+			if (event.m_shiftDown)
 			{
 			} // End if - then
 
@@ -160,7 +151,6 @@ void CSelectMode::OnLeftDown( MouseEvent& event )
 			}
 		}
 	}
-#endif
 }
 
 void CSelectMode::OnMiddleDown( MouseEvent& event )
@@ -172,7 +162,6 @@ void CSelectMode::OnMiddleDown( MouseEvent& event )
 	theApp.m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
 }
 
-#if 0
 void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &objects)
 {
 	if(window_box.width > 0){
@@ -213,7 +202,7 @@ void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &ob
 
 		for(std::set<HeeksObj*>::iterator It = obj_set.begin(); It != obj_set.end(); It++)
 		{
-			if(!event.ControlDown() || !theApp.m_marked_list->ObjectMarked(*It))objects.push_back(*It);
+			if(!event.m_controlDown || !theApp.m_marked_list->ObjectMarked(*It))objects.push_back(*It);
 		}
 	}
 	else{
@@ -222,30 +211,28 @@ void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &ob
 		theApp.m_marked_list->ObjectsInWindow(window_box, &marked_object, false);
 		for(HeeksObj* object = marked_object.GetFirstOfTopOnly(); object; object = marked_object.Increment())
 		{
-			if(object->GetType() != GripperType && (!event.ControlDown() || !theApp.m_marked_list->ObjectMarked(object)))
+			if (object->GetType() != GripperType && (!event.m_controlDown || !theApp.m_marked_list->ObjectMarked(object)))
 				objects.push_back(object);
 		}
 	}
 }
-#endif
 
 void CSelectMode::OnLeftUp( MouseEvent& event )
 {
-#if 0
 	if(theApp.drag_gripper)
 	{
 		double to[3], from[3];
 		theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
-		extract(theApp.m_digitizing->digitized_point.m_point, to);
+		theApp.m_digitizing->digitized_point.m_point.get(to);
 		theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
-		extract(theApp.grip_from, from);
+		theApp.grip_from.get(from);
 		theApp.drag_gripper->OnGripperReleased(from, to);
 		theApp.m_digitizing->SetOnlyCoords(theApp.drag_gripper, false);
 		theApp.drag_gripper = NULL;
 	}
 	else if(window_box_exists)
 	{
-		if(!event.ControlDown())theApp.m_marked_list->Clear(true);
+		if (!event.m_controlDown)theApp.m_marked_list->Clear(true);
 		std::list<HeeksObj*> obj_list;
 		GetObjectsInWindow(event, obj_list);
 		theApp.m_marked_list->Add(obj_list, true);
@@ -288,13 +275,13 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 					}
 				}
 			}
-			if(!event.ShiftDown() && !event.ControlDown())
+			if (!event.m_shiftDown && !event.m_controlDown)
 			{
 				theApp.m_marked_list->Clear(true);
 			}
 			if (theApp.m_marked_list->ObjectMarked(object))
 			{
-				if (!event.ShiftDown())
+				if (!event.m_shiftDown)
 				{
 					theApp.m_marked_list->Remove(object, true);
 				}
@@ -305,15 +292,15 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 				m_last_click_point = CClickPoint(IPoint(event.GetX(), event.GetY()), depth);
 				geoff_geometry::Line ray = theApp.m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
 				double ray_start[3], ray_direction[3];
-				extract(ray.Location(), ray_start);
-				extract(ray.Direction(), ray_direction);
+				ray.p0.get(ray_start);
+				ray.v.get(ray_direction);
 				marked_object.GetFirstOfTopOnly();
 				object->SetClickMarkPoint(marked_object.GetCurrent(), ray_start, ray_direction);
 			}
 		}
 		else
 		{
-			if(!event.ShiftDown() && !event.ControlDown())
+			if (!event.m_shiftDown && !event.m_controlDown)
 			{
 				theApp.m_marked_list->Clear(true);
 			}
@@ -322,13 +309,12 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 
 	if(m_just_one && m_doing_a_main_loop && (theApp.m_marked_list->size() > 0))
 	{
-		ExitMainLoop();
+//		ExitMainLoop();
 	}
 	else
 	{
 		theApp.m_current_viewport->m_need_refresh = true;
 	}
-#endif
 }
 
 void CSelectMode::OnDragging( MouseEvent& event )
@@ -338,14 +324,12 @@ void CSelectMode::OnDragging( MouseEvent& event )
 		IPoint dm;
 		dm.x = event.GetX() - CurrentPoint.x;
 		dm.y = event.GetY() - CurrentPoint.y;
-#if 0
-		if(theApp.ctrl_does_rotate == event.ControlDown())
+
+		if (theApp.ctrl_does_rotate == event.m_controlDown)
 		{
 			if(theApp.m_rotate_mode)
 			{
-#endif
 				theApp.m_current_viewport->m_view_point.Turn(dm);
-#if 0
 			}
 			else
 			{
@@ -356,23 +340,20 @@ void CSelectMode::OnDragging( MouseEvent& event )
 		{
 			theApp.m_current_viewport->m_view_point.Shift(dm, IPoint(event.GetX(), event.GetY()));
 		}
-#endif
 		theApp.m_current_viewport->m_need_update = true;
 		theApp.m_current_viewport->m_need_refresh = true;
 	}
 	else if(event.m_leftDown)
 	{
-#if 0
 		if(theApp.drag_gripper)
 		{
 			double to[3], from[3];
 			theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
-			extract(theApp.m_digitizing->digitized_point.m_point, to);
+			theApp.m_digitizing->digitized_point.m_point.get(to);
 			theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
-			extract(theApp.grip_from, from);
+			theApp.grip_from.get(from);
 			theApp.drag_gripper->OnGripperMoved(from, to);
 			theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
-			theApp.grip_from = make_point(from);
 		}
 		else if(abs(button_down_point.x - event.GetX())>2 || abs(button_down_point.y - event.GetY())>2)
 		{
@@ -432,9 +413,9 @@ void CSelectMode::OnDragging( MouseEvent& event )
 					theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
 					double to[3];
 					theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
-					extract(theApp.m_digitizing->digitized_point.m_point, to);
+					theApp.m_digitizing->digitized_point.m_point.get(to);
 					theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
-					extract(theApp.grip_from, from);
+					theApp.grip_from.get(from);
 					theApp.drag_gripper->OnGripperMoved(from, to);
 					theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
 					return;
@@ -462,7 +443,6 @@ void CSelectMode::OnDragging( MouseEvent& event )
 				window_box_exists = true;
 			}
 		}
-#endif
 	}
 	CurrentPoint = IPoint(event.GetX(), event.GetY());
 }
@@ -471,7 +451,6 @@ void CSelectMode::OnMoving( MouseEvent& event )
 {
 	CurrentPoint = IPoint(event.GetX(), event.GetY());
 
-#if 0
 	if(theApp.m_mouse_move_highlighting)
 	{
 		m_highlighted_objects.clear();
@@ -485,12 +464,10 @@ void CSelectMode::OnMoving( MouseEvent& event )
 		}
 		theApp.Repaint();
 	}
-#endif
 }
 
 void CSelectMode::OnRender()
 {
-#if 0
 	if (m_highlighted_objects.size() > 0)
 	{
 		theApp.m_highlight_color.glColor();
@@ -502,17 +479,15 @@ void CSelectMode::OnRender()
 		HeeksObj* object = *It;
 		object->glCommands(false, true, true);
 	}
-#endif
 }
 
 void CSelectMode::OnWheelRotation( MouseEvent& event )
 {
-	double wheel_value = (double)(event.GetWheelRotation());
+	double wheel_value = (double)(event.m_wheelRotation);
 	double multiplier = wheel_value /1000.0, multiplier2;
-#if 0
+
 	// to do
 	if(theApp.mouse_wheel_forward_away)multiplier = -multiplier;
-#endif
 
 	// make sure these are actually inverses, so if you
 	// zoom in and out the same number of steps, you'll be
@@ -603,7 +578,7 @@ void CSelectMode::OnMouse( MouseEvent& event )
 #if 0
 		MarkedObjectOneOfEach marked_object;
 		theApp.FindMarkedObject(IPoint(event.GetX(), event.GetY()), &marked_object);
-		theApp.DoDropDownMenu(theApp.m_frame->m_graphics, IPoint(event.GetX(), event.GetY()), &marked_object, false, event.ControlDown());
+		theApp.DoDropDownMenu(theApp.m_frame->m_graphics, IPoint(event.GetX(), event.GetY()), &marked_object, false, event.m_controlDown);
 #endif
 	}
 	else if(dragging)
@@ -641,6 +616,7 @@ void CSelectMode::OnKeyUp(wxKeyEvent& event)
 {
 	CInputMode::OnKeyUp(event);
 }
+#endif
 
 void CSelectMode::OnFrontRender(){
 	if(theApp.drag_gripper){
@@ -655,92 +631,3 @@ bool CSelectMode::OnStart(){
 
 void CSelectMode::GetProperties(std::list<Property *> *list){
 }
-
-class EndPicking:public Tool{
-public:
-	void Run(){
-		if(theApp.m_select_mode->m_doing_a_main_loop)
-		{
-			ExitMainLoop();
-			theApp.m_frame->RefreshInputCanvas();
-		}
-		else{
-			wxMessageBox(_T("Error! The \"Stop Picking\" button shouldn't have been available!"));
-		}
-	}
-	const wchar_t* GetTitle(){return _("Accept selection");}
-	std::wstring BitmapPath(){return _T("endpick");}
-};
-
-static EndPicking end_picking;
-
-class CancelPicking:public Tool{
-public:
-	void Run(){
-		if(theApp.m_select_mode->m_doing_a_main_loop)
-		{
-			theApp.m_marked_list->Clear(false);
-			ExitMainLoop();
-			theApp.m_frame->RefreshInputCanvas();
-		}
-		else{
-			wxMessageBox(_T("Error! The \"Cancel Picking\" button shouldn't have been available!"));
-		}
-	}
-	const wchar_t* GetTitle(){return _("Cancel selection");}
-	std::wstring BitmapPath(){return _T("escpick");}
-};
-
-static CancelPicking cancel_picking;
-
-class PickAnything:public Tool{
-public:
-	void Run(){
-		theApp.m_marked_list->m_filter = -1;
-		theApp.m_frame->RefreshInputCanvas();
-	}
-	const wchar_t* GetTitle(){return _("Pick Anything");}
-	std::wstring BitmapPath(){return _T("pickany");}
-	const wchar_t* GetToolTip(){return _("Set the selection filter to all items");}
-};
-
-static PickAnything pick_anything;
-
-class PickEdges:public Tool{
-public:
-	void Run(){
-		theApp.m_marked_list->m_filter = MARKING_FILTER_EDGE;
-		theApp.m_frame->RefreshInputCanvas();
-	}
-	const wchar_t* GetTitle(){return _("Pick Edges");}
-	std::wstring BitmapPath(){return _T("pickedges");}
-	const wchar_t* GetToolTip(){return _("Set the selection filter to only edges");}
-};
-
-static PickEdges pick_edges;
-
-class PickFaces:public Tool{
-public:
-	void Run(){
-		theApp.m_marked_list->m_filter = MARKING_FILTER_FACE;
-		theApp.m_frame->RefreshInputCanvas();
-	}
-	const wchar_t* GetTitle(){return _("Pick Faces");}
-	std::wstring BitmapPath(){return _T("pickfaces");}
-	const wchar_t* GetToolTip(){return _("Set the selection filter to only faces");}
-};
-
-static PickFaces pick_faces;
-
-void CSelectMode::GetTools(std::list<Tool*>* t_list, const IPoint* p)
-{
-	if(m_doing_a_main_loop)
-	{
-		t_list->push_back(&end_picking);
-		t_list->push_back(&cancel_picking);
-	}
-	if(theApp.m_marked_list->m_filter != -1)t_list->push_back(&pick_anything);
-	if(theApp.m_marked_list->m_filter != MARKING_FILTER_EDGE)t_list->push_back(&pick_edges);
-	if(theApp.m_marked_list->m_filter != MARKING_FILTER_FACE)t_list->push_back(&pick_faces);
-}
-#endif

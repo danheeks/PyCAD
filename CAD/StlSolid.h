@@ -58,7 +58,6 @@ public:
 	void WriteXML(TiXmlNode *root);
 	bool IsDifferent(HeeksObj* obj);
 	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
-	bool UsesCustomSubNames(){ return true; }
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 

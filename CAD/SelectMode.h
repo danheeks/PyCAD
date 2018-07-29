@@ -35,7 +35,7 @@ public:
 	bool m_just_one;
 //	std::wstring m_prompt_when_doing_a_main_loop;
 	CClickPoint m_last_click_point;
-	//std::list<HeeksObj*> m_highlighted_objects;
+	std::list<HeeksObj*> m_highlighted_objects;
 
 	CSelectMode();
 	virtual ~CSelectMode(void){}
@@ -44,7 +44,7 @@ public:
 
 	void OnLeftDown( MouseEvent& event );
 	void OnMiddleDown( MouseEvent& event );
-	//void GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &objects);
+	void GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &objects);
 	void OnLeftUp( MouseEvent& event );
 	void OnDragging( MouseEvent& event );
 	void OnMoving( MouseEvent& event );
@@ -58,7 +58,7 @@ public:
 	//void OnKeyDown(wxKeyEvent& event);
 	//void OnKeyUp(wxKeyEvent& event);
 	bool OnStart();
-	//void OnFrontRender();
-	//void GetProperties(std::list<Property *> *list);
+	void OnFrontRender();
+	void GetProperties(std::list<Property *> *list);
 	void OnRender();
 };

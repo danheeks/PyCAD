@@ -199,64 +199,6 @@ bool Drawing::OnModeChange(void){
 	return true;
 }
 
-#if 0
-static Drawing* drawing_for_tools = NULL;
-
-class EndDrawing:public Tool{
-public:
-	void Run(){if(drawing_for_tools->DragDoneWithXOR())theApp.m_current_viewport->EndDrawFront();drawing_for_tools->ClearObjectsMade(); theApp.SetInputMode(theApp.m_select_mode);}
-	const wchar_t* GetTitle(){return _("Stop drawing");}
-	wxString BitmapPath(){return _T("enddraw");}
-	const wchar_t* GetToolTip(){return _("Finish drawing");}
-};
-
-static EndDrawing end_drawing;
-
-class AddPointTool:public Tool{
-public:
-	Drawing* m_drawing;
-
-	AddPointTool(): m_drawing(NULL){}
-
-	void Run()
-	{
-		theApp.m_digitizing->digitized_point.m_type = DigitizeInputType;
-		m_drawing->AddPoint();
-	}
-	const wchar_t* GetTitle(){return _("Add point");}
-	wxString BitmapPath(){return _T("add");}
-	const wchar_t* GetToolTip(){return _("Add a point to drawing");}
-};
-
-static AddPointTool add_point;
-
-class GetPosTool:public Tool{
-public:
-	Drawing* m_drawing;
-
-	GetPosTool(): m_drawing(NULL){}
-
-	void Run()
-	{
-		m_drawing->m_getting_position = true;
-	}
-	const wchar_t* GetTitle(){return _("Get Position");}
-	wxString BitmapPath(){return _T("pickpos");}
-	const wchar_t* GetToolTip(){return _("Pick position without adding to the drawing");}
-};
-
-static GetPosTool get_pos_tool;
-
-void Drawing::GetTools(std::list<Tool*> *f_list, const IPoint *p){
-	drawing_for_tools = this;
-	f_list->push_back(&end_drawing);
-	add_point.m_drawing = this;
-	f_list->push_back(&add_point);
-	get_pos_tool.m_drawing = this;
-	f_list->push_back(&get_pos_tool);
-}
-#endif
-
 HeeksObj* Drawing::GetOwnerForDrawingObjects()
 {
 	return &theApp; //Object always needs to be added somewhere

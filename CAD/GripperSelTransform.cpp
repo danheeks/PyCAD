@@ -7,6 +7,7 @@
 #include "GripperSelTransform.h"
 #include "MarkedList.h"
 #include "DigitizeMode.h"
+#include "Viewport.h"
 //#include "Sketch.h"
 //#include "EndedObject.h"
 
@@ -163,78 +164,82 @@ void GripperSelTransform::OnGripperReleased ( const double* from, const double* 
 	theApp.EndHistory();
 }
 
-void GripperSelTransform::MakeMatrix(const double* from, const double* to, const geoff_geometry::Matrix& object_m, geoff_geometry::Matrix& mat)
+void GripperSelTransform::MakeMatrix(const geoff_geometry::Point3d &from, const geoff_geometry::Point3d &to, const geoff_geometry::Matrix& object_m, geoff_geometry::Matrix& mat)
 {
 	mat = geoff_geometry::Matrix();
-#if 0
+
 	switch ( m_data.m_type )
 	{
 	case GripperTypeTranslate:
-		mat.SetTranslation ( gp_Vec ( make_point ( from ), make_point ( to ) ) );
+		mat.Translate(geoff_geometry::Point3d(from, to));
 		break;
 	case GripperTypeScale:
 		{
-			geoff_geometry::Matrix object_mat = make_matrix(object_m);
-			gp_Pnt scale_centre_point = gp_Pnt(0, 0, 0).Transformed(object_mat);
-			double dist = make_point ( from ).Distance ( scale_centre_point );
+			geoff_geometry::Point3d scale_centre_point = geoff_geometry::Point3d(0, 0, 0).Transformed(object_m);
+			double dist = geoff_geometry::Point3d(from).Dist(scale_centre_point);
 			if ( dist<0.00000001 )
 			{
 				return;
 			}
-			double scale = make_point ( to ).Distance ( scale_centre_point ) /dist;
-			mat.SetScale( scale_centre_point, scale );
+			double scale = to.Dist( scale_centre_point ) /dist;
+			mat.Translate(-scale_centre_point);
+			mat.Scale(scale);
 		}
 		break;
 	case GripperTypeObjectScaleX:
 		{
-			geoff_geometry::Matrix object_mat = make_matrix(object_m);
-			gp_Vec object_x = gp_Vec(1, 0, 0).Transformed(object_mat).Normalized();
-			gp_Pnt scale_centre_point = gp_Pnt(0, 0, 0).Transformed(object_mat);
-			double old_x = make_vector(from) * object_x - gp_Vec(scale_centre_point.XYZ()) * object_x;
-			double new_x = make_vector(to) * object_x - gp_Vec(scale_centre_point.XYZ()) * object_x;
+			geoff_geometry::Point3d object_x = geoff_geometry::Point3d(1, 0, 0).Transformed(object_m).Normalized();
+			geoff_geometry::Point3d scale_centre_point = geoff_geometry::Point3d(0, 0, 0).Transformed(object_m);
+			double old_x = from * object_x - scale_centre_point * object_x;
+			double new_x = to * object_x - scale_centre_point * object_x;
 			if(fabs(old_x) < 0.000000001)return;
 			double scale = new_x/old_x;
 			double m[16] = {scale, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-			mat = object_mat * make_matrix(m) * object_mat.Inverted();
+			geoff_geometry::Matrix invm = object_m;
+			invm.Inverse();
+			mat = object_m * geoff_geometry::Matrix(m) * invm;
 		}
 		break;
 	case GripperTypeObjectScaleY:
 		{
-			geoff_geometry::Matrix object_mat = make_matrix(object_m);
-			gp_Vec object_y = gp_Vec(0, 1, 0).Transformed(object_mat).Normalized();
-			gp_Pnt scale_centre_point = gp_Pnt(0, 0, 0).Transformed(object_mat);
-			double old_y = make_vector(from) * object_y - gp_Vec(scale_centre_point.XYZ()) * object_y;
-			double new_y = make_vector(to) * object_y - gp_Vec(scale_centre_point.XYZ()) * object_y;
-			if(fabs(old_y) < 0.000000001)return;
-			double scale = new_y/old_y;
-			double m[16] = {1, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-			mat = object_mat * make_matrix(m) * object_mat.Inverted();
+			geoff_geometry::Point3d object_x = geoff_geometry::Point3d(0, 1, 0).Transformed(object_m).Normalized();
+			geoff_geometry::Point3d scale_centre_point = geoff_geometry::Point3d(0, 0, 0).Transformed(object_m);
+			double old_x = from * object_x - scale_centre_point * object_x;
+			double new_x = to * object_x - scale_centre_point * object_x;
+			if (fabs(old_x) < 0.000000001)return;
+			double scale = new_x / old_x;
+			double m[16] = { 1, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+			geoff_geometry::Matrix invm = object_m;
+			invm.Inverse();
+			mat = object_m * geoff_geometry::Matrix(m) * invm;
 		}
 		break;
 	case GripperTypeObjectScaleZ:
 		{
-			geoff_geometry::Matrix object_mat = make_matrix(object_m);
-			gp_Vec object_z = gp_Vec(0, 0, 1).Transformed(object_mat).Normalized();
-			gp_Pnt scale_centre_point = gp_Pnt(0, 0, 0).Transformed(object_mat);
-			double old_z = make_vector(from) * object_z - gp_Vec(scale_centre_point.XYZ()) * object_z;
-			double new_z = make_vector(to) * object_z - gp_Vec(scale_centre_point.XYZ()) * object_z;
-			if(fabs(old_z) < 0.000000001)return;
-			double scale = new_z/old_z;
-			double m[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1};
-			mat = object_mat * make_matrix(m) * object_mat.Inverted();
+			geoff_geometry::Point3d object_x = geoff_geometry::Point3d(0, 0, 1).Transformed(object_m).Normalized();
+			geoff_geometry::Point3d scale_centre_point = geoff_geometry::Point3d(0, 0, 0).Transformed(object_m);
+			double old_x = from * object_x - scale_centre_point * object_x;
+			double new_x = to * object_x - scale_centre_point * object_x;
+			if (fabs(old_x) < 0.000000001)return;
+			double scale = new_x / old_x;
+			double m[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1 };
+			geoff_geometry::Matrix invm = object_m;
+			invm.Inverse();
+			mat = object_m * geoff_geometry::Matrix(m) * invm;
 		}
 		break;
 	case GripperTypeObjectScaleXY:
 		{
-			geoff_geometry::Matrix object_mat = make_matrix(object_m);
-			gp_Vec object_x = gp_Vec(1, 0, 0).Transformed(object_mat).Normalized();
-			gp_Pnt scale_centre_point = gp_Pnt(0, 0, 0).Transformed(object_mat);
-			double old_x = make_vector(from) * object_x - gp_Vec(scale_centre_point.XYZ()) * object_x;
-			double new_x = make_vector(to) * object_x - gp_Vec(scale_centre_point.XYZ()) * object_x;
-			if(fabs(old_x) < 0.000000001)return;
-			double scale = new_x/old_x;
-			double m[16] = {scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale};
-			mat = object_mat * make_matrix(m) * object_mat.Inverted();
+			geoff_geometry::Point3d object_x = geoff_geometry::Point3d(1, 0, 0).Transformed(object_m).Normalized();
+			geoff_geometry::Point3d scale_centre_point = geoff_geometry::Point3d(0, 0, 0).Transformed(object_m);
+			double old_x = from * object_x - scale_centre_point * object_x;
+			double new_x = to * object_x - scale_centre_point * object_x;
+			if (fabs(old_x) < 0.000000001)return;
+			double scale = new_x / old_x;
+			double m[16] = { scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale };
+			geoff_geometry::Matrix invm = object_m;
+			invm.Inverse();
+			mat = object_m * geoff_geometry::Matrix(m) * invm;
 		}
 		break;
 	case GripperTypeRotate:
@@ -243,26 +248,25 @@ void GripperSelTransform::MakeMatrix(const double* from, const double* to, const
 	case GripperTypeRotateObjectXZ:
 	case GripperTypeRotateObjectYZ:
 		{
-			geoff_geometry::Matrix object_mat = make_matrix(object_m);
-			gp_Pnt rotate_centre_point = gp_Pnt(0, 0, 0).Transformed(object_mat);
-			gp_Vec start_to_end_vector(make_point(from), make_point(to));
-			if ( start_to_end_vector.Magnitude() <0.000001 ) return;
-			gp_Vec start_vector ( rotate_centre_point, make_point ( from ) );
-			gp_Vec end_vector ( rotate_centre_point, make_point ( to ) );
-			if ( start_vector.Magnitude() <0.000001 ) return;
-			if ( end_vector.Magnitude() <0.000001 ) return;
-			mat.SetTranslation ( -gp_Vec ( rotate_centre_point.XYZ() ) );
+			geoff_geometry::Point3d rotate_centre_point = geoff_geometry::Point3d(0, 0, 0).Transformed(object_m);
+			geoff_geometry::Point3d start_to_end_vector(from, to);
+			if ( start_to_end_vector.magnitude() <0.000001 ) return;
+			geoff_geometry::Point3d start_vector(rotate_centre_point, from);
+			geoff_geometry::Point3d end_vector(rotate_centre_point, to);
+			if ( start_vector.magnitude() <0.000001 ) return;
+			if ( end_vector.magnitude() <0.000001 ) return;
+			mat.Translate(-rotate_centre_point);
 
-			gp_Vec vx, vy;
+			geoff_geometry::Point3d vx, vy;
 			theApp.m_current_viewport->m_view_point.GetTwoAxes(vx, vy, false, 0);			
-			gp_Vec rot_dir = vx ^ vy;
+			geoff_geometry::Point3d rot_dir = vx ^ vy;
 			rot_dir.Normalize();
 
 			if(m_data.m_type == GripperTypeRotateObjectXY){
 				// use object z axis
-				gp_Vec object_x = gp_Vec(1, 0, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_y = gp_Vec(0, 1, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_z = gp_Vec(0, 0, 1).Transformed(object_mat).Normalized();
+				geoff_geometry::Point3d object_x = geoff_geometry::Point3d(1, 0, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_y = geoff_geometry::Point3d(0, 1, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_z = geoff_geometry::Point3d(0, 0, 1).Transformed(object_m).Normalized();
 				rot_dir = object_z;
 				vx = object_x;
 				vy = object_y;
@@ -270,9 +274,9 @@ void GripperSelTransform::MakeMatrix(const double* from, const double* to, const
 
 			else if(m_data.m_type == GripperTypeRotateObjectXZ){
 				// use object y axis
-				gp_Vec object_x = gp_Vec(1, 0, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_y = gp_Vec(0, 1, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_z = gp_Vec(0, 0, 1).Transformed(object_mat).Normalized();
+				geoff_geometry::Point3d object_x = geoff_geometry::Point3d(1, 0, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_y = geoff_geometry::Point3d(0, 1, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_z = geoff_geometry::Point3d(0, 0, 1).Transformed(object_m).Normalized();
 				rot_dir = object_y;
 				vx = object_z;
 				vy = object_x;
@@ -280,9 +284,9 @@ void GripperSelTransform::MakeMatrix(const double* from, const double* to, const
 
 			else if(m_data.m_type == GripperTypeRotateObjectYZ){
 				// use object x axis
-				gp_Vec object_x = gp_Vec(1, 0, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_y = gp_Vec(0, 1, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_z = gp_Vec(0, 0, 1).Transformed(object_mat).Normalized();
+				geoff_geometry::Point3d object_x = geoff_geometry::Point3d(1, 0, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_y = geoff_geometry::Point3d(0, 1, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_z = geoff_geometry::Point3d(0, 0, 1).Transformed(object_m).Normalized();
 				rot_dir = object_x;
 				vx = object_y;
 				vy = object_z;
@@ -290,9 +294,9 @@ void GripperSelTransform::MakeMatrix(const double* from, const double* to, const
 
 			else if(m_data.m_type == GripperTypeRotateObject){
 				// choose the closest object axis to use
-				gp_Vec object_x = gp_Vec(1, 0, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_y = gp_Vec(0, 1, 0).Transformed(object_mat).Normalized();
-				gp_Vec object_z = gp_Vec(0, 0, 1).Transformed(object_mat).Normalized();
+				geoff_geometry::Point3d object_x = geoff_geometry::Point3d(1, 0, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_y = geoff_geometry::Point3d(0, 1, 0).Transformed(object_m).Normalized();
+				geoff_geometry::Point3d object_z = geoff_geometry::Point3d(0, 0, 1).Transformed(object_m).Normalized();
 
 				double dpx = fabs(rot_dir * object_x);
 				double dpy = fabs(rot_dir * object_y);
@@ -317,6 +321,8 @@ void GripperSelTransform::MakeMatrix(const double* from, const double* to, const
 				}
 			}
 
+#if 0 
+			to do
 			gp_Ax1 rot_axis(rotate_centre_point, rot_dir);
 			double sx = start_vector * vx;
 			double sy = start_vector * vy;
@@ -324,10 +330,10 @@ void GripperSelTransform::MakeMatrix(const double* from, const double* to, const
 			double ey = end_vector * vy;
 			double angle = gp_Vec(sx, sy, 0).AngleWithRef(gp_Vec(ex, ey, 0), gp_Vec(0,0,1));
 			mat.SetRotation(rot_axis, angle);
+#endif
 		}
 		break;
 	default:
 		break;
 	}
-#endif
 }

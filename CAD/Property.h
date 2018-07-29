@@ -60,6 +60,9 @@ public:
 	PropertyCheck(HeeksObj* object) :Property(object, NULL), m_pvar(NULL){}
 	PropertyCheck(HeeksObj* object, const wchar_t* title, bool* pvar) :Property(object, title), m_pvar(pvar){ }
 	PropertyCheck(HeeksObj* object, const wchar_t* title, const bool* pvar) :Property(object, title), m_pvar((bool*)pvar){ m_editable = false; }
+
+	~PropertyCheck();
+
 	// Property's virtual functions
 	int get_property_type(){ return CheckPropertyType; }
 	Property *MakeACopy(void)const;
@@ -239,6 +242,29 @@ public:
 	int get_property_type(){ return ListOfPropertyType; }
 	Property *MakeACopy(void)const;
 	void GetList(std::list< Property* > &list)const{ list = m_list; }
+};
+
+class HeeksObj;
+
+class PropertyObjectTitle :public Property{
+public:
+	PropertyObjectTitle(HeeksObj* object);
+	// Property's virtual functions
+	int get_property_type(){ return StringPropertyType; }
+	Property *MakeACopy(void)const;
+	const wchar_t* GetString()const;
+	void Set(const wchar_t* value);
+};
+
+
+class PropertyObjectColor :public Property{
+public:
+	PropertyObjectColor(HeeksObj* object);
+	// Property's virtual functions
+	int get_property_type(){ return ColorPropertyType; }
+	Property *MakeACopy(void)const;
+	const HeeksColor &GetColor()const;
+	void Set(const HeeksColor& value);
 };
 
 

@@ -40,26 +40,15 @@ HeeksObj* HeeksObj::MakeACopyWithID()
 	return ret;
 }
 
+PropertyObjectTitle::PropertyObjectTitle(HeeksObj* object) :Property(object, L"object title"){ m_editable = object->CanEditString(); }
+Property *PropertyObjectTitle::MakeACopy(void)const{ return new PropertyObjectTitle(*this); }
+const wchar_t* PropertyObjectTitle::GetString()const{ return m_object->GetShortString(); }
+void PropertyObjectTitle::Set(const wchar_t* value){ m_object->OnEditString(value); }
 
-class PropertyObjectTitle :public Property{
-public:
-	PropertyObjectTitle(HeeksObj* object) :Property(object, L"object title"){ m_editable = object->CanEditString(); }
-	// Property's virtual functions
-	int get_property_type(){ return StringPropertyType; }
-	Property *MakeACopy(void)const{ return new PropertyObjectTitle(*this); }
-	const wchar_t* GetString()const{ return m_object->GetShortString(); }
-	void Set(const wchar_t* value){ m_object->OnEditString(value); }
-};
-
-class PropertyObjectColor :public Property{
-public:
-	PropertyObjectColor(HeeksObj* object) :Property(object, L"color"){}
-	// Property's virtual functions
-	int get_property_type(){ return ColorPropertyType; }
-	Property *MakeACopy(void)const{ return new PropertyObjectColor(*this); }
-	const HeeksColor &GetColor()const{ return *(m_object->GetColor()); }
-	void Set(const HeeksColor& value){ m_object->SetColor(value); }
-};
+PropertyObjectColor::PropertyObjectColor(HeeksObj* object) :Property(object, L"color"){}
+Property *PropertyObjectColor::MakeACopy(void)const{ return new PropertyObjectColor(*this); }
+const HeeksColor &PropertyObjectColor::GetColor()const{ return *(m_object->GetColor()); }
+void PropertyObjectColor::Set(const HeeksColor& value){ m_object->SetColor(value); }
 
 
 const wchar_t* HeeksObj::GetIconFilePath()
@@ -73,7 +62,6 @@ void HeeksObj::GetProperties(std::list<Property *> *list)
 {
 	bool editable = CanEditString();
 	list->push_back(new PropertyStringReadOnly(L"object type", GetTypeString()));
-
 	if (GetShortString())list->push_back(new PropertyObjectTitle(this));
 	if(UsesID())list->push_back(new PropertyInt(this, L"ID", (int*)(&m_id)));
 	const HeeksColor* c = GetColor();
