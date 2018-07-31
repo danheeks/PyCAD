@@ -3,6 +3,9 @@ import sys
 import cad
 from Frame import Frame
 
+def OnMessageBox(error_message):
+    wx.MessageBox(error_message)
+
 class App(wx.App):
     def __init__(self):
         import os
@@ -20,6 +23,7 @@ class App(wx.App):
         sys.stderr = save_err
         
     def OnInit(self):
+        cad.RegisterMessageBoxCallback(OnMessageBox)
         result = cad.OnInit()
         
         # make a wxWidgets application

@@ -1969,9 +1969,45 @@ geoff_geometry::Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 	return geoff_geometry::Matrix();
 }
 
+extern void PythonOnMessageBox(const wchar_t* message);
+
+#ifndef WIN32
+int MessageBox(HWND hwnd, const char* text, const char* caption, UINT type)
+{
+	GtkWidget *dialog ;
+
+	/* Instead of 0, use GTK_DIALOG_MODAL to get a modal dialog box */
+
+	if (type & MB_YESNO)
+		dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, text );
+	else
+		dialog = gtk_message_dialog_new(NULL, 0, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, text );
+
+
+	gtk_window_set_title(GTK_WINDOW(dialog), caption);
+	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy( GTK_WIDGET(dialog) );
+
+	if (type & MB_YESNO)
+	{
+		switch (result)
+		{
+		default:
+		case GTK_RESPONSE_DELETE_EVENT:
+		case GTK_RESPONSE_NO:
+			return IDNO;
+		case GTK_RESPONSE_YES:
+			return IDYES;
+		}
+		return IDOK;
+	}
+}
+#endif
+
+
 void CApp::MessageBox(const wchar_t* message)
 {
-	// this will pass the message out to the GUI via some kind of callback function
+	::MessageBox(NULL, message, L"Message", MB_OK);
 }
 
 void CApp::GetOptions(std::list<Property *> *list)

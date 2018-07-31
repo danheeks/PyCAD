@@ -12,7 +12,7 @@ import sys
 
 class Frame(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self, None, -1, 'HeeksCAM ( Computer Aided Manufacturing )')
+        wx.Frame.__init__(self, None, -1, 'HeeksCAM ( Computer Aided Manufacturing )', size = wx.Size(400,400))
         self.SetIcon(wx.Icon("heekscad.png", wx.BITMAP_TYPE_PNG))
         
         self.MakeMenus()
@@ -22,11 +22,11 @@ class Frame(wx.Frame):
 
         self.graphics_canvas = GraphicsCanvas(self)
 
-        self.aui_manager.AddPane(self.graphics_canvas, wx.aui.AuiPaneInfo().Name('graphics').CentrePane().BestSize(wx.Size(800,600)))
+        self.aui_manager.AddPane(self.graphics_canvas, wx.aui.AuiPaneInfo().Name('graphics').CentrePane().BestSize(wx.Size(800,800)))
         self.tree_canvas = TreeCanvas(self)
-        self.aui_manager.AddPane(self.tree_canvas, wx.aui.AuiPaneInfo().Name('Objects').Caption('Objects').Left().BestSize(wx.Size(300,200)).Position(0))
+        self.aui_manager.AddPane(self.tree_canvas, wx.aui.AuiPaneInfo().Name('Objects').Caption('Objects').Left().BestSize(wx.Size(300,400)).Position(0))
         self.properties_canvas = ObjPropsCanvas(self)
-        self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(1))
+        self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,400)).Position(1))
 
         self.Center()
         self.aui_manager.Update()

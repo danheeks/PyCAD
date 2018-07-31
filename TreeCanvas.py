@@ -60,22 +60,22 @@ class TreeCanvas(wx.ScrolledWindow):
         self.tree_buttons = []
         self.clicked_object = None
         
-        self.bmp_branch_plus = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_plus.png"))
-        self.bmp_branch_minus = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_minus.png"))
-        self.bmp_branch_end_plus = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_end_plus.png"))
-        self.bmp_branch_end_minus = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_end_minus.png"))
-        self.bmp_branch_split = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_split.png"))
-        self.bmp_branch_end = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_end.png"))
-        self.bmp_plus = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/plus.png"))
-        self.bmp_minus = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/minus.png"))
-        self.bmp_branch_trunk = wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + "/icons/branch_trunk.png"))
+        self.bmp_branch_plus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_plus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_minus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_minus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_end_plus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_end_plus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_end_minus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_end_minus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_split = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_split.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_end = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_end.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_plus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/plus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_minus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/minus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_trunk = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_trunk.png", wx.BITMAP_TYPE_ANY)
 
         self.render_just_for_calculation = False
         self.render_labels = True
         self.end_child_list = []
 
         self.SetScrollRate(10, 10)
-        self.SetVirtualSize(92, 97)
+        self.SetVirtualSize(wx.Size(92, 97))
         
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
@@ -382,7 +382,7 @@ class TreeCanvas(wx.ScrolledWindow):
         
         # find icon info
         if not self.render_just_for_calculation:
-            self.dc.DrawBitmap(wx.Bitmap(wx.Image(wx.GetApp().GetResFolder() + object.GetIconFilePath())), self.xpos, self.ypos)
+            self.dc.DrawBitmap(wx.Bitmap(wx.GetApp().GetResFolder() + object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, self.ypos)
 
         self.xpos += 16
 

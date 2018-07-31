@@ -141,7 +141,7 @@ static void BeforePythonCall(PyObject **main_module, PyObject **globals)
 		*globals = PyModule_GetDict(*main_module);
 	}
 
-	const char* str = "import sys\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n  def write(self, txt):\n    self.value += txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr"; //this is python code to redirect stdouts/stderr
+	const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n  def write(self, txt):\n    self.value += txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
 	PyRun_String(str, Py_file_input, *globals, *globals); //invoke code to redirect
 
 	if (PyErr_Occurred())
@@ -152,13 +152,21 @@ static void AfterPythonCall(PyObject *main_module)
 {
 	PyObject *catcher = PyObject_GetAttrString(main_module, "catchOutErr"); //get our catchOutErr created above
 	PyObject *output = PyObject_GetAttrString(catcher, "value"); //get the stdout and stderr from our catchOutErr object
+#if PY_MAJOR_VERSION >= 3
 	std::wstring s(Ctt(PyUnicode_AsUTF8(output)));
+#else
+	std::wstring s(Ctt(PyString_AsString(output)));
+#endif
 	if (s.size() > 0) {
 		wprintf(s.c_str());
 	}
 
 	if (PyErr_Occurred())
 		MessageBoxPythonError();
+
+	const char* str = "sys.stdout = old_stdout\nsys.stderr = old_stderr"; 
+	PyRun_String(str, Py_file_input, globals, globals); //invoke code
+
 }
 
 std::wstring str_for_base_object;
@@ -278,30 +286,37 @@ void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 
 bp::detail::method_result Call_Override(bp::override &f, bp::list &list)
 {
+	BeforePythonCall(&main_module, &globals);
 	// Execute the python function
 	PyLockGIL lock;
 	try
 	{
 		bp::detail::method_result result = f(list);// , removed_list, modified_list);
+		AfterPythonCall(main_module);
 		return result;
 	}
 	catch (const bp::error_already_set&)
 	{
 	}
+	AfterPythonCall(main_module);
 }
 
 bp::detail::method_result Call_Override(bp::override &f, bp::list &added, bp::list &removed)
 {
+	BeforePythonCall(&main_module, &globals);
+
 	// Execute the python function
 	PyLockGIL lock;
 	try
 	{
 		bp::detail::method_result result = f(added, removed);
+		AfterPythonCall(main_module);
 		return result;
 	}
 	catch (const bp::error_already_set&)
 	{
 	}
+	AfterPythonCall(main_module);
 }
 
 
@@ -501,6 +516,34 @@ void RegisterOnRepaint(PyObject *callback)
 		return;
 	}
 	repaint_callbacks.push_back(callback);
+}
+
+PyObject* message_box_callback = NULL;
+
+void PythonOnMessageBox(const wchar_t* message)
+{
+	static bool in_message_box = false;
+	if (in_message_box)
+		return;
+	in_message_box = true;
+	if (message_box_callback)
+		CallPythonCallback(message_box_callback);
+	in_message_box = false;
+}
+
+void RegisterMessageBoxCallback(PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	message_box_callback = callback;
+}
+
+void CadMessageBox(std::wstring str)
+{
+	theApp.MessageBox(str.c_str());
 }
 
 class BaseObject : public HeeksObj, public bp::wrapper<HeeksObj>
@@ -1424,7 +1467,8 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 		bp::def("Import", CadImport);
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
-
+		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
+		bp::def("MessageBox", CadMessageBox);
 		bp::def("GetSelectedObjects", GetSelectedObjects);
 		bp::def("GetObjects", GetObjects);
 		bp::def("ObjectMarked", ObjectMarked);
