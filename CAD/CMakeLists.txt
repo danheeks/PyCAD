@@ -1,6 +1,46 @@
 project(cad)
 
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.8.3)
+
+FIND_PACKAGE(PythonInterp)
+
+if (PYTHONINTERP_FOUND)
+  if (UNIX AND NOT APPLE)
+    if (PYTHON_VERSION_MAJOR EQUAL 3)
+        FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_SUFFIX})
+        FIND_PACKAGE(PythonInterp 3)
+        FIND_PACKAGE(PythonLibs 3 REQUIRED)
+    else()
+        FIND_PACKAGE(Boost COMPONENTS python)
+        FIND_PACKAGE(PythonInterp)
+        FIND_PACKAGE(PythonLibs REQUIRED)
+    endif()
+  else()	
+    if (PYTHON_VERSION_MAJOR EQUAL 3)
+        FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+        FIND_PACKAGE(PythonInterp 3)
+        FIND_PACKAGE(PythonLibs 3 REQUIRED)
+    else()
+        FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+        FIND_PACKAGE(PythonInterp)
+        FIND_PACKAGE(PythonLibs REQUIRED)
+    endif()
+  endif()
+else()
+    message("Python not found")
+endif()
+
+message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
+message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+message(STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}")
+
+ENABLE_TESTING()
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES}) # Deprecated but so convenient!
+
+
+
 
 # Turn compiler warnings up to 11, at least with gcc.  
 if (CMAKE_BUILD_TOOL MATCHES "make")
@@ -25,29 +65,7 @@ if (NOT BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif(NOT BUILD_TYPE)
 
-# this figures out the Python include directories and adds them to the
-# header file search path
-execute_process(
-    COMMAND python-config --includes
-    COMMAND sed -r "s/-I//g; s/ +/;/g"
-    COMMAND tr -d '\n'
-    OUTPUT_VARIABLE Python_Includes
-)
-message(STATUS "Python include dir:" ${Python_Includes})
-
-include_directories(${Python_Includes})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-find_package( Boost COMPONENTS python REQUIRED )  # find BOOST and boost-python
-
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-    MESSAGE(STATUS "found Boost: " ${Boost_LIB_VERSION})
-    MESSAGE(STATUS "boost-incude dirs are: " ${Boost_INCLUDE_DIRS})
-    MESSAGE(STATUS "boost-python lib is: " ${Boost_PYTHON_LIBRARY})
-    MESSAGE(STATUS "boost_LIBRARY_DIRS is: " ${Boost_LIBRARY_DIRS})
-    MESSAGE(STATUS "Boost_LIBRARIES is: " ${Boost_LIBRARIES})    
-endif()
 
 find_package( OpenGL REQUIRED )
 
