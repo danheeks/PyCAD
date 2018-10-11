@@ -32,8 +32,10 @@ cp cad.so ../../\
 cd ../../\
 python test.py
 
-### problems June 2018 ###
-I couldn't get cad module to share classes with wxPython, but cad will be more reusable when it doesn't have any wx in it.\
-So, I am writing GUI to be in wxPython and the cad to implement the rendering.\
-First test will be cad rendering the background and grid.
 
+### Development Plan ###
+To use Property Grid on the raspberry pi, I need to start using Python3, so I need to get boost-python working on the raspberry pi, probably need to build boost python\
+
+The plan is to get back to the same functionality as HeeksCNC 1.3, but working from python 3, using PyCAD.
+I need to think through the mechanism of adding new functionality to PyCAD.
+It doesn't need to be automatic. The idea is for it to be hackable, so that you just download an add-on to PyCAD, then hack the UI in Frame.py, I guess.
