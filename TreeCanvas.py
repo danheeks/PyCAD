@@ -382,7 +382,7 @@ class TreeCanvas(wx.ScrolledWindow):
         
         # find icon info
         if not self.render_just_for_calculation:
-            self.dc.DrawBitmap(wx.Bitmap(wx.GetApp().GetResFolder() + object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, self.ypos)
+            self.dc.DrawBitmap(wx.Bitmap(object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, self.ypos)
 
         self.xpos += 16
 

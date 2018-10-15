@@ -2,6 +2,9 @@ import wx
 import sys
 import cad
 from Frame import Frame
+import os
+
+pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
 def OnMessageBox(error_message):
     wx.MessageBox(error_message)
@@ -23,15 +26,23 @@ class App(wx.App):
         sys.stderr = save_err
         
     def OnInit(self):
-        cad.RegisterMessageBoxCallback(OnMessageBox)
-        result = cad.OnInit()
+        self.RegisterMessageBoxCallback()
+        result = self.InitCad()
         
         # make a wxWidgets application
-        self.frame = Frame()
+        self.frame = Frame(None)
         self.frame.Show()
         
         return result
 
+    def RegisterMessageBoxCallback(self):
+        cad.RegisterMessageBoxCallback(OnMessageBox)
+        
+    def InitCad(self):
+        result = cad.OnInit()
+        cad.SetResFolder(pycad_dir)
+        return result
+        
     def GetResFolder(self):
         if self.res_folder:
             return self.res_folder

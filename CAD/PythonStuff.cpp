@@ -480,6 +480,13 @@ void CadImport(std::wstring fp)
 	theApp.OpenFile(fp.c_str(), true);
 }
 
+static std::list<PyObject*> new_or_open_callbacks;
+
+void RegisterNewOrOpen(PyObject *callback)
+{
+	new_or_open_callbacks.push_back(callback);
+}
+
 void RegisterObserver(Observer* observer)
 {
 	theApp.RegisterObserver(observer);
@@ -541,6 +548,11 @@ void RegisterMessageBoxCallback(PyObject *callback)
 	message_box_callback = callback;
 }
 
+void SetResFolder(std::wstring str)
+{
+	theApp.m_res_folder = str;
+}
+
 void CadMessageBox(std::wstring str)
 {
 	theApp.MessageBox(str.c_str());
@@ -555,15 +567,7 @@ public:
 	BaseObject() :HeeksObj(), m_uses_display_list(false), m_display_list(0){
 	}
 	bool NeverDelete(){ return true; }
-	int GetType()const override
-	{
-		if (bp::override f = this->get_override("GetType"))
-		{
-			int t = f();
-			return t;
-		}
-		return HeeksObj::GetType();
-	}
+	int GetType()const{return PythonType;}
 
 	const wchar_t* GetIconFilePath() override
 	{
@@ -935,7 +939,8 @@ void DrawLine(double x0, double x1, double x2, double x3, double x4, double x5)
 
 void AddProperty(Property* property)
 {
-	property_list->push_back(property);
+	if (property_list)
+		property_list->push_back(property);
 }
 
 std::wstring GetFileFullPath()
@@ -1334,8 +1339,16 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("GetColor", &BaseObjectGetColor)
 			.def("AutoExpand", &BaseObject::AutoExpand)
 			.def("GetNumChildren", &BaseObject::GetNumChildren)
+			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetFirstChild", &HeeksObj::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetNextChild", &HeeksObj::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("CanAdd", &HeeksObj::CanAdd)
+			.def("CanAddTo", &HeeksObj::CanAddTo)
+			.def("OneOfAKind", &HeeksObj::OneOfAKind)
+			.def("CopyFrom", &HeeksObj::CopyFrom)
 			;
 
+#if 1
 		bp::class_<HeeksObj, boost::noncopyable>("Object")
 			.def(bp::init<HeeksObj>())
 			.def("GetType", &HeeksObjGetType)
@@ -1355,6 +1368,7 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			;
+#endif
 
 		bp::class_<HeeksColor>("Color")
 			.def(bp::init<HeeksColor>())
@@ -1366,8 +1380,9 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("ref", &HeeksColor::COLORREF_color)
 			;
 
-		bp::class_<PropertyWrap, boost::noncopyable >("PropertyBase")
+		bp::class_<PropertyWrap, boost::noncopyable >("BaseProperty")
 			.def(bp::init<int, std::wstring, HeeksObj*>())
+			.def("GetType", &Property::get_property_type)
 			;
 
 		//boost::python::register_ptr_to_python<boost::shared_ptr<Property> >();
@@ -1464,10 +1479,22 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 
 		bp::def("OnInit", OnInit);
 		bp::def("OnExit", OnExit);
+
 		bp::def("Import", CadImport);
+		bp::def("RegisterNewOrOpen", RegisterNewOrOpen);
+		bp::def("DrawTriangle", &DrawTriangle);
+		bp::def("DrawLine", &DrawLine);
+		bp::def("AddProperty", AddProperty);
+		bp::def("GetFileFullPath", GetFileFullPath);
+		bp::def("GetObjectFromId", &GetObjectFromId);
+		bp::def("RegisterXMLRead", RegisterXMLRead);
+		bp::def("SetXmlValue", SetXmlValue);
+		bp::def("GetXmlValue", GetXmlValue);
+
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
 		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
+		bp::def("SetResFolder", SetResFolder);
 		bp::def("MessageBox", CadMessageBox);
 		bp::def("GetSelectedObjects", GetSelectedObjects);
 		bp::def("GetObjects", GetObjects);
@@ -1493,6 +1520,13 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 		bp::def("ChangePropertyChoice", ChangePropertyChoice);
 		bp::def("ChangePropertyColor", ChangePropertyColor);
 		bp::def("ChangePropertyCheck", ChangePropertyCheck);
+
+		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)OBJECT_TYPE_UNKNOWN;
+		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)OBJECT_TYPE_SKETCH;
+		bp::scope().attr("OBJECT_TYPE_SKETCH_SEG") = (int)OBJECT_TYPE_SKETCH_SEG;
+		bp::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)OBJECT_TYPE_SKETCH_LINE;
+		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)OBJECT_TYPE_SKETCH_ARC;
+		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)OBJECT_TYPE_CIRCLE;
 
 		bp::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;

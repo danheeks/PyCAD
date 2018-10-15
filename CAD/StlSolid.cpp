@@ -254,7 +254,8 @@ void CStlSolid::KillGLLists()
 
 const wchar_t* CStlSolid::GetIconFilePath()
 {
-	return L"/icons/stlsolid.png";
+	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/stlsolid.png";
+	return iconpath.c_str();
 }
 
 void CStlSolid::GetProperties(std::list<Property *> *list)

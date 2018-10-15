@@ -7,7 +7,6 @@ class ObjPropsObserver(PropertiesObserver):
         PropertiesObserver.__init__(self, window)
         
     def OnSelectionChanged(self, added, removed):
-        print('sel')
         self.window.objects = cad.GetSelectedObjects()
         self.window.RemoveAndAddAll()
 
@@ -23,10 +22,8 @@ class ObjPropsCanvas(PropertiesCanvas):
         self.objects = []     
         self.observer = ObjPropsObserver(self)
         cad.RegisterObserver(self.observer)
-        cad.MessageBox('ObjPropsCanvas')
         
     def RemoveAndAddAll(self):
-        print('RemoveAndAddAll')
         if self.inRemoveAndAddAll:
             cad.MessageBox('recursion = RemoveAndAddAll')
             return
@@ -34,8 +31,9 @@ class ObjPropsCanvas(PropertiesCanvas):
         self.ClearProperties()
         for object in self.objects:
             properties = object.GetProperties()
-            for property in properties:
-                self.AddProperty(property)
+            if properties:
+                for property in properties:
+                    self.AddProperty(property)
         self.inRemoveAndAddAll = False
         
        

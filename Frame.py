@@ -6,14 +6,14 @@ from PropertiesCanvas import PropertiesCanvas
 from ObjPropsCanvas import ObjPropsCanvas
 import cad
 import sys
-#sys.path.append("c:\wheremypluginis")
 
-#import my_cool_plugin
-
+import os
+pycad_dir = os.path.dirname(os.path.realpath(__file__))
+        
 class Frame(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self, None, -1, 'HeeksCAM ( Computer Aided Manufacturing )', size = wx.Size(400,400))
-        self.SetIcon(wx.Icon("heekscad.png", wx.BITMAP_TYPE_PNG))
+    def __init__(self, parent, id=-1, title='CAD ( Computer Aided Design )', pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
+        wx.Frame.__init__(self, parent, id, title, pos, size, style, name)
+        self.SetIcon(wx.Icon(pycad_dir + "/heekscad.png", wx.BITMAP_TYPE_PNG))
         
         self.MakeMenus()
         
@@ -33,6 +33,7 @@ class Frame(wx.Frame):
         
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
+        self.current_menu_stack = []
 
         file_menu = wx.Menu()
         self.Bind(wx.EVT_MENU, self.OnNew, file_menu.Append(wx.ID_ANY, 'New', 'Start a new job'))
@@ -45,16 +46,53 @@ class Frame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnRedo, edit_menu.Append(wx.ID_ANY, 'Redo', 'Redo Next item'))
         self.menuBar.Append(edit_menu, '&Edit')
 
-#        my_cool_plugin.AddMenus(self.menuBar)
+        self.AddExtraMenus();
 
         self.SetMenuBar(self.menuBar)
-
         
+    def AddExtraMenus(self):
+        pass
+    
+    def CurrentMenu(self):
+        if len(self.current_menu_stack) > 0:
+            return self.current_menu_stack[-1]
+        return None
+    
+    def SetMenuItemBitmap(self, item, bitmap_name):
+        if bitmap_name:
+            image = wx.Image(self.BitmapPath(bitmap_name))
+            image.Rescale(24, 24)
+            item.SetBitmap(wx.Bitmap(image))
+            
+    def BitmapPath(self, name):
+        return pycad_dir + '/bitmaps/'+ name + '.png'
+    
+    def AddMenu(self, title, bitmap_name = None):
+        menu = wx.Menu()
+        current_menu = self.CurrentMenu()
+        self.current_menu_stack.append(menu)
+        if current_menu:
+            item = wx.MenuItem(current_menu, wx.ID_ANY, title)
+            item.SetSubMenu(menu)
+            if bitmap_name != None:
+                self.SetMenuItemBitmap(item, self.BitmapPath(bitmap_name))
+            current_menu.Append(item)
+        else:
+            self.menuBar.Append(menu, title)
+            
+    def EndMenu(self):
+        self.current_menu_stack.pop()
+        
+    def AddMenuItem(self, title, onButton, onUpdate = None, bitmap_name = None):
+        item = wx.MenuItem(self.CurrentMenu(), wx.ID_ANY, title)        
+        self.SetMenuItemBitmap(item, bitmap_name)
+        self.Bind(wx.EVT_MENU, onButton, self.CurrentMenu().Append(item))        
+    
     def OnNew(self, e):
         wx.MessageBox('OnNew called')
         
     def OnSolid(self, e):
-        cad.Import('cutsphere.stl')
+        cad.Import(pycad_dir + '/cutsphere.stl')
         
     def OnDan(self, e):
         wx.MessageBox('Hello')

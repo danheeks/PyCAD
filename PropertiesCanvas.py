@@ -27,27 +27,12 @@ class PropertiesObserver(cad.Observer):
         self.window = window
         
     def OnAdded(self, added):
-        s = 'add '
-        for o in added:
-            s += o.GetTitle()
-            s += ' '
-        print(s)
         self.window.Refresh()
         
     def OnRemoved(self, removed):
-        s = 'rem '
-        for o in removed:
-            s += o.GetTitle()
-            s += ' '
-        print(s)
         self.window.Refresh()
         
     def OnModified(self, modified):
-        s = 'mod '
-        for o in modified:
-            s += o.GetTitle()
-            s += ' '
-        print(s)
         self.window.Refresh()
         self.window.pg.Refresh()
         
@@ -121,7 +106,6 @@ class PropertiesCanvas( wx.Panel ):
 
     def AddProperty(self, property, parent_property = None):
         # add a cad.property, optionally to an existing wx.PGProperty
-        
         if property.GetType() == cad.PROPERTY_TYPE_STRING:
             new_prop = wxpg.StringProperty(property.GetTitle(),value=property.GetString())
             if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)

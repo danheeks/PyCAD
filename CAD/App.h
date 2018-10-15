@@ -171,6 +171,7 @@ public:
 	double m_view_units; // units to display to the user ( but everything is stored as mm ), 1.0 for mm, 25.4 for inches
 	bool m_dragging_moves_objects;
 	bool m_no_creation_mode; // set from a plugin, for making an exporter only application
+	std::wstring m_res_folder;
 
 	double m_min_correlation_factor;
 	double m_max_scale_threshold;

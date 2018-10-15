@@ -17,14 +17,16 @@ const char* Ttc(const wchar_t* str)
 	std::wstring_convert<convert_type, wchar_t> converter;
 
 	//use converter (.to_bytes: wstr->str, .from_bytes: str->wstr)
-	static std::string converted_str = converter.to_bytes(string_to_convert);
+	static std::string converted_str;
+	converted_str = converter.to_bytes(string_to_convert);
 	return converted_str.c_str();
 }
 
 const wchar_t* Ctt(const char* narrow_utf8_source_string)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	static std::wstring wide = converter.from_bytes(narrow_utf8_source_string);
+	static std::wstring wide;
+	wide = converter.from_bytes(narrow_utf8_source_string);
 	return wide.c_str();
 }
 

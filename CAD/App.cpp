@@ -2099,7 +2099,8 @@ const wchar_t* CApp::GetKnownFilesCommaSeparatedList(bool open, bool import_expo
 std::wstring CApp::GetExeFolder()const{
 	return L"";
 }
-std::wstring CApp::GetResFolder()const{ return L""; }
+
+std::wstring CApp::GetResFolder()const{ return m_res_folder; }
 
 
 // do your own glBegin and glEnd
