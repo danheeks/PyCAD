@@ -7,6 +7,8 @@ ButtonTypeMinus = 2
 ButtonTypeLabelBefore = 3
 ButtonTypeLabel = 4
 
+pycad_dir = os.path.dirname(os.path.realpath(__file__))
+
 class TreeButton:
     def __init__(self, type = 0, rect = wx.Rect(0,0,0,0), obj = None, paste_into = None, paste_before = None):
         self.type = type
@@ -60,15 +62,15 @@ class TreeCanvas(wx.ScrolledWindow):
         self.tree_buttons = []
         self.clicked_object = None
         
-        self.bmp_branch_plus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_plus.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_branch_minus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_minus.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_branch_end_plus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_end_plus.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_branch_end_minus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_end_minus.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_branch_split = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_split.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_branch_end = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_end.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_plus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/plus.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_minus = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/minus.png", wx.BITMAP_TYPE_ANY)
-        self.bmp_branch_trunk = wx.Bitmap(wx.GetApp().GetResFolder() + "/icons/branch_trunk.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_plus = wx.Bitmap(pycad_dir + "/icons/branch_plus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_minus = wx.Bitmap(pycad_dir + "/icons/branch_minus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_end_plus = wx.Bitmap(pycad_dir + "/icons/branch_end_plus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_end_minus = wx.Bitmap(pycad_dir + "/icons/branch_end_minus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_split = wx.Bitmap(pycad_dir + "/icons/branch_split.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_end = wx.Bitmap(pycad_dir + "/icons/branch_end.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_plus = wx.Bitmap(pycad_dir + "/icons/plus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_minus = wx.Bitmap(pycad_dir + "/icons/minus.png", wx.BITMAP_TYPE_ANY)
+        self.bmp_branch_trunk = wx.Bitmap(pycad_dir + "/icons/branch_trunk.png", wx.BITMAP_TYPE_ANY)
 
         self.render_just_for_calculation = False
         self.render_labels = True
@@ -117,7 +119,8 @@ class TreeCanvas(wx.ScrolledWindow):
  
             if button:
                 if button.type == ButtonTypePlus or button.type == ButtonTypeMinus:
-                    self.SetExpanded(button.obj, button.type == 0)
+                    print('button obj = ' + str(button.obj))
+                    self.SetExpanded(button.obj, button.type == ButtonTypePlus)
                     self.SetVirtualSize(self.GetRenderSize())
                     self.Refresh()
                 else:
@@ -256,21 +259,23 @@ class TreeCanvas(wx.ScrolledWindow):
     def IsExpanded(self, object):
         if object.AutoExpand():
             # assume it is expanded if it hasn't been collapsed
-            return object not in self.collapsed
+            return object.GetIndex() not in self.collapsed
         
         # it is expanded, if it is in the expanded set
-        return object in self.expanded
+        return object.GetIndex() in self.expanded
         
     def SetExpanded(self, object, bExpanded):
         if bExpanded:
-            self.expanded[object] = True
-            del self.collapsed[object]
+            self.expanded[object.GetIndex()] = True
+            if object.GetIndex() in self.collapsed:
+                del self.collapsed[object.GetIndex()]
         else:
-            del self.expanded[object]
-            self.collapsed[object] = True
+            if object.GetIndex() in self.expanded:
+                del self.expanded[object.GetIndex()]
+            self.collapsed[object.GetIndex()] = True
     
     def AddPlusOrMinusButton(self, object, plus):
-        self.tree_buttons.append( TreeButton(plus, wx.Rect(self.xpos, self.ypos, 16, 18), object, None, None) )
+        self.tree_buttons.append( TreeButton(ButtonTypePlus if plus else ButtonTypeMinus, wx.Rect(self.xpos, self.ypos, 16, 18), object, None, None) )
         
     def AddLabelButton(self, expanded, prev_object, prev_object_expanded, object, next_object, label_start_x, label_end_x):
         x = label_start_x
@@ -334,26 +339,26 @@ class TreeCanvas(wx.ScrolledWindow):
                     # not at end
                     if expanded:
                         self.dc.DrawBitmap(self.bmp_branch_minus, self.xpos, self.ypos)
-                        if self.render_labels: AddPlusOrMinusButton(object, False)
+                        if self.render_labels: self.AddPlusOrMinusButton(object, False)
                     else:
                         self.dc.DrawBitmap(self.bmp_branch_plus, self.xpos, self.ypos)
-                        if self.render_labels: AddPlusOrMinusButton(object, True)
+                        if self.render_labels: self.AddPlusOrMinusButton(object, True)
                 else:
                     # not at end
                     if expanded:
                         self.dc.DrawBitmap(self.bmp_branch_end_minus, self.xpos, self.ypos)
-                        if self.render_labels: AddPlusOrMinusButton(object, False)
+                        if self.render_labels: self.AddPlusOrMinusButton(object, False)
                     else:
                         self.dc.DrawBitmap(self.bmp_branch_end_plus, self.xpos, self.ypos)
-                        if self.render_labels: AddPlusOrMinusButton(object, True)
+                        if self.render_labels: self.AddPlusOrMinusButton(object, True)
             else:
                 # without branches
                 if expanded:
                     self.dc.DrawBitmap(self.bmp_minus, self.xpos, self.ypos)
-                    if self.render_labels: AddPlusOrMinusButton(object, False)
+                    if self.render_labels: self.AddPlusOrMinusButton(object, False)
                 else:
                     self.dc.DrawBitmap(self.bmp_plus, self.xpos, self.ypos)
-                    if self.render_labels:AddPlusOrMinusButton(object, True)
+                    if self.render_labels:self.AddPlusOrMinusButton(object, True)
         else:
             if level > 0:
                 # just branches

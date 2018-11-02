@@ -48,7 +48,7 @@ public:
 	virtual const HeeksColor &GetColor()const{ return *((const HeeksColor*)NULL); }
 	virtual double GetDouble()const{ return 0.0; }
 	virtual const wchar_t* GetString()const{ return NULL; }
-	virtual int GetInt()const{return 0;}
+	virtual int GetInt()const{return 66;}
 	virtual const geoff_geometry::Matrix &GetTrsf()const{ return *((const geoff_geometry::Matrix*)NULL); }
 	virtual void GetList(std::list< Property* > &list)const{}
 };

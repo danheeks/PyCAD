@@ -46,7 +46,8 @@ CoordinateSystem::~CoordinateSystem(void)
 
 const wchar_t* CoordinateSystem::GetIconFilePath()
 {
-	return L"/icons/coordsys.png";
+	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/coordsys.png";
+	return iconpath.c_str();
 }
 
 // static

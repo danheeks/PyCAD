@@ -11,7 +11,7 @@ bool ViewZooming::m_reversed = false;
 
 void ViewZooming::OnMouse( MouseEvent& event )
 {
-	if(event.m_leftDown || event.m_middleDown)
+	if (event.LeftDown() || event.MiddleDown())
 	{
 		button_down_point = IPoint(event.GetX(), event.GetY());
 		CurrentPoint = button_down_point;
@@ -33,6 +33,7 @@ void ViewZooming::OnMouse( MouseEvent& event )
 			theApp.m_current_viewport->m_view_point.Shift(dm, IPoint(event.GetX(), event.GetY()));
 		}
 
+		theApp.Repaint();
 		CurrentPoint = IPoint(event.GetX(), event.GetY());
 	}
 	else if(event.RightUp()){

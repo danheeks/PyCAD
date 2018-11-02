@@ -260,9 +260,9 @@ void HRuler::GetBox(CBox &box)
 
 HeeksObj *HRuler::MakeACopy(void)const{ return new HRuler(*this);}
 
-void HRuler::ModifyByMatrix(const double *mat)
+void HRuler::Transform(const geoff_geometry::Matrix& m)
 {
-	m_trsf = geoff_geometry::Matrix(mat) * m_trsf;
+	m_trsf = m * m_trsf;
 }
 
 void HRuler::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)

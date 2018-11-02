@@ -53,7 +53,8 @@ void PropertyObjectColor::Set(const HeeksColor& value){ m_object->SetColor(value
 
 const wchar_t* HeeksObj::GetIconFilePath()
 {
-	return L"/icons/unknown.png";
+	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/unknown.png";
+	return iconpath.c_str();
 }
 
 static bool test_bool = false;

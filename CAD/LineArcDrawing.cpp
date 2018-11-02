@@ -282,7 +282,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			}
 
 			geoff_geometry::Point3d centre;
-			gp_Dir axis;
+			geoff_geometry::Point3d axis;
 			geoff_geometry::Point3d p1, p2;
 			bool arc_found = DigitizedPoint::GetArcPoints(GetStartPos(), m_previous_direction_set ? (&m_previous_direction) : NULL, end, p1, p2, centre, axis);
 			if (p1.IsEqual(p2, theApp.m_geom_tol))return false;
@@ -292,7 +292,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 				if(HArc::TangentialArc(p1, m_previous_direction, p2, centre, axis))
 				{
 					// arc
-					gp_Circ circle(gp_Ax2(centre, axis), centre.Distance(p1));
+					gp_Circ circle(geoff_geometry::Point3d(centre, axis), centre.Distance(p1));
 
 					if(TempObject() == NULL){
 						AddToTempObjects(new HArc(p1, p2, circle, &theApp.current_color));
@@ -400,12 +400,12 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			case CentreAndPointCircleMode:
 				{
 					geoff_geometry::Point3d p1, p2, centre;
-					gp_Dir axis;
+					geoff_geometry::Point3d axis;
 					DigitizedPoint::GetArcPoints(GetStartPos(), NULL, end, p1, p2, centre, axis);
 					radius_for_circle = p1.Distance(p2);
 
 					if(TempObject() == NULL){
-						AddToTempObjects(new HCircle(gp_Circ(gp_Ax2(p1, gp_Dir(0, 0, 1)), radius_for_circle), &theApp.current_color));
+						AddToTempObjects(new HCircle(gp_Circ(geoff_geometry::Point3d(p1, geoff_geometry::Point3d(0, 0, 1)), radius_for_circle), &theApp.current_color));
 					}
 					else{
 						((HCircle*)TempObject())->m_axis.SetLocation(p1);
@@ -445,7 +445,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			case CentreAndRadiusCircleMode:
 				{
 					if(TempObject()==NULL){
-						AddToTempObjects(new HCircle(gp_Circ(gp_Ax2(end.m_point, gp_Dir(0, 0, 1)), radius_for_circle), &theApp.current_color));
+						AddToTempObjects(new HCircle(gp_Circ(geoff_geometry::Point3d(end.m_point, geoff_geometry::Point3d(0, 0, 1)), radius_for_circle), &theApp.current_color));
 					}
 					else{
 						((HCircle*)TempObject())->m_axis.SetLocation(end.m_point);

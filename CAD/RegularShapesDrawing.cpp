@@ -56,11 +56,11 @@ bool RegularShapesDrawing::calculate_item(DigitizedPoint &end)
 	geoff_geometry::Point3d p0 = GetStartPos().m_point;
 	geoff_geometry::Point3d p2 = end.m_point;
 
-	double x = geoff_geometry::Point3d(p2.XYZ()) * geoff_geometry::Point3d(xdir.XYZ()) - geoff_geometry::Point3d(p0.XYZ()) * geoff_geometry::Point3d(xdir.XYZ());
-	double y = geoff_geometry::Point3d(p2.XYZ()) * geoff_geometry::Point3d(ydir.XYZ()) - geoff_geometry::Point3d(p0.XYZ()) * geoff_geometry::Point3d(ydir.XYZ());
+	double x = geoff_geometry::Point3d(p2) * geoff_geometry::Point3d(xdir) - geoff_geometry::Point3d(p0) * geoff_geometry::Point3d(xdir);
+	double y = geoff_geometry::Point3d(p2) * geoff_geometry::Point3d(ydir) - geoff_geometry::Point3d(p0) * geoff_geometry::Point3d(ydir);
 
-	geoff_geometry::Point3d p1 = p0.XYZ() + xdir.XYZ() * x;
-	geoff_geometry::Point3d p3 = p0.XYZ() + ydir.XYZ() * y;
+	geoff_geometry::Point3d p1 = p0 + xdir * x;
+	geoff_geometry::Point3d p3 = p0 + ydir * y;
 
 	// swap left and right, if user dragged to the left
 	if(x < 0){
@@ -154,9 +154,9 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const geoff_ge
 					TempObject()->Add(arcs[i], NULL);
 				}
 			}
-			arcs[0]->A = p0.XYZ() + xdir.XYZ() * m_rect_radius;
-			arcs[0]->B = p3.XYZ() + xdir.XYZ() * m_rect_radius;
-			arcs[0]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p0.XYZ() + xdir.XYZ() * m_rect_radius + ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+			arcs[0]->A = p0 + xdir * m_rect_radius;
+			arcs[0]->B = p3 + xdir * m_rect_radius;
+			arcs[0]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 			arcs[1]->A = arcs[0]->B;
 			arcs[1]->B = arcs[0]->A;
 			arcs[1]->SetCircle(arcs[0]->GetCircle());
@@ -189,26 +189,26 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const geoff_ge
 			}
 
 			if(x_lines_disappear){
-				arcs[0]->A = p2.XYZ() - ydir.XYZ() * m_rect_radius;
-				arcs[0]->B = p3.XYZ() - ydir.XYZ() * m_rect_radius;
-				arcs[0]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p3.XYZ() + xdir.XYZ() * m_rect_radius - ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+				arcs[0]->A = p2 - ydir * m_rect_radius;
+				arcs[0]->B = p3 - ydir * m_rect_radius;
+				arcs[0]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p3 + xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[0]->A = arcs[0]->B;
-				lines[0]->B = p0.XYZ() + ydir.XYZ() * m_rect_radius;
+				lines[0]->B = p0 + ydir * m_rect_radius;
 				arcs[1]->A = lines[0]->B;
-				arcs[1]->B = p1.XYZ() + ydir.XYZ() * m_rect_radius;
-				arcs[1]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p0.XYZ() + xdir.XYZ() * m_rect_radius + ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+				arcs[1]->B = p1 + ydir * m_rect_radius;
+				arcs[1]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[1]->A = arcs[1]->B;
 				lines[1]->B = arcs[0]->A;
 			}
 			else{
-				arcs[0]->A = p1.XYZ() - xdir.XYZ() * m_rect_radius;
-				arcs[0]->B = p2.XYZ() - xdir.XYZ() * m_rect_radius;
-				arcs[0]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p1.XYZ() - xdir.XYZ() * m_rect_radius + ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+				arcs[0]->A = p1 - xdir * m_rect_radius;
+				arcs[0]->B = p2 - xdir * m_rect_radius;
+				arcs[0]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p1 - xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[0]->A = arcs[0]->B;
-				lines[0]->B = p3.XYZ() + xdir.XYZ() * m_rect_radius;
+				lines[0]->B = p3 + xdir * m_rect_radius;
 				arcs[1]->A = lines[0]->B;
-				arcs[1]->B = p0.XYZ() + xdir.XYZ() * m_rect_radius;
-				arcs[1]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p0.XYZ() + xdir.XYZ() * m_rect_radius + ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+				arcs[1]->B = p0 + xdir * m_rect_radius;
+				arcs[1]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[1]->A = arcs[1]->B;
 				lines[1]->B = arcs[0]->A;
 			}
@@ -239,24 +239,24 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const geoff_ge
 				}
 			}
 
-			arcs[0]->A = p1.XYZ() - xdir.XYZ() * m_rect_radius;
-			arcs[0]->B = p1.XYZ() + ydir.XYZ() * m_rect_radius;
-			arcs[0]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p1.XYZ() - xdir.XYZ() * m_rect_radius + ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+			arcs[0]->A = p1 - xdir * m_rect_radius;
+			arcs[0]->B = p1 + ydir * m_rect_radius;
+			arcs[0]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p1 - xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[0]->A = arcs[0]->B;
-			lines[0]->B = p2.XYZ() - ydir.XYZ() * m_rect_radius;
+			lines[0]->B = p2 - ydir * m_rect_radius;
 			arcs[1]->A = lines[0]->B;
-			arcs[1]->B = p2.XYZ() - xdir.XYZ() * m_rect_radius;
-			arcs[1]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p2.XYZ() - xdir.XYZ() * m_rect_radius - ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+			arcs[1]->B = p2 - xdir * m_rect_radius;
+			arcs[1]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p2 - xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[1]->A = arcs[1]->B;
-			lines[1]->B = p3.XYZ() + xdir.XYZ() * m_rect_radius;
+			lines[1]->B = p3 + xdir * m_rect_radius;
 			arcs[2]->A = lines[1]->B;
-			arcs[2]->B = p3.XYZ() - ydir.XYZ() * m_rect_radius;
-			arcs[2]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p3.XYZ() + xdir.XYZ() * m_rect_radius - ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+			arcs[2]->B = p3 - ydir * m_rect_radius;
+			arcs[2]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p3 + xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[2]->A = arcs[2]->B;
-			lines[2]->B = p0.XYZ() + ydir.XYZ() * m_rect_radius;
+			lines[2]->B = p0 + ydir * m_rect_radius;
 			arcs[3]->A = lines[2]->B;
-			arcs[3]->B = p0.XYZ() + xdir.XYZ() * m_rect_radius;
-			arcs[3]->SetCircle(gp_Circ(gp_Ax2(geoff_geometry::Point3d(p0.XYZ() + xdir.XYZ() * m_rect_radius + ydir.XYZ() * m_rect_radius), zdir), m_rect_radius));
+			arcs[3]->B = p0 + xdir * m_rect_radius;
+			arcs[3]->SetCircle(gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[3]->A = arcs[3]->B;
 			lines[3]->B = arcs[0]->A;
 		}
@@ -341,9 +341,9 @@ void RegularShapesDrawing::CalculatePolygon(const geoff_geometry::Point3d& p0, c
                 geoff_geometry::Point3d ydir = zdir ^ xdir;
                 angle0 = (sideAngle * i)+(sideAngle/2);
                 angle1 = (sideAngle * (i+1))+(sideAngle/2);
-                lines[i]->A = p0.XYZ() + xdir.XYZ() * ( cos(angle0) * radius ) + ydir.XYZ() * ( sin(angle0) * radius );
+                lines[i]->A = p0 + xdir * ( cos(angle0) * radius ) + ydir * ( sin(angle0) * radius );
                 if(i == m_number_of_side_for_polygon - 1)lines[i]->B = lines[0]->A;
-                lines[i]->B = p0.XYZ() + xdir.XYZ() * ( cos(angle1) * radius ) + ydir .XYZ()* ( sin(angle1) * radius );
+                lines[i]->B = p0 + xdir * ( cos(angle1) * radius ) + ydir * ( sin(angle1) * radius );
             }
         break;
         case ExcribedMode:
@@ -354,9 +354,9 @@ void RegularShapesDrawing::CalculatePolygon(const geoff_geometry::Point3d& p0, c
                 geoff_geometry::Point3d ydir = zdir ^ xdir;
                 angle0 = 2.0 * M_PI / m_number_of_side_for_polygon * i;
                 angle1 = 2.0 * M_PI / m_number_of_side_for_polygon * (i+1);
-                lines[i]->A = p0.XYZ() + xdir.XYZ() * ( cos(angle0) * radius ) + ydir.XYZ() * ( sin(angle0) * radius );
+                lines[i]->A = p0 + xdir * ( cos(angle0) * radius ) + ydir * ( sin(angle0) * radius );
                 if(i == m_number_of_side_for_polygon - 1)lines[i]->B = lines[0]->A;
-                lines[i]->B = p0.XYZ() + xdir.XYZ() * ( cos(angle1) * radius ) + ydir .XYZ()* ( sin(angle1) * radius );
+                lines[i]->B = p0 + xdir * ( cos(angle1) * radius ) + ydir * ( sin(angle1) * radius );
             }
         break;
     }
@@ -402,9 +402,9 @@ void RegularShapesDrawing::CalculateObround(const geoff_geometry::Point3d& p0, c
 				TempObject()->Add(arcs[i], NULL);
 			}
 		}
-		arcs[0]->A = p0.XYZ() + xdir.XYZ() * m_obround_radius;
-		arcs[0]->B = p0.XYZ() - xdir.XYZ() * m_obround_radius;
-		arcs[0]->SetCircle(gp_Circ(gp_Ax2(p0, zdir), m_obround_radius));
+		arcs[0]->A = p0 + xdir * m_obround_radius;
+		arcs[0]->B = p0 - xdir * m_obround_radius;
+		arcs[0]->SetCircle(gp_Circ(geoff_geometry::Point3d(p0, zdir), m_obround_radius));
 		arcs[1]->A = arcs[0]->B;
 		arcs[1]->B = arcs[0]->A;
 		arcs[1]->C = arcs[0]->C;
@@ -440,14 +440,14 @@ void RegularShapesDrawing::CalculateObround(const geoff_geometry::Point3d& p0, c
 		geoff_geometry::Point3d along_dir(make_vector(p0, p1));
 		geoff_geometry::Point3d right_dir = along_dir ^ zdir;
 
-		arcs[0]->A = p1.XYZ() + right_dir.XYZ() * m_obround_radius;
-		arcs[0]->B = p1.XYZ() - right_dir.XYZ() * m_obround_radius;
-		arcs[0]->SetCircle(gp_Circ(gp_Ax2(p1, zdir), m_obround_radius));
+		arcs[0]->A = p1 + right_dir * m_obround_radius;
+		arcs[0]->B = p1 - right_dir * m_obround_radius;
+		arcs[0]->SetCircle(gp_Circ(geoff_geometry::Point3d(p1, zdir), m_obround_radius));
 		lines[0]->A = arcs[0]->B;
-		lines[0]->B = p0.XYZ() - right_dir.XYZ() * m_obround_radius;
+		lines[0]->B = p0 - right_dir * m_obround_radius;
 		arcs[1]->A = lines[0]->B;
-		arcs[1]->B = p0.XYZ() + right_dir.XYZ() * m_obround_radius;
-		arcs[1]->SetCircle(gp_Circ(gp_Ax2(p0, zdir), m_obround_radius));
+		arcs[1]->B = p0 + right_dir * m_obround_radius;
+		arcs[1]->SetCircle(gp_Circ(geoff_geometry::Point3d(p0, zdir), m_obround_radius));
 		lines[1]->A = arcs[1]->B;
 		lines[1]->B = arcs[0]->A;
 	}

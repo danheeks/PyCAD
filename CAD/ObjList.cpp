@@ -287,6 +287,12 @@ void ObjList::GetTriangles(void(*callbackfunc)(const double* x, const double* n)
 	for(std::list<HeeksObj*>::iterator It=m_objects.begin(); It!=m_objects.end() ;It++) (*It)->GetTriangles(callbackfunc, cusp, just_one_average_normal);
 }
 
+void ObjList::GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const
+{
+	for (std::list<HeeksObj*>::const_iterator It = m_objects.begin(); It != m_objects.end(); It++) (*It)->GetSegments(callbackfunc, pixels_per_mm);
+}
+
+
 /**
 	This is the overload for the corresponding method in the HeeksObj class.  It looks for an existing
 	object anywhere in this or the child elements (or their children's children.... or their

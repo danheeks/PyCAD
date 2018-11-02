@@ -57,7 +57,8 @@ public:
 	void ReadBaseXML(TiXmlElement* element);
 	void Transform(const geoff_geometry::Matrix& m);
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
-	bool IsList(){return true;}
+	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
+	bool IsList(){ return true; }
 	void GetProperties(std::list<Property *> *list);
 	void ReloadPointers();
 	void OnChangeViewUnits(const double units);

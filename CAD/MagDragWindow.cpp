@@ -22,7 +22,7 @@ void MagDragWindow::OnMouse( MouseEvent& event )
 		if(abs(window_box.width)<4){theApp.SetInputMode(save_input_mode); return;}
 		if(abs(window_box.height)<4){theApp.SetInputMode(save_input_mode); return;}
 
-//		theApp.m_frame->m_graphics->WindowMag(window_box);
+		theApp.m_current_viewport->WindowMag(window_box);
 		window_box_exists = false;
 		theApp.SetInputMode(save_input_mode);
 	}

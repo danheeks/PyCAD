@@ -4,19 +4,20 @@
 
 #include "stdafx.h"
 #include "HDxf.h"
-#if 0
 #include "HLine.h"
 #include "HArc.h"
 #include "HCircle.h"
+#if 0
 #include "HEllipse.h"
 #include "HSpline.h"
+#endif
 #include "HPoint.h"
 #include "Sketch.h"
+#if 0
 #include "HText.h"
 #endif
 #include "HeeksConfig.h"
 #include "strconv.h"
-
 
 // static
 bool HeeksDxfRead::m_make_as_sketch = false;
@@ -109,15 +110,13 @@ void HeeksDxfRead::OnReadEndBlock()
 
 void HeeksDxfRead::OnReadLine(const double* s, const double* e, bool hidden)
 {
-#if 0
-	HLine* new_object = new HLine(make_point(s), make_point(e), hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
+	HLine* new_object = new HLine(geoff_geometry::Point3d(s), geoff_geometry::Point3d(e), hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{
 		new_object->m_thickness = m_thickness;
 		for (int i = 0; i < 3; i++)new_object->m_extrusion_vector[i] = m_extrusion_vector[i];
 	}
 	AddObject(new_object);
-#endif
 }
 
 void HeeksDxfRead::OnReadPoint(const double* s)
@@ -133,22 +132,18 @@ void HeeksDxfRead::OnReadPoint(const double* s)
 
 void HeeksDxfRead::OnReadArc(const double* s, const double* e, const double* c, bool dir, bool hidden)
 {
-#if 0
-	to do
 	geoff_geometry::Point3d p0(s);
 	geoff_geometry::Point3d p1(e);
 	geoff_geometry::Point3d up(0, 0, 1);
 	if(!dir)up = -up;
 	geoff_geometry::Point3d pc(c);
-	gp_Circ circle(gp_Ax2(pc, up), p1.Distance(pc));
-	HArc* new_object = new HArc(p0, p1, circle, hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
+	HArc* new_object = new HArc(p0, p1, up, c, hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{
 		new_object->m_thickness = m_thickness;
 		for (int i = 0; i < 3; i++)new_object->m_extrusion_vector[i] = m_extrusion_vector[i];
 	}
 	AddObject(new_object);
-#endif
 }
 
 void HeeksDxfRead::OnReadCircle(const double* s, const double* c, bool dir, bool hidden)
@@ -160,7 +155,7 @@ void HeeksDxfRead::OnReadCircle(const double* s, const double* c, bool dir, bool
 	geoff_geometry::Point3d up(0, 0, 1);
 	if(!dir)up = -up;
 	geoff_geometry::Point3d pc = make_point(c);
-	gp_Circ circle(gp_Ax2(pc, up), p0.Distance(pc));
+	gp_Circ circle(geoff_geometry::Point3d(pc, up), p0.Distance(pc));
 	HCircle* new_object = new HCircle(circle, hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{
@@ -277,7 +272,7 @@ void HeeksDxfRead::OnReadEllipse(const double* c, double major_radius, double mi
 	geoff_geometry::Point3d up(0, 0, 1);
 	if(!dir)up = -up;
 	geoff_geometry::Point3d pc = make_point(c);
-	gp_Elips ellipse(gp_Ax2(pc, up), major_radius, minor_radius);
+	gp_Elips ellipse(geoff_geometry::Point3d(pc, up), major_radius, minor_radius);
 	ellipse.Rotate(gp_Ax1(pc,up),rotation);
 	HEllipse* new_object = new HEllipse(ellipse, start_angle, end_angle, ActiveColorPtr(m_aci));
 	AddObject(new_object);
@@ -469,8 +464,6 @@ void HeeksDxfRead::AddObject(HeeksObj *object)
 		object->Transform(*theApp.m_file_open_matrix);
 	}
 
-#if 0
-	to do
 	if(m_make_as_sketch)
 	{
 		// Check to see if we've already added a sketch for the current layer name.  If not
@@ -484,7 +477,7 @@ void HeeksDxfRead::AddObject(HeeksObj *object)
 		if(m_current_block)m_current_block->Add(object, NULL);
 		else
 		{
-			object->ModifyByMatrix(m_ucs_matrix);
+			object->Transform(m_ucs_matrix);
 			m_sketches[std::wstring(Ctt(LayerName().c_str()))]->Add( object, NULL );
 		}
 	}
@@ -493,12 +486,11 @@ void HeeksDxfRead::AddObject(HeeksObj *object)
 		if(m_current_block)m_current_block->Add(object, NULL);
 		else
 		{
-			object->ModifyByMatrix(m_ucs_matrix);
+			object->Transform(m_ucs_matrix);
 			if(m_undoable)theApp.AddUndoably(object, NULL, NULL);
 			else theApp.Add( object, NULL );
 		}
 	}
-#endif
 }
 
 void HeeksDxfRead::AddGraphics()

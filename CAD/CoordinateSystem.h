@@ -49,7 +49,7 @@ public:
 	static void RenderDatum(bool bright, bool solid); // render a coordinate system at 0, 0, 0
 	static void AxesToAngles(const geoff_geometry::Point3d &x, const geoff_geometry::Point3d &y, double &v_angle, double &h_angle, double &t_angle);
 	static void AnglesToAxes(const double &v_angle, const double &h_angle, const double &t_angle, geoff_geometry::Point3d &x, geoff_geometry::Point3d &y);
-	//static void GetAx2Properties(std::list<Property *> *list, gp_Ax2& a, HeeksObj* object);
+	//static void GetAx2Properties(std::list<Property *> *list, geoff_geometry::Point3d& a, HeeksObj* object);
 	bool PickFrom3Points();
 	bool PickFrom1Point();
 };

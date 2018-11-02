@@ -315,6 +315,7 @@ inline bool FNEZ(double a, double tolerance = TIGHT_TOLERANCE) {return fabs(a) >
 		void get(double xyz[3]) {xyz[0] = x; xyz[1] = y; xyz[2] = z;}
 		double* getBuffer(){return &this->x;};																		// returns ptr to data
 		const double* getBuffer()const{return &this->x;};																		// returns ptr to data
+		void arbitrary_axes(Point3d& x, Point3d& y);
 
 	};
 

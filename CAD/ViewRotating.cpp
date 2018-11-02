@@ -39,6 +39,7 @@ void ViewRotating::OnMouse( MouseEvent& event )
 			theApp.m_current_viewport->m_view_point.Shift(dm, IPoint(event.GetX(), event.GetY()));
 		}
 
+		theApp.Repaint();
 		CurrentPoint = IPoint(event.GetX(), event.GetY());
 	}
 	else if(event.RightUp()){

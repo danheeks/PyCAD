@@ -23,6 +23,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_MENU, self.OnMenu, None, 10000, 12000)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
         self.viewport= cad.Viewport()
         self.Resize()
         self.paint_callbacks = []
@@ -44,7 +46,16 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       index = event.GetId() - 10000
       tool = self.tools[index]
       tool.Run()
-
+      
+    def OnKeyDown(self, event):
+        pass
+#        if event.GetKeyCode() == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
+#            wx.GetApp().frame.ShowFullScreen(False)
+#        else:
+#            wx.GetApp().
+    def OnKeyUp(self, event):
+        pass
+    
     def AppendToolsToMenu(self, menu, tools):
       for tool in tools:
          if tool.IsSeparator():

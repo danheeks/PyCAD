@@ -611,6 +611,19 @@ namespace geoff_geometry {
 		y = *this ^ x;
 	}
 
+	 void Point3d::arbitrary_axes(Point3d& X, Point3d& Y){
+		 // arbitrary axis algorithm - acad method of generating an arbitrary but
+		 // consistant set of axes from a single normal ( z )
+		 // arbitrary x & y axes
+
+		 if ((fabs(this->x) < 1.0 / 64.0) && (fabs(this->y) < 1.0 / 64.0))
+			 X = Point3d(0,1,0) ^ *this;
+		 else
+			 X = Point3d(0,0,1) ^ *this;
+
+		 Y = *this ^ X;
+	 }
+
 	 int Vector3d::setCartesianAxes(Vector3d& b, Vector3d& c) {
 #define a *this
 	// computes a RH triad of Axes (Cartesian) starting from a (normalised)

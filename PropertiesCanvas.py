@@ -108,37 +108,35 @@ class PropertiesCanvas( wx.Panel ):
         # add a cad.property, optionally to an existing wx.PGProperty
         if property.GetType() == cad.PROPERTY_TYPE_STRING:
             new_prop = wxpg.StringProperty(property.GetTitle(),value=property.GetString())
-            if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
-            self.Append(parent_property, new_prop, property)
         elif property.GetType() == cad.PROPERTY_TYPE_DOUBLE:
             new_prop = wxpg.FloatProperty(property.GetTitle(),value=property.GetDouble())
-            if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
-            self.Append(parent_property, new_prop, property)
         elif property.GetType() == cad.PROPERTY_TYPE_LENGTH:
             new_prop = wxpg.FloatProperty(property.GetTitle(),value=property.GetDouble() / cad.GetUnits())
-            if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
-            self.Append(parent_property, new_prop, property)
         elif property.GetType() == cad.PROPERTY_TYPE_INT:
             new_prop = wxpg.IntProperty(property.GetTitle(),value=property.GetInt())
-            if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
-            self.Append(parent_property, new_prop, property)
         elif property.GetType() == cad.PROPERTY_TYPE_COLOR:
             col = property.GetColor()
             wcol = wx.Colour(col.red, col.green, col.blue)
             new_prop = wxpg.ColourProperty(property.GetTitle(),value=wcol)
-            if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
-            self.Append(parent_property, new_prop, property)
         elif property.GetType() == cad.PROPERTY_TYPE_CHOICE:
-            pass # to do
+            return # to do
         elif property.GetType() == cad.PROPERTY_TYPE_CHECK:
             new_prop = wxpg.BoolProperty(property.GetTitle(),value=property.GetBool())
-            if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
-            self.Append(parent_property, new_prop, property)
-            self.pg.SetPropertyAttribute(new_prop, wxpg.PG_BOOL_USE_CHECKBOX, True)
         elif property.GetType() == cad.PROPERTY_TYPE_LIST:
-            pass # to do
+            new_prop = wxpg.StringProperty(property.GetTitle())
         elif property.GetType() == cad.PROPERTY_TYPE_FILE:
-            pass # to do
+            return # to do
+        else:
+            wx.MessageBox('invalid property type: ' + str(property.GetType()))
+            return
+        
+        if not property.editable: new_prop.ChangeFlag(wxpg.PG_PROP_READONLY, True)
+        self.Append(parent_property, new_prop, property)
+        
+        if property.GetType() == cad.PROPERTY_TYPE_LIST:
+            plist = property.GetProperties()
+            for p in plist:
+                self.AddProperty(p, new_prop)
        
     def ClearProperties(self):
         self.pg.Clear()

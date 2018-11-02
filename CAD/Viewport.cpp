@@ -314,6 +314,11 @@ void CViewport::SetViewPoint(int margin){
 	StoreViewPoint();
 }
 
+void CViewport::ClearViewpoints()
+{
+	m_view_points.clear();
+}
+
 void CViewport::InsertViewBox(const CBox& box)
 {
 	m_view_point.m_extra_view_box.Insert(box);
@@ -422,3 +427,8 @@ void CViewport::DrawWindow(IRect &rect, bool allow_extra_bits){
 	glPopMatrix();
 }
 
+void CViewport::WindowMag(IRect &window_box){
+	StoreViewPoint();
+	m_view_point.WindowMag(window_box);
+	theApp.Repaint();
+}

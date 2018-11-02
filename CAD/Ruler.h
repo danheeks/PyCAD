@@ -50,7 +50,7 @@ public:
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{return L"Ruler";}
 	HeeksObj *MakeACopy(void)const;
-	void ModifyByMatrix(const double *mat);
+	void Transform(const geoff_geometry::Matrix& m);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
 	bool GetScaleAboutMatrix(geoff_geometry::Matrix &m);

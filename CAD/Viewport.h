@@ -28,6 +28,7 @@ public:
 
 	void SetViewport();
 	void glCommands();
+	void ClearViewpoints();
 	void SetViewPoint(int margin);
 	void InsertViewBox(const CBox& box);
 	void StoreViewPoint(void);
@@ -46,4 +47,5 @@ public:
 	void GetViewportSize(int *w, int *h){ *w = m_w; *h = m_h; }
 	void OnMouseEvent(MouseEvent& event);
 	void OnMagExtents(bool rotate, int margin);
+	void WindowMag(IRect &window_box);
 };

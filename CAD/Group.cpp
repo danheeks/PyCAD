@@ -116,7 +116,8 @@ HeeksObj* CGroup::ReadFromXMLElement(TiXmlElement* element)
 
 const wchar_t* CGroup::GetIconFilePath()
 {
-	return L"/icons/group.png";
+	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/group.png";
+	return iconpath.c_str();
 }
 
 void CGroup::OnEditString(const wchar_t* str){

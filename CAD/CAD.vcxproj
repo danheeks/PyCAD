@@ -97,17 +97,26 @@
     <ClCompile Include="DigitizeMode.cpp" />
     <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="dxf.cpp" />
+    <ClCompile Include="EndedObject.cpp" />
+    <ClCompile Include="ExtrudedObj.cpp" />
     <ClCompile Include="glfont2.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Gripper.cpp" />
     <ClCompile Include="GripperSelTransform.cpp" />
     <ClCompile Include="Group.cpp" />
+    <ClCompile Include="HArc.cpp" />
+    <ClCompile Include="HCircle.cpp" />
     <ClCompile Include="HDxf.cpp" />
     <ClCompile Include="HeeksColor.cpp" />
     <ClCompile Include="HeeksConfig.cpp" />
     <ClCompile Include="HeeksObj.cpp" />
+    <ClCompile Include="HILine.cpp" />
     <ClCompile Include="History.cpp" />
+    <ClCompile Include="HLine.cpp" />
+    <ClCompile Include="HPoint.cpp" />
     <ClCompile Include="HXml.cpp" />
+    <ClCompile Include="IdNamedObj.cpp" />
+    <ClCompile Include="IdNamedObjList.cpp" />
     <ClCompile Include="LineArcDrawing.cpp" />
     <ClCompile Include="MagDragWindow.cpp" />
     <ClCompile Include="MarkedList.cpp" />
@@ -122,6 +131,7 @@
     <ClCompile Include="RemoveOrAddTool.cpp" />
     <ClCompile Include="Ruler.cpp" />
     <ClCompile Include="SelectMode.cpp" />
+    <ClCompile Include="Sketch.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
@@ -149,6 +159,8 @@
     <ClInclude Include="DigitizeMode.h" />
     <ClInclude Include="Drawing.h" />
     <ClInclude Include="dxf.h" />
+    <ClInclude Include="EndedObject.h" />
+    <ClInclude Include="ExtrudedObj.h" />
     <ClInclude Include="glfont2.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GripData.h" />
@@ -156,12 +168,19 @@
     <ClInclude Include="GripperSelTransform.h" />
     <ClInclude Include="GripperTypes.h" />
     <ClInclude Include="Group.h" />
+    <ClInclude Include="HArc.h" />
+    <ClInclude Include="HCircle.h" />
     <ClInclude Include="HDxf.h" />
     <ClInclude Include="HeeksColor.h" />
     <ClInclude Include="HeeksConfig.h" />
     <ClInclude Include="HeeksObj.h" />
+    <ClInclude Include="HILine.h" />
     <ClInclude Include="History.h" />
+    <ClInclude Include="HLine.h" />
+    <ClInclude Include="HPoint.h" />
     <ClInclude Include="HXml.h" />
+    <ClInclude Include="IdNamedObj.h" />
+    <ClInclude Include="IdNamedObjList.h" />
     <ClInclude Include="InputMode.h" />
     <ClInclude Include="IPoint.h" />
     <ClInclude Include="LineArcDrawing.h" />
@@ -180,6 +199,8 @@
     <ClInclude Include="RemoveOrAddTool.h" />
     <ClInclude Include="Ruler.h" />
     <ClInclude Include="SelectMode.h" />
+    <ClInclude Include="Sketch.h" />
+    <ClInclude Include="SketchOrder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StlSolid.h" />
     <ClInclude Include="strconv.h" />

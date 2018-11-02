@@ -5,10 +5,10 @@
 #pragma once
 
 #include "dxf.h"
+#include "strconv.h"
 
 class CSketch;
 
-#if 0
 // a class just to be used while doing dxf import
 class HInsert: public HeeksObj
 {
@@ -16,7 +16,7 @@ class HInsert: public HeeksObj
 	double m_insert_point[3];
 	double m_rotation_angle;
 
-	std::wstring title; // to be removed
+	wchar_t title[1024]; // to be removed
 
 public:
 	HInsert(const char* block_name, const double* insert_point, double rotation_angle)
@@ -24,14 +24,14 @@ public:
 		m_block_name.assign(block_name);
 		memcpy(m_insert_point, insert_point, 3*sizeof(double));
 		m_rotation_angle = rotation_angle;
-		title = std::wstring::Format(_T("Insert of %s at x%lf y%lf %lf rot%lf"), Ctt(block_name), insert_point[0], insert_point[1], insert_point[2], rotation_angle);
+
+		wsprintf(title, L"Insert of %s at x%lf y%lf %lf rot%lf", Ctt(block_name), insert_point[0], insert_point[1], insert_point[2], rotation_angle);
 	}
 
 	HeeksObj *MakeACopy(void)const{ return new HInsert(*this);}
 
-	const wchar_t* GetShortString(void)const{return title.c_str();} // to be removed
+	const wchar_t* GetShortString(void)const{ return title; } // to be removed
 };
-#endif
 
 class HeeksDxfRead : public CDxfRead{
 private:

@@ -133,8 +133,6 @@ public:
 	CViewport *m_current_viewport;
 	MarkedList *m_marked_list;
 	bool m_doing_rollback;
-	std::wstring m_filepath;
-	bool m_untitled;
 	bool m_light_push_matrix;
 	std::list<HeeksObj*> m_hidden_for_drag;
 	bool m_show_grippers_on_drag;
@@ -144,7 +142,6 @@ public:
 	bool m_show_ruler;
 	bool m_show_datum_coords_system;
 	bool m_datum_coords_system_solid_arrows;
-	std::list< std::wstring > m_recent_files;
 	bool m_in_OpenFile;
 	bool m_mark_newly_added_objects;
 	std::wstring m_version_number;
@@ -170,7 +167,6 @@ public:
 	geoff_geometry::Matrix* m_file_open_matrix;
 	double m_view_units; // units to display to the user ( but everything is stored as mm ), 1.0 for mm, 25.4 for inches
 	bool m_dragging_moves_objects;
-	bool m_no_creation_mode; // set from a plugin, for making an exporter only application
 	std::wstring m_res_folder;
 
 	double m_min_correlation_factor;
@@ -208,8 +204,6 @@ public:
 
 	void RegisterHeeksTypesConverter(HeeksTypesConverter_t);
 	void UnregisterHeeksTypesConverter(HeeksTypesConverter_t);
-
-	std::wstring m_alternative_open_wild_card_string;
 
 	bool m_settings_restored;
 
@@ -271,7 +265,7 @@ public:
 	void SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance = -1.0);
 	void SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, bool for_clipboard = false);
 	void SaveXMLFile(const wchar_t *filepath){ SaveXMLFile(m_objects, filepath); }
-	bool SaveFile(const wchar_t *filepath, bool use_dialog = false, bool update_recent_file_list = true, bool set_app_caption = true);
+	bool SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects = NULL);
 	void AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object = NULL);
 	void AddUndoably(const std::list<HeeksObj*>& list, HeeksObj* owner);
 	void DeleteUndoably(HeeksObj* object);
@@ -297,8 +291,6 @@ public:
 	void ObserversMarkedListChanged(bool selection_cleared, const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed);
 	void ObserversFreeze();
 	void ObserversThaw();
-	const wchar_t* GetKnownFilesWildCardString(bool open, bool import_export)const;
-	const wchar_t* GetKnownFilesCommaSeparatedList(bool open, bool import_export)const;
 	std::wstring GetExeFolder()const;
 	std::wstring GetResFolder()const;
 	void get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy));
@@ -311,7 +303,6 @@ public:
 	void OnBeforeNewOrOpen(bool open, int res);
 	void OnBeforeFrameDelete(void);
 	void RegisterReadXMLfunction(const char* type_name, HeeksObj*(*read_xml_function)(TiXmlElement* pElem));
-	int CheckForModifiedDoc(); // returns wxCANCEL, if NOT OK to continue with file open etc.
 	HeeksObj* GetIDObject(int type, int id);
 	std::list<HeeksObj*> GetIDObjects(int type, int id);
 	void SetObjectID(HeeksObj* object, int id);
@@ -375,7 +366,6 @@ public:
 	bool Digitize(const IPoint &point, double* pos);
 	bool GetLastDigitizePosition(double *pos);
 	void ObjectAreaString(HeeksObj* object, std::wstring &s);
-	const wchar_t* GetFileFullPath();
 	void SetViewUnits(double units, bool write_to_config);
 	void Mark(HeeksObj* object);
 	void Unmark(HeeksObj* object);

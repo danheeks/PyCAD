@@ -16,6 +16,7 @@ public:
 	// HeeksObj's virtual functions
 	int GetType()const{return XmlType;}
 	const wchar_t* GetTypeString(void)const{return L"Xml";}
+	const wchar_t* GetShortString(void)const;
 	HeeksObj *MakeACopy(void)const;
 	const wchar_t* GetIconFilePath();
 	void GetProperties(std::list<Property *> *list);

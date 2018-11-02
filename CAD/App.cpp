@@ -28,6 +28,12 @@
 #include "TransformTool.h"
 #include "Picking.h"
 #include "svg.h"
+#include "Sketch.h"
+#include "HLine.h"
+#include "HArc.h"
+#include "HPoint.h"
+#include "CoordinateSystem.h"
+#include "HCircle.h"
 
 CApp theApp;
 
@@ -94,8 +100,6 @@ CApp::CApp()
 	m_show_ruler = false;
 	m_show_datum_coords_system = true;
 	m_datum_coords_system_solid_arrows = true;
-	m_filepath = std::wstring(L"Untitled") + L".heeks";
-	m_untitled = true;
 	m_in_OpenFile = false;
 	m_transform_gl_list = 0;
 	m_current_coordinate_system = NULL;
@@ -115,7 +119,6 @@ CApp::CApp()
 	m_property_grid_validation = false;
 	m_solid_view_mode = SolidViewFacesAndEdges;
 	m_dragging_moves_objects = true;
-	m_no_creation_mode = false;
 	m_stl_solid_random_colors = false;
 	m_svg_unite = false;
 	m_stl_facet_tolerance = 0.1;
@@ -139,6 +142,8 @@ CApp::CApp()
 	}
 
 	RegisterHeeksTypesConverter(HeeksCADType);
+
+	InitializeXMLFunctions();
 
 	m_settings_restored = false;
 
@@ -307,12 +312,12 @@ void CApp::WriteConfig()
 	config.Write(_T("DrawRadius"), digitizing_radius);
 	for (int i = 0; i<NUM_BACKGROUND_COLORS; i++)
 	{
-		wxString key = wxString::Format(_T("BackgroundColor%d"), i);
+		std::wstring key = std::wstring::Format(_T("BackgroundColor%d"), i);
 		config.Write(key, background_color[i].COLORREF_color());
 	}
 	config.Write(_T("BackgroundMode"), (int)m_background_mode);
 	config.Write(_T("FaceSelectionColor"), face_selection_color.COLORREF_color());
-	config.Write(_T("CurrentColor"), wxString::Format(_T("%d %d %d"), current_color.red, current_color.green, current_color.blue));
+	config.Write(_T("CurrentColor"), std::wstring::Format(_T("%d %d %d"), current_color.red, current_color.green, current_color.blue));
 	config.Write(_T("RotateMode"), m_rotate_mode);
 	config.Write(_T("Antialiasing"), m_antialiasing);
 	config.Write(_T("GridMode"), grid_mode);
@@ -452,8 +457,6 @@ void CApp::Reset(){
 	m_doing_rollback = false;
 	geoff_geometry::Point3d vy(0, 1, 0), vz(0, 0, 1);
 	m_current_viewport->m_view_point.SetView(vy, vz, 6);
-	m_filepath = std::wstring(L"Untitled.heeks");
-	m_untitled = true;
 	m_hidden_for_drag.clear();
 	m_show_grippers_on_drag = true;
 	*m_ruler = HRuler();
@@ -469,19 +472,23 @@ void CApp::InitializeXMLFunctions()
 	// set up function map
 	if(xml_read_fn_map.size() == 0)
 	{
-#if 0
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Line", HLine::ReadFromXMLElement ) );
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Arc", HArc::ReadFromXMLElement ) );
+#if 0
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "InfiniteLine", HILine::ReadFromXMLElement ) );
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Circle", HCircle::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Point", HPoint::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Image", HImage::ReadFromXMLElement ) );
+#endif
+		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("Point", HPoint::ReadFromXMLElement));
+#if 0
+		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("Image", HImage::ReadFromXMLElement));
+#endif
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Sketch", CSketch::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "STEP_file", ReadSTEPFileFromXMLElement ) );
+#if 0
+		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("STEP_file", ReadSTEPFileFromXMLElement));
 #endif
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "STLSolid", CStlSolid::ReadFromXMLElement ) );
-#if 0
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "CoordinateSystem", CoordinateSystem::ReadFromXMLElement ) );
+#if 0
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Text", HText::ReadFromXMLElement ) );
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Dimension", HDimension::ReadFromXMLElement ) );
 		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Ellipse", HEllipse::ReadFromXMLElement ) );
@@ -502,7 +509,7 @@ void CApp::RegisterReadXMLfunction(const char* type_name, HeeksObj*(*read_xml_fu
 	xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( type_name, read_xml_function ) );
 }
 
-//HeeksObj* ReadPyObjectFromXMLElementWithName(const std::string& name, TiXmlElement* pElem);
+HeeksObj* ReadPyObjectFromXMLElementWithName(const std::string& name, TiXmlElement* pElem);
 
 HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
 {
@@ -515,7 +522,7 @@ HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
 		HeeksObj*(*callback)(TiXmlElement* pElem) = FindIt->second;
 		if (callback == ReadPyObjectFromXMLElement)
 		{
-			//object = ReadPyObjectFromXMLElementWithName(name, pElem);
+			object = ReadPyObjectFromXMLElementWithName(name, pElem);
 		}
 		else
 		{
@@ -695,7 +702,8 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	char oldlocale[1000];
 	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
 
-		HeeksDxfRead dxf_file(filepath, true);
+	HeeksDxfRead dxf_file(filepath, true);
+	dxf_file.DoRead();
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
@@ -725,6 +733,7 @@ bool CApp::OpenImageFile(const wchar_t *filepath)
 
 void CApp::OnNewButton()
 {
+#if 0
 	int res = CheckForModifiedDoc();
 	if (res != 0x10)
 	{
@@ -736,6 +745,7 @@ void CApp::OnNewButton()
 //		SetFrameTitle();
 		Repaint();
 	}
+#endif
 }
 
 void CApp::OnOpenButton()
@@ -815,7 +825,7 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 
 	bool open_succeeded = true;
 
-	if (endsWith(wf, L".heeks"))
+	if (endsWith(wf, L".heeks") || endsWith(wf, L".xml"))
 	{
 		m_file_open_or_import_type = FileOpenTypeHeeks;
 		if (import_not_open)
@@ -838,20 +848,9 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 	else
 	{
 		// error
-		std::wstring str = std::wstring(L"Invalid file type chosen") + L"  " + L"expecting" + L" " + GetKnownFilesCommaSeparatedList(true, import_not_open);
+		std::wstring str = std::wstring(L"Invalid file type chosen");
 		MessageBox(str.c_str());
 		open_succeeded = false;
-	}
-
-	if (open_succeeded && !import_not_open)
-	{
-		if (retain_filename)
-		{
-			m_filepath.assign(filepath);
-			m_untitled = false;
-//			SetFrameTitle();
-		}
-		SetLikeNewFile();
 	}
 
 	m_file_open_matrix = NULL;
@@ -864,13 +863,11 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 
 static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wstring parent_layer_name)
 {
-#if 0
-	// to do when we have lines and arcs
 	std::wstring layer_name;
 
 	if (parent_layer_name.size() == 0)
 	{
-		layer_name << object->m_id;
+		layer_name.append(to_wstring(object->m_id));
 	}
 	else
 	{
@@ -882,31 +879,24 @@ static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wst
 	case LineType:
 	{
 		HLine* l = (HLine*)object;
-		double s[3], e[3];
-		extract(l->A, s);
-		extract(l->B, e);
-		dxf_file.WriteLine(s, e, Ttc(layer_name.c_str()), l->m_thickness, l->m_extrusion_vector);
+		dxf_file.WriteLine(l->A.getBuffer(), l->B.getBuffer(), Ttc(layer_name.c_str()), l->m_thickness, l->m_extrusion_vector);
 	}
 	break;
 	case PointType:
 	{
 		HPoint* p = (HPoint*)object;
-		double s[3];
-		extract(p->m_p, s);
-		dxf_file.WritePoint(s, Ttc(layer_name.c_str()));
+		dxf_file.WritePoint(p->m_p.getBuffer(), Ttc(layer_name.c_str()));
 	}
 	break;
 	case ArcType:
 	{
 		HArc* a = (HArc*)object;
-		double s[3], e[3], c[3];
-		extract(a->A, s);
-		extract(a->B, e);
-		extract(a->C, c);
-		bool dir = a->m_axis.Direction().z > 0;
-		dxf_file.WriteArc(s, e, c, dir, Ttc(layer_name.c_str()), a->m_thickness, a->m_extrusion_vector);
+		bool dir = a->m_axis.z > 0;
+		dxf_file.WriteArc(a->A.getBuffer(), a->B.getBuffer(), a->C.getBuffer(), dir, Ttc(layer_name.c_str()), a->m_thickness, a->m_extrusion_vector);
 	}
 	break;
+	// to do
+#if 0
 	case EllipseType:
 	{
 		HEllipse* e = (HEllipse*)object;
@@ -919,27 +909,25 @@ static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wst
 		dxf_file.WriteEllipse(c, maj_r, min_r, rot, 0, 2 * M_PI, dir, Ttc(layer_name.c_str()), 0.0);
 	}
 	break;
+#endif
 	case CircleType:
 	{
 		HCircle* cir = (HCircle*)object;
-		double c[3];
-		extract(cir->m_axis.Location(), c);
-		double radius = cir->m_radius;
-		dxf_file.WriteCircle(c, radius, Ttc(layer_name.c_str()), cir->m_thickness, cir->m_extrusion_vector);
+		dxf_file.WriteCircle(cir->m_c.getBuffer(), cir->m_radius, Ttc(layer_name.c_str()), cir->m_thickness, cir->m_extrusion_vector);
 	}
 	break;
 	default:
 	{
-		if (parent_layer_name.Len() == 0)
+		if (parent_layer_name.length() == 0)
 		{
-			layer_name.Clear();
+			layer_name.clear();
 			if ((object->GetShortString() != NULL) && (std::wstring(object->GetTypeString()) != std::wstring(object->GetShortString())))
 			{
-				layer_name << object->GetShortString();
+				layer_name.append( object->GetShortString());
 			}
 			else
 			{
-				layer_name << object->m_id;   // Use the ID as a layer name so that it's unique.
+				layer_name.append(to_wstring(object->m_id));   // Use the ID as a layer name so that it's unique.
 			}
 		}
 		else
@@ -955,7 +943,6 @@ static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wst
 		}
 	}
 	}
-#endif
 }
 
 void CApp::SaveDXFFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath)
@@ -1352,20 +1339,15 @@ void CApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 	doc.SaveFile(Ttc(filepath));
 }
 
-bool CApp::SaveFile(const wchar_t *filepath, bool use_dialog, bool update_recent_file_list, bool set_app_caption)
+bool CApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects)
 {
-#if 0
-	if (use_dialog){
-		wxFileDialog fd(m_frame, _("Save graphical data file"), wxEmptyString, filepath, GetKnownFilesWildCardString(false, false), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-		fd.SetFilterIndex(1);
-		if (fd.ShowModal() == wxID_CANCEL)return false;
-		return SaveFile(fd.GetPath().c_str(), false, update_recent_file_list);
-	}
+	if (objects == NULL)
+		objects = &m_objects;
 
 	std::wstring wf(filepath);
-	wf.LowerCase();
+	lowerCase(wf);
 
-	if (wf.EndsWith(_T(".heeks")))
+	if (endsWith(wf, L".heeks") || endsWith(wf, L".xml"))
 	{
 		// call external OnSave functions
 		for (std::list< void(*)(bool) >::iterator It = m_on_save_callbacks.begin(); It != m_on_save_callbacks.end(); It++)
@@ -1374,45 +1356,34 @@ bool CApp::SaveFile(const wchar_t *filepath, bool use_dialog, bool update_recent
 			(*callbackfunc)(false);
 		}
 
-		SaveXMLFile(filepath);
+		SaveXMLFile(*objects, filepath);
 	}
-	else if (wf.EndsWith(_T(".dxf")))
+	else if (endsWith(wf, L".dxf"))
 	{
-		SaveDXFFile(m_objects, filepath);
+		SaveDXFFile(*objects, filepath);
 	}
-	else if (wf.EndsWith(_T(".stl")))
+	else if (endsWith(wf, L".stl"))
 	{
-		SaveSTLFile(m_objects, filepath, -1.0, NULL, m_stl_save_as_binary);
+		SaveSTLFile(*objects, filepath, -1.0, NULL, m_stl_save_as_binary);
 	}
-	else if (wf.EndsWith(_T(".cpp")))
+	else if (endsWith(wf, L".cpp"))
 	{
-		SaveCPPFile(m_objects, filepath);
+		SaveCPPFile(*objects, filepath);
 	}
-	else if (wf.EndsWith(_T(".obj")))
+	else if (endsWith(wf, L".obj"))
 	{
-		SaveOBJFileAscii(m_objects, filepath);
+		SaveOBJFileAscii(*objects, filepath);
 	}
-	else if (wf.EndsWith(_T(".py")))
+	else if (endsWith(wf, L".py"))
 	{
-		SavePyFile(m_objects, filepath);
-	}
-	else if (CShape::ExportSolidsFile(m_objects, filepath))
-	{
+		SavePyFile(*objects, filepath);
 	}
 	else
 	{
-		std::wstring str = std::wstring(_("Invalid file type chosen")) + _T("  ") + _("expecting") + _T(" ") + GetKnownFilesCommaSeparatedList(false, false);
-		wxMessageBox(str);
+		std::wstring str = std::wstring(L"Invalid file type chosen ") + filepath;
+		MessageBox(str.c_str());
 		return false;
 	}
-
-	m_filepath.assign(filepath);
-	m_untitled = false;
-
-	if (update_recent_file_list)InsertRecentFileItem(filepath);
-	if (set_app_caption)SetFrameTitle();
-	SetLikeNewFile();
-#endif
 
 	return true;
 }
@@ -2013,89 +1984,6 @@ void CApp::glColorEnsuringContrast(const HeeksColor &c)
 	else c.glColor();
 }
 
-static std::wstring known_file_ext;
-
-const wchar_t* CApp::GetKnownFilesWildCardString(bool open, bool import_export)const
-{
-	if (!import_export)
-	{
-		known_file_ext = std::wstring(L"Heeks files") + L" |*.heeks;*.HEEKS";
-		return known_file_ext.c_str();
-	}
-
-	if (open){
-		if (m_alternative_open_wild_card_string.size() > 0)
-			return m_alternative_open_wild_card_string.c_str();
-
-#if 0
-		wxList handlers = wxImage::GetHandlers();
-		std::wstring imageExtStr;
-		std::wstring imageExtStr2;
-		for (wxList::iterator It = handlers.begin(); It != handlers.end(); It++)
-		{
-			wxImageHandler* handler = (wxImageHandler*)(*It);
-			std::wstring ext = handler->GetExtension();
-			if (It != handlers.begin())imageExtStr.Append(_T(";"));
-			imageExtStr.Append(_T("*."));
-			imageExtStr.Append(ext);
-			if (It != handlers.begin())imageExtStr2.Append(_T(" "));
-			imageExtStr2.Append(_T("*."));
-			imageExtStr2.Append(ext);
-		}
-#endif
-
-		std::wstring registeredExtensions;
-#if 0
-		for (FileOpenHandlers_t::const_iterator itHandler = m_fileopen_handlers.begin(); itHandler != m_fileopen_handlers.end(); itHandler++)
-		{
-			registeredExtensions << L";*." << itHandler->first;
-		}
-#endif
-
-		known_file_ext = std::wstring(L"Known Files") + L" |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF"/* + imageExtStr*/ + registeredExtensions + L"|" + L"Heeks files" + L" (*.heeks)|*.heeks;*.HEEKS|" + L"IGES files" + L" (*.igs *.iges)|*.igs;*.IGS;*.iges;*.IGES|" + L"STEP files" + L" (*.stp *.step)|*.stp;*.STP;*.step;*.STEP|" + L"STL files" + L" (*.stl)|*.stl;*.STL|" + L"Scalar Vector Graphics files" + L" (*.svg)|*.svg;*.SVG|" + L"DXF files" + L" (*.dxf)|*.dxf;*.DXF|" + L"RS274X/Gerber files" + L" (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|"/* + L"Picture files" + L" (" + imageExtStr2 + L")|" + imageExtStr*/;
-		return known_file_ext.c_str();
-	}
-	else{
-		// file save
-		known_file_ext = std::wstring(L"Known Files") + L" |*.heeks;*.igs;*.iges;*.stp;*.step;*.stl;*.dxf;*.cpp;*.py;*.obj|" + L"Heeks files" + L" (*.heeks)|*.heeks|" + L"IGES files" + L" (*.igs *.iges)|*.igs;*.iges|" + L"STEP files" + L" (*.stp *.step)|*.stp;*.step|" + L"STL files" + L" (*.stl)|*.stl|" + L"DXF files" + L" (*.dxf)|*.dxf|" + L"CPP files" + L" (*.cpp)|*.cpp|" + L"OpenCAMLib python files" + L" (*.py)|*.py|" + L"Wavefront .obj files" + L" (*.obj)|*.obj";
-		return known_file_ext.c_str();
-	}
-}
-
-const wchar_t* CApp::GetKnownFilesCommaSeparatedList(bool open, bool import_export)const
-{
-	if (!import_export)
-		return L"heeks";
-
-#if 0
-	if (open){
-		wxList handlers = wxImage::GetHandlers();
-		std::wstring known_ext_str = _T("heeks, igs, iges, stp, step, dxf");
-		for (wxList::iterator It = handlers.begin(); It != handlers.end(); It++)
-		{
-			wxImageHandler* handler = (wxImageHandler*)(*It);
-			std::wstring ext = handler->GetExtension();
-			known_ext_str.Append(_T(", "));
-			known_ext_str.Append(ext);
-		}
-
-		for (FileOpenHandlers_t::const_iterator itHandler = m_fileopen_handlers.begin(); itHandler != m_fileopen_handlers.end(); itHandler++)
-		{
-			known_ext_str << _T(", ") << itHandler->first;
-		}
-
-
-		return known_ext_str;
-	}
-	else{
-		// file save
-#endif
-		return L"heeks, igs, iges, stp, step, stl, dxf";
-#if 0
-	}
-#endif
-}
-
 std::wstring CApp::GetExeFolder()const{
 	return L"";
 }
@@ -2330,28 +2218,6 @@ void CApp::OnBeforeFrameDelete(void)
 		(*callbackfunc)();
 	}
 }
-
-
-int CApp::CheckForModifiedDoc()
-{
-	// returns wxCANCEL if not OK to continue opening file
-	if (!m_no_creation_mode && IsModified())
-	{
-		std::wstring str = std::wstring(L"Save changes to file") + L" " + m_filepath;
-		MessageBox(str.c_str());
-
-#if 0
-		int res = wxMessageBox(str, wxMessageBoxCaptionStr, wxCANCEL | wxYES_NO | wxCENTRE);
-		if (res == wxCANCEL || res == wxNO) return res;
-		if (res == wxYES)
-		{
-			return (int)SaveFile(m_filepath.c_str(), true);
-		}
-#endif
-	}
-	return 0x04;
-}
-
 
 HeeksObj* CApp::GetIDObject(int type, int id)
 {
@@ -2838,9 +2704,3 @@ void CApp::RestoreDefaults()
 	theApp.m_settings_restored = true;
 }
 
-
-const wchar_t* CApp::GetFileFullPath()
-{
-	if (theApp.m_untitled)return NULL;
-	return theApp.m_filepath.c_str();
-}

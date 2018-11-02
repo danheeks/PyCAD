@@ -35,6 +35,15 @@
 #include "Material.h"
 #include "MarkedList.h"
 #include "PropertyChange.h"
+#include "Sketch.h"
+#include "HLine.h"
+#include "HArc.h"
+#include "InputMode.h"
+#include "SelectMode.h"
+#include "MagDragWindow.h"
+#include "ViewRotating.h"
+#include "ViewZooming.h"
+#include "ViewPanning.h"
 
 namespace bp = boost::python;
 
@@ -260,15 +269,11 @@ void AddPropertyToPythonList(Property* p, boost::python::list& list)
 
 void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 {
-	list.append(bp::ptr<HeeksObj*>(object));
-#if 0
 	switch (object->GetType())
 	{
-#if 0
 	case SketchType:
 		list.append(boost::python::pointer_wrapper<CSketch*>((CSketch*)object));
 		break;
-#endif
 	case StlSolidType:
 		list.append(boost::python::pointer_wrapper<CStlSolid*>((CStlSolid*)object));
 		break;
@@ -281,7 +286,6 @@ void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 		list.append(boost::python::pointer_wrapper<HeeksObj*>((HeeksObj*)object));
 		break;
 	}
-#endif
 }
 
 bp::detail::method_result Call_Override(bp::override &f, bp::list &list)
@@ -475,9 +479,53 @@ public:
 	}
 };
 
+static std::wstring str_for_input_mode;
+
+class InputModeWrap : public CInputMode, public bp::wrapper<CInputMode>
+{
+public:
+	InputModeWrap() :CInputMode(){}
+
+	const wchar_t* GetTitle()override
+	{
+		if (bp::override f = this->get_override("GetTitle"))
+		{
+			std::string s = f();
+			str_for_input_mode = Ctt(s.c_str());
+			return str_for_input_mode.c_str();
+		}
+		return NULL;
+	}
+};
+
+void CadReset()
+{
+	theApp.Reset();
+}
+
+bool CadOpenFile(std::wstring fp)
+{
+	return theApp.OpenFile(fp.c_str(), false);
+}
+
 void CadImport(std::wstring fp)
 {
 	theApp.OpenFile(fp.c_str(), true);
+}
+
+bool CadSaveFile(std::wstring fp)
+{
+	return theApp.SaveFile(fp.c_str());
+}
+
+bool SaveObjects(std::wstring fp, bp::list &list)
+{
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	return theApp.SaveFile(fp.c_str(), &o_list);
 }
 
 static std::list<PyObject*> new_or_open_callbacks;
@@ -548,6 +596,11 @@ void RegisterMessageBoxCallback(PyObject *callback)
 	message_box_callback = callback;
 }
 
+std::wstring GetResFolder()
+{
+	return theApp.m_res_folder;
+}
+
 void SetResFolder(std::wstring str)
 {
 	theApp.m_res_folder = str;
@@ -588,7 +641,7 @@ public:
 			str_for_base_object = Ctt(s.c_str());
 			return str_for_base_object.c_str();
 		}
-		return HeeksObj::GetShortString();
+		return HeeksObj::GetShortStringOrTypeString();
 	}
 
 	const wchar_t* GetTypeString()const override
@@ -806,7 +859,7 @@ std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 
 std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 {
-	const wchar_t* s = object->GetShortString();
+	const wchar_t* s = object->GetShortStringOrTypeString();
 	if (s == NULL)return L"";
 	return std::wstring(s);
 }
@@ -868,6 +921,80 @@ boost::python::list HeeksObjGetProperties(HeeksObj& object) {
 	return return_list;
 }
 
+static double GetLines_pixels_per_mm = 0.0;
+static PyObject* GetLines_callback = NULL;
+
+static boost::python::list return_list_ForGetLines;
+
+
+static void CallbackForGetLines(const double *p, bool start)
+{
+#if 0
+	if (GetLines_callback)
+	{
+		PyObject *args = PyTuple_New(6);
+		for (int i = 0; i<6; i++)PyTuple_SetItem(args, i, PyFloat_FromDouble(p[i]));
+		//BeforePythonCall(&main_module, &globals);
+		PyObject_CallObject(GetLines_callback, args);
+		//AfterPythonCall(main_module);
+	}
+#endif
+	return_list_ForGetLines.append(bp::make_tuple(start, p[0], p[1], p[2]));
+}
+
+void SetCallbackForGetLines(PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		GetLines_callback = NULL;
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	GetLines_callback = callback;
+}
+
+void SetGetLinesPixelsPerMm(double pixels_per_mm)
+{
+	GetLines_pixels_per_mm = pixels_per_mm;
+}
+
+CInputMode* GetSelectMode()
+{
+	return theApp.m_select_mode;
+}
+
+CInputMode* GetMagnification()
+{
+	return theApp.magnification;
+}
+
+CInputMode* GetViewRotating()
+{
+	return theApp.viewrotating;
+}
+
+CInputMode* GetViewZooming()
+{
+	return theApp.viewzooming;
+}
+
+CInputMode* GetViewPanning()
+{
+	return theApp.viewpanning;
+}
+
+void SetInputMode(CInputMode* input_mode)
+{
+	theApp.SetInputMode(input_mode);
+}
+
+boost::python::list HeeksObjGetLines(HeeksObj& object)
+{
+	return_list_ForGetLines = boost::python::list();
+	object.GetSegments(CallbackForGetLines, GetLines_pixels_per_mm);
+	return return_list_ForGetLines;
+}
+
 std::wstring PropertyGetShortString(Property& p)
 {
 	return std::wstring(p.GetShortString());
@@ -877,6 +1004,21 @@ std::wstring PropertyGetString(Property& p)
 {
 	return std::wstring(p.GetString());
 }
+
+boost::python::list PropertyGetProperties(Property& p) {
+	boost::python::list return_list;
+	std::list<Property*> p_list;
+	p.GetList(p_list);
+	for (std::list<Property*>::iterator It = p_list.begin(); It != p_list.end(); It++)
+	{
+		Property* property = *It;
+		return_list.append(boost::python::ptr<Property*>(property));
+	}
+	return return_list;
+}
+
+
+
 
 HeeksColor PropertyGetColor(const Property& p)
 {
@@ -888,6 +1030,89 @@ HeeksColor HeeksObjGetColor(const HeeksObj& object)
 	return *(object.GetColor());
 }
 
+bp::tuple SketchGetStartPoint(CSketch &sketch)
+{
+	geoff_geometry::Point3d s(0.0, 0.0, 0.0);
+
+	HeeksObj* last_child = NULL;
+	HeeksObj* child = sketch.GetFirstChild();
+	child->GetStartPoint(s);
+	return bp::make_tuple(s.x, s.y, s.z);
+}
+
+bp::tuple SketchGetEndPoint(CSketch &sketch)
+{
+	geoff_geometry::Point3d s(0.0, 0.0, 0.0);
+
+	HeeksObj* last_child = NULL;
+	HeeksObj* child = sketch.GetFirstChild();
+	child->GetEndPoint(s);
+	return bp::make_tuple(s.x, s.y, s.z);
+}
+
+boost::python::list SketchSplit(CSketch& sketch) {
+	boost::python::list olist;
+	std::list<HeeksObj*> new_separate_sketches;
+	sketch.ExtractSeparateSketches(new_separate_sketches, false);
+	for (std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
+	{
+		HeeksObj* object = *It;
+		AddObjectToPythonList(object, olist);
+	}
+	return olist;
+}
+
+double SketchGetCircleDiameter(CSketch& sketch)
+{
+	HeeksObj* span = sketch.GetFirstChild();
+	if (span == NULL)
+		return 0.0;
+
+	if (span->GetType() == ArcType)
+	{
+		HArc* arc = (HArc*)span;
+		return arc->m_radius * 2;
+	}
+	else if (span->GetType() == CircleType)
+	{
+#if 0 // to do
+		HCircle* circle = (HCircle*)span;
+		return circle->m_radius * 2;
+#endif
+	}
+	return 0.0;
+}
+
+bp::tuple SketchGetCircleCentre(CSketch& sketch)
+{
+	HeeksObj* span = sketch.GetFirstChild();
+	if (span == NULL)
+		return bp::make_tuple(NULL);
+
+	if (span->GetType() == ArcType)
+	{
+		HArc* arc = (HArc*)span;
+		geoff_geometry::Point3d& C = arc->C;
+		return bp::make_tuple(C.x, C.y, C.z);
+	}
+	else if (span->GetType() == CircleType)
+	{
+#if 0 // to do
+		HCircle* circle = (HCircle*)span;
+		const geoff_geometry::Point3d& C = circle->m_axis.Location();
+		return bp::make_tuple(C.X(), C.Y(), C.Z());
+#endif
+	}
+
+	return bp::make_tuple(NULL);
+}
+
+void SketchWriteDXF(CSketch& sketch, std::wstring filepath)
+{
+	std::list<HeeksObj*> objects;
+	objects.push_back(&sketch);
+	theApp.SaveDXFFile(objects, filepath.c_str());
+}
 
 void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8)
 {
@@ -941,13 +1166,6 @@ void AddProperty(Property* property)
 {
 	if (property_list)
 		property_list->push_back(property);
-}
-
-std::wstring GetFileFullPath()
-{
-	const wchar_t* fp = theApp.GetFileFullPath();
-	if (fp)return (fp);
-	else return L"";
 }
 
 bp::object GetObjectFromId(int type, int id) {
@@ -1115,6 +1333,11 @@ boost::python::list GetSelectedObjects() {
 	return slist;
 }
 
+unsigned int GetNumSelected()
+{
+	return theApp.m_marked_list->list().size();
+}
+
 boost::python::list GetObjects() {
 	boost::python::list olist;
 	for (HeeksObj *object = theApp.GetFirstChild(); object; object = theApp.GetNextChild())
@@ -1162,6 +1385,21 @@ void StartHistory()
 void EndHistory()
 {
 	theApp.EndHistory();
+}
+
+void ClearHistory()
+{
+	theApp.ClearHistory();
+}
+
+bool IsModified()
+{
+	return theApp.IsModified();
+}
+
+void SetLikeNewFile()
+{
+	theApp.SetLikeNewFile();
 }
 
 void RollBack()
@@ -1327,6 +1565,10 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 	return object->m_owner;
 }
 
+double GetUnits()
+{
+	return theApp.m_view_units;
+}
 
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
@@ -1334,6 +1576,7 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
 			.def("GetID", &BaseObjectGetID)
+			.def("GetIndex", &HeeksObj::GetIndex)
 			.def("KillGLLists", &BaseObject::KillGLLists)
 			.def("SetUsesGLList", &BaseObjectSetUsesGLList)
 			.def("GetColor", &BaseObjectGetColor)
@@ -1348,7 +1591,6 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			;
 
-#if 1
 		bp::class_<HeeksObj, boost::noncopyable>("Object")
 			.def(bp::init<HeeksObj>())
 			.def("GetType", &HeeksObjGetType)
@@ -1367,8 +1609,8 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
+			.def("GetLines", &HeeksObjGetLines)
 			;
-#endif
 
 		bp::class_<HeeksColor>("Color")
 			.def(bp::init<HeeksColor>())
@@ -1380,16 +1622,8 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("ref", &HeeksColor::COLORREF_color)
 			;
 
-		bp::class_<PropertyWrap, boost::noncopyable >("BaseProperty")
+		bp::class_<PropertyWrap, boost::noncopyable >("Property")
 			.def(bp::init<int, std::wstring, HeeksObj*>())
-			.def("GetType", &Property::get_property_type)
-			;
-
-		//boost::python::register_ptr_to_python<boost::shared_ptr<Property> >();
-		//boost::python::register_ptr_to_python<boost::shared_ptr<PropertyObjectTitle> >();
-
-		bp::class_<Property, boost::noncopyable>("Property")
-			.def(bp::init<Property>())
 			.def("GetType", &Property::get_property_type)
 			.def("GetTitle", &PropertyGetShortString)
 			.def("GetString", &PropertyGetString)
@@ -1399,6 +1633,36 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("GetColor", &PropertyGetColor)
 			.def_readwrite("editable", &PropertyWrap::m_editable)
 			.def_readwrite("object", &PropertyWrap::m_object)
+			.def("GetProperties", &PropertyGetProperties)
+			;
+
+		bp::class_<ObjList, bp::bases<HeeksObj>, boost::noncopyable>("ObjList")
+			.def(bp::init<ObjList>())
+			.def("Clear", &ObjList::ClearUndoably)
+			;
+
+		bp::class_<IdNamedObjList, bp::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
+			.def(bp::init<IdNamedObjList>())
+			;
+
+		bp::class_<CSketch, bp::bases<IdNamedObjList>, boost::noncopyable>("Sketch")
+			.def(bp::init<CSketch>())
+			.def("GetStartPoint", &SketchGetStartPoint)
+			.def("GetEndPoint", &SketchGetEndPoint)
+			.def("IsCircle", &CSketch::IsCircle)
+			.def("IsClosed", &CSketch::IsClosed)
+			.def("HasMultipleSketches", &CSketch::HasMultipleSketches)
+			.def("Split", &SketchSplit)
+			.def("GetCircleDiameter", &SketchGetCircleDiameter)
+			.def("GetCircleCentre", &SketchGetCircleCentre)
+			.def("WriteDxf", &SketchWriteDXF)
+			;
+
+		bp::class_<CStlSolid, bp::bases<HeeksObj>>("StlSolid")
+			.def(bp::init<CStlSolid>())
+			.def("__init__", bp::make_constructor(&initStlSolid))
+			.def(bp::init<const std::wstring&>())// load a stl solid from a filepath
+			.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
 			;
 
 		bp::class_<PropertyCheck, boost::noncopyable, bp::bases<Property>>("PropertyCheck", boost::python::no_init);
@@ -1430,20 +1694,12 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 		bp::class_<PropertyChangeChoice, bp::bases<Undoable>>("PropertyChangeChoice", boost::python::no_init).def(bp::init<const int&, Property*>());
 		bp::class_<PropertyChangeCheck, bp::bases<Undoable>>("PropertyChangeCheck", boost::python::no_init).def(bp::init<const bool&, Property*>());
 
-		bp::class_<CStlSolid, bp::bases<HeeksObj>>("StlSolid")
-			.def(bp::init<CStlSolid>())
-			.def("__init__", bp::make_constructor(&initStlSolid))
-			.def(bp::init<const std::wstring&>())// load a stl solid from a filepath
-			.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
-			;
-
-		bp::class_<ObjList, bp::bases<HeeksObj>>("ObjList")
-			.def(bp::init<ObjList>())
-			.def("Clear", &ObjList::ClearUndoably)
-			;
-
-		bp::class_<CApp, bp::bases<ObjList>>("App")
+		bp::class_<CApp, bp::bases<ObjList>, boost::noncopyable>("App")
 			.def(bp::init<CApp>())
+			;
+
+		bp::class_<CViewPoint>("ViewPoint", boost::python::no_init)
+			.def("SetView", &CViewPoint::SetView)
 			;
 
 		bp::class_<CViewport>("Viewport")
@@ -1451,9 +1707,14 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def("glCommands", &CViewport::glCommands)
 			.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
 			.def("OnMouseEvent", &CViewport::OnMouseEvent)
+			.def("OnMagExtents", &CViewport::OnMagExtents)
+			.def("RestorePreviousViewPoint", &CViewport::RestorePreviousViewPoint)
+			.def("ClearViewpoints", &CViewport::ClearViewpoints)
+			.def("StoreViewPoint", &CViewport::StoreViewPoint)
 			.def_readwrite("m_need_update", &CViewport::m_need_update)
 			.def_readwrite("m_need_refresh", &CViewport::m_need_refresh)
 			.def_readwrite("m_orthogonal", &CViewport::m_orthogonal)
+			.def_readwrite("m_view_point", &CViewport::m_view_point)
 			;
 
 		bp::class_<MouseEvent>("MouseEvent")
@@ -1477,26 +1738,35 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 			.def(bp::init<ObserverWrap>())
 			;
 
+
+		bp::class_<InputModeWrap, boost::noncopyable >("InputMode")
+			.def(bp::init<InputModeWrap>())
+			;
+
 		bp::def("OnInit", OnInit);
 		bp::def("OnExit", OnExit);
 
+		bp::def("Reset", CadReset);
+		bp::def("OpenFile", CadOpenFile);
 		bp::def("Import", CadImport);
+		bp::def("SaveFile", CadSaveFile);
+		bp::def("SaveObjects", SaveObjects);		
 		bp::def("RegisterNewOrOpen", RegisterNewOrOpen);
 		bp::def("DrawTriangle", &DrawTriangle);
 		bp::def("DrawLine", &DrawLine);
 		bp::def("AddProperty", AddProperty);
-		bp::def("GetFileFullPath", GetFileFullPath);
 		bp::def("GetObjectFromId", &GetObjectFromId);
 		bp::def("RegisterXMLRead", RegisterXMLRead);
 		bp::def("SetXmlValue", SetXmlValue);
 		bp::def("GetXmlValue", GetXmlValue);
-
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
-		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
+		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
+		bp::def("GetResFolder", GetResFolder);
 		bp::def("SetResFolder", SetResFolder);
 		bp::def("MessageBox", CadMessageBox);
 		bp::def("GetSelectedObjects", GetSelectedObjects);
+		bp::def("GetNumSelected", GetNumSelected);
 		bp::def("GetObjects", GetObjects);
 		bp::def("ObjectMarked", ObjectMarked);
 		bp::def("Select", Select);
@@ -1507,6 +1777,9 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 		bp::def("GetApp", GetApp, bp::return_value_policy<bp::reference_existing_object>());
 		bp::def("StartHistory", StartHistory);
 		bp::def("EndHistory", EndHistory);
+		bp::def("ClearHistory", ClearHistory);
+		bp::def("IsModified", IsModified);
+		bp::def("SetLikeNewFile", SetLikeNewFile);
 		bp::def("RollBack", RollBack);
 		bp::def("RollForward", RollForward);
 		bp::def("DeleteUndoably", DeleteUndoably);
@@ -1520,6 +1793,16 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 		bp::def("ChangePropertyChoice", ChangePropertyChoice);
 		bp::def("ChangePropertyColor", ChangePropertyColor);
 		bp::def("ChangePropertyCheck", ChangePropertyCheck);
+		bp::def("GetUnits", GetUnits);
+		bp::def("SetCallbackForGetLines", SetCallbackForGetLines);
+		bp::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
+		bp::def("GetSelectMode", GetSelectMode, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("GetMagnification", GetMagnification, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("GetViewRotating", GetViewRotating, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("GetViewZooming", GetViewZooming, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("GetViewPanning", GetViewPanning, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("SetInputMode", SetInputMode);
+
 
 		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)OBJECT_TYPE_UNKNOWN;
 		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)OBJECT_TYPE_SKETCH;

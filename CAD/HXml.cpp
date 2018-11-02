@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include "HXml.h"
+#include "strconv.h"
 
 HXml::HXml(TiXmlElement* pElem):m_element(*pElem){
 }
@@ -23,7 +24,8 @@ void HXml::GetProperties(std::list<Property *> *list){
 
 const wchar_t* HXml::GetIconFilePath()
 {
-	return L"/icons/xml.png";
+	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/xml.png";
+	return iconpath.c_str();
 }
 
 void HXml::WriteXML(TiXmlNode *root)
@@ -37,8 +39,13 @@ void HXml::WriteXML(TiXmlNode *root)
 HeeksObj* HXml::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	HXml* new_object = new HXml(pElem);
-	//new_object->ReadBaseXML(pElem);
+	new_object->ReadBaseXML(pElem);
 
 	return new_object;
+}
+
+const wchar_t* HXml::GetShortString(void)const
+{
+	return Ctt(m_element.Value());
 }
 

@@ -328,7 +328,7 @@ void GripperSelTransform::MakeMatrix(const geoff_geometry::Point3d &from, const 
 			double sy = start_vector * vy;
 			double ex = end_vector * vx;
 			double ey = end_vector * vy;
-			double angle = gp_Vec(sx, sy, 0).AngleWithRef(gp_Vec(ex, ey, 0), gp_Vec(0,0,1));
+			double angle = geoff_geometry::Point3d(sx, sy, 0).AngleWithRef(geoff_geometry::Point3d(ex, ey, 0), geoff_geometry::Point3d(0,0,1));
 			mat.SetRotation(rot_axis, angle);
 #endif
 		}

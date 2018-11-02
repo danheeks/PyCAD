@@ -110,8 +110,8 @@ public:
 	virtual bool ValidateProperties(){return true;}
 	virtual const wchar_t* GetIconFilePath();  
 	virtual int Intersects(const HeeksObj *object, std::list< double > *rl)const{return 0;}
-	virtual bool FindNearPoint(const double* ray_start, const double* ray_direction, double *point){return false;}
-	virtual bool FindPossTangentPoint(const double* ray_start, const double* ray_direction, double *point){return false;}
+	virtual bool FindNearPoint(const geoff_geometry::Line &ray, geoff_geometry::Point3d &point){ return false; }
+	virtual bool FindPossTangentPoint(const geoff_geometry::Line &ray, geoff_geometry::Point3d &point){ return false; }
 	virtual void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof);
 	virtual bool Stretch(const geoff_geometry::Point3d &p, const geoff_geometry::Point3d &shift, void* data){ return false; } // return true, if undo stretch is done with Add and Delete
 	virtual bool StretchTemporary(const geoff_geometry::Point3d &p, const geoff_geometry::Point3d &shift, void* data){ Stretch(p, shift, data); return true; } // returns true, because Stretch was done.  If not done, then override and return false;
@@ -136,8 +136,8 @@ public:
 	virtual std::list<HeeksObj *> GetChildren() const { std::list<HeeksObj *> empty; return(empty); }
 	virtual bool AutoExpand(){return false;}
 	virtual void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true){} // [nine doubles, three doubles],  or [nine doubles, nine doubles] if just_one_average_normal = false
-	virtual double Area()const{return 0.0;}
-	virtual void GetSegments(void(*callbackfunc)(const double *p), double pixels_per_mm, bool want_start_point = true)const{};
+	virtual double Area()const{ return 0.0; }
+	virtual void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const{};
 	virtual void WriteXML(TiXmlNode *root){}
 	virtual void WriteBaseXML(TiXmlElement *element);
 	virtual void ReadBaseXML(TiXmlElement* element);

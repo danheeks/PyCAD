@@ -146,7 +146,7 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const geoff_geometry
 
 	if (plc1.type == CircleType && plc2.type == CircleType)
 	{
-		bool success = HCircle::GetArcTangentPoints(plc1.c, plc2.c, d1.m_point, d2.m_point, wxGetApp().digitizing_radius, P1, P2, centre, axis);
+		bool success = HCircle::GetArcTangentPoints(plc1.c, plc2.c, d1.m_point, d2.m_point, theApp.digitizing_radius, P1, P2, centre, axis);
 		if (success && initial_direction){
 			// get the axis the right way round
 		}
@@ -154,15 +154,15 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const geoff_geometry
 	}
 	else if (plc1.type == LineType && plc2.type == CircleType)
 	{
-		return HCircle::GetArcTangentPoints(plc2.c, plc1.l, d2.m_point, wxGetApp().digitizing_radius, P1, P2, centre, axis);
+		return HCircle::GetArcTangentPoints(plc2.c, plc1.l, d2.m_point, theApp.digitizing_radius, P1, P2, centre, axis);
 	}
 	else if (plc1.type == CircleType && plc2.type == LineType)
 	{
-		return HCircle::GetArcTangentPoints(plc1.c, plc2.l, d1.m_point, wxGetApp().digitizing_radius, P2, P1, centre, axis);
+		return HCircle::GetArcTangentPoints(plc1.c, plc2.l, d1.m_point, theApp.digitizing_radius, P2, P1, centre, axis);
 	}
 	else if (plc1.type == LineType && plc2.type == LineType)
 	{
-		return HCircle::GetArcTangentPoints(plc1.l, plc2.l, d1.m_point, d2.m_point, wxGetApp().digitizing_radius, P1, P2, centre, axis);
+		return HCircle::GetArcTangentPoints(plc1.l, plc2.l, d1.m_point, d2.m_point, theApp.digitizing_radius, P1, P2, centre, axis);
 	}
 	else if (plc1.type == CircleType && plc2.type == PointType)
 	{
@@ -196,9 +196,9 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const geoff_geometry
 
 bool DigitizedPoint::GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, gp_Circ& c)
 {
-	geoff_geometry::Point3d v = d2.m_point.XYZ() - d1.m_point.XYZ();
+	geoff_geometry::Point3d v = d2.m_point - d1.m_point;
 	double d = d2.m_point.Distance(d1.m_point);
-	geoff_geometry::Point3d cen = d1.m_point.XYZ() + (v.XYZ() / 2);
+	geoff_geometry::Point3d cen = d1.m_point + (v / 2);
 	c.SetLocation(cen);
 	c.SetRadius(d / 2);
 	return true;
@@ -280,8 +280,8 @@ bool DigitizedPoint::GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& 
 	e.SetMajorRadius(d);
 	e.SetMinorRadius(d / 2);
 
-	geoff_geometry::Point3d vec = d2.m_point.XYZ() - d1.m_point.XYZ();
-	vec = vec.XYZ() / d;
+	geoff_geometry::Point3d vec = d2.m_point - d1.m_point;
+	vec = vec / d;
 	double rot = atan2(vec.y, vec.x);
 
 	geoff_geometry::Point3d up(0, 0, 1);
@@ -293,7 +293,7 @@ bool DigitizedPoint::GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& 
 	double maj_r = d;
 
 	//We have to rotate the incoming vector to be in our coordinate system
-	geoff_geometry::Point3d cir = d3.m_point.XYZ() - d1.m_point.XYZ();
+	geoff_geometry::Point3d cir = d3.m_point - d1.m_point;
 	cir.Rotate(gp_Ax1(zp, up), -rot + M_PI / 2);
 
 	double nradius = 1 / sqrt((1 - (1 / maj_r)*(1 / maj_r)*cir.y*cir.y) / cir.x / cir.x);

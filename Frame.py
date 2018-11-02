@@ -6,13 +6,22 @@ from PropertiesCanvas import PropertiesCanvas
 from ObjPropsCanvas import ObjPropsCanvas
 import cad
 import sys
-
 import os
+from HeeksConfig import HeeksConfig
+from Printout import Printout
+import geom
+
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
-        
+HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
+
 class Frame(wx.Frame):
-    def __init__(self, parent, id=-1, title='CAD ( Computer Aided Design )', pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
+    def __init__(self, parent, id=-1, title='', pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
         wx.Frame.__init__(self, parent, id, title, pos, size, style, name)
+
+        self.ID_RECENT_FIRST = wx.ID_HIGHEST + 1
+        self.ID_RECENT_MENU = self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES
+        self.windows_visible = {}
+        
         self.SetIcon(wx.Icon(pycad_dir + "/heekscad.png", wx.BITMAP_TYPE_PNG))
         
         self.MakeMenus()
@@ -27,24 +36,105 @@ class Frame(wx.Frame):
         self.aui_manager.AddPane(self.tree_canvas, wx.aui.AuiPaneInfo().Name('Objects').Caption('Objects').Left().BestSize(wx.Size(300,400)).Position(0))
         self.properties_canvas = ObjPropsCanvas(self)
         self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,400)).Position(1))
+        
+        wx.GetApp().RegisterHideableWindow(self.tree_canvas)
+        wx.GetApp().RegisterHideableWindow(self.properties_canvas)
 
         self.Center()
         self.aui_manager.Update()
         
+        self.Bind(wx.EVT_MENU_RANGE, self.OnOpenRecent, id=self.ID_RECENT_FIRST, id2=self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES)
+        
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
         self.current_menu_stack = []
+        self.bitmap_path = pycad_dir + '/bitmaps'
 
-        file_menu = wx.Menu()
-        self.Bind(wx.EVT_MENU, self.OnNew, file_menu.Append(wx.ID_ANY, 'New', 'Start a new job'))
-        self.Bind(wx.EVT_MENU, self.OnSolid, file_menu.Append(wx.ID_ANY, 'Solid', 'Import a test solid'))
-        self.Bind(wx.EVT_MENU, self.OnDan, file_menu.Append(wx.ID_ANY, 'Dan', 'Import a test solid'))
-        self.menuBar.Append(file_menu, '&File')
+        self.AddMenu('&File')
+        self.AddMenuItem('&New', self.OnNew, None, 'new')
+        self.AddMenuItem('&Open', self.OnOpen, None, 'open')
+        self.recent_files_menu = self.AddMenu('Open Recent', 'recent', self.OnUpdateOpenRecent)
+        self.EndMenu()
+        self.AddSeparator()
+        self.AddMenuItem('&Save\tCtrl+S', self.OnSave, self.OnUpdateSave, 'save')
+        self.AddMenuItem('Save &As...', self.OnSaveAs, None, 'saveas')
+        self.AddSeparator()
+        self.AddMenuItem('&Import', self.OnImport, None, 'import')
+        self.AddMenuItem('&Export', self.OnExport, None, 'export')
+        self.AddSeparator()
+        self.AddMenuItem('&Print...\tCtrl+P', self.OnPrint, None, 'print')
+        self.AddMenuItem('Page Setup...', self.OnPageSetup, None, 'psetup')
+        self.AddMenuItem('Print Preview', self.OnPrintPreview, None, 'ppreview')
+        self.AddSeparator()
+        self.AddMenuItem('Restore All Defaults', self.OnResetDefaults, None, 'restore')
+        self.AddSeparator()
+        self.AddMenuItem('Exit\tCtrl+Q', self.OnQuit, None, 'exit')
+        self.EndMenu()
+        
+        self.AddMenu('&Edit')
+        self.AddMenuItem('&Undo', self.OnUndo, None, 'undo')
+        self.AddMenuItem('&Redo', self.OnRedo, None, 'redo')
+        self.AddSeparator()
+        self.AddMenuItem('Cut', self.OnCut, self.OnUpdateCut, 'cut')
+        self.AddMenuItem('Copy', self.OnCopy, self.OnUpdateCopy, 'copy')
+        self.AddMenuItem('Paste', self.OnPaste, self.OnUpdatePaste, 'paste')
+        self.AddMenuItem('Delete', self.OnDelete, self.OnUpdateDelete, 'delete')
+        self.AddSeparator()
+        self.AddMenuItem('Select Mode', self.OnSelectMode, None, 'select')
+        self.EndMenu()
 
-        edit_menu = wx.Menu()
-        self.Bind(wx.EVT_MENU, self.OnUndo, edit_menu.Append(wx.ID_ANY, 'Undo', 'Undo last item'))
-        self.Bind(wx.EVT_MENU, self.OnRedo, edit_menu.Append(wx.ID_ANY, 'Redo', 'Redo Next item'))
-        self.menuBar.Append(edit_menu, '&Edit')
+        self.AddMenu('View')
+        self.AddMenuItem('Previous view', self.OnMagPrevious, None, 'magprev')
+        self.AddSeparator()
+        self.AddMenuItem('Zoom window', self.OnMag, None, 'mag')
+        self.AddMenuItem('Fit view to extents', self.OnMagExtents, None, 'magextents')
+        self.AddMenuItem('Fit view to extents, but no rotation', self.OnMagNoRot, None, 'magnorot')
+        self.AddMenuItem('View XY Front', self.OnMagXY, None, 'magxy')
+        self.AddMenuItem('View XY Back', self.OnMagXYM, None, 'magxym')
+        self.AddMenuItem('View XZ Top', self.OnMagXZ, None, 'magxz')
+        self.AddMenuItem('View XZ Bottom', self.OnMagXZM, None, 'magxzm')
+        self.AddMenuItem('View YZ Right', self.OnMagYZ, None, 'magyz')
+        self.AddMenuItem('View YZ Left', self.OnMagYZM, None, 'magyzm')
+        self.AddMenuItem('View XZY Isometric', self.OnMagXYZ, None, 'magxyz')
+        self.AddSeparator()
+        self.AddMenuItem('View rotate', self.OnViewRotate, None, 'viewrot')
+        self.AddMenuItem('View zoom', self.OnViewZoom, None, 'zoom')
+        self.AddMenuItem('View pan', self.OnViewPan, None, 'pan')
+        self.AddMenuItem('Full screen', self.OnFullScreen, None, 'fullscreen')
+        self.AddSeparator()
+        self.AddMenuItem('Redraw', self.OnRedraw, None, 'redraw')
+        self.EndMenu()
+
+        self.AddMenu('&Geometry')
+        self.AddMenuItem('Draw a sketch', self.OnLines, None, 'lines')
+        self.AddMenuItem('Draw circles through 3 points', self.OnCircles3p, None, 'circ3p')
+        self.AddMenuItem('Draw circles, centre and point', self.OnCircles2p, None, 'circ2p')
+        self.AddMenuItem('DrawEllipses', self.OnEllipse, None, 'circles')
+        self.AddMenuItem('Draw Infinite Lines', self.OnILine, None, 'iline')
+        self.AddMenuItem('Draw Points', self.OnPoints, None, 'point')
+        self.AddMenuItem('Gear', self.OnGear, None, 'gear')
+        self.AddSeparator()
+        self.AddMenuItem('Add Text', self.OnText, None, 'text')
+        self.AddMenuItem('Add Dimension', self.OnDimensioning, None, 'dimension')
+        self.EndMenu()
+
+        self.AddMenu('Set &Origin')
+        self.AddMenuItem('Pick 3 points', self.OnCoordinateSystem, None, 'coords3')
+        self.AddMenuItem('Pick 1 point', self.OnNewOrigin, None, 'coordsys')
+        self.EndMenu()
+
+        self.AddMenu('&Transform')
+        self.AddMenuItem('Move Translate', self.OnMoveTranslate, None, 'movet')
+        self.AddMenuItem('Copy Translate', self.OnCopyTranslate, None, 'copyt')
+        self.AddSeparator()
+        self.AddMenuItem('Move Rotate', self.OnMoveRotate, None, 'mover')
+        self.AddMenuItem('Copy Rotate', self.OnCopyRotate, None, 'copyr')
+        self.AddSeparator()
+        self.AddMenuItem('Move Mirror', self.OnMoveMirror, None, 'movem')
+        self.AddMenuItem('Copy Mirror', self.OnCopyMirror, None, 'copym')
+        self.AddSeparator()
+        self.AddMenuItem('Move Scale', self.OnMoveScale, None, 'moves')
+        self.EndMenu()
 
         self.AddExtraMenus();
 
@@ -65,42 +155,440 @@ class Frame(wx.Frame):
             item.SetBitmap(wx.Bitmap(image))
             
     def BitmapPath(self, name):
-        return pycad_dir + '/bitmaps/'+ name + '.png'
+        return self.bitmap_path + '/'+ name + '.png'
     
-    def AddMenu(self, title, bitmap_name = None):
+    def AddMenu(self, title, bitmap_name = None, onUpdate = None, id = wx.ID_ANY):
         menu = wx.Menu()
         current_menu = self.CurrentMenu()
         self.current_menu_stack.append(menu)
         if current_menu:
-            item = wx.MenuItem(current_menu, wx.ID_ANY, title)
+            item = wx.MenuItem(current_menu, id, title)
             item.SetSubMenu(menu)
             if bitmap_name != None:
-                self.SetMenuItemBitmap(item, self.BitmapPath(bitmap_name))
+                self.SetMenuItemBitmap(item, bitmap_name)
             current_menu.Append(item)
+            if onUpdate != None:
+                self.Bind(wx.EVT_UPDATE_UI, onUpdate, id = item.GetId())
         else:
             self.menuBar.Append(menu, title)
+        return menu
             
     def EndMenu(self):
         self.current_menu_stack.pop()
         
+    def AddSeparator(self):
+        current_menu = self.CurrentMenu()
+        if current_menu:
+            current_menu.AppendSeparator()
+        
     def AddMenuItem(self, title, onButton, onUpdate = None, bitmap_name = None):
         item = wx.MenuItem(self.CurrentMenu(), wx.ID_ANY, title)        
         self.SetMenuItemBitmap(item, bitmap_name)
-        self.Bind(wx.EVT_MENU, onButton, self.CurrentMenu().Append(item))        
+        self.Bind(wx.EVT_MENU, onButton, self.CurrentMenu().Append(item))     
+        if onUpdate:
+            self.Bind(wx.EVT_UPDATE_UI, onUpdate, id = item.GetId())  
     
     def OnNew(self, e):
-        wx.MessageBox('OnNew called')
+        res = self.CheckForModifiedDoc()
+        if res != wx.CANCEL:
+            cad.Reset()
+            # self.OnNewOrOpen(True, res)
+            cad.ClearHistory()
+            cad.SetLikeNewFile()
+            wx.GetApp().filepath = None
+            self.SetFrameTitle()
+            
+    def SetFrameTitle(self):
+        str = wx.GetApp().GetAppName() + ' - '
+        if wx.GetApp().filepath:
+            str += wx.GetApp().filepath
+        else:
+            str += 'Untitled'
+        self.SetTitle(str)
         
-    def OnSolid(self, e):
-        cad.Import(pycad_dir + '/cutsphere.stl')
+    def CheckForModifiedDoc(self):
+        # returns wxCANCEL if not OK to continue opening file
+        if cad.IsModified():
+            str = 'Save changes to file ' + wx.GetApp().filepath if wx.GetApp().filepath else 'Untitled'
+            res = wx.MessageBox(str, wx.MessageBoxCaptionStr, wx.CANCEL | wx.YES_NO|wx.CENTER)
+            if res == wx.CANCEL or res == wx.NO: return res
+            if res == wx.YES:
+                return self.SaveFile(cad.GetFileFullPath(), True)
+
+        return wx.OK
+    
+    def DoFileOpenViewMag(self):
+        self.graphics_canvas.viewport.OnMagExtents(True, 25)
+    
+    def OnOpenFilepath(self, filepath):
+        res = self.CheckForModifiedDoc()
+        if res != wx.CANCEL:
+            # self.OnBeforeNewOrOpen(True, res)
+            cad.Reset()
+            if cad.OpenFile(filepath):
+                self.DoFileOpenViewMag()
+                # self.OnNewOrOpen(True, res)
+                cad.ClearHistory()
+                cad.SetLikeNewFile()
+                wx.GetApp().filepath = filepath
+                self.SetFrameTitle()
+                wx.GetApp().InsertRecentFileItem(filepath)
+                wx.GetApp().WriteRecentFiles()
+                return True
+            else:
+                wx.MessageBox('Invalid file type chosen expecting .heeks')
+        return True
+                
+    def GetDefaultDir(self):
+        default_directory = os.getcwd()
         
-    def OnDan(self, e):
-        wx.MessageBox('Hello')
+        if len(wx.GetApp().recent_files) > 0:
+            default_directory = wx.GetApp().recent_files[0]
+            default_directory = os.path.dirname(os.path.realpath(default_directory))
+            
+        return default_directory
+
+    def OnOpen(self, e):
+        dialog = wx.FileDialog(self, 'Open File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
+        dialog.CenterOnParent()
+        
+        if dialog.ShowModal() == wx.ID_OK:
+            self.OnOpenFilepath(dialog.GetPath())
+                    
+    def OnOpenRecent(self, e):
+        file_path = wx.GetApp().recent_files[e.GetId() - self.ID_RECENT_FIRST]
+        self.OnOpenFilepath(file_path)
+        
+    def OnUpdateOpenRecent(self, e):
+        size = self.recent_files_menu.GetMenuItemCount()
+        menu_items = []
+        for i in range(0, size):
+            menu_items.append(self.recent_files_menu.FindItemByPosition(i))
+        for menu_item in menu_items:
+            self.recent_files_menu.Delete(menu_item)
+            
+        recent_id = self.ID_RECENT_FIRST
+        for filepath in wx.GetApp().recent_files:
+            self.recent_files_menu.Append(recent_id, filepath)
+            recent_id += 1
+            
+    def OnSaveFilepath(self, filepath):
+        if cad.SaveFile(filepath):
+            wx.GetApp().filepath = filepath        
+            cad.SetLikeNewFile()
+            self.SetFrameTitle()
+            wx.GetApp().InsertRecentFileItem(filepath)
+            wx.GetApp().WriteRecentFiles()
+            
+    def OnSave(self, e):
+        if wx.GetApp().filepath:
+            self.OnSaveFilepath(wx.GetApp().filepath)
+        else:
+            dialog = wx.FileDialog(self, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+            dialog.SetFilterIndex(1)
+            dialog.CenterOnParent()
+            if dialog.ShowModal() != wx.ID_CANCEL:
+                self.OnSaveFilepath(dialog.GetPath())
+            
+    def OnUpdateSave(self, e):
+        e.Enable(cad.IsModified())            
+            
+    def OnSaveAs(self, e):
+        if wx.GetApp().filepath:
+            default_directory = ''
+            default_filepath = wx.GetApp().filepath
+        else:
+            default_directory = self.GetDefaultDir()
+            default_filepath = ''            
+        
+        dialog = wx.FileDialog(self, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog.SetFilterIndex(1)
+        dialog.CenterOnParent()
+        if dialog.ShowModal() != wx.ID_CANCEL:
+            self.OnSaveFilepath(dialog.GetPath())
+            
+    def GetImportWildcardString(self):
+        imageExtStr = '' # to do, get image extensions from wx
+        imageExtStr2 = '' # to do, get image extensions from wx
+        registeredExtensions = '' # to do, this will be extensions added by child apps
+        return 'Known Files' + ' |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF' + imageExtStr + registeredExtensions + '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|Picture files (' + imageExtStr2 + ')|' + imageExtStr
+
+    def GetExportWildcardString(self):
+        return 'Known Files |*.stl;*.dxf;*.cpp;*.py;*.obj|STL files (*.stl)|*.stl|DXF files (*.dxf)|*.dxf|CPP files (*.cpp)|*.cpp|OpenCAMLib python files (*.py)|*.py|Wavefront .obj files (*.obj)|*.obj'
                                          
+    def OnImport(self, e):
+        config = HeeksConfig()
+        default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
+        dialog = wx.FileDialog(self, 'Import File', default_directory, '', self.GetImportWildcardString())
+        dialog.CenterOnParent()
+        
+        if dialog.ShowModal() == wx.ID_OK:
+            if self.OnOpenFilepath(dialog.GetPath()):
+                self.DoFileOpenViewMag()
+                config.Write('ImportDirectory', dialog.GetDirectory())
+            
+    def OnExport(self, e):
+        config = HeeksConfig()
+        default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
+        dialog = wx.FileDialog(self, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog.CenterOnParent()
+        
+        if dialog.ShowModal() == wx.ID_OK:
+            if cad.SaveFile(dialog.GetPath()):
+                config.Write('ExportDirectory', dialog.GetDirectory())
+                
+    def OnPrint(self, e):
+        printDialogData = wx.PrintDialogData(wx.GetApp().printData)
+        printer = wx.Printer(printDialogData)
+        self.printout = Printout()
+        if printer.Print(self, self.printout, True):
+            theApp.printData = printer.GetPrintDialogData().GetPrintData()
+        else:
+            if wx.Printer.GetLastError() == wx.PRINTER_ERROR:
+                wx.MessageBox('There was a problem printing.\nPerhaps your current printer is not set correctly?', 'Printing', wx.OK)
+            else:
+                wx.MessageBox('You canceled printing', 'Printing', wx.OK)
+                
+        self.printout = None
+            
+    def OnPageSetup(self, e):
+        pageSetupData = wx.GetApp().printData
+        
+        pageSetupDialog = wx.PageSetupDialog(self, wx.GetApp().pageSetupData)
+        pageSetupDialog.ShowModal()
+        
+        wx.GetApp().printData = pageSetupDialog.GetPageSetupDialogData().GetPrintData()
+        wx.GetApp().pageSetupData = pageSetupDialog.GetPageSetupDialogData()
+            
+    def OnPrintPreview(self, e):
+        printDialogData = wx.PrintDialogData(wx.GetApp().printData)
+        preview = wx.PrintPreview(Printout(), Printout(), printDialogData)
+        if not preview.IsOk():
+            preview = None
+            wx.MessageBox('There was a problem previewing.\nPerhaps your current printer is not set correctly?', 'Previewing', wx.OK)
+
+        frame = wx.PreviewFrame(preview, self, 'Print Preview', wx.Point(100,100), wx.Size(600, 650))
+        frame.Centre(wx.BOTH)
+        frame.Initialize()
+        frame.Show()
+    
+            
+    def OnResetDefaults(self, e):
+        pass # to do            
+            
+    def OnQuit(self, e):
+        pass # to do            
+            
     def OnUndo(self, e):
         cad.RollBack()
         
     def OnRedo(self, e):
         cad.RollForward()
+        
+    def CopySelectedItems(self):
+        temp_file = wx.StandardPaths.Get().GetTempDir() + '/temp_Heeks_clipboard_file.xml'
+        cad.SaveObjects(temp_file, cad.GetSelectedObjects())
+        
+        f = open(temp_file)
+        s = f.read()
+        
+        if wx.TheClipboard.Open():
+            wx.TheClipboard.SetData(wx.TextDataObject(s))
+            wx.TheClipboard.Close()
+            
+        f.close()
+                
+    def OnCut(self, e):
+        self.CopySelectedItems()
+        cad.StartHistory()
+        for object in cad.GetSelectedObjects():
+            cad.DeleteUndoably(object)
+        cad.EndHistory()
+        
+    def OnUpdateCut(self, e):
+        e.Enable(cad.GetNumSelected() > 0)            
+        
+    def OnCopy(self, e):
+        self.CopySelectedItems()
+        
+    def OnUpdateCopy(self, e):
+        e.Enable(cad.GetNumSelected() > 0)            
+        
+    def OnPaste(self, e):
+        s = None
+        
+        if wx.TheClipboard.Open():
+            if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
+                data = wx.TextDataObject()
+                wx.TheClipboard.GetData(data)
+                s = data.GetText()                
+            wx.TheClipboard.Close()
+            
+        if s == None:
+            return
 
+        temp_file = wx.StandardPaths.Get().GetTempDir() + '/temp_Heeks_clipboard_file.xml'
+        f = open(temp_file, 'w')
+        f.write(s)
+        f.close()
+        cad.Import(temp_file)
+        
+    def IsPasteReady(self):
+        if wx.TheClipboard.IsOpened():
+            return False
+        
+        if wx.TheClipboard.Open():
+            s = ''
+            if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
+                data = wx.TextDataObject()
+                wx.TheClipboard.GetData(data)
+                s = data.GetText()
+            wx.TheClipboard.Close()
+            
+            if s[:19] == '<?xml version="1.0"':
+                return True
+        
+        return False
+    
+    def OnUpdatePaste(self, e):
+        e.Enable(self.IsPasteReady())    
+        
+    def OnDelete(self, e):
+        cad.StartHistory()
+        for object in cad.GetSelectedObjects():
+            cad.DeleteUndoably(object)
+        cad.EndHistory()
+        
+    def OnUpdateDelete(self, e):
+        e.Enable(cad.GetNumSelected() > 0)            
+    
+    def OnSelectMode(self, e):
+        cad.SetInputMode(cad.GetSelectMode())
+        
+    def OnMagPrevious(self, e):
+        self.graphics_canvas.viewport.RestorePreviousViewPoint()
+        self.graphics_canvas.Refresh()
+        
+    def OnMag(self, e):
+        cad.SetInputMode(cad.GetMagnification())
+        
+    def OnMagExtents(self, e):
+        self.graphics_canvas.viewport.OnMagExtents(True, 6)
+        
+    def OnMagNoRot(self, e):
+        self.graphics_canvas.viewport.OnMagExtents(False, 6)
+        
+    def OnMagAxes(self, unitY, unitZ):
+        self.graphics_canvas.viewport.ClearViewpoints()
+        self.graphics_canvas.viewport.m_view_point.SetView(unitY, unitZ, 6)
+        self.graphics_canvas.viewport.StoreViewPoint()
+        self.Refresh()
+        
+    def OnMagXY(self, e):
+        self.OnMagAxes(geom.Point3D(0,1,0), geom.Point3D(0,0,1))
+        
+    def OnMagXYM(self, e):
+        self.OnMagAxes(geom.Point3D(0,1,0), geom.Point3D(0,0,-1))
+        
+    def OnMagXZ(self, e):
+        self.OnMagAxes(geom.Point3D(0,0,-1), geom.Point3D(0,1,0))
+        
+    def OnMagXZM(self, e):
+        self.OnMagAxes(geom.Point3D(0,0,1), geom.Point3D(0,-1,0))
+        
+    def OnMagYZ(self, e):
+        self.OnMagAxes(geom.Point3D(0,1,0), geom.Point3D(1,0,0))
+        
+    def OnMagYZM(self, e):
+        self.OnMagAxes(geom.Point3D(0,1,0), geom.Point3D(1,0,0))
+        
+    def OnMagXYZ(self, e):
+        s = 0.5773502691896257
+        self.OnMagAxes(geom.Point3D(-s,s,s), geom.Point3D(s,-s,s))
+        
+    def OnViewRotate(self, e):
+        cad.SetInputMode(cad.GetViewRotating())
+        
+    def OnViewZoom(self, e):
+        cad.SetInputMode(cad.GetViewZooming())
+        
+    def OnViewPan(self, e):
+        cad.SetInputMode(cad.GetViewPanning())
+        
+    def ShowFullScreen(self, show, style = wx.FULLSCREEN_ALL):
+        if show:
+            self.SetMenuBar(None)
+            self.windows_visible = {}
+            for w in wx.GetApp().hideable_windows:
+                self.windows_visible[w] = self.aui_manager.GetPane(w).IsShown() and w.IsShown()
+                self.aui_manager.GetPane(w).Show(False)
+        else:
+            self.SetMenuBar(self.menuBar)
+            for w in wx.GetApp().hideable_windows:
+                if w in self.windows_visible:
+                    visible = self.windows_visible[w]
+                    self.aui_manager.GetPane(w).Show(visible)
+            
+        res = super().ShowFullScreen(show, style)
+        self.aui_manager.Update()
+        return res
+        
+    def OnFullScreen(self, e):
+        self.ShowFullScreen(True)
+        
+    def OnRedraw(self, e):
+        pass
+        
+    def OnLines(self, e):
+        pass
+        
+    def OnCircles3p(self, e):
+        pass
+        
+    def OnCircles2p(self, e):
+        pass
+        
+    def OnEllipse(self, e):
+        pass
+        
+    def OnILine(self, e):
+        pass
+        
+    def OnPoints(self, e):
+        pass
+        
+    def OnGear(self, e):
+        pass
+        
+    def OnText(self, e):
+        pass
+        
+    def OnDimensioning(self, e):
+        pass
+        
+    def OnCoordinateSystem(self, e):
+        pass
+        
+    def OnNewOrigin(self, e):
+        pass
+        
+    def OnMoveTranslate(self, e):
+        pass
+        
+    def OnCopyTranslate(self, e):
+        pass
+        
+    def OnMoveRotate(self, e):
+        pass
+        
+    def OnCopyRotate(self, e):
+        pass
 
+    def OnMoveMirror(self, e):
+        pass
+        
+    def OnCopyMirror(self, e):
+        pass
+        
+    def OnMoveScale(self, e):
+        pass

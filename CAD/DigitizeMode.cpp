@@ -289,12 +289,10 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfEverything();
 			while(object){
-				double ray_start[3], ray_direction[3];
-				ray.p0.get(ray_start);
-				ray.v.get(ray_direction);
-				double p[3];
-				if(object->FindNearPoint(ray_start, ray_direction, p)){
-					compare_list.push_back(DigitizedPoint(geoff_geometry::Point3d(p), DigitizeNearestType));
+				geoff_geometry::Line ray;
+				geoff_geometry::Point3d p;
+				if(object->FindNearPoint(ray, p)){
+					compare_list.push_back(DigitizedPoint(p, DigitizeNearestType));
 				}
 				object = marked_object.Increment();
 			}
@@ -304,11 +302,9 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfEverything();
 			while(object){
-				double ray_start[3], ray_direction[3];
-				ray.p0.get(ray_start);
-				ray.v.get(ray_direction);
-				double p[3];
-				if(object->FindPossTangentPoint(ray_start, ray_direction, p)){
+				geoff_geometry::Line ray;
+				geoff_geometry::Point3d p;
+				if (object->FindPossTangentPoint(ray, p)){
 					compare_list.push_back(DigitizedPoint(geoff_geometry::Point3d(p), DigitizeTangentType, object));
 				}
 				object = marked_object.Increment();

@@ -166,7 +166,7 @@ void CSvgRead::ProcessArea()
 			else
 			{
 				// add an arc
-				HArc *arc = new HArc(geoff_geometry::Point3d(span.m_p.x, span.m_p.y, 0.0), geoff_geometry::Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(gp_Ax2(geoff_geometry::Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), geoff_geometry::Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp.current_color);
+				HArc *arc = new HArc(geoff_geometry::Point3d(span.m_p.x, span.m_p.y, 0.0), geoff_geometry::Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), geoff_geometry::Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp.current_color);
 				ModifyByMatrix(arc);
 				AddSketchIfNeeded();
 				m_sketch->Add(arc, NULL);
@@ -642,9 +642,9 @@ struct TwoPoints CSvgRead::ReadCubic(const char *text,geoff_geometry::Point3d pp
 	}
 
 #if 0
-	geoff_geometry::Point3d dir=ppnt.XYZ()-pcpnt.XYZ();
+	geoff_geometry::Point3d dir=ppnt-pcpnt;
 	double d = ppnt.Distance(pcpnt);
-	geoff_geometry::Point3d pnt1(ppnt.XYZ() + dir.XYZ() * d);
+	geoff_geometry::Point3d pnt1(ppnt + dir * d);
 	retpts.pcpnt = geoff_geometry::Point3d(x2,y2,0);
 	retpts.ppnt = geoff_geometry::Point3d(x3,y3,0);
 
@@ -686,9 +686,9 @@ struct TwoPoints CSvgRead::ReadQuadratic(const char *text,geoff_geometry::Point3
 		x2+=ppnt.x; y2+=ppnt.y;
 	}
 #if 0
-	geoff_geometry::Point3d dir=ppnt.XYZ()-pcpnt.XYZ();
+	geoff_geometry::Point3d dir=ppnt-pcpnt;
 	double d = ppnt.Distance(pcpnt);
-	geoff_geometry::Point3d pnt1(ppnt.XYZ() + dir.XYZ() * d);
+	geoff_geometry::Point3d pnt1(ppnt + dir * d);
 	retpts.pcpnt = pnt1;
 	retpts.ppnt = geoff_geometry::Point3d(x2,y2,0);
 
@@ -717,7 +717,7 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 
 	//from http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
 
-	geoff_geometry::Point3d mid((ppnt.XYZ()-ept.XYZ())/2);
+	geoff_geometry::Point3d mid((ppnt-ept)/2);
 	mid.Rotate(gp_Ax1(zp,up),-xrot);
 	
 	double error = mid.x * mid.x/(rx*rx) + mid.y*mid.y/(ry*ry);
@@ -736,7 +736,7 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 	}
 	geoff_geometry::Point3d cvec(cx,cy,0);
 	cvec.Rotate(gp_Ax1(zp,up),xrot);
-	geoff_geometry::Point3d cpnt(cvec.XYZ() + (ept.XYZ()+ppnt.XYZ())/2);
+	geoff_geometry::Point3d cpnt(cvec + (ept+ppnt)/2);
 
 	if(rx<ry)
 	{
@@ -746,8 +746,8 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 		xrot += M_PI/2;
 	}
 
-	geoff_geometry::Point3d start(ppnt.XYZ() - cpnt.XYZ());
-	geoff_geometry::Point3d end(ept.XYZ()-cpnt.XYZ());
+	geoff_geometry::Point3d start(ppnt - cpnt);
+	geoff_geometry::Point3d end(ept-cpnt);
 	start.Rotate(gp_Ax1(zp,up),-xrot);
 	end.Rotate(gp_Ax1(zp,up),-xrot);
 
@@ -988,7 +988,7 @@ void CSvgRead::OnReadEllipse(geoff_geometry::Point3d c, double maj_r, double min
 {
 #if 0
 	geoff_geometry::Point3d up(0,0,1);
-	gp_Elips elip(gp_Ax2(c,geoff_geometry::Point3d(0,0,1)),maj_r,min_r);
+	gp_Elips elip(geoff_geometry::Point3d(c,geoff_geometry::Point3d(0,0,1)),maj_r,min_r);
 	elip.Rotate(gp_Ax1(c,up),rot);
 	HEllipse *new_object = new HEllipse(elip,start,end,&theApp.current_color);
 	ModifyByMatrix(new_object);
@@ -1001,7 +1001,7 @@ void CSvgRead::OnReadCircle(geoff_geometry::Point3d c, double r)
 {
 #if 0
 	geoff_geometry::Point3d up(0,0,1);
-	gp_Circ cir(gp_Ax2(c,up),r);
+	gp_Circ cir(geoff_geometry::Point3d(c,up),r);
 	HCircle *new_object = new HCircle(cir,&theApp.current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();
