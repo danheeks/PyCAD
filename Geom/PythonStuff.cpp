@@ -713,7 +713,7 @@ BOOST_PYTHON_MODULE(geom) {
 
 	///class Matrix
 	/// defines a 4x4 transformation matrix
-	bp::class_<geoff_geometry::Matrix, boost::shared_ptr<geoff_geometry::Matrix> > ("Matrix")
+	bp::class_<geoff_geometry::Matrix > ("Matrix")
         .def(bp::init<geoff_geometry::Matrix>())
 		.def("__init__", bp::make_constructor(&matrix3point_constructor))
 		.def("__init__", bp::make_constructor(&matrix_constructor))///function Matrix///return Matrix///params list values///makes a Matrix from a list of 16 floats
@@ -721,7 +721,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Multiply", &geoff_geometry::Matrix::Multiply)///function Multiply///params Matrix m///transforms this matrix by the given one
 		.def("Inverse", &geoff_geometry::Matrix::Inverse)///function Inverse
 		.def("Rotate", &MatrixRotate)
-		.def("Translate", &geoff_geometry::Matrix::Translate)
+		.def("Translate", static_cast< void (geoff_geometry::Matrix::*)(double, double, double) >(&geoff_geometry::Matrix::Translate))
 		;
 
 	///class Point3d
