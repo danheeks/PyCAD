@@ -38,12 +38,15 @@
 #include "Sketch.h"
 #include "HLine.h"
 #include "HArc.h"
+#include "HPoint.h"
 #include "InputMode.h"
 #include "SelectMode.h"
 #include "MagDragWindow.h"
 #include "ViewRotating.h"
 #include "ViewZooming.h"
 #include "ViewPanning.h"
+#include "KeyEvent.h"
+#include "LineArcDrawing.h"
 
 namespace bp = boost::python;
 
@@ -218,6 +221,7 @@ enum
 	OBJECT_TYPE_SKETCH_LINE,
 	OBJECT_TYPE_SKETCH_ARC,
 	OBJECT_TYPE_CIRCLE,
+	OBJECT_TYPE_POINT,
 };
 
 int HeeksTypeToObjectType(long type)
@@ -495,6 +499,86 @@ public:
 			return str_for_input_mode.c_str();
 		}
 		return NULL;
+	}
+
+	void OnKeyDown(KeyEvent& e)override
+	{
+		if (bp::override f = this->get_override("OnKeyDown"))
+		{
+			f(e);
+		}
+		else
+			CInputMode::OnKeyDown(e);
+	}
+
+	void OnKeyUp(KeyEvent& e)override
+	{
+		if (bp::override f = this->get_override("OnKeyUp"))
+		{
+			f(e);
+		}
+		else
+			CInputMode::OnKeyUp(e);
+	}
+
+};
+
+class DrawingWrap : public Drawing, public bp::wrapper<Drawing>
+{
+public:
+	DrawingWrap() :Drawing(){}
+
+	void AddPoint()override
+	{
+		if (bp::override f = this->get_override("AddPoint"))
+		{
+			f();
+		}
+		else
+			Drawing::AddPoint();
+	}
+
+	bool calculate_item(DigitizedPoint &end)override
+	{
+		if (bp::override f = this->get_override("CalculateItem"))
+		{
+			bool result = f(end);
+			return result;
+		}
+		else
+			return Drawing::calculate_item(end);
+	}
+
+	bool is_an_add_level(int level)override
+	{
+		if (bp::override f = this->get_override("IsAnAddLevel"))
+		{
+			bool result = f(level);
+			return result;
+		}
+		return Drawing::is_an_add_level(level);
+	}
+
+	int number_of_steps()override
+	{
+		if (bp::override f = this->get_override("NumberOfSteps"))
+		{
+			int result = f();
+			return result;
+		}
+		return Drawing::number_of_steps();
+	}
+
+	HeeksObj* TempObject(){
+		return Drawing::TempObject();
+	}
+
+	void ClearObjectsMade(){
+		Drawing::ClearObjectsMade();
+	}
+
+	void AddToTempObjects(HeeksObj* object){
+		return Drawing::AddToTempObjects(object);
 	}
 };
 
@@ -800,7 +884,7 @@ public:
 	{
 #if 0
 		to do
-		geoff_geometry::Point3d p;
+		Point3d p;
 		HeeksColor c;
 
 		// get the attributes
@@ -841,6 +925,8 @@ int GetTypeFromHeeksObj(const HeeksObj* object)
 		return (int)OBJECT_TYPE_CIRCLE;
 	case StlSolidType:
 		return (int)OBJECT_TYPE_SOLID;
+	case PointType:
+		return (int)OBJECT_TYPE_POINT;
 	default:
 		return object->GetType();
 	}
@@ -988,6 +1074,56 @@ void SetInputMode(CInputMode* input_mode)
 	theApp.SetInputMode(input_mode);
 }
 
+CInputMode* GetInputMode()
+{
+	return theApp.input_mode_object;
+}
+
+void SetLineArcDrawing()
+{
+	line_strip.drawing_mode = LineDrawingMode;
+	theApp.SetInputMode(&line_strip);
+}
+
+void SetCircles3pDrawing()
+{
+	line_strip.drawing_mode = CircleDrawingMode;
+	line_strip.circle_mode = ThreePointsCircleMode;
+	theApp.SetInputMode(&line_strip);
+}
+
+void SetCircles2pDrawing()
+{
+	line_strip.drawing_mode = CircleDrawingMode;
+	line_strip.circle_mode = CentreAndPointCircleMode;
+	theApp.SetInputMode(&line_strip);
+}
+
+void SetCircle1pDrawing()
+{
+	line_strip.drawing_mode = CircleDrawingMode;
+	line_strip.circle_mode = CentreAndRadiusCircleMode;
+	theApp.SetInputMode(&line_strip);
+}
+
+void SetEllipseDrawing()
+{
+	line_strip.drawing_mode = EllipseDrawingMode;
+	theApp.SetInputMode(&line_strip);
+}
+
+void SetILineDrawing()
+{
+	line_strip.drawing_mode = ILineDrawingMode;
+	theApp.SetInputMode(&line_strip);
+}
+
+HeeksObj* NewPoint(const Point3d& p)
+{
+	HPoint* point = new HPoint(p, &theApp.current_color);
+	return point;
+}
+
 boost::python::list HeeksObjGetLines(HeeksObj& object)
 {
 	return_list_ForGetLines = boost::python::list();
@@ -1032,7 +1168,7 @@ HeeksColor HeeksObjGetColor(const HeeksObj& object)
 
 bp::tuple SketchGetStartPoint(CSketch &sketch)
 {
-	geoff_geometry::Point3d s(0.0, 0.0, 0.0);
+	Point3d s(0.0, 0.0, 0.0);
 
 	HeeksObj* last_child = NULL;
 	HeeksObj* child = sketch.GetFirstChild();
@@ -1042,7 +1178,7 @@ bp::tuple SketchGetStartPoint(CSketch &sketch)
 
 bp::tuple SketchGetEndPoint(CSketch &sketch)
 {
-	geoff_geometry::Point3d s(0.0, 0.0, 0.0);
+	Point3d s(0.0, 0.0, 0.0);
 
 	HeeksObj* last_child = NULL;
 	HeeksObj* child = sketch.GetFirstChild();
@@ -1092,14 +1228,14 @@ bp::tuple SketchGetCircleCentre(CSketch& sketch)
 	if (span->GetType() == ArcType)
 	{
 		HArc* arc = (HArc*)span;
-		geoff_geometry::Point3d& C = arc->C;
+		Point3d& C = arc->C;
 		return bp::make_tuple(C.x, C.y, C.z);
 	}
 	else if (span->GetType() == CircleType)
 	{
 #if 0 // to do
 		HCircle* circle = (HCircle*)span;
-		const geoff_geometry::Point3d& C = circle->m_axis.Location();
+		const Point3d& C = circle->m_axis.Location();
 		return bp::make_tuple(C.X(), C.Y(), C.Z());
 #endif
 	}
@@ -1127,14 +1263,14 @@ void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double 
 		BaseObject::triangles_begun = true;
 	}
 
-	geoff_geometry::Point3d p0(x0, x1, x2);
-	geoff_geometry::Point3d p1(x3, x4, x5);
-	geoff_geometry::Point3d p2(x6, x7, x8);
-	geoff_geometry::Point3d v1(p0, p1);
-	geoff_geometry::Point3d v2(p0, p2);
+	Point3d p0(x0, x1, x2);
+	Point3d p1(x3, x4, x5);
+	Point3d p2(x6, x7, x8);
+	Point3d v1(p0, p1);
+	Point3d v2(p0, p2);
 	try
 	{
-		geoff_geometry::Point3d norm = (v1 ^ v2).Normalized();
+		Point3d norm = (v1 ^ v2).Normalized();
 		glNormal3d(norm.x, norm.y, norm.z);
 	}
 	catch (...)
@@ -1321,6 +1457,11 @@ void StlSolidWriteSTL(CStlSolid& solid, double tolerance, std::wstring filepath)
 static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, const HeeksColor* color)
 {
 	return boost::shared_ptr<CStlSolid>(new CStlSolid(title.c_str(), color));
+}
+
+static boost::shared_ptr<HPoint> initHPoint(const Point3d& p)
+{
+	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp.current_color));
 }
 
 boost::python::list GetSelectedObjects() {
@@ -1597,6 +1738,7 @@ double GetUnits()
 			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
 			.def("GetID", &HeeksObj::GetID)
 			.def("GetIndex", &HeeksObj::GetIndex)
+			.def("KillGLLists", &HeeksObj::KillGLLists)
 			.def("GetColor", &HeeksObjGetColor)
 			.def("GetTitle", &HeeksObjGetTitle)
 			.def("AutoExpand", &HeeksObj::AutoExpand)
@@ -1610,6 +1752,7 @@ double GetUnits()
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetLines", &HeeksObjGetLines)
+			.def("SetStartPoint", &HeeksObj::SetStartPoint)
 			;
 
 		bp::class_<HeeksColor>("Color")
@@ -1641,6 +1784,10 @@ double GetUnits()
 			.def("Clear", &ObjList::ClearUndoably)
 			;
 
+		bp::class_<IdNamedObj, bp::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
+			.def(bp::init<IdNamedObj>())
+			;
+
 		bp::class_<IdNamedObjList, bp::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
 			.def(bp::init<IdNamedObjList>())
 			;
@@ -1656,6 +1803,11 @@ double GetUnits()
 			.def("GetCircleDiameter", &SketchGetCircleDiameter)
 			.def("GetCircleCentre", &SketchGetCircleCentre)
 			.def("WriteDxf", &SketchWriteDXF)
+			;
+
+		bp::class_<HPoint, bp::bases<IdNamedObj>>("Point", boost::python::no_init)
+			.def("__init__", bp::make_constructor(&initHPoint))
+//			.def_readwrite("p", &HPoint::m_p)
 			;
 
 		bp::class_<CStlSolid, bp::bases<HeeksObj>>("StlSolid")
@@ -1739,8 +1891,45 @@ double GetUnits()
 			;
 
 
+		bp::class_<KeyEvent>("KeyEvent")
+			.def(bp::init<KeyEvent>())
+			.def_readwrite("m_key_code", &KeyEvent::m_key_code)
+			;
+
 		bp::class_<InputModeWrap, boost::noncopyable >("InputMode")
 			.def(bp::init<InputModeWrap>())
+			.def("OnKeyDown", &CInputMode::OnKeyDown)
+			.def("OnKeyUp", &CInputMode::OnKeyUp)
+			;
+
+		bp::enum_<DigitizeType>("DigitizeType")
+			.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
+			.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
+			.value("DIGITIZE_INTER_TYPE", DigitizeIntersType)
+			.value("DIGITIZE_MIDPOINT_TYPE", DigitizeMidpointType)
+			.value("DIGITIZE_CENTRE_TYPE", DigitizeCentreType)
+			.value("DIGITIZE_SCREEN_TYPE", DigitizeScreenType)
+			.value("DIGITIZE_COORDS_TYPE", DigitizeCoordsType)
+			.value("DIGITIZE_NEAREST_TYPE", DigitizeNearestType)
+			.value("DIGITIZE_TANGENT_TYPE", DigitizeTangentType)
+			.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
+			;
+
+		bp::class_<DigitizedPoint>("DigitizedPoint")
+			.def(bp::init<DigitizedPoint>())
+			.def_readwrite("point", &DigitizedPoint::m_point)
+			.def_readwrite("type", &DigitizedPoint::m_type)
+			;
+
+		bp::class_<DrawingWrap, bp::bases<CInputMode>, boost::noncopyable >("Drawing")
+			.def(bp::init<DrawingWrap>())
+			.def("AddPoint", &Drawing::AddPoint)
+			.def("CalculateItem", &DrawingWrap::calculate_item)
+			.def("IsAnAddLevel", &DrawingWrap::is_an_add_level)
+			.def("NumberOfSteps", &DrawingWrap::number_of_steps)
+			.def("TempObject", &DrawingWrap::TempObject, bp::return_value_policy<bp::reference_existing_object>())
+			.def("ClearObjectsMade", &DrawingWrap::ClearObjectsMade)
+			.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
 			;
 
 		bp::def("OnInit", OnInit);
@@ -1802,7 +1991,14 @@ double GetUnits()
 		bp::def("GetViewZooming", GetViewZooming, bp::return_value_policy<bp::reference_existing_object>());
 		bp::def("GetViewPanning", GetViewPanning, bp::return_value_policy<bp::reference_existing_object>());
 		bp::def("SetInputMode", SetInputMode);
-
+		bp::def("GetInputMode", GetInputMode, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("SetLineArcDrawing", SetLineArcDrawing);
+		bp::def("SetCircles3pDrawing", SetCircles3pDrawing);
+		bp::def("SetCircles2pDrawing", SetCircles2pDrawing);
+		bp::def("SetCircle1pDrawing", SetCircle1pDrawing);
+		bp::def("SetEllipseDrawing", SetEllipseDrawing);
+		bp::def("SetILineDrawing", SetILineDrawing);
+		bp::def("NewPoint", NewPoint, bp::return_value_policy<bp::reference_existing_object>());
 
 		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)OBJECT_TYPE_UNKNOWN;
 		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)OBJECT_TYPE_SKETCH;
@@ -1810,6 +2006,7 @@ double GetUnits()
 		bp::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)OBJECT_TYPE_SKETCH_LINE;
 		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)OBJECT_TYPE_SKETCH_ARC;
 		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)OBJECT_TYPE_CIRCLE;
+		bp::scope().attr("OBJECT_TYPE_POINT") = (int)OBJECT_TYPE_POINT;
 
 		bp::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
@@ -1821,5 +2018,4 @@ double GetUnits()
 		bp::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
-
 	}

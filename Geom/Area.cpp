@@ -756,7 +756,7 @@ CArea CArea::Swept(const Point& vector)const
 }
 
 
-void CArea::Transform(const geoff_geometry::Matrix& matrix)
+void CArea::Transform(const Matrix& matrix)
 {
 	for (std::list<CCurve>::iterator It = m_curves.begin(); It != m_curves.end(); It++)
 	{

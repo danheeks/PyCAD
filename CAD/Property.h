@@ -42,14 +42,14 @@ public:
 	virtual void Set(double value){} // only called by Property Changer, set Property::m_editable to enable this
 	virtual void Set(const wchar_t*){} // only called by Property Changer, set Property::m_editable to enable this
 	virtual void Set(int value){} // only called by Property Changer, set Property::m_editable to enable this
-	virtual void Set(const geoff_geometry::Matrix& value){} // only called by Property Changer, set Property::m_editable to enable this
+	virtual void Set(const Matrix& value){} // only called by Property Changer, set Property::m_editable to enable this
 	virtual bool GetBool()const{ return false; }
 	virtual void GetChoices(std::list< std::wstring > &choices){}
 	virtual const HeeksColor &GetColor()const{ return *((const HeeksColor*)NULL); }
 	virtual double GetDouble()const{ return 0.0; }
 	virtual const wchar_t* GetString()const{ return NULL; }
 	virtual int GetInt()const{return 66;}
-	virtual const geoff_geometry::Matrix &GetTrsf()const{ return *((const geoff_geometry::Matrix*)NULL); }
+	virtual const Matrix &GetTrsf()const{ return *((const Matrix*)NULL); }
 	virtual void GetList(std::list< Property* > &list)const{}
 };
 
@@ -270,9 +270,9 @@ public:
 
 PropertyList* PropertyVertex(HeeksObj* object, const wchar_t* title, double* p);
 PropertyList* PropertyVertex(HeeksObj* object, const wchar_t* title, const double* p);
-PropertyList* PropertyPnt(HeeksObj* object, const wchar_t* title, geoff_geometry::Point3d* pnt);
-void PropertyPnt(std::list<Property *> *list, HeeksObj* object, geoff_geometry::Point3d* pnt);
-PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix* trsf);
+PropertyList* PropertyPnt(HeeksObj* object, const wchar_t* title, Point3d* pnt);
+void PropertyPnt(std::list<Property *> *list, HeeksObj* object, Point3d* pnt);
+PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, Matrix* trsf);
 
 
 #endif

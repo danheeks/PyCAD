@@ -18,7 +18,7 @@ HLine::HLine(const HLine &line):EndedObject(){
 	operator=(line);
 }
 
-HLine::HLine(const geoff_geometry::Point3d &a, const geoff_geometry::Point3d &b, const HeeksColor* col):EndedObject(){
+HLine::HLine(const Point3d &a, const Point3d &b, const HeeksColor* col):EndedObject(){
 	A = a;
 	B = b;
 	SetColor(*col);
@@ -38,8 +38,8 @@ HLine* line_for_tool = NULL;
 class MakeCylinderOnLine:public Tool{
 public:
 	void Run(){
-		geoff_geometry::Point3d v(line_for_tool->A, line_for_tool->B);
-		CCylinder* new_object = new CCylinder(geoff_geometry::Point3d(line_for_tool->A, v), 1.0, v.Magnitude(), _("Cylinder"), HeeksColor(191, 191, 240), 1.0f);
+		Point3d v(line_for_tool->A, line_for_tool->B);
+		CCylinder* new_object = new CCylinder(Point3d(line_for_tool->A, v), 1.0, v.Magnitude(), _("Cylinder"), HeeksColor(191, 191, 240), 1.0f);
 		theApp.StartHistory();
 		theApp.AddUndoably(new_object,NULL,NULL);
 		theApp.EndHistory();
@@ -52,8 +52,8 @@ static MakeCylinderOnLine make_cylinder_on_line;
 class MakeConeOnLine:public Tool{
 public:
 	void Run(){
-		geoff_geometry::Point3d v(line_for_tool->A, line_for_tool->B);
-		CCone* new_object = new CCone(geoff_geometry::Point3d(line_for_tool->A, v), 2.0, 1.0, v.Magnitude(), _("Cone"), HeeksColor(240, 240, 191), 1.0f);
+		Point3d v(line_for_tool->A, line_for_tool->B);
+		CCone* new_object = new CCone(Point3d(line_for_tool->A, v), 2.0, 1.0, v.Magnitude(), _("Cone"), HeeksColor(240, 240, 191), 1.0f);
 		theApp.StartHistory();
 		theApp.AddUndoably(new_object,NULL,NULL);
 		theApp.EndHistory();
@@ -67,7 +67,7 @@ static MakeConeOnLine make_cone_on_line;
 class ClickMidpointOnLine:public Tool{
 public:
 	void Run(){
-		geoff_geometry::Point3d midpoint((line_for_tool->A + line_for_tool->B) /2);
+		Point3d midpoint((line_for_tool->A + line_for_tool->B) /2);
 
 		theApp.m_digitizing->digitized_point = DigitizedPoint(midpoint, DigitizeInputType);
 		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
@@ -121,7 +121,7 @@ const wchar_t* HLine::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-bool HLine::GetMidPoint(geoff_geometry::Point3d &pos)
+bool HLine::GetMidPoint(Point3d &pos)
 {
 	pos = (A + B) * 0.5;
 	return true;
@@ -159,9 +159,9 @@ void HLine::glCommands(bool select, bool marked, bool no_color){
 	glVertex3d(B.x, B.y, B.z);
 	if (m_thickness != 0.0)
 	{
-		geoff_geometry::Point3d Ve(m_extrusion_vector[0], m_extrusion_vector[1], m_extrusion_vector[2]);
-		geoff_geometry::Point3d Ae = A + Ve * m_thickness;
-		geoff_geometry::Point3d Be = B + Ve * m_thickness;
+		Point3d Ve(m_extrusion_vector[0], m_extrusion_vector[1], m_extrusion_vector[2]);
+		Point3d Ae = A + Ve * m_thickness;
+		Point3d Be = B + Ve * m_thickness;
 		glVertex3d(B.x, B.y, B.z);
 		glVertex3d(Be.x, Be.y, Be.z);
 		glVertex3d(Be.x, Be.y, Be.z);
@@ -203,7 +203,7 @@ void HLine::GetProperties(std::list<Property *> *list){
 	HeeksObj::GetProperties(list);
 }
 
-bool HLine::FindNearPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point){
+bool HLine::FindNearPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point){
 	// The OpenCascade libraries throw an exception when one tries to
 	// create a gp_Lin() object using a vector that doesn't point
 	// anywhere.  If this is a zero-length line then we're in
@@ -212,11 +212,11 @@ bool HLine::FindNearPoint(const geoff_geometry::Point3d & ray_start, const geoff
 	    (A.y == B.y) &&
 	    (A.z == B.z)) return(false);
 
-	geoff_geometry::Line line(ray_start, ray_direction);
-	geoff_geometry::Line lshort;
+	Line line(ray_start, ray_direction);
+	Line lshort;
 	double t1, t2;
 	line.Shortest(GetLine(), lshort, t1, t2);
-	geoff_geometry::Point3d p1 = lshort.p0;
+	Point3d p1 = lshort.p0;
 
 	if(!Intersects(p1))
 		return false;
@@ -225,13 +225,13 @@ bool HLine::FindNearPoint(const geoff_geometry::Point3d & ray_start, const geoff
 	return true;
 }
 
-bool HLine::FindPossTangentPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point){
+bool HLine::FindPossTangentPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point){
 	// any point on this line is a possible tangent point
 	return FindNearPoint(ray_start, ray_direction, point);
 }
 
-geoff_geometry::Line HLine::GetLine()const{
-	return geoff_geometry::Line(A, B);
+Line HLine::GetLine()const{
+	return Line(A, B);
 }
 
 int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
@@ -253,7 +253,7 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 			    (A.y == B.y) &&
 			    (A.z == B.z)) break;
 
-			geoff_geometry::Point3d pnt;
+			Point3d pnt;
 			if(intersect(GetLine(), ((HLine*)object)->GetLine(), pnt))
 			{
 				if(Intersects(pnt) && ((HLine*)object)->Intersects(pnt)){
@@ -266,7 +266,7 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case ILineType:
 		{
-			geoff_geometry::Point3d pnt;
+			Point3d pnt;
 			if(intersect(GetLine(), ((HILine*)object)->GetLine(), pnt))
 			{
 				if(Intersects(pnt)){
@@ -279,11 +279,11 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case ArcType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(GetLine(), ((HArc*)object)->GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(Intersects(pnt) && ((HArc*)object)->Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -295,11 +295,11 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case CircleType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(GetLine(), ((HCircle*)object)->GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -314,17 +314,17 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 	return numi;
 }
 
-bool HLine::Intersects(const geoff_geometry::Point3d &pnt)const
+bool HLine::Intersects(const Point3d &pnt)const
 {
 #if 0
 	gp_Lin this_line = GetLine();
 	if(!intersect(pnt, this_line))return false;
 
 	// check it lies between A and B
-	geoff_geometry::Point3d v = this_line.Direction();
-	double dpA = geoff_geometry::Point3d(A) * v;
-	double dpB = geoff_geometry::Point3d(B) * v;
-	double dp = geoff_geometry::Point3d(pnt) * v;
+	Point3d v = this_line.Direction();
+	double dpA = Point3d(A) * v;
+	double dpB = Point3d(B) * v;
+	double dp = Point3d(pnt) * v;
 	return dp >= dpA - theApp.m_geom_tol && dp <= dpB + theApp.m_geom_tol;
 #else
 	return false;
@@ -336,11 +336,11 @@ void HLine::GetSegments(void(*callbackfunc)(const double *p, bool start), double
 	(*callbackfunc)(B.getBuffer(), false);
 }
 
-geoff_geometry::Point3d HLine::GetSegmentVector(double fraction)
+Point3d HLine::GetSegmentVector(double fraction)
 {
-	geoff_geometry::Point3d line_vector(A, B);
-	if(line_vector.magnitude() < 0.000000001)return geoff_geometry::Point3d(0, 0, 0);
-	return geoff_geometry::Point3d(A, B).Normalized();
+	Point3d line_vector(A, B);
+	if(line_vector.magnitude() < 0.000000001)return Point3d(0, 0, 0);
+	return Point3d(A, B).Normalized();
 }
 
 void HLine::WriteXML(TiXmlNode *root)
@@ -356,7 +356,7 @@ void HLine::WriteXML(TiXmlNode *root)
 HeeksObj* HLine::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	HeeksColor c;
-	HLine* new_object = new HLine(geoff_geometry::Point3d(), geoff_geometry::Point3d(), &c);
+	HLine* new_object = new HLine(Point3d(), Point3d(), &c);
 	new_object->ReadBaseXML(pElem);
 
 	// The OpenCascade libraries throw an exception when one tries to
@@ -376,7 +376,7 @@ HeeksObj* HLine::ReadFromXMLElement(TiXmlElement* pElem)
 
 void HLine::Reverse()
 {
-	geoff_geometry::Point3d temp = A;
+	Point3d temp = A;
 	A = B;
 	B = temp;
 }

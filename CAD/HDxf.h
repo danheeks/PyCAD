@@ -43,7 +43,7 @@ private:
 	Blocks_t m_blocks;
 	std::set<BlockName_t> inserted_blocks;
 	CSketch* m_current_block;
-	geoff_geometry::Matrix m_ucs_matrix;
+	Matrix m_ucs_matrix;
 	bool m_undoable;
 
 	HeeksColor DecodeACI(const int aci);

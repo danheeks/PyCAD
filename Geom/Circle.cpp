@@ -2,15 +2,15 @@
 // Copyright 2011, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-#include "Circle.h"
+#include "geometry.h"
 
 Circle::Circle(const Point& p0, const Point& p1, const Point& p2)
 {
 	// from TangentCircles in http://code.google.com/p/heekscad/source/browse/trunk/src/Geom.cpp
 
 	// set default values, in case this fails
-	m_radius = 0.0;
-	m_c = Point(0, 0);
+	radius = 0.0;
+	pc = Point(0, 0);
 
 	double x1 = p0.x;
 	double y1 = p0.y;
@@ -50,8 +50,8 @@ Circle::Circle(const Point& p0, const Point& p1, const Point& p2)
 
 			// set the circle
 			if(r >= 0.0){
-				m_c = Point(x, y);
-				m_radius = r;
+				pc = Point(x, y);
+				radius = r;
 			}
 		}
 	}
@@ -59,8 +59,8 @@ Circle::Circle(const Point& p0, const Point& p1, const Point& p2)
 
 bool Circle::PointIsOn(const Point& p, double accuracy)
 {
-	double rp = p.dist(m_c);
-	bool on = fabs(m_radius - rp) < accuracy;
+	double rp = p.dist(pc);
+	bool on = fabs(radius - rp) < accuracy;
 	return on;
 }
 

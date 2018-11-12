@@ -23,7 +23,7 @@ public:
 	const ExtrudedObj& operator=(const ExtrudedObj &b);
 
 	// HeeksObj's virtual functions
-	void Transform(const geoff_geometry::Matrix& m);
+	void Transform(const Matrix& m);
 	void CopyFrom(const HeeksObj* object){ operator=(*((ExtrudedObj*)object)); }
 	HeeksObj* MakeACopyWithID();
 	bool IsDifferent(HeeksObj* other);
@@ -65,7 +65,7 @@ template < typename T >
 bool ExtrudedObj<T>::IsDifferent(HeeksObj *other)
 {
 	ExtrudedObj<T>* eobj = (ExtrudedObj<T>*)other;
-	if (fabs(eobj->m_thickness - m_thickness) > geoff_geometry::TOLERANCE)
+	if (fabs(eobj->m_thickness - m_thickness) > TOLERANCE)
 		return true;
 
 	for (int i = 0; i<3; i++)
@@ -77,9 +77,9 @@ bool ExtrudedObj<T>::IsDifferent(HeeksObj *other)
 	return T::IsDifferent(other);
 }
 
-template < typename T > void ExtrudedObj<T>::Transform(const geoff_geometry::Matrix& m){
-	geoff_geometry::Matrix mat(m);
-	geoff_geometry::Point3d v(m_extrusion_vector[0], m_extrusion_vector[1], m_extrusion_vector[2]);
+template < typename T > void ExtrudedObj<T>::Transform(const Matrix& m){
+	Matrix mat(m);
+	Point3d v(m_extrusion_vector[0], m_extrusion_vector[1], m_extrusion_vector[2]);
 	v = v.Transformed(mat);
 	v.get(m_extrusion_vector);
 }

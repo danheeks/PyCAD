@@ -27,11 +27,11 @@ public:
 class CRay
 {
 public:
-	geoff_geometry::Point3d m_p;
-	geoff_geometry::Vector3d m_v;
+	Point3d m_p;
+	Point3d m_v;
 	int m_type;//  0 +x+y+z  1 +x+y-z  2 +x-y+z  3 +x-y-z  4 -x+y+z  5 -x+y-z  6 -x-y+z  7 -x-y-z
 
-	CRay(const geoff_geometry::Point3d& p, const geoff_geometry::Vector3d& v);
+	CRay(const Point3d& p, const Point3d& v);
 };
 
 
@@ -63,17 +63,17 @@ public:
 	void GetTrianglesInBox();
 	bool GetRayColor(const CRay& ray, unsigned char* col4, bool bright_spot);
 	void Split();
-	void MakeSphere(const geoff_geometry::Point3d& c, double r);
-	int TouchingSphere(const geoff_geometry::Point3d& c, double r);
+	void MakeSphere(const Point3d& c, double r);
+	int TouchingSphere(const Point3d& c, double r);
 };
 
 class CIntersectPoint
 {
 public:
-	geoff_geometry::Point3d m_p;
+	Point3d m_p;
 	const CTri* m_tri;
 
-	CIntersectPoint(const geoff_geometry::Point3d &p, const CTri* tri) :m_p(p), m_tri(tri){}
+	CIntersectPoint(const Point3d &p, const CTri* tri) :m_p(p), m_tri(tri){}
 };
 
 static const int TRI_INSIDE = 1;
@@ -87,7 +87,7 @@ public:
 
 	void SetInsideFlags();
 	void MakeNewListOfTriangles(const std::list<CTri> &in_tris, std::list<CTri> &tris, int keep_type);
-	int GetInsideOutside(const geoff_geometry::Point3d& p);
+	int GetInsideOutside(const Point3d& p);
 	int GetInsideOutside(const CTri* tri);
 	void IntersectionPoints(const CXRay& xray, std::list<CIntersectPoint> &list);
 	void SplitTriangles(std::list<CTri> &tris);

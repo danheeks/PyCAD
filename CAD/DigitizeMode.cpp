@@ -139,21 +139,21 @@ void DigitizeMode::OnKeyDown(wxKeyEvent& event)
 }
 #endif
 
-static geoff_geometry::Matrix global_matrix_relative_to_screen;
+static Matrix global_matrix_relative_to_screen;
 
-static const geoff_geometry::Matrix& digitizing_matrix(bool calculate = false){
+static const Matrix& digitizing_matrix(bool calculate = false){
 	if(calculate){
 		if(theApp.digitize_screen){
-			geoff_geometry::Matrix mat = theApp.GetDrawMatrix(false);
-			geoff_geometry::Point3d origin = geoff_geometry::Point3d(0, 0, 0).Transformed(mat);
-			geoff_geometry::Point3d x1 = origin + geoff_geometry::Point3d(1, 0, 0);
-			geoff_geometry::Point3d y1 = origin + geoff_geometry::Point3d(0, 1, 0);
-			geoff_geometry::Point3d po = origin;
+			Matrix mat = theApp.GetDrawMatrix(false);
+			Point3d origin = Point3d(0, 0, 0).Transformed(mat);
+			Point3d x1 = origin + Point3d(1, 0, 0);
+			Point3d y1 = origin + Point3d(0, 1, 0);
+			Point3d po = origin;
 			po = theApp.m_current_viewport->m_view_point.glUnproject(po);
 			x1 = theApp.m_current_viewport->m_view_point.glUnproject(x1);
 			y1 = theApp.m_current_viewport->m_view_point.glUnproject(y1);
 			
-			global_matrix_relative_to_screen = geoff_geometry::Matrix(origin, geoff_geometry::Point3d(po, x1).Normalized(), geoff_geometry::Point3d(po, y1).Normalized());
+			global_matrix_relative_to_screen = Matrix(origin, Point3d(po, x1).Normalized(), Point3d(po, y1).Normalized());
 		}
 		else{
 			global_matrix_relative_to_screen = theApp.GetDrawMatrix(true);
@@ -169,7 +169,7 @@ bool DigitizeMode::OnModeChange(void){
 	return true;
 }
 
-bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::const_iterator &It, geoff_geometry::Point3d& pnt, bool four_doubles = false)
+bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::const_iterator &It, Point3d& pnt, bool four_doubles = false)
 {
 	if (It == dlist.end())return false;
 	if (four_doubles)It++;
@@ -182,12 +182,12 @@ bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::
 	return true;
 }
 
-int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<geoff_geometry::Point3d> &plist, bool four_doubles = false)
+int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<Point3d> &plist, bool four_doubles = false)
 {
 	int nump = 0;
 	for (std::list<double>::const_iterator It = dlist.begin(); It != dlist.end();)
 	{
-		geoff_geometry::Point3d pnt;
+		Point3d pnt;
 		if (!make_point_from_doubles(dlist, It, pnt, four_doubles))break;
 		plist.push_back(pnt);
 		nump++;
@@ -195,12 +195,12 @@ int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<geoff_geom
 	return nump;
 }
 
-int convert_gripdata_to_pnts(const std::list<GripData> &dlist, std::list<geoff_geometry::Point3d> &plist)
+int convert_gripdata_to_pnts(const std::list<GripData> &dlist, std::list<Point3d> &plist)
 {
 	int nump = 0;
 	for (std::list<GripData>::const_iterator It = dlist.begin(); It != dlist.end(); ++It)
 	{
-		geoff_geometry::Point3d pnt;
+		Point3d pnt;
 		pnt.x = ((*It).m_x);
 		pnt.y = ((*It).m_y);
 		pnt.z = ((*It).m_z);
@@ -212,7 +212,7 @@ int convert_gripdata_to_pnts(const std::list<GripData> &dlist, std::list<geoff_g
 
 
 DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
-	geoff_geometry::Line ray = theApp.m_current_viewport->m_view_point.SightLine(input_point);
+	Line ray = theApp.m_current_viewport->m_view_point.SightLine(input_point);
 	std::list<DigitizedPoint> compare_list;
 	MarkedObjectManyOfSame marked_object;
 	if(theApp.digitize_end || theApp.digitize_inters || theApp.digitize_centre || theApp.digitize_midpoint || theApp.digitize_nearest || theApp.digitize_tangent){
@@ -227,11 +227,11 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			while(object){
 				std::list<GripData> vl;
 				object->GetGripperPositionsTransformed(&vl, true);
-				std::list<geoff_geometry::Point3d> plist;
+				std::list<Point3d> plist;
 				convert_gripdata_to_pnts(vl, plist);
-				for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+				for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 				{
-					geoff_geometry::Point3d& pnt = *It;
+					Point3d& pnt = *It;
 					compare_list.push_back(DigitizedPoint(pnt, DigitizeEndofType));
 				}
 				object = marked_object.Increment();
@@ -260,11 +260,11 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 						std::list<double> rl;
 						if(object->Intersects(object2, &rl))
 						{
-							std::list<geoff_geometry::Point3d> plist;
+							std::list<Point3d> plist;
 							convert_doubles_to_pnts(rl, plist);
-							for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+							for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 							{
-								geoff_geometry::Point3d& pnt = *It;
+								Point3d& pnt = *It;
 								compare_list.push_back(DigitizedPoint(pnt, DigitizeIntersType));
 							}
 						}
@@ -277,7 +277,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
 			while(object){
-				geoff_geometry::Point3d p;
+				Point3d p;
 				if(object->GetMidPoint(p)){
 					compare_list.push_back(DigitizedPoint(p, DigitizeMidpointType));
 				}
@@ -289,8 +289,8 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfEverything();
 			while(object){
-				geoff_geometry::Line ray;
-				geoff_geometry::Point3d p;
+				Line ray;
+				Point3d p;
 				if(object->FindNearPoint(ray, p)){
 					compare_list.push_back(DigitizedPoint(p, DigitizeNearestType));
 				}
@@ -302,10 +302,10 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfEverything();
 			while(object){
-				geoff_geometry::Line ray;
-				geoff_geometry::Point3d p;
+				Line ray;
+				Point3d p;
 				if (object->FindPossTangentPoint(ray, p)){
-					compare_list.push_back(DigitizedPoint(geoff_geometry::Point3d(p), DigitizeTangentType, object));
+					compare_list.push_back(DigitizedPoint(Point3d(p), DigitizeTangentType, object));
 				}
 				object = marked_object.Increment();
 			}
@@ -337,9 +337,9 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		}
 	}
 	if(theApp.digitize_centre && (min_dist == -1 || min_dist * theApp.GetPixelScale()>5)){
-		geoff_geometry::Point3d pos;
+		Point3d pos;
 		for(HeeksObj* object = marked_object.GetFirstOfEverything(); object != NULL; object = marked_object.Increment()){
-			geoff_geometry::Point3d p, p2;
+			Point3d p, p2;
 			int num = object->GetCentrePoints(p, p2);
 			if(num == 1)
 			{
@@ -350,7 +350,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 				double t;
 				double dist1 = ray.Near(p, t).Dist(p);
 				double dist2 = ray.Near(p2, t).Dist(p2);
-				compare_list.push_back(DigitizedPoint(geoff_geometry::Point3d((dist1 < dist2) ? p : p2), DigitizeCentreType));
+				compare_list.push_back(DigitizedPoint(Point3d((dist1 < dist2) ? p : p2), DigitizeCentreType));
 			}
 			else
 				continue;
@@ -370,34 +370,34 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	return point;
 }
 
-DigitizedPoint DigitizeMode::Digitize(const geoff_geometry::Line &ray){
-	geoff_geometry::Plane pl(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(0, 0, 1));
+DigitizedPoint DigitizeMode::Digitize(const Line &ray){
+	Plane pl(Point3d(0, 0, 0), Point3d(0, 0, 1));
 	pl.Transform(digitizing_matrix(true));
-	geoff_geometry::Point3d pnt;
+	Point3d pnt;
 	double t;
 	if(!pl.Intof(ray, pnt, t)){
-		pl = geoff_geometry::Plane(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(0, -1, 0));
+		pl = Plane(Point3d(0, 0, 0), Point3d(0, -1, 0));
 		if(!pl.Intof(ray, pnt, t))DigitizedPoint();
 
-		pl = geoff_geometry::Plane(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(1, 0, 0));
+		pl = Plane(Point3d(0, 0, 0), Point3d(1, 0, 0));
 		if(!pl.Intof(ray, pnt, t))DigitizedPoint();
 	}
 
 	DigitizedPoint point(pnt, DigitizeCoordsType);
 
 	if(theApp.draw_to_grid){
-		geoff_geometry::Point3d plane_vx = geoff_geometry::Point3d(1, 0, 0).Transformed(digitizing_matrix());
-		geoff_geometry::Point3d plane_vy = geoff_geometry::Point3d(0, 1, 0).Transformed(digitizing_matrix());
-		geoff_geometry::Point3d datum = geoff_geometry::Point3d(0, 0, 0).Transformed(digitizing_matrix());
+		Point3d plane_vx = Point3d(1, 0, 0).Transformed(digitizing_matrix());
+		Point3d plane_vy = Point3d(0, 1, 0).Transformed(digitizing_matrix());
+		Point3d datum = Point3d(0, 0, 0).Transformed(digitizing_matrix());
 
-		double a = geoff_geometry::Point3d(datum) * plane_vx;
-		double b = geoff_geometry::Point3d(point.m_point) * plane_vx;
+		double a = Point3d(datum) * plane_vx;
+		double b = Point3d(point.m_point) * plane_vx;
 		double c = b - a;
 		double extra1 = c > -0.00000001 ? 0.5:-0.5;
 		c = (int)(c / theApp.digitizing_grid + extra1) * theApp.digitizing_grid;
 
-		double datum_dotp_y = geoff_geometry::Point3d(datum) * plane_vy;
-		double rp_dotp_y = geoff_geometry::Point3d(point.m_point) * plane_vy;
+		double datum_dotp_y = Point3d(datum) * plane_vy;
+		double rp_dotp_y = Point3d(point.m_point) * plane_vy;
 		double d = rp_dotp_y - datum_dotp_y;
 		double extra2 = d > -0.00000001 ? 0.5:-0.5;
 		d = (int)(d / theApp.digitizing_grid + extra2) * theApp.digitizing_grid;

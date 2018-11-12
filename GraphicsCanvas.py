@@ -4,6 +4,7 @@ import sys
 import math
 import cad
 import Mouse
+import Key
 from RefreshObserver import RefreshObserver
 
 graphics_canvases = []
@@ -48,13 +49,15 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       tool.Run()
       
     def OnKeyDown(self, event):
-        pass
-#        if event.GetKeyCode() == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
-#            wx.GetApp().frame.ShowFullScreen(False)
-#        else:
-#            wx.GetApp().
+        if event.GetKeyCode() == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
+            wx.GetApp().frame.ShowFullScreen(False)
+        else:
+            key_event = Key.KeyEventFromWx(event)
+            cad.GetInputMode().OnKeyDown(key_event)
+            
     def OnKeyUp(self, event):
-        pass
+        key_event = Key.KeyEventFromWx(event)
+        cad.GetInputMode().OnKeyUp(key_event)
     
     def AppendToolsToMenu(self, menu, tools):
       for tool in tools:

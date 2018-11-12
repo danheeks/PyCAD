@@ -84,9 +84,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Geom\Arc.cpp" />
+    <ClCompile Include="..\Geom\Area.cpp" />
+    <ClCompile Include="..\Geom\AreaClipper.cpp" />
+    <ClCompile Include="..\Geom\AreaOrderer.cpp" />
+    <ClCompile Include="..\Geom\AreaPocket.cpp" />
+    <ClCompile Include="..\Geom\Circle.cpp" />
+    <ClCompile Include="..\Geom\clipper.cpp" />
     <ClCompile Include="..\Geom\Construction.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Geom\Curve.cpp" />
     <ClCompile Include="..\Geom\Finite.cpp" />
     <ClCompile Include="..\Geom\Matrix.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -151,6 +159,12 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Geom\Arc.h" />
+    <ClInclude Include="..\Geom\Area.h" />
+    <ClInclude Include="..\Geom\AreaOrderer.h" />
+    <ClInclude Include="..\Geom\Circle.h" />
+    <ClInclude Include="..\Geom\clipper.hpp" />
+    <ClInclude Include="..\Geom\Curve.h" />
     <ClInclude Include="..\Geom\geometry.h" />
     <ClInclude Include="..\Geom\Point.h" />
     <ClInclude Include="App.h" />
@@ -183,6 +197,7 @@
     <ClInclude Include="IdNamedObjList.h" />
     <ClInclude Include="InputMode.h" />
     <ClInclude Include="IPoint.h" />
+    <ClInclude Include="KeyEvent.h" />
     <ClInclude Include="LineArcDrawing.h" />
     <ClInclude Include="MagDragWindow.h" />
     <ClInclude Include="MarkedList.h" />

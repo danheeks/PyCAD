@@ -89,11 +89,9 @@
     <ClCompile Include="dxf.cpp" />
     <ClCompile Include="Finite.cpp" />
     <ClCompile Include="HeeksGeomDxf.cpp" />
-    <ClCompile Include="kurve.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="OctTree.cpp" />
-    <ClCompile Include="offset.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="Solid.cpp" />
     <ClCompile Include="Tris.cpp" />

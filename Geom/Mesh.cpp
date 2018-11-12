@@ -71,18 +71,18 @@ void CMeshEdgeAndDir::AddFace(CMeshFace* face)
 		m_edge->m_f[1] = face;
 }
 
-bool CMeshFace::GetNormal(geoff_geometry::Vector3d &norm)const
+bool CMeshFace::GetNormal(Point3d &norm)const
 {
 	 if (m_vertices.size() < 3)
 		 return false;
 
-	geoff_geometry::Point3d p[3];
+	Point3d p[3];
 	for (int i = 0; i < 3; i++)
 	{
-		p[i] = geoff_geometry::Point3d(m_vertices[i]->m_x[0], m_vertices[i]->m_x[1], m_vertices[i]->m_x[2]);
+		p[i] = Point3d(m_vertices[i]->m_x[0], m_vertices[i]->m_x[1], m_vertices[i]->m_x[2]);
 	}
 
-	norm = geoff_geometry::Vector3d(p[0], p[1]) ^ geoff_geometry::Vector3d(p[0], p[2]);
+	norm = Point3d(p[0], p[1]) ^ Point3d(p[0], p[2]);
 	norm.normalise();
 
 	return true;

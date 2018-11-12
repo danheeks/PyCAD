@@ -299,14 +299,14 @@ void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 					HeeksColor col(rand() >> 7, rand() >> 7, rand() >> 7);
 					Material(col).glMaterial(1.0);
 				}
-				geoff_geometry::Point3d p0(t.x[0][0], t.x[0][1], t.x[0][2]);
-				geoff_geometry::Point3d p1(t.x[1][0], t.x[1][1], t.x[1][2]);
-				geoff_geometry::Point3d p2(t.x[2][0], t.x[2][1], t.x[2][2]);
-				geoff_geometry::Point3d v1(p0, p1);
-				geoff_geometry::Point3d v2(p0, p2);
+				Point3d p0(t.x[0][0], t.x[0][1], t.x[0][2]);
+				Point3d p1(t.x[1][0], t.x[1][1], t.x[1][2]);
+				Point3d p2(t.x[2][0], t.x[2][1], t.x[2][2]);
+				Point3d v1(p0, p1);
+				Point3d v2(p0, p2);
 				try
 				{
-					geoff_geometry::Point3d norm = (v1 ^ v2).Normalized();
+					Point3d norm = (v1 ^ v2).Normalized();
 					float n[3];
 					n[0] = (float)(norm.x);
 					n[1] = (float)(norm.y);
@@ -393,14 +393,14 @@ void CStlSolid::GetBox(CBox &box){
 	box.Insert(m_box);
 }
 
-void CStlSolid::Transform(const geoff_geometry::Matrix &m){
-	geoff_geometry::Matrix mat = geoff_geometry::Matrix(m);
+void CStlSolid::Transform(const Matrix &m){
+	Matrix mat = Matrix(m);
 	for(std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
 	{
 		CStlTri &t = *It;
 		for(int i = 0; i<3; i++){
-			geoff_geometry::Point3d vx;
-			vx = geoff_geometry::Point3d(t.x[i][0], t.x[i][1], t.x[i][2]);
+			Point3d vx;
+			vx = Point3d(t.x[i][0], t.x[i][1], t.x[i][2]);
 			vx = vx.Transformed(mat);
 			t.x[i][0] = (float)vx.x;
 			t.x[i][1] = (float)vx.y;
@@ -446,14 +446,14 @@ void CStlSolid::GetTriangles(void(*callbackfunc)(const double* x, const double* 
 		x[6] = t.x[2][0];
 		x[7] = t.x[2][1];
 		x[8] = t.x[2][2];
-		geoff_geometry::Point3d p0(t.x[0][0], t.x[0][1], t.x[0][2]);
-		geoff_geometry::Point3d p1(t.x[1][0], t.x[1][1], t.x[1][2]);
-		geoff_geometry::Point3d p2(t.x[2][0], t.x[2][1], t.x[2][2]);
-		geoff_geometry::Point3d v1(p0, p1);
-		geoff_geometry::Point3d v2(p0, p2);
+		Point3d p0(t.x[0][0], t.x[0][1], t.x[0][2]);
+		Point3d p1(t.x[1][0], t.x[1][1], t.x[1][2]);
+		Point3d p2(t.x[2][0], t.x[2][1], t.x[2][2]);
+		Point3d v1(p0, p1);
+		Point3d v2(p0, p2);
 		try
 		{
-			geoff_geometry::Point3d norm = (v1 ^ v2).Normalized();
+			Point3d norm = (v1 ^ v2).Normalized();
 			n[0] = norm.x;
 			n[1] = norm.y;
 			n[2] = norm.z;

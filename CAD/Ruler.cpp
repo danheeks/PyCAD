@@ -86,12 +86,12 @@ HRuler::HRuler() : m_gl_list(0), m_select_gl_list(0)
 	m_empty_length = 3;
 }
 
-void HRuler::GetFourCorners(geoff_geometry::Point3d *point)
+void HRuler::GetFourCorners(Point3d *point)
 {
-	point[0] = geoff_geometry::Point3d(-m_empty_length, -m_width, 0);
-	point[1] = geoff_geometry::Point3d(m_length - m_empty_length, -m_width, 0);
-	point[2] = geoff_geometry::Point3d(m_length - m_empty_length, 0, 0);
-	point[3] = geoff_geometry::Point3d(-m_empty_length, 0, 0);
+	point[0] = Point3d(-m_empty_length, -m_width, 0);
+	point[1] = Point3d(m_length - m_empty_length, -m_width, 0);
+	point[2] = Point3d(m_length - m_empty_length, 0, 0);
+	point[3] = Point3d(-m_empty_length, 0, 0);
 }
 
 double HRuler::GetUnits()
@@ -189,7 +189,7 @@ void HRuler::glCommands(bool select, bool marked, bool no_color)
 		if(!no_color)glColor4ub(255, 255, 255, 120); // white
 		if (!select)theApp.EnableBlend();
 		glDepthMask(0);
-		geoff_geometry::Point3d point[4];
+		Point3d point[4];
 		GetFourCorners(point);
 		glBegin(GL_TRIANGLES);
 		glVertex3d(point[0].x, point[0].y, point[0].z);
@@ -248,7 +248,7 @@ void HRuler::KillGLLists()
 
 void HRuler::GetBox(CBox &box)
 {
-	geoff_geometry::Point3d point[4];
+	Point3d point[4];
 	GetFourCorners(point);
 
 	for(int i = 0; i<4; i++)
@@ -260,14 +260,14 @@ void HRuler::GetBox(CBox &box)
 
 HeeksObj *HRuler::MakeACopy(void)const{ return new HRuler(*this);}
 
-void HRuler::Transform(const geoff_geometry::Matrix& m)
+void HRuler::Transform(const Matrix& m)
 {
 	m_trsf = m * m_trsf;
 }
 
 void HRuler::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
-	geoff_geometry::Point3d point[4];
+	Point3d point[4];
 	GetFourCorners(point);
 
 	for(int i = 0; i<4; i++)point[i] = point[i].Transformed(m_trsf);
@@ -323,7 +323,7 @@ void HRuler::GetProperties(std::list<Property *> *list)
 	HeeksObj::GetProperties(list);
 }
 
-bool HRuler::GetScaleAboutMatrix(geoff_geometry::Matrix &m)
+bool HRuler::GetScaleAboutMatrix(Matrix &m)
 {
 	m_trsf = m;
 	return true;

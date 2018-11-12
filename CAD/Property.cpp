@@ -143,15 +143,15 @@ PropertyList* PropertyVertex(HeeksObj* object, const wchar_t* title, const doubl
 
 class PropertyPntCoord :public Property{
 protected:
-	geoff_geometry::Point3d* m_pnt;
+	Point3d* m_pnt;
 public:
-	PropertyPntCoord(HeeksObj* object, const wchar_t* title, geoff_geometry::Point3d *pnt) :Property(object, title), m_pnt(pnt){ }
+	PropertyPntCoord(HeeksObj* object, const wchar_t* title, Point3d *pnt) :Property(object, title), m_pnt(pnt){ }
 };
 
 class PropertyPntX :public PropertyPntCoord
 {
 public:
-	PropertyPntX(HeeksObj* object, geoff_geometry::Point3d *pnt) :PropertyPntCoord(object, L"x", pnt){ }
+	PropertyPntX(HeeksObj* object, Point3d *pnt) :PropertyPntCoord(object, L"x", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	void Set(double value){ m_pnt->x = (value); m_object->OnApplyProperties(); }
@@ -162,7 +162,7 @@ public:
 class PropertyPntY :public PropertyPntCoord
 {
 public:
-	PropertyPntY(HeeksObj* object, geoff_geometry::Point3d *pnt) :PropertyPntCoord(object, L"y", pnt){ }
+	PropertyPntY(HeeksObj* object, Point3d *pnt) :PropertyPntCoord(object, L"y", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	void Set(double value){ m_pnt->y = (value); m_object->OnApplyProperties(); }
@@ -173,7 +173,7 @@ public:
 class PropertyPntZ :public PropertyPntCoord
 {
 public:
-	PropertyPntZ(HeeksObj* object, geoff_geometry::Point3d *pnt) :PropertyPntCoord(object, L"z", pnt){ }
+	PropertyPntZ(HeeksObj* object, Point3d *pnt) :PropertyPntCoord(object, L"z", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	void Set(double value){ m_pnt->z = (value); m_object->OnApplyProperties(); }
@@ -181,7 +181,7 @@ public:
 	Property* MakeACopy()const{ return new PropertyPntZ(*this); }
 };
 
-PropertyList* PropertyPnt(HeeksObj* object, const wchar_t* title, geoff_geometry::Point3d* pnt)
+PropertyList* PropertyPnt(HeeksObj* object, const wchar_t* title, Point3d* pnt)
 {
 	PropertyList* p = new PropertyList(title);
 	p->m_list.push_back(new PropertyPntX(object, pnt));
@@ -190,7 +190,7 @@ PropertyList* PropertyPnt(HeeksObj* object, const wchar_t* title, geoff_geometry
 	return p;
 }
 
-void PropertyPnt(std::list<Property *> *list, HeeksObj* object, geoff_geometry::Point3d* pnt)
+void PropertyPnt(std::list<Property *> *list, HeeksObj* object, Point3d* pnt)
 {
 	list->push_back(new PropertyPntX(object, pnt));
 	list->push_back(new PropertyPntY(object, pnt));
@@ -202,15 +202,15 @@ void PropertyPnt(std::list<Property *> *list, HeeksObj* object, geoff_geometry::
 to do
 class PropertyTrsfBase :public Property{
 protected:
-	geoff_geometry::Matrix* m_trsf;
+	Matrix* m_trsf;
 public:
-	PropertyTrsfBase(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix *trsf) :Property(object, title), m_trsf(trsf){ }
+	PropertyTrsfBase(HeeksObj* object, const wchar_t* title, Matrix *trsf) :Property(object, title), m_trsf(trsf){ }
 };
 
 class PropertyLengthTrsfPosX :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfPosX(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
+	PropertyLengthTrsfPosX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetX(t.x + value); m_trsf->SetTranslationPart(t); m_object->OnApplyProperties(); }
@@ -221,7 +221,7 @@ public:
 class PropertyLengthTrsfPosY :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfPosY(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
+	PropertyLengthTrsfPosY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetY(t.y + value); m_trsf->SetTranslationPart(t); m_object->OnApplyProperties(); }
@@ -232,7 +232,7 @@ public:
 class PropertyLengthTrsfPosZ :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfPosZ(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
+	PropertyLengthTrsfPosZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetZ(t.z + value); m_trsf->SetTranslationPart(t); m_object->OnApplyProperties(); }
@@ -243,66 +243,66 @@ public:
 class PropertyLengthTrsfXDirX :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfXDirX(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
+	PropertyLengthTrsfXDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ geoff_geometry::Point3d d; d.Transform(*m_trsf); geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); geoff_geometry::Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetX(value); *m_trsf = geoff_geometry::Matrix(d, x, y);  m_object->OnApplyProperties(); }
-	double GetDouble(void)const{ geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.x; }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetX(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirX(*this); }
 };
 
 class PropertyLengthTrsfXDirY :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfXDirY(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
+	PropertyLengthTrsfXDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ geoff_geometry::Point3d d; d.Transform(*m_trsf); geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); geoff_geometry::Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetY(value); *m_trsf = geoff_geometry::Matrix(d, x, y);  m_object->OnApplyProperties(); }
-	double GetDouble(void)const{ geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.y; }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetY(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirY(*this); }
 };
 
 class PropertyLengthTrsfXDirZ :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfXDirZ(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
+	PropertyLengthTrsfXDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ geoff_geometry::Point3d d; d.Transform(*m_trsf); geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); geoff_geometry::Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetZ(value); *m_trsf = geoff_geometry::Matrix(d, x, y);  m_object->OnApplyProperties(); }
-	double GetDouble(void)const{ geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.z; }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetZ(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirZ(*this); }
 };
 
 class PropertyLengthTrsfYDirX :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfYDirX(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
+	PropertyLengthTrsfYDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ geoff_geometry::Point3d d; d.Transform(*m_trsf); geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); geoff_geometry::Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetX(value); *m_trsf = geoff_geometry::Matrix(d, x, y);  m_object->OnApplyProperties(); }
-	double GetDouble(void)const{ geoff_geometry::Point3d y(0,1,0);  y.Transform(*m_trsf); return y.x; }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetX(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	double GetDouble(void)const{ Point3d y(0,1,0);  y.Transform(*m_trsf); return y.x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirX(*this); }
 };
 
 class PropertyLengthTrsfYDirY :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfYDirY(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
+	PropertyLengthTrsfYDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ geoff_geometry::Point3d d; d.Transform(*m_trsf); geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); geoff_geometry::Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetY(value); *m_trsf = geoff_geometry::Matrix(d, x, y);  m_object->OnApplyProperties(); }
-	double GetDouble(void)const{ geoff_geometry::Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.y; }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetY(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	double GetDouble(void)const{ Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirY(*this); }
 };
 
 class PropertyLengthTrsfYDirZ :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfYDirZ(HeeksObj* object, geoff_geometry::Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
+	PropertyLengthTrsfYDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ geoff_geometry::Point3d d; d.Transform(*m_trsf); geoff_geometry::Point3d x(1, 0, 0);  x.Transform(*m_trsf); geoff_geometry::Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetZ(value); *m_trsf = geoff_geometry::Matrix(d, x, y);  m_object->OnApplyProperties(); }
-	double GetDouble(void)const{ geoff_geometry::Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.z; }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetZ(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	double GetDouble(void)const{ Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirZ(*this); }
 };
 
@@ -312,15 +312,15 @@ class PropertyDoubleTrsfAngle :public PropertyTrsfBase
 {
 	int m_type;
 public:
-	PropertyDoubleTrsfAngle(HeeksObj* object, geoff_geometry::Matrix* trsf, int type) :PropertyTrsfBase(object, angle_titles[type], trsf), m_type(type){}
+	PropertyDoubleTrsfAngle(HeeksObj* object, Matrix* trsf, int type) :PropertyTrsfBase(object, angle_titles[type], trsf), m_type(type){}
 	// Property's virtual functions
 	int get_property_type(){ return DoublePropertyType; }
 	Property* MakeACopy()const{ return new PropertyDoubleTrsfAngle(*this); }
 	void Set(double value){
 		double vertical_angle, horizontal_angle, twist_angle;
-		geoff_geometry::Point3d x(1, 0, 0);
-		geoff_geometry::Point3d y(0, 1, 0);
-		geoff_geometry::Point3d d(0, 0, 0);
+		Point3d x(1, 0, 0);
+		Point3d y(0, 1, 0);
+		Point3d d(0, 0, 0);
 		x.Transform(*m_trsf);
 		y.Transform(*m_trsf);
 		d.Transform(*m_trsf);
@@ -337,15 +337,15 @@ public:
 			twist_angle = value * M_PI / 180;
 			break;
 		}
-		geoff_geometry::Point3d dx, dy;
+		Point3d dx, dy;
 		CoordinateSystem::AnglesToAxes(vertical_angle, horizontal_angle, twist_angle, dx, dy);
-		*m_trsf = geoff_geometry::Matrix(d, dx, dy);
+		*m_trsf = Matrix(d, dx, dy);
 		m_object->OnApplyProperties();
 	}
 	double GetDouble(void)const{
 		double vertical_angle, horizontal_angle, twist_angle;
-		geoff_geometry::Point3d x(1, 0, 0);
-		geoff_geometry::Point3d y(0, 1, 0);
+		Point3d x(1, 0, 0);
+		Point3d y(0, 1, 0);
 		x.Transform(*m_trsf);
 		y.Transform(*m_trsf);
 		CoordinateSystem::AxesToAngles(x, y, vertical_angle, horizontal_angle, twist_angle);
@@ -362,7 +362,7 @@ public:
 };
 
 
-PropertyList* PropertyTrsfPnt(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix* trsf)
+PropertyList* PropertyTrsfPnt(HeeksObj* object, const wchar_t* title, Matrix* trsf)
 {
 	PropertyList* p = new PropertyList(title);
 	p->m_list.push_back(new PropertyLengthTrsfPosX(object, trsf));
@@ -371,7 +371,7 @@ PropertyList* PropertyTrsfPnt(HeeksObj* object, const wchar_t* title, geoff_geom
 	return p;
 }
 
-PropertyList* PropertyTrsfXDir(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix* trsf)
+PropertyList* PropertyTrsfXDir(HeeksObj* object, const wchar_t* title, Matrix* trsf)
 {
 	PropertyList* p = new PropertyList(title);
 	p->m_list.push_back(new PropertyLengthTrsfXDirX(object, trsf));
@@ -380,7 +380,7 @@ PropertyList* PropertyTrsfXDir(HeeksObj* object, const wchar_t* title, geoff_geo
 	return p;
 }
 
-PropertyList* PropertyTrsfYDir(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix* trsf)
+PropertyList* PropertyTrsfYDir(HeeksObj* object, const wchar_t* title, Matrix* trsf)
 {
 	PropertyList* p = new PropertyList(title);
 	p->m_list.push_back(new PropertyLengthTrsfYDirX(object, trsf));
@@ -390,7 +390,7 @@ PropertyList* PropertyTrsfYDir(HeeksObj* object, const wchar_t* title, geoff_geo
 }
 
 
-PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix* trsf)
+PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, Matrix* trsf)
 {
 	PropertyList* p = new PropertyList(title);
 	p->m_list.push_back(PropertyTrsfPnt(object, _("position"), trsf));
@@ -404,7 +404,7 @@ PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, geoff_geometr
 
 #else
 
-PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, geoff_geometry::Matrix* trsf)
+PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, Matrix* trsf)
 {
 	return new PropertyList(L"to do ");
 }

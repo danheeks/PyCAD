@@ -48,7 +48,7 @@ public:
 	const HeeksColor* GetColor()const{return &m_color;}
 	void GetBox(CBox &box);
 	void KillGLLists(void);
-	void Transform(const geoff_geometry::Matrix& m);
+	void Transform(const Matrix& m);
 	const wchar_t* GetShortString(void)const{return m_title.c_str();}
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wchar_t* str);

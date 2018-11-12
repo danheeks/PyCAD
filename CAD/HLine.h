@@ -9,7 +9,7 @@
 class HLine: public EndedObject{
 public:
 	~HLine(void);
-	HLine(const geoff_geometry::Point3d &a, const geoff_geometry::Point3d &b, const HeeksColor* col);
+	HLine(const Point3d &a, const Point3d &b, const HeeksColor* col);
 	HLine(const HLine &line);
 
 	const HLine& operator=(const HLine &b);
@@ -22,11 +22,11 @@ public:
 	const wchar_t* GetTypeString(void)const{return L"Line";}
 	HeeksObj *MakeACopy(void)const;
 	const wchar_t* GetIconFilePath();
-	bool GetMidPoint(geoff_geometry::Point3d &pos);
+	bool GetMidPoint(Point3d &pos);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
-	bool FindNearPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point);
-	bool FindPossTangentPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point);
+	bool FindNearPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point);
+	bool FindPossTangentPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	void CopyFrom(const HeeksObj* object){operator=(*((HLine*)object));}
@@ -34,9 +34,9 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
     bool UsesID(){return true;} 
-	bool Intersects(const geoff_geometry::Point3d &pnt)const;
-	geoff_geometry::Point3d GetSegmentVector(double fraction);
+	bool Intersects(const Point3d &pnt)const;
+	Point3d GetSegmentVector(double fraction);
 	void Reverse();
 
-	geoff_geometry::Line GetLine()const;
+	Line GetLine()const;
 };

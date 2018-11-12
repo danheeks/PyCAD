@@ -8,12 +8,12 @@
 
 class TransformTool: public Undoable{
 private:
-	geoff_geometry::Matrix modify_matrix;
-	geoff_geometry::Matrix revert_matrix;
+	Matrix modify_matrix;
+	Matrix revert_matrix;
 	HeeksObj *object;
 
 public:
-	TransformTool(HeeksObj *o, const geoff_geometry::Matrix &t, const geoff_geometry::Matrix &i);
+	TransformTool(HeeksObj *o, const Matrix &t, const Matrix &i);
 	~TransformTool(void);
 
 	// Tool's virtual functions
@@ -24,12 +24,12 @@ public:
 
 class TransformObjectsTool: public Undoable{
 private:
-	geoff_geometry::Matrix modify_matrix;
-	geoff_geometry::Matrix revert_matrix;
+	Matrix modify_matrix;
+	Matrix revert_matrix;
 	std::list<HeeksObj*> m_list;
 
 public:
-	TransformObjectsTool(const std::list<HeeksObj*>& list, const geoff_geometry::Matrix &t, const geoff_geometry::Matrix &i);
+	TransformObjectsTool(const std::list<HeeksObj*>& list, const Matrix &t, const Matrix &i);
 	~TransformObjectsTool(void);
 
 	// Tool's virtual functions

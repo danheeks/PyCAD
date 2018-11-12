@@ -8,7 +8,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "geometry.h"
-using namespace geoff_geometry;
 
 #ifdef PEPSDLL
 	#include "vdm.h"
@@ -18,7 +17,6 @@ using namespace geoff_geometry;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // matrix
 ////////////////////////////////////////////////////////////////////////////////////////////////
-namespace geoff_geometry {
 
 	Matrix::Matrix(){
 		Unit();
@@ -29,22 +27,22 @@ namespace geoff_geometry {
 		this->IsMirrored();
 	}
 
-	Matrix::Matrix(const Point3d &origin, const Vector3d &x_axis, const Vector3d &y_axis)
+	Matrix::Matrix(const Point3d &origin, const Point3d &x_axis, const Point3d &y_axis)
 	{
-		Vector3d unit_x = x_axis;
+		Point3d unit_x = x_axis;
 		unit_x.normalise();
 
-		double t = unit_x.getx() * y_axis.getx()
-			+ unit_x.gety() * y_axis.gety()
-			+ unit_x.getz() * y_axis.getz();
-		Vector3d y_orthogonal(y_axis.getx() - unit_x.getx() * t, y_axis.gety() - unit_x.gety() * t, y_axis.getz() - unit_x.getz() * t);
+		double t = unit_x.x * y_axis.x
+			+ unit_x.y * y_axis.y
+			+ unit_x.z * y_axis.z;
+		Point3d y_orthogonal(y_axis.x - unit_x.x * t, y_axis.y - unit_x.y * t, y_axis.z - unit_x.z * t);
 
-		Vector3d unit_y = y_orthogonal;
+		Point3d unit_y = y_orthogonal;
 		unit_y.normalise();
-		Vector3d unit_z = (unit_x ^ y_orthogonal);
+		Point3d unit_z = (unit_x ^ y_orthogonal);
 		unit_z.normalise();
 
-		double m[16] = { unit_x.getx(), unit_y.getx(), unit_z.getx(), origin.x, unit_x.gety(), unit_y.gety(), unit_z.gety(), origin.y, unit_x.getz(), unit_y.getz(), unit_z.getz(), origin.z, 0, 0, 0, 1 };
+		double m[16] = { unit_x.x, unit_y.x, unit_z.x, origin.x, unit_x.y, unit_y.y, unit_z.y, origin.y, unit_x.z, unit_y.z, unit_z.z, origin.z, 0, 0, 0, 1 };
 		memcpy(e, m, sizeof(e));
 		this->IsUnit();
 		this->IsMirrored();
@@ -135,27 +133,27 @@ namespace geoff_geometry {
 		Translate(v.x, v.y, v.z);
 	}
 
-	void	Matrix::Rotate(double angle, Vector3d *rotAxis) {
+	void	Matrix::Rotate(double angle, Point3d *rotAxis) {
 		/// Rotation about rotAxis with angle
 		Rotate(sin(angle), cos(angle), rotAxis);
 	}
 
-	void	Matrix::Rotate(double sinang, double cosang, Vector3d *rotAxis) {
+	void	Matrix::Rotate(double sinang, double cosang, Point3d *rotAxis) {
 		/// Rotation about rotAxis with cp & dp
 		Matrix rotate;
 		double oneminusc = 1.0 - cosang;
 
-		rotate.e[0] = rotAxis->getx() * rotAxis->getx() * oneminusc + cosang;
-		rotate.e[1] = rotAxis->getx() * rotAxis->gety() * oneminusc - rotAxis->getz() * sinang;
-		rotate.e[2] = rotAxis->getx() * rotAxis->getz() * oneminusc + rotAxis->gety() * sinang;
+		rotate.e[0] = rotAxis->x * rotAxis->x * oneminusc + cosang;
+		rotate.e[1] = rotAxis->x * rotAxis->y * oneminusc - rotAxis->z * sinang;
+		rotate.e[2] = rotAxis->x * rotAxis->z * oneminusc + rotAxis->y * sinang;
 
-		rotate.e[4] = rotAxis->getx() * rotAxis->gety() * oneminusc + rotAxis->getz() * sinang;
-		rotate.e[5] = rotAxis->gety() * rotAxis->gety() * oneminusc + cosang;
-		rotate.e[6] = rotAxis->gety() * rotAxis->getz() * oneminusc - rotAxis->getx() * sinang;
+		rotate.e[4] = rotAxis->x * rotAxis->y * oneminusc + rotAxis->z * sinang;
+		rotate.e[5] = rotAxis->y * rotAxis->y * oneminusc + cosang;
+		rotate.e[6] = rotAxis->y * rotAxis->z * oneminusc - rotAxis->x * sinang;
 
-		rotate.e[8] = rotAxis->getx() * rotAxis->getz() * oneminusc - rotAxis->gety() * sinang;
-		rotate.e[9] = rotAxis->gety() * rotAxis->getz() * oneminusc + rotAxis->getx() * sinang;
-		rotate.e[10] = rotAxis->getz() * rotAxis->getz() * oneminusc  + cosang;
+		rotate.e[8] = rotAxis->x * rotAxis->z * oneminusc - rotAxis->y * sinang;
+		rotate.e[9] = rotAxis->y * rotAxis->z * oneminusc + rotAxis->x * sinang;
+		rotate.e[10] = rotAxis->z * rotAxis->z * oneminusc  + cosang;
 		Multiply(rotate); // concatinate rotation with this matrix
 		m_unit = false;
 		m_mirrored = -1;	// don't know
@@ -562,48 +560,12 @@ namespace geoff_geometry {
 
 	Matrix UnitMatrix;					// a global unit matrix
 
-
-	// vector
-	 Vector2d::Vector2d(const Vector3d &v){
-		if(FEQZ(v.getz())) FAILURE(L"Converting Vector3d to Vector2d illegal");
-		dx = v.getx();
-		dy = v.gety();
-	}
-
-	 bool Vector2d::operator==(const Vector2d &v)const {
-		return FEQ(dx, v.getx(), 1.0e-06) && FEQ(dy, v.gety(), 1.0e-06);
-	 }
-
-	 void Vector2d::Transform(const Matrix& m) {
-		 // transform vector
-		 if(m.m_unit == false) {
-			double dxt = dx * m.e[0] + dy * m.e[1];
-			double dyt = dx * m.e[4] + dy * m.e[5];
-			dx = dxt;
-			dy = dyt;
-		}
-		 this->normalise();
-	 }
-
-	 void Vector3d::Transform(const Matrix& m) {
-		 // transform vector
-		 if(m.m_unit == false) {
-			double dxt = dx * m.e[0] + dy * m.e[1] + dz * m.e[2];
-			double dyt = dx * m.e[4] + dy * m.e[5] + dz * m.e[6];
-			double dzt = dx * m.e[8] + dy * m.e[9] + dz * m.e[10];
-			dx = dxt;
-			dy = dyt;
-			dz = dzt;
-		}
-		 this->normalise();
-	 }
-
-	 void Vector3d::arbitrary_axes(Vector3d& x, Vector3d& y){
+	 void Point3d::arbitrary_axes(Point3d& x, Point3d& y)const{
 		// arbitrary axis algorithm - acad method of generating an arbitrary but
 		// consistant set of axes from a single normal ( z )
 		// arbitrary x & y axes
 
-		if ( ( fabs ( this->getx() ) < 1.0/64.0 ) && (fabs(this->gety()) < 1.0/64.0))
+		if ( ( fabs ( this->x ) < 1.0/64.0 ) && (fabs(this->y) < 1.0/64.0))
 			x = Y_VECTOR ^ *this;
 		else
 			x = Z_VECTOR ^ *this;
@@ -611,66 +573,15 @@ namespace geoff_geometry {
 		y = *this ^ x;
 	}
 
-	 void Point3d::arbitrary_axes(Point3d& X, Point3d& Y){
-		 // arbitrary axis algorithm - acad method of generating an arbitrary but
-		 // consistant set of axes from a single normal ( z )
-		 // arbitrary x & y axes
-
-		 if ((fabs(this->x) < 1.0 / 64.0) && (fabs(this->y) < 1.0 / 64.0))
-			 X = Point3d(0,1,0) ^ *this;
-		 else
-			 X = Point3d(0,0,1) ^ *this;
-
-		 Y = *this ^ X;
-	 }
-
-	 int Vector3d::setCartesianAxes(Vector3d& b, Vector3d& c) {
-#define a *this
-	// computes a RH triad of Axes (Cartesian) starting from a (normalised)
-	// if a & b are perpendicular then c = a ^ b
-	// if a & c are perpendicular then b = c ^ a
-	// if neither are perpendicular to a, then return arbitrary axes from a
-
-	// calling sequence for RH cartesian
-	//	x y z
-	//  y z x
-	//  z x y
-	if(a == NULL_VECTOR) FAILURE(L"SetAxes given a NULL Vector");
-	double epsilon = 1.0e-09;
-	bool bNull = (b == NULL_VECTOR);
-	bool cNull = (c == NULL_VECTOR);
-	bool abPerp = !bNull;
-	if(abPerp) abPerp = (fabs(a * b) < epsilon);
-
-	bool acPerp = !cNull;
-	if(acPerp) acPerp = (fabs(a * c) < epsilon);
-
-	if(abPerp) {
-		c = a ^ b;
-		return 1;
-	}
-
-	if(acPerp) {
-		b = c ^ a;
-		return 1;
-	}
-
-	arbitrary_axes(b, c);
-	b.normalise();
-	c.normalise();
-	return 2;
-}
-
-
 	 void Plane::Mirrored(Matrix* tmMirrored) {
 		 // calculates a mirror transformation that mirrors 2d about plane
 	 
 		Point3d p1 = this->Near(Point3d(0.,0.,0.));
 		if(tmMirrored->m_unit == false) tmMirrored->Unit();
 
-		double nx = this->normal.getx();
-		double ny = this->normal.gety();
-		double nz = this->normal.getz();
+		double nx = this->normal.x;
+		double ny = this->normal.y;
+		double nz = this->normal.z;
 	   
 		// the translation
 		tmMirrored->e[ 3] = -2. * nx * this->d;
@@ -692,9 +603,8 @@ namespace geoff_geometry {
 	 void Plane::Transform(const Matrix& m)
 	 {
 		 Point3d p = normal * d;
-		 normal.Transform(m);
+		 normal = normal.Transformed(m);
 		 p = p.Transformed(m);
 		 normal.Normalize();
 		 d = Point3d(0, 0, 0) * normal;
 	 }
-}

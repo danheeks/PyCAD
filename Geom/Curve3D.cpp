@@ -1,12 +1,12 @@
 #include "Curve3D.h"
 #include "Box.h"
 
-CVertex3D::CVertex3D(const geoff_geometry::Point3d& p)
+CVertex3D::CVertex3D(const Point3d& p)
 {
 	m_p = p;
 }
 
-void CVertex3D::Transform(const geoff_geometry::Matrix& matrix)
+void CVertex3D::Transform(const Matrix& matrix)
 {
 	m_p = m_p.Transformed(matrix);
 }
@@ -36,7 +36,7 @@ void CCurve3D::Reverse()
 	}
 }
 
-void CCurve3D::Transform(const geoff_geometry::Matrix& matrix)
+void CCurve3D::Transform(const Matrix& matrix)
 {
 	for (std::list<CVertex3D>::iterator It = m_vertices.begin(); It != m_vertices.end(); It++)
 	{

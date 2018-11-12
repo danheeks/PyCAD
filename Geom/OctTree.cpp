@@ -7,22 +7,22 @@
 #include <map>
 #include "dxf.h"
 
-CRay::CRay(const geoff_geometry::Point3d& p, const geoff_geometry::Vector3d& v)
+CRay::CRay(const Point3d& p, const Point3d& v)
 {
 	m_p = p;
 	m_v = v.Normalized();
-	if (v.getx() > 0)
+	if (v.x > 0)
 	{
-		if (v.gety() > 0)
+		if (v.y > 0)
 		{
-			if (v.getz() > 0)
+			if (v.z > 0)
 				m_type = 0;
 			else
 				m_type = 1;
 		}
 		else
 		{
-			if (v.getz() > 0)
+			if (v.z > 0)
 				m_type = 2;
 			else
 				m_type = 3;
@@ -30,16 +30,16 @@ CRay::CRay(const geoff_geometry::Point3d& p, const geoff_geometry::Vector3d& v)
 	}
 	else
 	{
-		if (v.gety() > 0)
+		if (v.y > 0)
 		{
-			if (v.getz() > 0)
+			if (v.z > 0)
 				m_type = 4;
 			else
 				m_type = 5;
 		}
 		else
 		{
-			if (v.getz() > 0)
+			if (v.z > 0)
 				m_type = 6;
 			else
 				m_type = 7;
@@ -82,7 +82,7 @@ void COctEle::Split()
 	}
 }
 
-void COctEle::MakeSphere(const geoff_geometry::Point3d& c, double r)
+void COctEle::MakeSphere(const Point3d& c, double r)
 {
 	if ((m_level < MAX_OCTTREE_LEVEL))
 	{
@@ -141,18 +141,18 @@ void COctEle::MakeSphere(const geoff_geometry::Point3d& c, double r)
 	}
 }
 
-int COctEle::TouchingSphere(const geoff_geometry::Point3d& c, double r)
+int COctEle::TouchingSphere(const Point3d& c, double r)
 {
-	geoff_geometry::Point3d p[8] =
+	Point3d p[8] =
 	{
-		geoff_geometry::Point3d(m_box.m_x[0], m_box.m_x[1], m_box.m_x[2]),
-		geoff_geometry::Point3d(m_box.m_x[0], m_box.m_x[1], m_box.m_x[5]),
-		geoff_geometry::Point3d(m_box.m_x[0], m_box.m_x[4], m_box.m_x[2]),
-		geoff_geometry::Point3d(m_box.m_x[0], m_box.m_x[4], m_box.m_x[5]),
-		geoff_geometry::Point3d(m_box.m_x[3], m_box.m_x[1], m_box.m_x[2]),
-		geoff_geometry::Point3d(m_box.m_x[3], m_box.m_x[1], m_box.m_x[5]),
-		geoff_geometry::Point3d(m_box.m_x[3], m_box.m_x[4], m_box.m_x[2]),
-		geoff_geometry::Point3d(m_box.m_x[3], m_box.m_x[4], m_box.m_x[5])
+		Point3d(m_box.m_x[0], m_box.m_x[1], m_box.m_x[2]),
+		Point3d(m_box.m_x[0], m_box.m_x[1], m_box.m_x[5]),
+		Point3d(m_box.m_x[0], m_box.m_x[4], m_box.m_x[2]),
+		Point3d(m_box.m_x[0], m_box.m_x[4], m_box.m_x[5]),
+		Point3d(m_box.m_x[3], m_box.m_x[1], m_box.m_x[2]),
+		Point3d(m_box.m_x[3], m_box.m_x[1], m_box.m_x[5]),
+		Point3d(m_box.m_x[3], m_box.m_x[4], m_box.m_x[2]),
+		Point3d(m_box.m_x[3], m_box.m_x[4], m_box.m_x[5])
 	};
 
 	int touching = 0;
@@ -287,34 +287,34 @@ bool TriContainsMinusX(const CTri& tri)
 	return tri_contains_minusx;
 }
 
-const CTri* GetClosestTri(const std::list<CIntersectPoint>& first_hits, geoff_geometry::Vector3d &average_normal)
+const CTri* GetClosestTri(const std::list<CIntersectPoint>& first_hits, Point3d &average_normal)
 {
 	// find the front-most of the multiple triangles hit and return it's normal
 
 	// find the average normal of the triangles
-	average_normal = geoff_geometry::Vector3d(0.0, 0.0, 0.0);
+	average_normal = Point3d(0.0, 0.0, 0.0);
 	for (std::list<CIntersectPoint>::const_iterator It = first_hits.begin(); It != first_hits.end(); It++)
 	{
 		const CIntersectPoint& ip = *It;
 		const CTri* tri = ip.m_tri;
-		geoff_geometry::Vector3d norm = geoff_geometry::Vector3d(geoff_geometry::Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), geoff_geometry::Point3d(tri->x[1][0], tri->x[1][1], tri->x[1][2])) ^ geoff_geometry::Vector3d(geoff_geometry::Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), geoff_geometry::Point3d(tri->x[2][0], tri->x[2][1], tri->x[2][2]));
+		Point3d norm = Point3d(Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), Point3d(tri->x[1][0], tri->x[1][1], tri->x[1][2])) ^ Point3d(Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), Point3d(tri->x[2][0], tri->x[2][1], tri->x[2][2]));
 		average_normal += norm;
 	}
 	average_normal.normalise();
 
 	// for the rare case that the average normal is facing away from or toward us, then use it directly
-	if (fabs(fabs(average_normal.getx()) - 1.0) < 0.000000001)
+	if (fabs(fabs(average_normal.x) - 1.0) < 0.000000001)
 	{
 		return NULL;
 	}
 
 	// make a matrix using x-axis as x-axis, and perp to x and average_normal as y-axis
-	geoff_geometry::Point3d origin = first_hits.front().m_p;
-	geoff_geometry::Vector3d x_axis(1.0, 0.0, 0.0);
-	geoff_geometry::Vector3d y_axis = x_axis ^ average_normal;
+	Point3d origin = first_hits.front().m_p;
+	Point3d x_axis(1.0, 0.0, 0.0);
+	Point3d y_axis = x_axis ^ average_normal;
 	y_axis.normalise();
-	geoff_geometry::Matrix tm(origin, x_axis, y_axis);
-	geoff_geometry::Matrix invtm = tm.Inverse();
+	Matrix tm(origin, x_axis, y_axis);
+	Matrix invtm = tm.Inverse();
 
 	// loop through the triangles hit, finding the one that contains -x vector
 	for (std::list<CIntersectPoint>::const_iterator It = first_hits.begin(); It != first_hits.end(); It++)
@@ -333,7 +333,7 @@ const CTri* GetClosestTri(const std::list<CIntersectPoint>& first_hits, geoff_ge
 	return NULL; // shouldn't get here
 }
 
-int COctTree::GetInsideOutside(const geoff_geometry::Point3d& p)
+int COctTree::GetInsideOutside(const Point3d& p)
 {
 	// make an x-ray from point to outside of model
 	CXRay xray(p.y, p.z);
@@ -369,7 +369,7 @@ int COctTree::GetInsideOutside(const geoff_geometry::Point3d& p)
 	if (first_hits.size() > 0)
 	{
 		const CTri* tri = first_hits.front().m_tri;
-		geoff_geometry::Vector3d norm;
+		Point3d norm;
 		if (first_hits.size() > 1)
 		{
 			tri = GetClosestTri(first_hits, norm);
@@ -377,9 +377,9 @@ int COctTree::GetInsideOutside(const geoff_geometry::Point3d& p)
 
 		if (tri)
 			// use normal of the triangle hit
-			norm = geoff_geometry::Vector3d(geoff_geometry::Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), geoff_geometry::Point3d(tri->x[1][0], tri->x[1][1], tri->x[1][2])) ^ geoff_geometry::Vector3d(geoff_geometry::Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), geoff_geometry::Point3d(tri->x[2][0], tri->x[2][1], tri->x[2][2]));
+			norm = Point3d(Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), Point3d(tri->x[1][0], tri->x[1][1], tri->x[1][2])) ^ Point3d(Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), Point3d(tri->x[2][0], tri->x[2][1], tri->x[2][2]));
 
-		if (norm.getx() > 0)
+		if (norm.x > 0)
 			return TRI_INSIDE;
 		return TRI_OUTSIDE;
 	}
@@ -391,15 +391,15 @@ int COctTree::GetInsideOutside(const CTri* tri)
 {
 	int inside = 0;
 	int outside = 0;
-	geoff_geometry::Point3d p[4];
+	Point3d p[4];
 
 	for (int i = 0; i < 3; i++)
 	{
-		p[i] = geoff_geometry::Point3d(tri->x[i][0], tri->x[i][1], tri->x[i][2]);
+		p[i] = Point3d(tri->x[i][0], tri->x[i][1], tri->x[i][2]);
 	}
 
-	geoff_geometry::Vector3d v0(p[0], p[1]);
-	geoff_geometry::Vector3d v1(p[0], p[2]);
+	Point3d v0(p[0], p[1]);
+	Point3d v1(p[0], p[2]);
 	p[3] = p[0] + v0 * 0.3333 + v1 * 0.3333; // mid point
 
 	for (int i = 0; i < 4; i++)
@@ -428,10 +428,10 @@ int COctTree::GetInsideOutside(const CTri* tri)
 
 bool COctEle::IntersectsBox(const CXRay& xray)
 {
-	if (xray.m_y < m_box.MinY() - geoff_geometry::TOLERANCE) return false;
-	if (xray.m_y > m_box.MaxY() + geoff_geometry::TOLERANCE) return false;
-	if (xray.m_z < m_box.MinZ() - geoff_geometry::TOLERANCE) return false;
-	if (xray.m_z > m_box.MaxZ() + geoff_geometry::TOLERANCE) return false;
+	if (xray.m_y < m_box.MinY() - TOLERANCE) return false;
+	if (xray.m_y > m_box.MaxY() + TOLERANCE) return false;
+	if (xray.m_z < m_box.MinZ() - TOLERANCE) return false;
+	if (xray.m_z > m_box.MaxZ() + TOLERANCE) return false;
 	return true;
 }
 
@@ -441,7 +441,7 @@ std::set<const CTri*>* tris_checked_for_IntersectionPoints = NULL;
 
 bool CXRay::Intersects(const CTri* tri, LineOrPoint& intof)const
 {
-	geoff_geometry::Line line(geoff_geometry::Point3d(-1000.0, m_y, m_z), geoff_geometry::Point3d(1000.0, m_y, m_z));
+	Line line(Point3d(-1000.0, m_y, m_z), Point3d(1000.0, m_y, m_z));
 	return tri->Intof(line, intof);
 }
 
@@ -458,10 +458,10 @@ void COctEle::IntersectionPoints()
 			LineOrPoint line_or_point;
 			if (x_ray_for_IntersectionPoints->Intersects(tri, line_or_point))
 			{
-				geoff_geometry::Point3d tri_int_point;
+				Point3d tri_int_point;
 				if (line_or_point.m_is_a_line)
 				{
-					if (line_or_point.m_line.v.getx() < 0.0)
+					if (line_or_point.m_line.v.x < 0.0)
 						tri_int_point = line_or_point.m_line.p0 + line_or_point.m_line.v;
 					else
 						tri_int_point = line_or_point.m_line.p0;
@@ -499,26 +499,26 @@ void COctTree::IntersectionPoints(const CXRay& xray, std::list<CIntersectPoint> 
 	}
 }
 
-void GetTriTrisIntersections(const CTri& tri, const std::set<const CTri*> &set, std::list<geoff_geometry::Point3d> &intof_list)
+void GetTriTrisIntersections(const CTri& tri, const std::set<const CTri*> &set, std::list<Point3d> &intof_list)
 {
-	geoff_geometry::Triangle3d t = tri.GeoffTri();
+	Triangle3d t = tri.GeoffTri();
 
-	std::list<geoff_geometry::Point3d> list;
+	std::list<Point3d> list;
 
 	for (std::set<const CTri*>::const_iterator It = set.begin(); It != set.end(); It++)
 	{
 		const CTri* tri2 = *It;
-		geoff_geometry::Triangle3d t2 = tri2->GeoffTri();
+		Triangle3d t2 = tri2->GeoffTri();
 
-		std::list<geoff_geometry::Point3d> ilist;
+		std::list<Point3d> ilist;
 		t.Intof(t2, ilist);
-		for (std::list<geoff_geometry::Point3d>::iterator It2 = ilist.begin(); It2 != ilist.end(); It2++)
+		for (std::list<Point3d>::iterator It2 = ilist.begin(); It2 != ilist.end(); It2++)
 		{
-			geoff_geometry::Point3d& p = *It2;
+			Point3d& p = *It2;
 			bool unique = true;
-			for (std::list<geoff_geometry::Point3d>::iterator It3 = list.begin(); It3 != list.end(); It3++)
+			for (std::list<Point3d>::iterator It3 = list.begin(); It3 != list.end(); It3++)
 			{
-				geoff_geometry::Point3d& p2 = *It3;
+				Point3d& p2 = *It3;
 				if (p == p2)
 				{
 					unique = false;
@@ -529,34 +529,34 @@ void GetTriTrisIntersections(const CTri& tri, const std::set<const CTri*> &set, 
 		}
 	}
 
-	for (std::list<geoff_geometry::Point3d>::iterator It = list.begin(); It != list.end(); It++)
+	for (std::list<Point3d>::iterator It = list.begin(); It != list.end(); It++)
 	{
-		geoff_geometry::Point3d& p = *It;
+		Point3d& p = *It;
 		intof_list.push_back(p);
 	}
 }
 
-void GetTriTrisIntersections(const CTri& tri, const std::set<const CTri*> &set, std::list<geoff_geometry::Line> &intof_list)
+void GetTriTrisIntersections(const CTri& tri, const std::set<const CTri*> &set, std::list<Line> &intof_list)
 {
-	geoff_geometry::Triangle3d t = tri.GeoffTri();
+	Triangle3d t = tri.GeoffTri();
 
 	for (std::set<const CTri*>::const_iterator It = set.begin(); It != set.end(); It++)
 	{
 		const CTri* tri2 = *It;
-		geoff_geometry::Triangle3d t2 = tri2->GeoffTri();
+		Triangle3d t2 = tri2->GeoffTri();
 
-		std::list<geoff_geometry::Point3d> ilist;
+		std::list<Point3d> ilist;
 		t.Intof(t2, ilist);
 		if (ilist.size() == 2)
 		{
-			intof_list.push_back(geoff_geometry::Line(ilist.front(), ilist.back()));
+			intof_list.push_back(Line(ilist.front(), ilist.back()));
 		}
 	}
 }
 
-void SplitTriWithPoint(const CTri& tri, const geoff_geometry::Point3d &p, std::list<CTri> &new_tris)
+void SplitTriWithPoint(const CTri& tri, const Point3d &p, std::list<CTri> &new_tris)
 {
-	geoff_geometry::Triangle3d t = tri.GeoffTri();
+	Triangle3d t = tri.GeoffTri();
 
 	if (p == t.getVert1() || p == t.getVert2() || p == t.getVert3())
 	{
@@ -574,7 +574,7 @@ void SplitTriWithPoint(const CTri& tri, const geoff_geometry::Point3d &p, std::l
 
 	float x[3] = { (float)(p.x), (float)(p.y), (float)(p.z) };
 
-	geoff_geometry::Line edge1(t.getVert1(), t.getVert2());
+	Line edge1(t.getVert1(), t.getVert2());
 	if (!edge1.Intof(p))
 	{
 		CTri new_tri(tri);
@@ -583,7 +583,7 @@ void SplitTriWithPoint(const CTri& tri, const geoff_geometry::Point3d &p, std::l
 		new_tris.push_back(new_tri);
 	}
 
-	geoff_geometry::Line edge2(t.getVert2(), t.getVert3());
+	Line edge2(t.getVert2(), t.getVert3());
 	if (!edge2.Intof(p))
 	{
 		CTri new_tri(tri);
@@ -592,7 +592,7 @@ void SplitTriWithPoint(const CTri& tri, const geoff_geometry::Point3d &p, std::l
 		new_tris.push_back(new_tri);
 	}
 
-	geoff_geometry::Line edge3(t.getVert3(), t.getVert1());
+	Line edge3(t.getVert3(), t.getVert1());
 	if (!edge3.Intof(p))
 	{
 		CTri new_tri(tri);
@@ -611,14 +611,14 @@ void SplitTriWithPoint(const CTri& tri, const geoff_geometry::Point3d &p, std::l
 //	CLineOrPointAndTri(const LineOrPoint& line_or_point, const CTri* m_tri) :m_line_or_point(line_or_point), m_tri(tri){}
 //};
 
-void SplitTriWithLineSegs(const CTri& tri, const std::list<geoff_geometry::Line> &intof_line_list, std::list<CTri> &new_tris)
+void SplitTriWithLineSegs(const CTri& tri, const std::list<Line> &intof_line_list, std::list<CTri> &new_tris)
 {
 	std::list<CTri> local_new_tris;
 	local_new_tris.push_back(tri);
 
-	for (std::list<geoff_geometry::Line>::const_iterator It = intof_line_list.begin(); It != intof_line_list.end(); It++)
+	for (std::list<Line>::const_iterator It = intof_line_list.begin(); It != intof_line_list.end(); It++)
 	{
-		const geoff_geometry::Line& line = *It;
+		const Line& line = *It;
 		std::list<CTri> temp_new_tris;
 
 		for (std::list<CTri>::iterator It3 = local_new_tris.begin(); It3 != local_new_tris.end();)
@@ -667,7 +667,7 @@ void COctTree::SplitTriangles(std::list<CTri> &tris)
 		std::set<const CTri*> set;
 		GetTrianglesInBox(tri.m_box, set);
 
-		std::list<geoff_geometry::Line> intof_list;
+		std::list<Line> intof_list;
 		GetTriTrisIntersections(tri, set, intof_list);
 
 		//WriteDxfFile(L"c:\\temp\\tri_intersections.dxf", intof_list);

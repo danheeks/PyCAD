@@ -15,7 +15,7 @@ HILine::HILine(const HILine &line):EndedObject(){
 	operator=(line);
 }
 
-HILine::HILine(const geoff_geometry::Point3d &a, const geoff_geometry::Point3d &b, const HeeksColor* col):EndedObject(){
+HILine::HILine(const Point3d &a, const Point3d &b, const HeeksColor* col):EndedObject(){
 	A = a;
 	B = b;
 	SetColor(*col);
@@ -49,13 +49,13 @@ void HILine::glCommands(bool select, bool marked, bool no_color)
 		glLineWidth(2);
 	}
 
-	geoff_geometry::Point3d v(A, B);
+	Point3d v(A, B);
 	if(v.magnitude() > 0.0000000001)
 	{
 		v.Normalize();
 
-		geoff_geometry::Point3d p1 = A - v * 10000;
-		geoff_geometry::Point3d p2 = A + v * 10000;
+		Point3d p1 = A - v * 10000;
+		Point3d p2 = A + v * 10000;
 
 		glBegin(GL_LINES);
 		glVertex3d(p1.x, p1.y, p1.z);
@@ -98,17 +98,17 @@ void HILine::GetProperties(std::list<Property *> *list){
 	HeeksObj::GetProperties(list);
 }
 
-bool HILine::FindNearPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point){
-	geoff_geometry::Line ray(ray_start, ray_direction);
-	geoff_geometry::Point3d p1;
-	geoff_geometry::Line lshort;
+bool HILine::FindNearPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point){
+	Line ray(ray_start, ray_direction);
+	Point3d p1;
+	Line lshort;
 	double t1, t2;
-	ray.Shortest(geoff_geometry::Line(A, B), lshort, t1, t2);
+	ray.Shortest(Line(A, B), lshort, t1, t2);
 	point = p1;
 	return true;
 }
 
-bool HILine::FindPossTangentPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point){
+bool HILine::FindPossTangentPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point){
 	// any point on this line is a possible tangent point
 	return FindNearPoint(ray_start, ray_direction, point);
 }
@@ -123,7 +123,7 @@ int HILine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case LineType:
 		{
-			geoff_geometry::Point3d pnt;
+			Point3d pnt;
 			if(intersect(GetLine(), ((HLine*)object)->GetLine(), pnt))
 			{
 				if(((HLine*)object)->Intersects(pnt)){
@@ -136,7 +136,7 @@ int HILine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case ILineType:
 		{
-			geoff_geometry::Point3d pnt;
+			Point3d pnt;
 			if(intersect(GetLine(), ((HILine*)object)->GetLine(), pnt))
 			{
 				if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -147,11 +147,11 @@ int HILine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case ArcType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(GetLine(), ((HArc*)object)->GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(((HArc*)object)->Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -163,7 +163,7 @@ int HILine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 
 	case CircleType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(GetLine(), ((HCircle*)object)->GetCircle(), plist);
 			if(rl)convert_pnts_to_doubles(plist, *rl);
 			numi += plist.size();
@@ -174,13 +174,13 @@ int HILine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 	return numi;
 }
 
-bool HILine::GetStartPoint(geoff_geometry::Point3d &pos)
+bool HILine::GetStartPoint(Point3d &pos)
 {
 	pos = A;
 	return true;
 }
 
-bool HILine::GetEndPoint(geoff_geometry::Point3d &pos)
+bool HILine::GetEndPoint(Point3d &pos)
 {
 	pos = B;
 	return true;
@@ -197,7 +197,7 @@ void HILine::WriteXML(TiXmlNode *root)
 // static member function
 HeeksObj* HILine::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	geoff_geometry::Point3d p0, p1;
+	Point3d p0, p1;
 	HeeksColor c;
 
 	HILine* new_object = new HILine(p0, p1, &c);

@@ -16,7 +16,7 @@ static unsigned char bitmapX[11] = {0x41, 0x41, 0x22, 0x14, 0x14, 0x08, 0x14, 0x
 static unsigned char bitmapY[11] = {0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x14, 0x14, 0x22, 0x22, 0x41};
 static unsigned char bitmapZ[11] = {0x3f, 0x10, 0x10, 0x08, 0x08, 0x08, 0x04, 0x04, 0x02, 0x02, 0x3f};
 
-CoordinateSystem::CoordinateSystem(const std::wstring& str, const geoff_geometry::Point3d &o, const geoff_geometry::Point3d &x, const geoff_geometry::Point3d &y)
+CoordinateSystem::CoordinateSystem(const std::wstring& str, const Point3d &o, const Point3d &x, const Point3d &y)
 {
 	m_title = str;
 	m_o = o;
@@ -1187,7 +1187,7 @@ void CoordinateSystem::glCommands(bool select, bool marked, bool no_color)
 
 void CoordinateSystem::GetBox(CBox &box)
 {
-	geoff_geometry::Point3d vt(0, 0, 0);
+	Point3d vt(0, 0, 0);
 	vt = vt.Transformed(GetMatrix());
 	double p[3];
 	vt.get(p);
@@ -1203,7 +1203,7 @@ HeeksObj *CoordinateSystem::MakeACopy(void)const
 	return new CoordinateSystem(*this);
 }
 
-void CoordinateSystem::Transform(const geoff_geometry::Matrix &m)
+void CoordinateSystem::Transform(const Matrix &m)
 {
 	m_o = m_o.Transformed(m);
 	m_x = m_x.Transformed(m);
@@ -1218,21 +1218,21 @@ void CoordinateSystem::GetProperties(std::list<Property *> *list)
 
 void CoordinateSystem::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
-	geoff_geometry::Matrix mat = GetMatrix();
+	Matrix mat = GetMatrix();
 	double s = size;
 	if(size_is_pixels)s /= theApp.GetPixelScale();
 
-	geoff_geometry::Point3d px(m_o + m_x * s);
-	geoff_geometry::Point3d py(m_o + m_y * s);
-	geoff_geometry::Point3d vz = geoff_geometry::Point3d(0, 0, 1).Transformed(mat);
-	geoff_geometry::Point3d pz(m_o + vz * s);
+	Point3d px(m_o + m_x * s);
+	Point3d py(m_o + m_y * s);
+	Point3d vz = Point3d(0, 0, 1).Transformed(mat);
+	Point3d pz(m_o + vz * s);
 	list->push_back(GripData(GripperTypeTranslate,m_o.x,m_o.y,m_o.z,NULL));
 	list->push_back(GripData(GripperTypeRotateObject,px.x,px.y,px.z,NULL));
 	list->push_back(GripData(GripperTypeRotateObject,py.x,py.y,py.z,NULL));
 	list->push_back(GripData(GripperTypeRotateObject,pz.x,pz.y,pz.z,NULL));
 }
 
-bool CoordinateSystem::GetScaleAboutMatrix(geoff_geometry::Matrix &m)
+bool CoordinateSystem::GetScaleAboutMatrix(Matrix &m)
 {
 	m = GetMatrix();
 	return true;
@@ -1256,16 +1256,16 @@ void CoordinateSystem::WriteXML(TiXmlNode *root)
 	WriteBaseXML(element);
 }
 
-geoff_geometry::Matrix CoordinateSystem::GetMatrix()
+Matrix CoordinateSystem::GetMatrix()
 {
-	return geoff_geometry::Matrix(m_o, m_x, m_y);
+	return Matrix(m_o, m_x, m_y);
 }
 
 // static
 HeeksObj* CoordinateSystem::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	geoff_geometry::Point3d o;
-	geoff_geometry::Point3d x, y;
+	Point3d o;
+	Point3d x, y;
 	std::wstring title;
 
 	// get the attributes
@@ -1299,10 +1299,10 @@ HeeksObj* CoordinateSystem::ReadFromXMLElement(TiXmlElement* pElem)
 #define EulOrdZXZs    EulOrd(2,0,1,0)
 
 //static
-void CoordinateSystem::AxesToAngles(const geoff_geometry::Point3d &x, const geoff_geometry::Point3d &y, double &v_angle, double &h_angle, double &t_angle)
+void CoordinateSystem::AxesToAngles(const Point3d &x, const Point3d &y, double &v_angle, double &h_angle, double &t_angle)
 {
 	double M[4][4];
-	geoff_geometry::Matrix(geoff_geometry::Point3d(0, 0, 0), x, y).Get(M[0]);
+	Matrix(Point3d(0, 0, 0), x, y).Get(M[0]);
 	int order = EulOrdZXZs;
 
     int i,j,k,h,n,s,f;
@@ -1336,29 +1336,29 @@ void CoordinateSystem::AxesToAngles(const geoff_geometry::Point3d &x, const geof
 
 //static
 void CoordinateSystem::AnglesToAxes(const double &v_angle, const double
-&h_angle, const double &t_angle, geoff_geometry::Point3d &x, geoff_geometry::Point3d &y)
+&h_angle, const double &t_angle, Point3d &x, Point3d &y)
 {
 #if 0
 	to do
-	geoff_geometry::Matrix zmat1;
-	zmat1.SetRotation(gp_Ax1(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(0, 0, 1)), t_angle);
+	Matrix zmat1;
+	zmat1.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(0, 0, 1)), t_angle);
 
-	geoff_geometry::Matrix xmat;
-	xmat.SetRotation(gp_Ax1(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(1, 0, 0)), v_angle);
+	Matrix xmat;
+	xmat.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(1, 0, 0)), v_angle);
 
-	geoff_geometry::Matrix zmat2;
-	zmat2.SetRotation(gp_Ax1(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(0, 0, 1)), h_angle);
+	Matrix zmat2;
+	zmat2.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(0, 0, 1)), h_angle);
 
-	geoff_geometry::Matrix mat = zmat2 * xmat * zmat1;
+	Matrix mat = zmat2 * xmat * zmat1;
 
-	x = geoff_geometry::Point3d(1, 0, 0).Transformed(mat);
-	y = geoff_geometry::Point3d(0, 1, 0).Transformed(mat);
+	x = Point3d(1, 0, 0).Transformed(mat);
+	y = Point3d(0, 1, 0).Transformed(mat);
 #endif
 } 
 
 static CoordinateSystem* coordinate_system_for_PickFrom3Points = NULL;
-static geoff_geometry::Point3d y_for_PickFrom3Points(0, 1, 0);
-static geoff_geometry::Point3d z_for_PickFrom3Points(0, 0, 1);
+static Point3d y_for_PickFrom3Points(0, 1, 0);
+static Point3d z_for_PickFrom3Points(0, 0, 1);
 static const double unit_vec_tol = 0.0000000001;
 
 

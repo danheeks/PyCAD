@@ -20,23 +20,25 @@ enum DigitizeType{
 
 class DigitizedPoint{
 public:
-	geoff_geometry::Point3d m_point;
+	Point3d m_point;
 	DigitizeType m_type;
 	HeeksObj* m_object1;
 	HeeksObj* m_object2;
 
 	DigitizedPoint();
-	DigitizedPoint(geoff_geometry::Point3d point, DigitizeType t, HeeksObj* object1 = NULL, HeeksObj* object2 = NULL);
+	DigitizedPoint(Point3d point, DigitizeType t, HeeksObj* object1 = NULL, HeeksObj* object2 = NULL);
 
 	int importance();
 
 	// calculate tangent points
-	static bool GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint& d2, geoff_geometry::Point3d &p1, geoff_geometry::Point3d &p2);
-	static bool GetArcPoints(const DigitizedPoint& d1, const geoff_geometry::Point3d *initial_direction, const DigitizedPoint& d2, geoff_geometry::Point3d &p1, geoff_geometry::Point3d &p2, geoff_geometry::Point3d &centre, geoff_geometry::Point3d &axis);
+	static bool GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint& d2, Point3d &p1, Point3d &p2);
+	static bool GetArcPoints(const DigitizedPoint& d1, const Point3d *initial_direction, const DigitizedPoint& d2, Point3d &p1, Point3d &p2, Point3d &centre, Point3d &axis);
+	static bool GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Circle& c);
 #if 0
-	static bool GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, gp_Circ& c);
 	static bool GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, gp_Elips& e);
-	static bool GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, gp_Circ& c);
+#endif
+	static bool GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, Circle& c);
+#if 0
 	static bool GetQuarticSpline(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Handle_Geom_BSplineCurve &spline);
 	static bool GetCubicSpline(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, const DigitizedPoint& d4, Handle_Geom_BSplineCurve &spline);
 	static bool GetRationalSpline(std::list<DigitizedPoint> &spline_points, const DigitizedPoint& d4, Handle_Geom_BSplineCurve &spline);

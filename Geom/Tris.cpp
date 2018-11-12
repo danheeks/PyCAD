@@ -15,19 +15,19 @@ double LineOrPoint::MinX()const
 {
 	if (m_is_a_line)
 	{
-		if (m_line.v.getx() > 0)
+		if (m_line.v.x > 0)
 			return m_line.p0.x;
 		else
-			return m_line.p0.x + m_line.v.getx();
+			return m_line.p0.x + m_line.v.x;
 	}
 	return m_p.x;
 }
 
-geoff_geometry::Point3d LineOrPoint::MostLeftPoint()const
+Point3d LineOrPoint::MostLeftPoint()const
 {
 	if (m_is_a_line)
 	{
-		if (m_line.v.getx() > 0)
+		if (m_line.v.x > 0)
 			return m_line.p0;
 		else
 			return m_line.p0 + m_line.v;
@@ -35,11 +35,11 @@ geoff_geometry::Point3d LineOrPoint::MostLeftPoint()const
 	return m_p;
 }
 
-void CTri::Transform(const geoff_geometry::Matrix &mat)
+void CTri::Transform(const Matrix &mat)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		geoff_geometry::Point3d p(x[i][0], x[i][1], x[i][2]);
+		Point3d p(x[i][0], x[i][1], x[i][2]);
 		p = p.Transformed(mat);
 		x[i][0] = (float)p.x;
 		x[i][1] = (float)p.y;
@@ -224,16 +224,16 @@ bool CTri::IntersectsXY(Span &span)
 	return false;
 }
 
-geoff_geometry::Triangle3d CTri::GeoffTri()const
+Triangle3d CTri::GeoffTri()const
 {
-	return geoff_geometry::Triangle3d(geoff_geometry::Point3d(x[0][0], x[0][1], x[0][2]), geoff_geometry::Point3d(x[1][0], x[1][1], x[1][2]), geoff_geometry::Point3d(x[2][0], x[2][1], x[2][2]));
+	return Triangle3d(Point3d(x[0][0], x[0][1], x[0][2]), Point3d(x[1][0], x[1][1], x[1][2]), Point3d(x[2][0], x[2][1], x[2][2]));
 }
 
-bool CTri::On(const geoff_geometry::Point3d &p)const
+bool CTri::On(const Point3d &p)const
 {
-	geoff_geometry::Triangle3d t = GeoffTri();
-	geoff_geometry::Plane pl(t.getVert1(), t.getVert2(), t.getVert3());
-	geoff_geometry::Point3d near = pl.Near(p);
+	Triangle3d t = GeoffTri();
+	Plane pl(t.getVert1(), t.getVert2(), t.getVert3());
+	Point3d near = pl.Near(p);
 	if (near.Dist(p) < 0.001)
 	{
 		if (t.Inside(p))
@@ -242,12 +242,12 @@ bool CTri::On(const geoff_geometry::Point3d &p)const
 	return false;
 }
 
-bool ClosestIntof(const geoff_geometry::Line& l, const geoff_geometry::Point3d& v0, const geoff_geometry::Point3d& v1, geoff_geometry::Point3d& intof)
+bool ClosestIntof(const Line& l, const Point3d& v0, const Point3d& v1, Point3d& intof)
 {
 	if (l.Intof(v0) && l.Intof(v1))
 	{
-		double d0 = l.v * geoff_geometry::Vector3d(v0);
-		double d1 = l.v * geoff_geometry::Vector3d(v1);
+		double d0 = l.v * Point3d(v0);
+		double d1 = l.v * Point3d(v1);
 		if (d0 < d1)intof = v0;
 		else intof = v1;
 		return true;
@@ -255,7 +255,7 @@ bool ClosestIntof(const geoff_geometry::Line& l, const geoff_geometry::Point3d& 
 	return false;
 }
 
-static void AddPointToEdgeIntofs(const geoff_geometry::Point3d& p, std::list<geoff_geometry::Point3d> &edge_intofs)
+static void AddPointToEdgeIntofs(const Point3d& p, std::list<Point3d> &edge_intofs)
 {
 	if (edge_intofs.size() < 2)
 		edge_intofs.push_back(p);
@@ -292,48 +292,48 @@ static void AddPointToEdgeIntofs(const geoff_geometry::Point3d& p, std::list<geo
 	}
 }
 
-bool CTri::Intof(const geoff_geometry::Line& l, LineOrPoint& intof)const
+bool CTri::Intof(const Line& l, LineOrPoint& intof)const
 {
-	geoff_geometry::Triangle3d t = GeoffTri();
-	geoff_geometry::Point3d p;
+	Triangle3d t = GeoffTri();
+	Point3d p;
 
-	//geoff_geometry::Plane pl(t.getVert1(), t.getVert2(), t.getVert3());
+	//Plane pl(t.getVert1(), t.getVert2(), t.getVert3());
 	//if (!(pl.On(l.p0) && pl.On(l.p0 + l.v)))
 	//{
 	//	return false;
 	//}
 
-	std::list<geoff_geometry::Point3d> edge_intofs;
-	geoff_geometry::Point3d other_p;
+	std::list<Point3d> edge_intofs;
+	Point3d other_p;
 
-	geoff_geometry::Line edge1(t.getVert1(), t.getVert2());
+	Line edge1(t.getVert1(), t.getVert2());
 
 	int edge1_num_ints = edge1.IntofFinite(l, p, other_p);
 	if (edge1_num_ints == 2)
 	{
-		intof = LineOrPoint(geoff_geometry::Line(p, other_p));
+		intof = LineOrPoint(Line(p, other_p));
 		return true;
 	}
 	else if ((edge1_num_ints == 1) && (p != t.getVert1()))
 		AddPointToEdgeIntofs(p, edge_intofs);
 
-	geoff_geometry::Line edge2(t.getVert2(), t.getVert3());
+	Line edge2(t.getVert2(), t.getVert3());
 
 	int edge2_num_ints = edge2.IntofFinite(l, p, other_p);
 	if (edge2_num_ints == 2)
 	{
-		intof = LineOrPoint(geoff_geometry::Line(p, other_p));
+		intof = LineOrPoint(Line(p, other_p));
 		return true;
 	}
 	else if ((edge2_num_ints == 1) && (p != t.getVert2()))
 		AddPointToEdgeIntofs(p, edge_intofs);
 
-	geoff_geometry::Line edge3(t.getVert3(), t.getVert1());
+	Line edge3(t.getVert3(), t.getVert1());
 
 	int edge3_num_ints = edge3.IntofFinite(l, p, other_p);
 	if (edge3_num_ints == 2)
 	{
-		intof = LineOrPoint(geoff_geometry::Line(p, other_p));
+		intof = LineOrPoint(Line(p, other_p));
 		return true;
 	}
 	else if ((edge3_num_ints == 1) && (p != t.getVert3()))
@@ -360,12 +360,12 @@ bool CTri::Intof(const geoff_geometry::Line& l, LineOrPoint& intof)const
 
 	if (edge_intofs.size() == 1)
 	{
-		intof = LineOrPoint(geoff_geometry::Point3d(edge_intofs.front()));
+		intof = LineOrPoint(Point3d(edge_intofs.front()));
 		return true;
 	}
 	else if (edge_intofs.size() == 2)
 	{
-		intof = LineOrPoint(geoff_geometry::Line(edge_intofs.front(), edge_intofs.back()));
+		intof = LineOrPoint(Line(edge_intofs.front(), edge_intofs.back()));
 		return true;
 	}
 
@@ -465,18 +465,18 @@ void CTris::MakeSection(const Point& s, const Point& e, const std::string& dxf_f
 	if (s == e)
 		return;
 
-	geoff_geometry::Point3d origin(s.x, s.y, 0.0);
-	geoff_geometry::Point3d end(e.x, e.y, 0.0);
+	Point3d origin(s.x, s.y, 0.0);
+	Point3d end(e.x, e.y, 0.0);
 
-	geoff_geometry::Vector3d x_axis(origin, end);
-	geoff_geometry::Vector3d y_axis(0.0, 0.0, 1.0);
+	Point3d x_axis(origin, end);
+	Point3d y_axis(0.0, 0.0, 1.0);
 
-	geoff_geometry::Vector3d plane_normal = x_axis ^ geoff_geometry::Vector3d(0.0, 0.0, 1.0);
+	Point3d plane_normal = x_axis ^ Point3d(0.0, 0.0, 1.0);
 
-	geoff_geometry::Plane(origin, plane_normal);
+	Plane(origin, plane_normal);
 
-	geoff_geometry::Matrix tm(origin, x_axis, y_axis);
-	geoff_geometry::Matrix inv_tm = tm;
+	Matrix tm(origin, x_axis, y_axis);
+	Matrix inv_tm = tm;
 	inv_tm = inv_tm.Inverse(); // this will transform things from our plane to the world coords
 
 	// make a list of triangles transformed with our plane now being the flat z = 0 plane
@@ -498,8 +498,8 @@ void CTris::MakeSection(const Point& s, const Point& e, const std::string& dxf_f
 		for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
 		{
 			Span& span = *It;
-			geoff_geometry::Point3d s(span.m_p.x, span.m_p.y, 0.0);
-			geoff_geometry::Point3d e(span.m_v.m_p.x, span.m_v.m_p.y, 0.0);
+			Point3d s(span.m_p.x, span.m_p.y, 0.0);
+			Point3d e(span.m_v.m_p.x, span.m_v.m_p.y, 0.0);
 			//s = s.Transform(tm);
 			//e = e.Transform(tm);
 			dxf_writer.WriteLine(s.getBuffer(), e.getBuffer(), "0");
@@ -663,7 +663,7 @@ void EdgeLoopToCurve(std::list<CMeshEdgeAndDir> &edge_loop, CCurve &curve)
 
 CArea CTris::Shadow()const
 {
-	geoff_geometry::Vector3d axis(0, 0, 1);
+	Point3d axis(0, 0, 1);
 
 	CMesh mesh(*this);
 
@@ -678,7 +678,7 @@ CArea CTris::Shadow()const
 			border_edges.insert(edge);
 		else
 		{
-			geoff_geometry::Vector3d n0, n1;
+			Point3d n0, n1;
 			if (!edge->m_f[0]->GetNormal(n0) || !edge->m_f[1]->GetNormal(n1))
 				border_edges.insert(edge);
 			else
@@ -695,7 +695,7 @@ CArea CTris::Shadow()const
 
 	CArea area;
 
-	std::list<geoff_geometry::Line> lines_for_dxf;
+	std::list<Line> lines_for_dxf;
 
 	while (border_edges.size() > 0)
 	{
@@ -711,15 +711,15 @@ CArea CTris::Shadow()const
 
 CArea CTris::Shadow2(bool just_up_allowed)const
 {
-	geoff_geometry::Matrix tm;
+	Matrix tm;
 	return Shadow2Mat(tm);
 }
 
-CArea CTris::Shadow2Mat(const geoff_geometry::Matrix &tm, bool just_up_allowed)const
+CArea CTris::Shadow2Mat(const Matrix &tm, bool just_up_allowed)const
 {
-	geoff_geometry::Matrix inv_tm = tm.Inverse();
+	Matrix inv_tm = tm.Inverse();
 
-	geoff_geometry::Vector3d axis(0, 0, 1);
+	Point3d axis(0, 0, 1);
 
 	CArea::m_fit_arcs = false;
 
@@ -730,7 +730,7 @@ CArea CTris::Shadow2Mat(const geoff_geometry::Matrix &tm, bool just_up_allowed)c
 		CTri t = (*It);
 		t.Transform(inv_tm);
 		CTri* tri = &t;
-		geoff_geometry::Vector3d norm = geoff_geometry::Vector3d(geoff_geometry::Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), geoff_geometry::Point3d(tri->x[1][0], tri->x[1][1], tri->x[1][2])) ^ geoff_geometry::Vector3d(geoff_geometry::Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), geoff_geometry::Point3d(tri->x[2][0], tri->x[2][1], tri->x[2][2]));
+		Point3d norm = Point3d(Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), Point3d(tri->x[1][0], tri->x[1][1], tri->x[1][2])) ^ Point3d(Point3d(tri->x[0][0], tri->x[0][1], tri->x[0][2]), Point3d(tri->x[2][0], tri->x[2][1], tri->x[2][2]));
 		if ((just_up_allowed == false) || (norm * axis > 0.0))
 		{
 			CArea tri_area;
@@ -759,23 +759,23 @@ CArea CTris::Shadow2Mat(const geoff_geometry::Matrix &tm, bool just_up_allowed)c
 	return area;
 }
 
-void CTris::ProjectSpan(const Span& span, std::list<geoff_geometry::Line>& lines)const
+void CTris::ProjectSpan(const Span& span, std::list<Line>& lines)const
 {
 	Point s = span.m_p;
 	Point e = span.m_v.m_p;
 
-	geoff_geometry::Point3d origin(s.x, s.y, 0.0);
-	geoff_geometry::Point3d end(e.x, e.y, 0.0);
+	Point3d origin(s.x, s.y, 0.0);
+	Point3d end(e.x, e.y, 0.0);
 
-	geoff_geometry::Vector3d x_axis(origin, end);
-	geoff_geometry::Vector3d y_axis(0.0, 0.0, 1.0);
+	Point3d x_axis(origin, end);
+	Point3d y_axis(0.0, 0.0, 1.0);
 
-	geoff_geometry::Vector3d plane_normal = x_axis ^ geoff_geometry::Vector3d(0.0, 0.0, 1.0);
+	Point3d plane_normal = x_axis ^ Point3d(0.0, 0.0, 1.0);
 
-	geoff_geometry::Plane(origin, plane_normal);
+	Plane(origin, plane_normal);
 
-	geoff_geometry::Matrix tm(origin, x_axis, y_axis);
-	geoff_geometry::Matrix inv_tm = tm;
+	Matrix tm(origin, x_axis, y_axis);
+	Matrix inv_tm = tm;
 	inv_tm = inv_tm.Inverse(); // this will transform things from our plane to the world coords
 
 	// make a list of triangles transformed with our plane now being the flat z = 0 plane
@@ -807,15 +807,15 @@ void CTris::ProjectSpan(const Span& span, std::list<geoff_geometry::Line>& lines
 	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
 	{
 		Span& span = *It;
-		geoff_geometry::Point3d s(span.m_p.x, span.m_p.y, 0.0);
-		geoff_geometry::Point3d e(span.m_v.m_p.x, span.m_v.m_p.y, 0.0);
+		Point3d s(span.m_p.x, span.m_p.y, 0.0);
+		Point3d e(span.m_v.m_p.x, span.m_v.m_p.y, 0.0);
 		s = s.Transformed(tm);
 		e = e.Transformed(tm);
-		lines.push_back(geoff_geometry::Line(s, e));
+		lines.push_back(Line(s, e));
 	}
 }
 
-void CTris::Project(const CArea& a, std::list<geoff_geometry::Line>& lines)const
+void CTris::Project(const CArea& a, std::list<Line>& lines)const
 {
 	for (std::list<CCurve>::const_iterator It = a.m_curves.begin(); It != a.m_curves.end(); It++)
 	{
@@ -1093,7 +1093,7 @@ void CTris::ClipSpans(std::list<Span>& spans, double length)const
 	span_clipper.GetSpans(spans);
 }
 
-void CTris::Transform(const geoff_geometry::Matrix& tm)
+void CTris::Transform(const Matrix& tm)
 {
 	for (std::list<CTri>::iterator It = m_tris.begin(); It != m_tris.end(); It++)
 	{
@@ -1122,13 +1122,13 @@ const CTris& CTris::operator+=(const CTris &t)
 
 FaceFlatType GetFaceFlatType(CMeshFace* face)
 {
-	geoff_geometry::Vector3d norm;
+	Point3d norm;
 	if(!face->GetNormal(norm))
 		return FaceFlatTypeDown;
 
-	if (norm.getz() > 0.999999)
+	if (norm.z > 0.999999)
 		return FaceFlatTypeFlat;
-	if (norm.getz() > 0.000001)
+	if (norm.z > 0.000001)
 		return  FaceFlatTypeUpButNotFlat;
 	return FaceFlatTypeDown;
 }
@@ -1215,7 +1215,7 @@ void CTris::GetMachiningAreas(std::list<CMachiningArea>& areas)const
 	}
 }
 
-static bool GetFlattenedEdgeTm(CMeshEdgeAndDir* axle_edge, geoff_geometry::Matrix &tm, std::map<CMeshEdge*, Span>& edge_span_map)
+static bool GetFlattenedEdgeTm(CMeshEdgeAndDir* axle_edge, Matrix &tm, std::map<CMeshEdge*, Span>& edge_span_map)
 {
 	// find the Span which is storing the new position of the edge
 	std::map<CMeshEdge*, Span>::iterator FindIt = edge_span_map.find(axle_edge->m_edge);
@@ -1227,11 +1227,11 @@ static bool GetFlattenedEdgeTm(CMeshEdgeAndDir* axle_edge, geoff_geometry::Matri
 	Point o = span.m_p;
 	Point vx = span.m_v.m_p - span.m_p;
 	Point vy = ~vx;
-	geoff_geometry::Point3d go(o.x, o.y, 0.0);
-	geoff_geometry::Vector3d gvx(vx.x, vx.y, 0.0);
-	geoff_geometry::Vector3d gvy(vy.x, vy.y, 0.0);
+	Point3d go(o.x, o.y, 0.0);
+	Point3d gvx(vx.x, vx.y, 0.0);
+	Point3d gvy(vy.x, vy.y, 0.0);
 
-	tm = geoff_geometry::Matrix(go, gvx, gvy);
+	tm = Matrix(go, gvx, gvy);
 
 	return true;
 }
@@ -1277,11 +1277,11 @@ static void AddFlattenedFace(CMeshFace* face, CMeshEdgeAndDir* axle_edge, CTris&
 	CTri tri;
 	face->GetTri(tri);
 
-	geoff_geometry::Point3d edge_p0(axle_edge->m_edge->m_v[0]->m_x[0], axle_edge->m_edge->m_v[0]->m_x[1], axle_edge->m_edge->m_v[0]->m_x[2]);
-	geoff_geometry::Point3d edge_p1(axle_edge->m_edge->m_v[1]->m_x[0], axle_edge->m_edge->m_v[1]->m_x[1], axle_edge->m_edge->m_v[1]->m_x[2]);
-	geoff_geometry::Vector3d vx(edge_p0, edge_p1);
+	Point3d edge_p0(axle_edge->m_edge->m_v[0]->m_x[0], axle_edge->m_edge->m_v[0]->m_x[1], axle_edge->m_edge->m_v[0]->m_x[2]);
+	Point3d edge_p1(axle_edge->m_edge->m_v[1]->m_x[0], axle_edge->m_edge->m_v[1]->m_x[1], axle_edge->m_edge->m_v[1]->m_x[2]);
+	Point3d vx(edge_p0, edge_p1);
 
-	geoff_geometry::Vector3d normal;
+	Point3d normal;
 	tri.GeoffTri().getNormal(&normal);
 
 	if (normal.magnitude() < 0.5)
@@ -1292,10 +1292,10 @@ static void AddFlattenedFace(CMeshFace* face, CMeshEdgeAndDir* axle_edge, CTris&
 		vx = -vx;
 		edge_p0 = edge_p1;
 	}
-	geoff_geometry::Vector3d vy = (normal ^ vx.Normalized()).Normalized();
+	Point3d vy = (normal ^ vx.Normalized()).Normalized();
 
-	geoff_geometry::Matrix tm(edge_p0, vx, vy);
-	geoff_geometry::Matrix inv_tm = tm.Inverse();
+	Matrix tm(edge_p0, vx, vy);
+	Matrix inv_tm = tm.Inverse();
 
 	tri.Transform(inv_tm);
 

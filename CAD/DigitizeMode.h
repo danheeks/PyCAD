@@ -37,7 +37,7 @@ public:
 	void OnFrontRender();
 	void GetProperties(std::list<Property *> *list);
 
-	DigitizedPoint Digitize(const geoff_geometry::Line &ray);
+	DigitizedPoint Digitize(const Line &ray);
 	DigitizedPoint digitize(const IPoint &point);
 	void SetOnlyCoords(HeeksObj* object, bool onoff);
 	bool OnlyCoords(HeeksObj* object);

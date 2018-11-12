@@ -353,7 +353,7 @@ public:
 		double centre[3];
 		box.Centre(centre);
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(geoff_geometry::Point3d(centre[0], centre[1], centre[2]), DigitizeInputType);
+		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], centre[1], centre[2]), DigitizeInputType);
 		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
 		if (pDrawingMode != NULL)
 		{
@@ -378,7 +378,7 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(geoff_geometry::Point3d(centre[0], box.MaxY(), centre[2]), DigitizeInputType);
+		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], box.MaxY(), centre[2]), DigitizeInputType);
 		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
 		if (pDrawingMode != NULL)
 		{
@@ -402,7 +402,7 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(geoff_geometry::Point3d(centre[0], box.MinY(), centre[2]), DigitizeInputType);
+		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], box.MinY(), centre[2]), DigitizeInputType);
 		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
 		if (pDrawingMode != NULL)
 		{
@@ -426,7 +426,7 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(geoff_geometry::Point3d(box.MaxX(), centre[1], centre[2]), DigitizeInputType);
+		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(box.MaxX(), centre[1], centre[2]), DigitizeInputType);
 		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
 		if (pDrawingMode != NULL)
 		{
@@ -450,7 +450,7 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(geoff_geometry::Point3d(box.MinX(), centre[1], centre[2]), DigitizeInputType);
+		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(box.MinX(), centre[1], centre[2]), DigitizeInputType);
 		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
 		if (pDrawingMode != NULL)
 		{
@@ -584,10 +584,10 @@ void CSketch::CalculateSketchOrder()
 
 		if(prev_object)
 		{
-			geoff_geometry::Point3d prev_e, s;
+			Point3d prev_e, s;
 			if(!prev_object->GetEndPoint(prev_e)){well_ordered = false; break;}
 			if(!object->GetStartPoint(s)){well_ordered = false; break;}
-			if (!(geoff_geometry::Point3d(prev_e).Dist(s) < theApp.m_sketch_reorder_tol)){ well_ordered = false; break; }
+			if (!(Point3d(prev_e).Dist(s) < theApp.m_sketch_reorder_tol)){ well_ordered = false; break; }
 		}
 
 		if(first_object == NULL)first_object = object;
@@ -598,7 +598,7 @@ void CSketch::CalculateSketchOrder()
 	{
 		if(prev_object && first_object)
 		{
-			geoff_geometry::Point3d e, s;
+			Point3d e, s;
 			if(prev_object->GetEndPoint(e))
 			{
 				if(first_object->GetStartPoint(s))
@@ -829,7 +829,7 @@ double CSketch::GetArea()const
 		default:
 			// treat all others as lines
 			{
-				geoff_geometry::Point3d s, e;
+				Point3d s, e;
 				if(!object->GetStartPoint(s))break;
 				if(!object->GetEndPoint(e))break;
 				area += (0.5 * (e.x - s.x) * (s.y + e.y));
@@ -858,8 +858,8 @@ bool CSketchRelinker::TryAdd(HeeksObj* object)
 	// if the object is not already added
 	if(m_added_from_old_set.find(object) == m_added_from_old_set.end())
 	{
-		geoff_geometry::Point3d old_point;
-		geoff_geometry::Point3d new_point;
+		Point3d old_point;
+		Point3d new_point;
 		m_new_back->GetEndPoint(old_point);
 
 		// try the object, the right way round
@@ -1010,7 +1010,7 @@ bool CSketch::operator==( const CSketch & rhs ) const
 
 #if 0
 
-static bool FindClosestVertex(const geoff_geometry::Point3d& p, const TopoDS_Face &face, TopoDS_Vertex &closest_vertex)
+static bool FindClosestVertex(const Point3d& p, const TopoDS_Face &face, TopoDS_Vertex &closest_vertex)
 {
 	// find closest vertex
 	TopExp_Explorer ex1;
@@ -1019,7 +1019,7 @@ static bool FindClosestVertex(const geoff_geometry::Point3d& p, const TopoDS_Fac
 	for(ex1.Init(face,TopAbs_VERTEX); ex1.More(); ex1.Next())
 	{
 		TopoDS_Vertex Vertex =TopoDS::Vertex(ex1.Current());
-		geoff_geometry::Point3d pos = BRep_Tool::Pnt(Vertex);
+		Point3d pos = BRep_Tool::Pnt(Vertex);
 		double d = pos.Distance(p);
 		if(best_dist < 0 || d < best_dist)
 		{
@@ -1032,7 +1032,7 @@ static bool FindClosestVertex(const geoff_geometry::Point3d& p, const TopoDS_Fac
 }
 
 #undef Status
-bool CSketch::FilletAtPoint(const geoff_geometry::Point3d& p, double rad)
+bool CSketch::FilletAtPoint(const Point3d& p, double rad)
 {
 	std::list<TopoDS_Shape> faces;
 	bool fillet_done = false;

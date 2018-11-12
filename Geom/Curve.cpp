@@ -17,6 +17,16 @@ double Point::length()const
     return sqrt( x*x + y*y );
 }
 
+double Point::magnitude()const
+{
+	return sqrt(x*x + y*y);
+}
+
+double Point::magnitudesqd()const
+{
+	return x*x + y*y;
+}
+
 double Point::normalize()
 {
 	double len = length();
@@ -25,11 +35,16 @@ double Point::normalize()
 	return len;
 }
 
-Line::Line(const Point& P0, const Point& V):p0(P0), v(V)
+Point Point::Mid(const Point& p1, double factor)const{
+	// Mid
+	return ::Mid(*this, p1, factor);
+}
+
+Line2d::Line2d(const Point& P0, const Point& V) :p0(P0), v(V)
 {
 }
 
-double Line::Dist(const Point& p)const
+double Line2d::Dist(const Point& p)const
 {
 	Point vn = v;
 	vn.normalize();
@@ -48,7 +63,7 @@ CVertex::CVertex(const Point& p, int user_data):m_type(0), m_p(p), m_c(0.0, 0.0)
 {
 }
 
-void CVertex::Transform(const geoff_geometry::Matrix& matrix)
+void CVertex::Transform(const Matrix& matrix)
 {
 	m_p.Transform(matrix);
 	m_c.Transform(matrix);
@@ -98,7 +113,7 @@ bool CCurve::CheckForArc(const CVertex& prev_vt, std::list<const CVertex*>& migh
 	}
 
 	CArc arc;
-	arc.m_c = c.m_c;
+	arc.m_c = c.pc;
 	arc.m_s = prev_vt.m_p;
 	arc.m_e = might_be_an_arc.back()->m_p;
 	arc.SetDirWithPoint(might_be_an_arc.front()->m_p);
@@ -605,7 +620,7 @@ void CCurve::RemoveTinySpans() {
 	{
 		const CVertex& vertex = *VIt;
 
-		if(vertex.m_type != 0 || new_curve.m_vertices.back().m_p.dist(vertex.m_p) > geoff_geometry::TOLERANCE)
+		if(vertex.m_type != 0 || new_curve.m_vertices.back().m_p.dist(vertex.m_p) > TOLERANCE)
 		{
 			new_curve.m_vertices.push_back(vertex);
 		}
@@ -678,40 +693,6 @@ Point CCurve::NearestPoint(const Span& p, double *d)const
 	return best_point;
 }
 
-static geoff_geometry::Kurve MakeKurve(const CCurve& curve)
-{
-	geoff_geometry::Kurve k;
-	for(std::list<CVertex>::const_iterator It = curve.m_vertices.begin(); It != curve.m_vertices.end(); It++)
-	{
-		const CVertex& v = *It;
-		k.Add(geoff_geometry::spVertex(v.m_type, geoff_geometry::Point(v.m_p.x, v.m_p.y), geoff_geometry::Point(v.m_c.x, v.m_c.y)));
-	}
-	return k;
-}
-
-static CCurve MakeCCurve(const geoff_geometry::Kurve& k)
-{
-	CCurve c;
-	int n = k.nSpans();
-	for(int i = 0; i<= n; i++)
-	{
-		geoff_geometry::spVertex spv;
-		k.Get(i, spv);
-		c.append(CVertex(spv.type, Point(spv.p.x, spv.p.y), Point(spv.pc.x, spv.pc.y)));
-	}
-	return c;
-}
-
-static geoff_geometry::Span MakeSpan(const Span& span)
-{
-	return geoff_geometry::Span(span.m_v.m_type, geoff_geometry::Point(span.m_p.x, span.m_p.y), geoff_geometry::Point(span.m_v.m_p.x, span.m_v.m_p.y), geoff_geometry::Point(span.m_v.m_c.x, span.m_v.m_c.y));
-}
-
-static Span MakeCSpan(const geoff_geometry::Span &sp)
-{
-	return Span(Point(sp.p0.x, sp.p0.y), CVertex(sp.dir, Point(sp.p1.x, sp.p1.y), Point(sp.pc.x, sp.pc.y)));
-}
-
 bool CCurve::Offset(double leftwards_value)
 {
 	// use the kurve code donated by Geoff Hawkesford, to offset the curve as an open curve
@@ -720,10 +701,12 @@ bool CCurve::Offset(double leftwards_value)
 
 	CCurve save_curve = *this;
 
+#if 0
+	to do
 	try
 	{
-		geoff_geometry::Kurve k = MakeKurve(*this);
-		geoff_geometry::Kurve kOffset;
+		Kurve k = MakeKurve(*this);
+		Kurve kOffset;
 		int ret = 0;
 		k.OffsetMethod1(kOffset, fabs(leftwards_value), (leftwards_value > 0) ? 1:-1, 1, ret);
 		success = (ret == 0);
@@ -733,6 +716,7 @@ bool CCurve::Offset(double leftwards_value)
 	{
 		success = false;
 	}
+#endif
 
 	if(success == false)
 	{
@@ -954,7 +938,7 @@ void CCurve::CurveIntersections(const CCurve& c, std::list<Point> &pts)const
 	a.CurveIntersections(c, pts);
 }
 
-void CCurve::Transform(const geoff_geometry::Matrix& matrix)
+void CCurve::Transform(const Matrix& matrix)
 {
 	for (std::list<CVertex>::iterator It = m_vertices.begin(); It != m_vertices.end(); It++)
 	{
@@ -1051,7 +1035,7 @@ Point Span::NearestPointNotOnSpan(const Point& p)const
 	{
 		double radius = m_p.dist(m_v.m_c);
 		double r = p.dist(m_v.m_c);
-		if(r < geoff_geometry::TOLERANCE)return m_p;
+		if(r < TOLERANCE)return m_p;
 		Point vc = (m_v.m_c - p);
 		return p + vc * ((r - radius) / r);
 	}
@@ -1200,21 +1184,6 @@ void Span::GetBox(CBox2D &box)const
 	}
 }
 
-double IncludedAngle(const Point& v0, const Point& v1, int dir) {
-	// returns the absolute included angle between 2 vectors in the direction of dir ( 1=acw  -1=cw)
-	double inc_ang = v0 * v1;
-	if(inc_ang > 1. - 1.0e-10) return 0;
-	if(inc_ang < -1. + 1.0e-10)
-		inc_ang = PI;  
-	else {									// dot product,   v1 . v2  =  cos ang
-		if(inc_ang > 1.0) inc_ang = 1.0;
-		inc_ang = acos(inc_ang);									// 0 to pi radians
-
-		if(dir * (v0 ^ v1) < 0) inc_ang = 2 * PI - inc_ang ;		// cp
-	}
-	return dir * inc_ang;
-}
-
 double Span::IncludedAngle()const
 {
 	if(m_v.m_type)
@@ -1317,12 +1286,15 @@ Point Span::GetVector(double fraction)const
 
 void Span::Intersect(const Span& s, std::list<Point> &pts)const
 {
+#if 0
+	to do
 	// finds all the intersection points between two spans and puts them in the given list
-	geoff_geometry::Point pInt1, pInt2;
+	Point pInt1, pInt2;
 	double t[4];
 	int num_int = MakeSpan(*this).Intof(MakeSpan(s), pInt1, pInt2, t);
 	if(num_int > 0)pts.push_back(Point(pInt1.x, pInt1.y));
 	if(num_int > 1)pts.push_back(Point(pInt2.x, pInt2.y));
+#endif
 }
 
 void Span::Reverse()
@@ -1345,10 +1317,25 @@ double Span::GetRadius()const
 
 void tangential_arc(const Point &p0, const Point &p1, const Point &v0, Point &c, int &dir)
 {
-	geoff_geometry::Point gp0(p0.x, p0.y);
-	geoff_geometry::Point gp1(p1.x, p1.y);
-	geoff_geometry::Vector2d gv0(v0.x, v0.y);
-	geoff_geometry::Point gc;
-	geoff_geometry::tangential_arc(gp0, gp1, gv0, gc, dir);
-	c = Point(gc.x, gc.y);
+	// sets dir to 0, if a line is needed, else to 1 or -1 for acw or cw arc and sets c
+	dir = 0;
+
+	if (p0.Dist(p1) > 0.0000000001 && v0.magnitude() > 0.0000000001){
+		Point v1(p0, p1);
+		Point halfway(p0 + Point(v1 * 0.5));
+		Plane pl1(halfway, v1);
+		Plane pl2(p0, v0);
+		Line plane_line;
+		if (pl1.Intof(pl2, plane_line))
+		{
+			Line l1(halfway, v1);
+			double t1, t2;
+			Line lshort;
+			plane_line.Shortest(l1, lshort, t1, t2);
+			c.x = lshort.p0.x;
+			c.y = lshort.p0.y;
+			Point3d cross = Point3d(v0) ^ Point3d(v1);
+			dir = (cross.z > 0) ? 1 : -1;
+		}
+	}
 }

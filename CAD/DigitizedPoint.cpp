@@ -14,12 +14,12 @@
 DigitizedPoint::DigitizedPoint()
 {
 	m_type = DigitizeNoItemType;
-	m_point = geoff_geometry::Point3d(0, 0, 0);
+	m_point = Point3d(0, 0, 0);
 	m_object1 = NULL;
 	m_object2 = NULL;
 }
 
-DigitizedPoint::DigitizedPoint(geoff_geometry::Point3d point, DigitizeType t, HeeksObj* object1, HeeksObj* object2)
+DigitizedPoint::DigitizedPoint(Point3d point, DigitizeType t, HeeksObj* object1, HeeksObj* object2)
 {
 	m_point = point;
 	m_type = t;
@@ -102,18 +102,23 @@ static bool PointOrLineToCircle(PointLineOrCircle &plc)
 		return true;
 	case LineType:
 		plc.type = TwoCircleType;
-		return LineToBigCircles(plc.l, geoff_geometry::Point3d(0, 0, 1), plc.c, plc.c2);
+		return LineToBigCircles(plc.l, Point3d(0, 0, 1), plc.c, plc.c2);
 	default:
 		return false;
 	}
 }
 
+#endif
+
 // static member function
-bool DigitizedPoint::GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint& d2, geoff_geometry::Point3d &P1, geoff_geometry::Point3d &P2)
+bool DigitizedPoint::GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint& d2, Point3d &P1, Point3d &P2)
 {
 	// calculate tangent points
 	P1 = d1.m_point;
 	P2 = d2.m_point;
+#if 0
+	to do
+
 
 	PointLineOrCircle plc1 = GetLineOrCircleType(d1);
 	PointLineOrCircle plc2 = GetLineOrCircleType(d2);
@@ -130,16 +135,20 @@ bool DigitizedPoint::GetLinePoints(const DigitizedPoint& d1, const DigitizedPoin
 	{
 		return HCircle::GetLineTangentPoint(plc2.c, d2.m_point, plc1.p, P2);
 	}
+#endif
 
 	return false;
 }
 
 // static member function
-bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const geoff_geometry::Point3d *initial_direction, const DigitizedPoint& d2, geoff_geometry::Point3d &P1, geoff_geometry::Point3d &P2, geoff_geometry::Point3d &centre, geoff_geometry::Point3d &axis)
+bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const Point3d *initial_direction, const DigitizedPoint& d2, Point3d &P1, Point3d &P2, Point3d &centre, Point3d &axis)
 {
-	// calculate tangent points
+		// calculate tangent points
 	P1 = d1.m_point;
 	P2 = d2.m_point;
+
+#if 0
+	to do
 
 	PointLineOrCircle plc1 = GetLineOrCircleType(d1);
 	PointLineOrCircle plc2 = GetLineOrCircleType(d2);
@@ -174,13 +183,13 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const geoff_geometry
 	}
 	else if (plc1.type == PointType && plc2.type == CircleType)
 	{
-		geoff_geometry::Point3d minus_dir;
+		Point3d minus_dir;
 		if (initial_direction)minus_dir = -(*initial_direction);
 		return HCircle::GetArcTangentPoint(plc2.c, d2.m_point, d1.m_point, (initial_direction != NULL) ? (&minus_dir) : NULL, NULL, P2, centre, axis);
 	}
 	else if (plc1.type == PointType && plc2.type == LineType)
 	{
-		geoff_geometry::Point3d minus_dir;
+		Point3d minus_dir;
 		if (initial_direction)minus_dir = -(*initial_direction);
 		return HCircle::GetArcTangentPoint(plc2.l, d2.m_point, d1.m_point, (initial_direction != NULL) ? (&minus_dir) : NULL, NULL, P2, centre, axis);
 	}
@@ -190,26 +199,30 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const geoff_geometry
 		P2 = d2.m_point;
 		return true;
 	}
+#endif
 
 	return false;
 }
 
-bool DigitizedPoint::GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, gp_Circ& c)
+
+
+bool DigitizedPoint::GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, Circle& c)
 {
-	geoff_geometry::Point3d v = d2.m_point - d1.m_point;
-	double d = d2.m_point.Distance(d1.m_point);
-	geoff_geometry::Point3d cen = d1.m_point + (v / 2);
-	c.SetLocation(cen);
-	c.SetRadius(d / 2);
+	Point3d v = d2.m_point - d1.m_point;
+	double d = d2.m_point.Dist(d1.m_point);
+	Point3d cen = d1.m_point + (v / 2);
+	c.pc = Point(cen.x, cen.y);
+	c.radius = (d / 2);
 	return true;
 }
 
+#if 0
 bool DigitizedPoint::GetCubicSpline(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, const DigitizedPoint& d4, Handle_Geom_BSplineCurve &spline)
 {
-	geoff_geometry::Point3d s = d1.m_point;
-	geoff_geometry::Point3d e = d2.m_point;
-	geoff_geometry::Point3d c1 = d3.m_point;
-	geoff_geometry::Point3d c2 = d4.m_point;
+	Point3d s = d1.m_point;
+	Point3d e = d2.m_point;
+	Point3d c1 = d3.m_point;
+	Point3d c2 = d4.m_point;
 
 	TColgp_Array1OfPnt poles(1, 4);
 	poles.SetValue(1, s); poles.SetValue(2, c1); poles.SetValue(3, c2); poles.SetValue(4, e);
@@ -228,9 +241,9 @@ bool DigitizedPoint::GetCubicSpline(const DigitizedPoint& d1, const DigitizedPoi
 
 bool DigitizedPoint::GetQuarticSpline(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Handle_Geom_BSplineCurve &spline)
 {
-	geoff_geometry::Point3d s = d1.m_point;
-	geoff_geometry::Point3d e = d2.m_point;
-	geoff_geometry::Point3d c = d3.m_point;
+	Point3d s = d1.m_point;
+	Point3d e = d2.m_point;
+	Point3d c = d3.m_point;
 	TColgp_Array1OfPnt poles(1, 3);
 	poles.SetValue(1, s); poles.SetValue(2, c); poles.SetValue(3, e);
 #ifdef _DEBUG
@@ -280,20 +293,20 @@ bool DigitizedPoint::GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& 
 	e.SetMajorRadius(d);
 	e.SetMinorRadius(d / 2);
 
-	geoff_geometry::Point3d vec = d2.m_point - d1.m_point;
+	Point3d vec = d2.m_point - d1.m_point;
 	vec = vec / d;
 	double rot = atan2(vec.y, vec.x);
 
-	geoff_geometry::Point3d up(0, 0, 1);
-	geoff_geometry::Point3d zp(0, 0, 0);
+	Point3d up(0, 0, 1);
+	Point3d zp(0, 0, 0);
 	e.Rotate(gp_Ax1(d1.m_point, up), rot);
 
-	geoff_geometry::Point3d x_axis = e.XAxis().Direction();
-	geoff_geometry::Point3d y_axis = e.YAxis().Direction();
+	Point3d x_axis = e.XAxis().Direction();
+	Point3d y_axis = e.YAxis().Direction();
 	double maj_r = d;
 
 	//We have to rotate the incoming vector to be in our coordinate system
-	geoff_geometry::Point3d cir = d3.m_point - d1.m_point;
+	Point3d cir = d3.m_point - d1.m_point;
 	cir.Rotate(gp_Ax1(zp, up), -rot + M_PI / 2);
 
 	double nradius = 1 / sqrt((1 - (1 / maj_r)*(1 / maj_r)*cir.y*cir.y) / cir.x / cir.x);
@@ -310,8 +323,11 @@ bool DigitizedPoint::GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& 
 	return true;
 }
 
-bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, gp_Circ& c)
+#endif
+
+bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Circle& c)
 {
+#if 0
 	PointLineOrCircle plc1 = GetLineOrCircleType(d1);
 	PointLineOrCircle plc2 = GetLineOrCircleType(d2);
 	PointLineOrCircle plc3 = GetLineOrCircleType(d3);
@@ -330,7 +346,7 @@ bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedP
 	{
 		gp_Circ& circle = *It;
 
-		std::list<geoff_geometry::Point3d> p_list;
+		std::list<Point3d> p_list;
 		intersect(circle, plc1.c, p_list);
 		if (p_list.size() != 1 && plc1.type == TwoCircleType)
 		{
@@ -339,7 +355,7 @@ bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedP
 		}
 		if (p_list.size() == 1)
 		{
-			geoff_geometry::Point3d p1 = p_list.front();
+			Point3d p1 = p_list.front();
 			p_list.clear();
 			intersect(circle, plc2.c, p_list);
 			if (p_list.size() != 1 && plc2.type == TwoCircleType)
@@ -350,7 +366,7 @@ bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedP
 
 			if (p_list.size() == 1)
 			{
-				geoff_geometry::Point3d p2 = p_list.front();
+				Point3d p2 = p_list.front();
 				p_list.clear();
 
 				intersect(circle, plc3.c, p_list);
@@ -361,7 +377,7 @@ bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedP
 				}
 				if (p_list.size() == 1)
 				{
-					geoff_geometry::Point3d p3 = p_list.front();
+					Point3d p3 = p_list.front();
 					p_list.clear();
 					double dist = d1.m_point.Distance(p1) + d2.m_point.Distance(p2) + d3.m_point.Distance(p3);
 					if (best_circle == NULL || dist<best_dist)
@@ -378,8 +394,6 @@ bool DigitizedPoint::GetTangentCircle(const DigitizedPoint& d1, const DigitizedP
 		c = *best_circle;
 		return true;
 	}
-
+#endif
 	return false;
 }
-
-#endif

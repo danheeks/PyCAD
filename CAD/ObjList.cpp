@@ -273,7 +273,7 @@ void ObjList::ReadBaseXML(TiXmlElement* element)
 	HeeksObj::ReadBaseXML(element);
 }
 
-void ObjList::Transform(const geoff_geometry::Matrix& m)
+void ObjList::Transform(const Matrix& m)
 {
 	std::list<HeeksObj*> copy_list = m_objects;
 	for(std::list<HeeksObj*>::iterator It=copy_list.begin(); It!=copy_list.end() ;It++)

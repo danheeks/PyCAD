@@ -36,10 +36,10 @@ HeeksObj* EndedObject::MakeACopyWithID()
 bool EndedObject::IsDifferent(HeeksObj *other)
 {
 	EndedObject* eobj = (EndedObject*)other;
-	if(eobj->A.Dist(A) > geoff_geometry::TOLERANCE)
+	if(eobj->A.Dist(A) > TOLERANCE)
 		return true;
 
-	if (eobj->B.Dist(B) > geoff_geometry::TOLERANCE)
+	if (eobj->B.Dist(B) > TOLERANCE)
 		return true;
 
 	if(color.COLORREF_color() != eobj->color.COLORREF_color())
@@ -48,14 +48,14 @@ bool EndedObject::IsDifferent(HeeksObj *other)
 	return ExtrudedObj<HeeksObj>::IsDifferent(other);
 }
 
-void EndedObject::Transform(const geoff_geometry::Matrix& m){
+void EndedObject::Transform(const Matrix& m){
 	A = A.Transformed(m);
 	B = B.Transformed(m);
 }
 
 bool EndedObject::Stretch(const double *p, const double* shift, void* data){
-	geoff_geometry::Point3d vp(p);
-	geoff_geometry::Point3d vshift(shift);
+	Point3d vp(p);
+	Point3d vshift(shift);
 
 	if(data == &A){
 		A = vp + vshift;

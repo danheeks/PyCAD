@@ -9,7 +9,7 @@
 class HILine: public EndedObject{
 public:
 	~HILine(void);
-	HILine(const geoff_geometry::Point3d &a, const geoff_geometry::Point3d &b, const HeeksColor* col);
+	HILine(const Point3d &a, const Point3d &b, const HeeksColor* col);
 	HILine(const HILine &line);
 
 	const HILine& operator=(const HILine &b);
@@ -24,13 +24,13 @@ public:
 	const wchar_t* GetIconFilePath();
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
-	bool FindNearPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point);
-	bool FindPossTangentPoint(const geoff_geometry::Point3d & ray_start, const geoff_geometry::Point3d & ray_direction, geoff_geometry::Point3d &point);
+	bool FindNearPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point);
+	bool FindPossTangentPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	void CopyFrom(const HeeksObj* object){operator=(*((HILine*)object));}
 	void WriteXML(TiXmlNode *root);
-	bool GetEndPoint(geoff_geometry::Point3d &pos);
-	bool GetStartPoint(geoff_geometry::Point3d &pos);
+	bool GetEndPoint(Point3d &pos);
+	bool GetStartPoint(Point3d &pos);
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

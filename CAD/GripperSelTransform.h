@@ -20,7 +20,7 @@ public:
 	HeeksObj *MakeACopy(void)const{ return new GripperSelTransform(*this);}
 
 	// virtual functions
-	void MakeMatrix(const geoff_geometry::Point3d &from, const geoff_geometry::Point3d &to, const geoff_geometry::Matrix& object_m, geoff_geometry::Matrix& mat);
+	void MakeMatrix(const Point3d &from, const Point3d &to, const Matrix& object_m, Matrix& mat);
 
 	//Gripper's virtual functions
 	void OnGripperMoved( double* from, const double* to );

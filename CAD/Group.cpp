@@ -76,19 +76,19 @@ HeeksObj* CGroup::ReadFromXMLElement(TiXmlElement* element)
 		element->Attribute("ox", &o[0]);
 		element->Attribute("oy", &o[1]);
 		element->Attribute("oz", &o[2]);
-		new_object->m_o = geoff_geometry::Point3d(o);
+		new_object->m_o = Point3d(o);
 		element->Attribute("pxx", &px[0]);
 		element->Attribute("pxy", &px[1]);
 		element->Attribute("pxz", &px[2]);
-		new_object->m_px = geoff_geometry::Point3d(px);
+		new_object->m_px = Point3d(px);
 		element->Attribute("pyx", &py[0]);
 		element->Attribute("pyy", &py[1]);
 		element->Attribute("pyz", &py[2]);
-		new_object->m_py = geoff_geometry::Point3d(py);
+		new_object->m_py = Point3d(py);
 		element->Attribute("pzx", &pz[0]);
 		element->Attribute("pzy", &pz[1]);
 		element->Attribute("pzz", &pz[2]);
-		new_object->m_pz = geoff_geometry::Point3d(pz);
+		new_object->m_pz = Point3d(pz);
 	}
 
 	// loop through all the objects
@@ -125,8 +125,8 @@ void CGroup::OnEditString(const wchar_t* str){
 }
 
 bool CGroup::Stretch(const double *p, const double* shift, void* data){
-	geoff_geometry::Point3d vp(p);
-	geoff_geometry::Point3d vshift(shift);
+	Point3d vp(p);
+	Point3d vshift(shift);
 	m_px = vp + vshift;
 	return false;
 }
@@ -139,10 +139,10 @@ void CGroup::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 			CBox box;
 			GetBox(box);
 			if(!box.m_valid)return;
-			m_o = geoff_geometry::Point3d((box.MinX() + box.MaxX())/2, (box.MinY() + box.MaxY())/2, (box.MinZ() + box.MaxZ())/2);
-			m_px = geoff_geometry::Point3d(box.MaxX(), (box.MinY() + box.MaxY())/2, (box.MinZ() + box.MaxZ())/2);
-			m_py = geoff_geometry::Point3d((box.MinX() + box.MaxX())/2, box.MaxY(), (box.MinZ() + box.MaxZ())/2);
-			m_pz = geoff_geometry::Point3d((box.MinX() + box.MaxX())/2, (box.MinY() + box.MaxY())/2, box.MaxZ());
+			m_o = Point3d((box.MinX() + box.MaxX())/2, (box.MinY() + box.MaxY())/2, (box.MinZ() + box.MaxZ())/2);
+			m_px = Point3d(box.MaxX(), (box.MinY() + box.MaxY())/2, (box.MinZ() + box.MaxZ())/2);
+			m_py = Point3d((box.MinX() + box.MaxX())/2, box.MaxY(), (box.MinZ() + box.MaxZ())/2);
+			m_pz = Point3d((box.MinX() + box.MaxX())/2, (box.MinY() + box.MaxY())/2, box.MaxZ());
 			m_gripper_datum_set = true;
 		}
 
@@ -182,25 +182,25 @@ void CGroup::GetProperties(std::list<Property *> *list)
 }
 
 static CGroup* object_for_tools = NULL;
-static geoff_geometry::Point3d* vertex_for_pick_pos = NULL;
+static Point3d* vertex_for_pick_pos = NULL;
 static void(*callback_for_pick_pos)(const double*) = NULL;
 
 static void on_set_o(const double* pos)
 {
-	geoff_geometry::Point3d shift(object_for_tools->m_o, geoff_geometry::Point3d(pos));
-	object_for_tools->m_o = geoff_geometry::Point3d(pos);
+	Point3d shift(object_for_tools->m_o, Point3d(pos));
+	object_for_tools->m_o = Point3d(pos);
 	object_for_tools->m_px = object_for_tools->m_px + shift;
 	object_for_tools->m_py = object_for_tools->m_py + shift;
 	object_for_tools->m_pz = object_for_tools->m_pz + shift;
 	theApp.Repaint();
 }
 
-geoff_geometry::Matrix CGroup::GetMatrix()
+Matrix CGroup::GetMatrix()
 {
-	return geoff_geometry::Matrix(m_o, geoff_geometry::Point3d(m_o, m_px), geoff_geometry::Point3d(m_o, m_py));
+	return Matrix(m_o, Point3d(m_o, m_px), Point3d(m_o, m_py));
 }
 
-bool CGroup::GetScaleAboutMatrix(geoff_geometry::Matrix &m)
+bool CGroup::GetScaleAboutMatrix(Matrix &m)
 {
 	if(m_custom_grippers)
 	{
@@ -211,13 +211,13 @@ bool CGroup::GetScaleAboutMatrix(geoff_geometry::Matrix &m)
 	return ObjList::GetScaleAboutMatrix(m);
 }
 
-void CGroup::Transform(const geoff_geometry::Matrix& m)
+void CGroup::Transform(const Matrix& m)
 {
 	ObjList::Transform(m);
 
 	if(m_gripper_datum_set)
 	{
-		geoff_geometry::Matrix mat = geoff_geometry::Matrix(m);
+		Matrix mat = Matrix(m);
 		m_o = m_o.Transformed(mat);
 		m_px = m_px.Transformed(mat);
 		m_py = m_py.Transformed(mat);

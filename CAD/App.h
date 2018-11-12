@@ -128,7 +128,7 @@ public:
 	GripperMode* gripper_mode;
 	int grid_mode;
 	Gripper *drag_gripper;
-	geoff_geometry::Point3d grip_from, grip_to;
+	Point3d grip_from, grip_to;
 	Gripper *cursor_gripper;
 	CViewport *m_current_viewport;
 	MarkedList *m_marked_list;
@@ -154,7 +154,7 @@ public:
 	std::list< void(*)(std::list<Tool*>&) > m_markedlisttools_callbacks;
 	std::list< void(*)() > m_on_restore_defaults_callbacks;
 	int m_transform_gl_list;
-	geoff_geometry::Matrix m_drag_matrix;
+	Matrix m_drag_matrix;
 	bool m_extrude_removes_sketches;
 	bool m_loft_removes_sketches;
 	bool m_font_created;
@@ -164,7 +164,7 @@ public:
 	bool m_print_scaled_to_page;
 	FileOpenOrImportType m_file_open_or_import_type;
 	bool m_inPaste;
-	geoff_geometry::Matrix* m_file_open_matrix;
+	Matrix* m_file_open_matrix;
 	double m_view_units; // units to display to the user ( but everything is stored as mm ), 1.0 for mm, 25.4 for inches
 	bool m_dragging_moves_objects;
 	std::wstring m_res_folder;
@@ -241,7 +241,7 @@ public:
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
 	void Remove(std::list<HeeksObj*> objects);
-	void Transform(std::list<HeeksObj*> objects, const geoff_geometry::Matrix& m);
+	void Transform(std::list<HeeksObj*> objects, const Matrix& m);
 	void Reset();
 	HeeksObj* ReadXMLElement(TiXmlElement* pElem);
 	void ObjectWriteBaseXML(HeeksObj *object, TiXmlElement *element);
@@ -271,8 +271,8 @@ public:
 	void DeleteUndoably(HeeksObj* object);
 	void DeleteUndoably(const std::list<HeeksObj*>& list);
 	void CopyUndoably(HeeksObj* object, HeeksObj* copy_with_new_data);
-	void TransformUndoably(HeeksObj *object, const geoff_geometry::Matrix &m);
-	void TransformUndoably(const std::list<HeeksObj*>& list, const geoff_geometry::Matrix &m);
+	void TransformUndoably(HeeksObj *object, const Matrix &m);
+	void TransformUndoably(const std::list<HeeksObj*>& list, const Matrix &m);
 	void ReverseUndoably(HeeksObj *object);
 	void EditUndoably(HeeksObj *object);
 	void WasModified(HeeksObj *object);
@@ -281,7 +281,7 @@ public:
 	void WereModified(const std::list<HeeksObj*>& list);
 	void WereAdded(const std::list<HeeksObj*>& list);
 	void WereRemoved(const std::list<HeeksObj*>& list);
-	geoff_geometry::Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
+	Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
 	void GetOptions(std::list<Property *> *list);
 	void DeleteMarkedItems();
 	void glColorEnsuringContrast(const HeeksColor &c);

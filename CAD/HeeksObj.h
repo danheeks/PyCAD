@@ -96,13 +96,14 @@ public:
 	virtual void CopyFrom(const HeeksObj* object){}
 	virtual void SetColor(const HeeksColor &col){}
 	virtual const HeeksColor* GetColor()const{return NULL;}
-	virtual void Transform(const geoff_geometry::Matrix &m){} // transform the object
-	virtual bool GetStartPoint(geoff_geometry::Point3d &pos){ return false; }
-	virtual bool GetEndPoint(geoff_geometry::Point3d &pos){ return false; }
-	virtual bool GetCentrePoint(geoff_geometry::Point3d &pos){ return false; }
-	virtual int GetCentrePoints(geoff_geometry::Point3d &pos, geoff_geometry::Point3d &pos2){ if (GetCentrePoint(pos))return 1; return 0; }
-	virtual bool GetMidPoint(geoff_geometry::Point3d &pos){ return false; }
-	virtual bool GetScaleAboutMatrix(geoff_geometry::Matrix &m);
+	virtual void Transform(const Matrix &m){} // transform the object
+	virtual bool GetStartPoint(Point3d &pos){ return false; }
+	virtual void SetStartPoint(const Point3d &pos){}
+	virtual bool GetEndPoint(Point3d &pos){ return false; }
+	virtual bool GetCentrePoint(Point3d &pos){ return false; }
+	virtual int GetCentrePoints(Point3d &pos, Point3d &pos2){ if (GetCentrePoint(pos))return 1; return 0; }
+	virtual bool GetMidPoint(Point3d &pos){ return false; }
+	virtual bool GetScaleAboutMatrix(Matrix &m);
 	virtual void GetProperties(std::list<Property *> *list);
 	virtual void GetOnEdit(bool(**callback)(HeeksObj*)){ *callback = NULL; } // returns a function for doing edit with a dialog
 	bool Edit(){bool(*fn)(HeeksObj*) = NULL;GetOnEdit(&fn);if(fn){if((*fn)(this)){WriteDefaultValues();return true;}}return false;}  // do edit with a dialog
@@ -110,12 +111,12 @@ public:
 	virtual bool ValidateProperties(){return true;}
 	virtual const wchar_t* GetIconFilePath();  
 	virtual int Intersects(const HeeksObj *object, std::list< double > *rl)const{return 0;}
-	virtual bool FindNearPoint(const geoff_geometry::Line &ray, geoff_geometry::Point3d &point){ return false; }
-	virtual bool FindPossTangentPoint(const geoff_geometry::Line &ray, geoff_geometry::Point3d &point){ return false; }
+	virtual bool FindNearPoint(const Line &ray, Point3d &point){ return false; }
+	virtual bool FindPossTangentPoint(const Line &ray, Point3d &point){ return false; }
 	virtual void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof);
-	virtual bool Stretch(const geoff_geometry::Point3d &p, const geoff_geometry::Point3d &shift, void* data){ return false; } // return true, if undo stretch is done with Add and Delete
-	virtual bool StretchTemporary(const geoff_geometry::Point3d &p, const geoff_geometry::Point3d &shift, void* data){ Stretch(p, shift, data); return true; } // returns true, because Stretch was done.  If not done, then override and return false;
-	virtual void SetClickMarkPoint(MarkedObject* marked_object, const geoff_geometry::Point3d &ray_start, const geoff_geometry::Point3d &ray_direction){}
+	virtual bool Stretch(const Point3d &p, const Point3d &shift, void* data){ return false; } // return true, if undo stretch is done with Add and Delete
+	virtual bool StretchTemporary(const Point3d &p, const Point3d &shift, void* data){ Stretch(p, shift, data); return true; } // returns true, because Stretch was done.  If not done, then override and return false;
+	virtual void SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction){}
 	virtual bool CanAdd(HeeksObj* object){return false;}
 	virtual bool CanAddTo(HeeksObj* owner){return true;}
 	virtual HeeksObj* PreferredPasteTarget(){return NULL;}

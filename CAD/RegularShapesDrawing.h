@@ -27,9 +27,9 @@ private:
 	int step_to_go_to_after_last_step(){return 0;}
 	bool is_an_add_level(int level){return level == 1;}
 
-	void CalculateRectangle(double x, double y, const geoff_geometry::Point3d& p0, const geoff_geometry::Point3d& p1, const geoff_geometry::Point3d& p2, const geoff_geometry::Point3d& p3, const geoff_geometry::Point3d& xdir, const geoff_geometry::Point3d& ydir, const geoff_geometry::Point3d& zdir);
-	void CalculatePolygon(const geoff_geometry::Point3d& p0, const geoff_geometry::Point3d& p1, const geoff_geometry::Point3d& zdir);
-	void CalculateObround(const geoff_geometry::Point3d& p0, const geoff_geometry::Point3d& p1, const geoff_geometry::Point3d& xdir, const geoff_geometry::Point3d& zdir);
+	void CalculateRectangle(double x, double y, const Point3d& p0, const Point3d& p1, const Point3d& p2, const Point3d& p3, const Point3d& xdir, const Point3d& ydir, const Point3d& zdir);
+	void CalculatePolygon(const Point3d& p0, const Point3d& p1, const Point3d& zdir);
+	void CalculateObround(const Point3d& p0, const Point3d& p1, const Point3d& xdir, const Point3d& zdir);
 
 public:
 	RegularShapeMode m_mode;

@@ -30,8 +30,8 @@ bool CClickPoint::GetPos(double *pos)
 		theApp.m_current_viewport->m_view_point.SetProjection(true);
 		theApp.m_current_viewport->m_view_point.SetModelview();
 
-		geoff_geometry::Point3d screen_pos(m_point.x, theApp.m_current_viewport->GetViewportSize().GetHeight() - m_point.y, (double)m_depth/4294967295.0);
-		geoff_geometry::Point3d world_pos = theApp.m_current_viewport->m_view_point.glUnproject(screen_pos);
+		Point3d screen_pos(m_point.x, theApp.m_current_viewport->GetViewportSize().GetHeight() - m_point.y, (double)m_depth/4294967295.0);
+		Point3d world_pos = theApp.m_current_viewport->m_view_point.glUnproject(screen_pos);
 		world_pos.get(m_pos);
 		m_valid = true;
 	}
@@ -143,7 +143,7 @@ void CSelectMode::OnLeftDown( MouseEvent& event )
 					}
 
 					theApp.drag_gripper->OnGripperGrabbed(selected_objects, true, from);
-					theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
+					theApp.grip_from = Point3d(from[0], from[1], from[2]);
 					theApp.m_current_viewport->EndDrawFront();
 					return;
 				}
@@ -290,7 +290,7 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 			{
 				theApp.m_marked_list->Add(object, true);
 				m_last_click_point = CClickPoint(IPoint(event.GetX(), event.GetY()), depth);
-				geoff_geometry::Line ray = theApp.m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
+				Line ray = theApp.m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
 				double ray_start[3], ray_direction[3];
 				ray.p0.get(ray_start);
 				ray.v.get(ray_direction);
@@ -353,7 +353,7 @@ void CSelectMode::OnDragging( MouseEvent& event )
 			theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
 			theApp.grip_from.get(from);
 			theApp.drag_gripper->OnGripperMoved(from, to);
-			theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
+			theApp.grip_from = Point3d(from[0], from[1], from[2]);
 		}
 		else if(abs(button_down_point.x - event.GetX())>2 || abs(button_down_point.y - event.GetY())>2)
 		{
@@ -410,14 +410,14 @@ void CSelectMode::OnDragging( MouseEvent& event )
 					from[1] = theApp.grip_from.y;
 					from[2] = theApp.grip_from.z;
 					theApp.drag_gripper->OnGripperGrabbed(selected_objects_dragged, theApp.m_show_grippers_on_drag, from);
-					theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
+					theApp.grip_from = Point3d(from[0], from[1], from[2]);
 					double to[3];
 					theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
 					theApp.m_digitizing->digitized_point.m_point.get(to);
 					theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
 					theApp.grip_from.get(from);
 					theApp.drag_gripper->OnGripperMoved(from, to);
-					theApp.grip_from = geoff_geometry::Point3d(from[0], from[1], from[2]);
+					theApp.grip_from = Point3d(from[0], from[1], from[2]);
 					return;
 				}
 			}

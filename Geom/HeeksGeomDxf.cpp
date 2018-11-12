@@ -43,11 +43,11 @@ void AddToDxfFile(CDxfWrite& writer, const Span& span)
 	}
 }
 
-void AddToDxfFile(CDxfWrite& writer, const std::list<geoff_geometry::Line> &intof_list)
+void AddToDxfFile(CDxfWrite& writer, const std::list<Line> &intof_list)
 {
-	for (std::list<geoff_geometry::Line>::const_iterator It = intof_list.begin(); It != intof_list.end(); It++)
+	for (std::list<Line>::const_iterator It = intof_list.begin(); It != intof_list.end(); It++)
 	{
-		const geoff_geometry::Line& line = *It;
+		const Line& line = *It;
 		writer.WriteLine(line.p0.getBuffer(), (line.p0 + line.v).getBuffer(), "0");
 	}
 }
@@ -64,7 +64,7 @@ void WriteDxfFile(const CCurve& curve, const std::string& dxf_file_path)
 	AddToDxfFile(dxf_writer, curve);
 }
 
-void WriteDxfFile(const std::string& dxf_file_path, const std::list<geoff_geometry::Line> &intof_list)
+void WriteDxfFile(const std::string& dxf_file_path, const std::list<Line> &intof_list)
 {
 	CDxfWrite dxf_writer(dxf_file_path.c_str());
 	AddToDxfFile(dxf_writer, intof_list);

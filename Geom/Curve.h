@@ -10,13 +10,13 @@
 #include "Point.h"
 #include "Box2D.h"
 
-class Line{
+class Line2d{
 public:
 	Point p0;
 	Point v;
 
 	// constructors
-	Line(const Point& P0, const Point& V);
+	Line2d(const Point& P0, const Point& V);
 
 	double Dist(const Point& p)const;
 };
@@ -35,7 +35,7 @@ public:
 	CVertex(int type, const Point& p, const Point& c, int user_data = 0);
 	CVertex(const Point& p, int user_data = 0);
 
-	void Transform(const geoff_geometry::Matrix& matrix);
+	void Transform(const Matrix& matrix);
 };
 
 class Span
@@ -104,7 +104,7 @@ public:
 	void operator+=(const CCurve& p);
 	void SpanIntersections(const Span& s, std::list<Point> &pts)const;
 	void CurveIntersections(const CCurve& c, std::list<Point> &pts)const;
-	void Transform(const geoff_geometry::Matrix& matrix);
+	void Transform(const Matrix& matrix);
 	bool GetMaxCutterRadius(double &radius)const;
 };
 

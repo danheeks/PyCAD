@@ -12,7 +12,7 @@ protected:
 	HeeksColor color;
 
 public:
-	geoff_geometry::Point3d A, B;
+	Point3d A, B;
 
 	~EndedObject(void);
 	EndedObject(void);
@@ -22,7 +22,7 @@ public:
 
 	// HeeksObj's virtual functions
 	bool Stretch(const double *p, const double* shift, void* data);
-	void Transform(const geoff_geometry::Matrix& m);
+	void Transform(const Matrix& m);
 	bool GetStartPoint(double* pos);
 	bool GetEndPoint(double* pos);
 	void CopyFrom(const HeeksObj* object){ operator=(*((EndedObject*)object)); }

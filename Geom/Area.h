@@ -73,7 +73,7 @@ public:
 	void CurveIntersections(const CCurve& curve, std::list<Point> &pts)const; 
 	void InsideCurves(const CCurve& curve, std::list<CCurve> &curves_inside)const;
 	CArea Swept(const Point& vector)const;
-	void Transform(const geoff_geometry::Matrix& matrix);
+	void Transform(const Matrix& matrix);
 };
 
 enum eOverlapType

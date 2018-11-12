@@ -16,7 +16,7 @@ HPoint::~HPoint(void)
 {
 }
 
-HPoint::HPoint(const geoff_geometry::Point3d &p, const HeeksColor* col)
+HPoint::HPoint(const Point3d &p, const HeeksColor* col)
 {
 	m_p = p;
 	color = *col;
@@ -47,7 +47,7 @@ const wchar_t* HPoint::GetIconFilePath()
 bool HPoint::IsDifferent(HeeksObj* o)
 {
 	HPoint* other = (HPoint*)o;
-	if(m_p.Dist(other->m_p) > geoff_geometry::TOLERANCE)
+	if(m_p.Dist(other->m_p) > TOLERANCE)
 		return true;
 
 	return HeeksObj::IsDifferent(o);
@@ -89,7 +89,7 @@ HeeksObj *HPoint::MakeACopy(void)const
 	return new HPoint(*this);
 }
 
-void HPoint::Transform(const geoff_geometry::Matrix& m)
+void HPoint::Transform(const Matrix& m)
 {
 	m_p = m_p.Transformed(m);
 }
@@ -109,13 +109,18 @@ void HPoint::GetProperties(std::list<Property *> *list)
 	HeeksObj::GetProperties(list);
 }
 
-bool HPoint::GetStartPoint(geoff_geometry::Point3d& pos)
+bool HPoint::GetStartPoint(Point3d& pos)
 {
 	pos = m_p;
 	return true;
 }
 
-bool HPoint::GetEndPoint(geoff_geometry::Point3d& pos)
+void HPoint::SetStartPoint(const Point3d &pos)
+{
+	m_p = pos;
+}
+
+bool HPoint::GetEndPoint(Point3d& pos)
 {
 	pos = m_p;
 	return true;
@@ -137,7 +142,7 @@ void HPoint::WriteXML(TiXmlNode *root)
 //static
 HeeksObj* HPoint::ReadFromXMLElement(TiXmlElement* pElem)
 {
-	geoff_geometry::Point3d p;
+	Point3d p;
 	HeeksColor c;
 
 	// get the attributes

@@ -10,6 +10,7 @@
 //class HeeksObj;
 //class Tool;
 class MouseEvent;
+class KeyEvent;
 
 class CInputMode{
 public:
@@ -19,8 +20,8 @@ public:
 	virtual bool TitleHighlighted(){return true;}
 	virtual const wchar_t* GetHelpText(){ return NULL; }
 	virtual void OnMouse( MouseEvent& event ){}
-	//virtual void OnKeyDown(wxKeyEvent& event){}
-	//virtual void OnKeyUp(wxKeyEvent& event){}
+	virtual void OnKeyDown( KeyEvent& event){}
+	virtual void OnKeyUp( KeyEvent& event){}
 	virtual bool OnModeChange(void){return true;}
 	virtual void OnFrontRender(){}
 	virtual void OnRender(){}

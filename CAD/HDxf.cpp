@@ -37,7 +37,7 @@ HeeksDxfRead::HeeksDxfRead(const wchar_t* filepath, bool undoable) : CDxfRead(Tt
 	config.Read(L"DxfAddUninstancedBlocks", &m_add_uninstanced_blocks);
 
 	m_current_block = NULL;
-	m_ucs_matrix = geoff_geometry::Matrix();
+	m_ucs_matrix = Matrix();
 }
 
 HeeksColor *HeeksDxfRead::ActiveColorPtr(Aci_t & aci)
@@ -53,8 +53,8 @@ void HeeksDxfRead::OnReadUCS(const double* ucs_point)
 {
 #if 0
 	to do
-	geoff_geometry::Matrix tm;
-	tm.SetTranslation(make_point(ucs_point), geoff_geometry::Point3d(0, 0, 0));
+	Matrix tm;
+	tm.SetTranslation(make_point(ucs_point), Point3d(0, 0, 0));
 	extract(tm, m_ucs_matrix);
 #endif
 }
@@ -89,10 +89,10 @@ void HeeksDxfRead::OnReadInsert(const char* block_name, const double* insert_poi
 		BlockName_t b_name = std::wstring(Ctt(block_name));
 		CSketch* block = m_blocks[b_name];
 		CSketch* block_copy = new CSketch(*block);
-		geoff_geometry::Matrix tm;
+		Matrix tm;
 		tm.SetTranslationPart(make_vector(insert_point));
-		geoff_geometry::Matrix rm;
-		rm.SetRotation(gp_Ax1(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(0, 0, 1)), rotation_angle * 0.01745329251994329);
+		Matrix rm;
+		rm.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(0, 0, 1)), rotation_angle * 0.01745329251994329);
 		double m[16];
 		extract(tm * rm, m);
 		block_copy->ModifyByMatrix(m);
@@ -110,7 +110,7 @@ void HeeksDxfRead::OnReadEndBlock()
 
 void HeeksDxfRead::OnReadLine(const double* s, const double* e, bool hidden)
 {
-	HLine* new_object = new HLine(geoff_geometry::Point3d(s), geoff_geometry::Point3d(e), hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
+	HLine* new_object = new HLine(Point3d(s), Point3d(e), hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{
 		new_object->m_thickness = m_thickness;
@@ -132,11 +132,11 @@ void HeeksDxfRead::OnReadPoint(const double* s)
 
 void HeeksDxfRead::OnReadArc(const double* s, const double* e, const double* c, bool dir, bool hidden)
 {
-	geoff_geometry::Point3d p0(s);
-	geoff_geometry::Point3d p1(e);
-	geoff_geometry::Point3d up(0, 0, 1);
+	Point3d p0(s);
+	Point3d p1(e);
+	Point3d up(0, 0, 1);
 	if(!dir)up = -up;
-	geoff_geometry::Point3d pc(c);
+	Point3d pc(c);
 	HArc* new_object = new HArc(p0, p1, up, c, hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{
@@ -150,12 +150,12 @@ void HeeksDxfRead::OnReadCircle(const double* s, const double* c, bool dir, bool
 {
 #if 0
 	to do
-	geoff_geometry::Point3d p0 = make_point(s);
-	//geoff_geometry::Point3d p1 = make_point(e);
-	geoff_geometry::Point3d up(0, 0, 1);
+	Point3d p0 = make_point(s);
+	//Point3d p1 = make_point(e);
+	Point3d up(0, 0, 1);
 	if(!dir)up = -up;
-	geoff_geometry::Point3d pc = make_point(c);
-	gp_Circ circle(geoff_geometry::Point3d(pc, up), p0.Distance(pc));
+	Point3d pc = make_point(c);
+	gp_Circ circle(Point3d(pc, up), p0.Distance(pc));
 	HCircle* new_object = new HCircle(circle, hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{
@@ -214,7 +214,7 @@ void HeeksDxfRead::OnReadSpline(struct SplineData& sd)
 	unsigned i=1; //int i=1;
 	for(std::list<double>::iterator itx = sd.controlx.begin(); itx!=sd.controlx.end(); ++itx)
 	{
-		geoff_geometry::Point3d pnt(*itx,*ity,*itz);
+		Point3d pnt(*itx,*ity,*itz);
 		control.SetValue(i,pnt);
 		if(sd.weight.empty())
 			weight.SetValue(i,1);
@@ -269,10 +269,10 @@ void HeeksDxfRead::OnReadSpline(struct SplineData& sd)
 void HeeksDxfRead::OnReadEllipse(const double* c, double major_radius, double minor_radius, double rotation, double start_angle, double end_angle, bool dir)
 {
 #if 0
-	geoff_geometry::Point3d up(0, 0, 1);
+	Point3d up(0, 0, 1);
 	if(!dir)up = -up;
-	geoff_geometry::Point3d pc = make_point(c);
-	gp_Elips ellipse(geoff_geometry::Point3d(pc, up), major_radius, minor_radius);
+	Point3d pc = make_point(c);
+	gp_Elips ellipse(Point3d(pc, up), major_radius, minor_radius);
 	ellipse.Rotate(gp_Ax1(pc,up),rotation);
 	HEllipse* new_object = new HEllipse(ellipse, start_angle, end_angle, ActiveColorPtr(m_aci));
 	AddObject(new_object);
@@ -341,8 +341,8 @@ void HeeksDxfRead::OnReadText(const double *point, const double height,  const c
 {
 #if 0
 	to do
-	geoff_geometry::Matrix trsf;
-	trsf.SetTranslation( geoff_geometry::Point3d( geoff_geometry::Point3d(0,0,0), geoff_geometry::Point3d(point[0], point[1], point[2]) ) );
+	Matrix trsf;
+	trsf.SetTranslation( Point3d( Point3d(0,0,0), Point3d(point[0], point[1], point[2]) ) );
 	trsf.SetScaleFactor( height * 1.7 );
 
 	std::wstring txt(Ctt(text));
@@ -358,8 +358,8 @@ void HeeksDxfRead::OnReadText(const double *point, const double height,  const c
 	wxArrayString retArray;
 	Split(txt, retArray, _T("\n"));
 
-	geoff_geometry::Matrix line_feed_shift;
-	line_feed_shift.SetTranslationPart(geoff_geometry::Point3d(0, -height, 0));
+	Matrix line_feed_shift;
+	line_feed_shift.SetTranslationPart(Point3d(0, -height, 0));
 
 	for(unsigned int i = 0; i<retArray.GetCount(); i++)
 	{
@@ -378,14 +378,14 @@ void HeeksDxfRead::OnReadDimension(int dimension_type, double angle, double angl
 {
 	int type = (dimension_type & 0x07);
 
-	geoff_geometry::Point3d d(def_point);
-	geoff_geometry::Point3d m(mid);
+	Point3d d(def_point);
+	Point3d m(mid);
 
-	geoff_geometry::Point3d d_to_m(d, m);
+	Point3d d_to_m(d, m);
 
-	geoff_geometry::Point3d e = (m + d);
+	Point3d e = (m + d);
 
-	geoff_geometry::Point3d forward(1,0,0);
+	Point3d forward(1,0,0);
 
 	HeeksColor c(0, 0, 0);
 
@@ -393,23 +393,23 @@ void HeeksDxfRead::OnReadDimension(int dimension_type, double angle, double angl
 	{
 #if 0
 		to do
-		forward.Rotate(gp_Ax1(geoff_geometry::Point3d(0, 0, 0), geoff_geometry::Point3d(0, 0, 1)), (angle/* + angle2 + angle3*/) * -0.01745329251);
+		forward.Rotate(gp_Ax1(Point3d(0, 0, 0), Point3d(0, 0, 1)), (angle/* + angle2 + angle3*/) * -0.01745329251);
 #endif
 	}
 	else
 	{
-		forward = geoff_geometry::Point3d(-d_to_m);
+		forward = Point3d(-d_to_m);
 		c = HeeksColor(255, 0, 0);
 	}
 
-	geoff_geometry::Point3d left(-forward.y, forward.x, 0.0);
+	Point3d left(-forward.y, forward.x, 0.0);
 
 	double arrow_size = 5.0;
-	geoff_geometry::Point3d da1 = d + forward * (-arrow_size) + left * (arrow_size * 0.25);
-	geoff_geometry::Point3d da2 = d + forward * (-arrow_size) + left * (arrow_size * -0.25);
+	Point3d da1 = d + forward * (-arrow_size) + left * (arrow_size * 0.25);
+	Point3d da2 = d + forward * (-arrow_size) + left * (arrow_size * -0.25);
 
-	geoff_geometry::Point3d ea1 = e + forward * (arrow_size) + left * (arrow_size * 0.25);
-	geoff_geometry::Point3d ea2 = e + forward * (arrow_size) + left * (arrow_size * -0.25);
+	Point3d ea1 = e + forward * (arrow_size) + left * (arrow_size * 0.25);
+	Point3d ea2 = e + forward * (arrow_size) + left * (arrow_size * -0.25);
 
 #if 0
 	to do

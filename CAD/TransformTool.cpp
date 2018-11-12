@@ -5,7 +5,7 @@
 #include "TransformTool.h"
 #include "HeeksObj.h"
 
-TransformTool::TransformTool(HeeksObj *o, const geoff_geometry::Matrix &t, const geoff_geometry::Matrix &i){
+TransformTool::TransformTool(HeeksObj *o, const Matrix &t, const Matrix &i){
 	object = o;
 	modify_matrix = t;
 	revert_matrix = i;
@@ -33,7 +33,7 @@ void TransformTool::RollBack(){
 	theApp.WasModified(object);
 }
 
-TransformObjectsTool::TransformObjectsTool(const std::list<HeeksObj*> &list, const geoff_geometry::Matrix &t, const geoff_geometry::Matrix &i){
+TransformObjectsTool::TransformObjectsTool(const std::list<HeeksObj*> &list, const Matrix &t, const Matrix &i){
 	m_list = list;
 	modify_matrix = t;
 	revert_matrix = i;

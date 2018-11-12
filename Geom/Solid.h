@@ -159,10 +159,10 @@ public:
 	CSolid* BooleanUnion(const CSolid& solid)const;
 	CSolid* BooleanCommon(const CSolid& solid)const;
 	void WriteStep(const std::wstring& step_file_path);
-	void Translate(const geoff_geometry::Vector3d& v);
-	void Transform(const geoff_geometry::Matrix& mat);
+	void Translate(const Point3d& v);
+	void Transform(const Matrix& mat);
 	void GetBox(CBox& box)const;
-	CSolid* Extrusion(const geoff_geometry::Vector3d& v)const;
+	CSolid* Extrusion(const Point3d& v)const;
 	const TopoDS_Shape& GetShape()const{ return m_shape; }
 	bool IsNull()const{ return m_shape.IsNull(); }
 };

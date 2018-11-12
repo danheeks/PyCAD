@@ -14,10 +14,10 @@ public:
 	bool m_gripper_datum_set;
 	bool m_custom_grippers;
 	bool m_custom_grippers_just_one_axis;
-	geoff_geometry::Point3d m_o;
-	geoff_geometry::Point3d m_px;
-	geoff_geometry::Point3d m_py;
-	geoff_geometry::Point3d m_pz;
+	Point3d m_o;
+	Point3d m_px;
+	Point3d m_py;
+	Point3d m_pz;
 
 	CGroup();
 
@@ -33,10 +33,10 @@ public:
 	bool Stretch(const double *p, const double* shift, void* data);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
-	bool GetScaleAboutMatrix(geoff_geometry::Matrix &m);
-	void Transform(const geoff_geometry::Matrix& m);
+	bool GetScaleAboutMatrix(Matrix &m);
+	void Transform(const Matrix& m);
 
-	geoff_geometry::Matrix GetMatrix();
+	Matrix GetMatrix();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

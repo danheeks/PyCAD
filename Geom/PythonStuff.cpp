@@ -61,27 +61,27 @@ boost::python::list getCurves(const CArea& area) {
 	return clist;
 }
 
-boost::python::tuple transformed_point(const geoff_geometry::Matrix &matrix, double x, double y, double z)
+boost::python::tuple transformed_point(const Matrix &matrix, double x, double y, double z)
 {
-	geoff_geometry::Point3d p(x,y,z);
+	Point3d p(x,y,z);
 	p = p.Transformed(matrix);
 
 	return bp::make_tuple(p.x,p.y,p.z);
 }
 
-void MatrixRotate(geoff_geometry::Matrix &matrix, double angle)
+void MatrixRotate(Matrix &matrix, double angle)
 {
 	matrix.Rotate(angle, 3);
 }
 
-void Point3dTransform(geoff_geometry::Point3d &p, const geoff_geometry::Matrix &matrix)
+void Point3dTransform(Point3d &p, const Matrix &matrix)
 {
 	p = p.Transformed(matrix);
 }
 
-boost::python::object PlaneIntofPlane(const geoff_geometry::Plane &plane1, const geoff_geometry::Plane &plane2)
+boost::python::object PlaneIntofPlane(const Plane &plane1, const Plane &plane2)
 {
-	geoff_geometry::Line line;
+	Line line;
 	bool result = plane1.Intof(plane2, line);
 
 	if (result)
@@ -92,10 +92,10 @@ boost::python::object PlaneIntofPlane(const geoff_geometry::Plane &plane1, const
 		return boost::python::object();
 }
 
-void LineTransform(geoff_geometry::Line &line, const geoff_geometry::Matrix &matrix)
+void LineTransform(Line &line, const Matrix &matrix)
 {
 	line.p0 = line.p0.Transformed(matrix);
-	line.v.Transform(matrix);
+	line.v = line.v.Transformed(matrix);
 }
 
 static void print_curve(const CCurve& c)
@@ -274,11 +274,11 @@ boost::python::list spanIntersect(const Span& span1, const Span& span2) {
 //Matrix(boost::python::list &l){}
 
 
-boost::shared_ptr<geoff_geometry::Matrix> matrix3point_constructor(const geoff_geometry::Point3d& o, const geoff_geometry::Point3d& x, const geoff_geometry::Point3d& y) {
-	return boost::shared_ptr<geoff_geometry::Matrix>(new geoff_geometry::Matrix(o, geoff_geometry::Vector3d(x.x, x.y, x.z), geoff_geometry::Vector3d(y.x, y.y, y.z)));
+boost::shared_ptr<Matrix> matrix3point_constructor(const Point3d& o, const Point3d& x, const Point3d& y) {
+	return boost::shared_ptr<Matrix>(new Matrix(o, Point3d(x.x, x.y, x.z), Point3d(y.x, y.y, y.z)));
 }
 
-boost::shared_ptr<geoff_geometry::Matrix> matrix_constructor(const boost::python::list& lst) {
+boost::shared_ptr<Matrix> matrix_constructor(const boost::python::list& lst) {
 	double m[16] = {1,0,0,0,0,1,0,0, 0,0,1,0, 0,0,0,1};
 
   boost::python::ssize_t n = boost::python::len(lst);
@@ -290,11 +290,11 @@ boost::shared_ptr<geoff_geometry::Matrix> matrix_constructor(const boost::python
 	if(j>=16)break;
   }
 
-  return boost::shared_ptr<geoff_geometry::Matrix>( new geoff_geometry::Matrix(m) );
+  return boost::shared_ptr<Matrix>( new Matrix(m) );
 }
 
-boost::shared_ptr<geoff_geometry::Plane> plane_constructor(const geoff_geometry::Point3d& p, const geoff_geometry::Point3d& v) {
-	return boost::shared_ptr<geoff_geometry::Plane>(new geoff_geometry::Plane(p, geoff_geometry::Vector3d(v.x, v.y, v.z)));
+boost::shared_ptr<Plane> plane_constructor(const Point3d& p, const Point3d& v) {
+	return boost::shared_ptr<Plane>(new Plane(p, Point3d(v.x, v.y, v.z)));
 }
 
 
@@ -359,15 +359,15 @@ boost::python::list CTrisGetMachiningAreas(const CTris& tris)
 	return plist;
 }
 
-geoff_geometry::Point3d LineIntersectPlane(const geoff_geometry::Line& line, const geoff_geometry::Plane& plane)
+Point3d LineIntersectPlane(const Line& line, const Plane& plane)
 {
-	geoff_geometry::Point3d intof;
+	Point3d intof;
 	double t;
 	plane.Intof(line, intof, t);
 	return intof;
 }
 
-void CTrisAddTriangle(CTris& tris, const geoff_geometry::Point3d& p0, const geoff_geometry::Point3d& p1, const geoff_geometry::Point3d& p2)
+void CTrisAddTriangle(CTris& tris, const Point3d& p0, const Point3d& p1, const Point3d& p2)
 {
 	float x[9] = { (float)p0.x, (float)p0.y, (float)p0.z, (float)p1.x, (float)p1.y, (float)p1.z, (float)p2.x, (float)p2.y, (float)p2.z };
 	tris.AddTri(x);
@@ -409,12 +409,12 @@ int get_oct_ele_count()
 
 static void set_tolerance(double tolerance)
 {
-	geoff_geometry::TOLERANCE = tolerance;
+	TOLERANCE = tolerance;
 }
 
 static double get_tolerance()
 {
-	return geoff_geometry::TOLERANCE;
+	return TOLERANCE;
 }
 
 static void set_accuracy(double accuracy)
@@ -462,16 +462,16 @@ size_t CTrisNumTris(const CTris& solid)
 
 void CTrisProject(const CTris& solid, const CArea& area, const std::string& dxf_file_path)
 {
-	std::list<geoff_geometry::Line> lines;
+	std::list<Line> lines;
 	solid.Project(area, lines);
 
 	// write dxf file
 	CDxfWrite dxf_writer(dxf_file_path.c_str());
 	// add the spans transformed back to the input span's plane
-	for (std::list<geoff_geometry::Line>::iterator It = lines.begin(); It != lines.end(); It++)
+	for (std::list<Line>::iterator It = lines.begin(); It != lines.end(); It++)
 	{
-		geoff_geometry::Line& line = *It;
-		geoff_geometry::Point3d e = line.p0 + line.v;
+		Line& line = *It;
+		Point3d e = line.p0 + line.v;
 		dxf_writer.WriteLine(line.p0.getBuffer(), e.getBuffer(), "0");
 	}
 }
@@ -713,56 +713,56 @@ BOOST_PYTHON_MODULE(geom) {
 
 	///class Matrix
 	/// defines a 4x4 transformation matrix
-	bp::class_<geoff_geometry::Matrix > ("Matrix")
-        .def(bp::init<geoff_geometry::Matrix>())
+	bp::class_<Matrix > ("Matrix")
+        .def(bp::init<Matrix>())
 		.def("__init__", bp::make_constructor(&matrix3point_constructor))
 		.def("__init__", bp::make_constructor(&matrix_constructor))///function Matrix///return Matrix///params list values///makes a Matrix from a list of 16 floats
 	    .def("TransformedPoint", &transformed_point)///function TransformedPoint///return float///return float///return float///params float x, float y, float z///transforms a 3D point by the matrix/// given x, y, z vlaues///returns x, y, z
-		.def("Multiply", &geoff_geometry::Matrix::Multiply)///function Multiply///params Matrix m///transforms this matrix by the given one
-		.def("Inverse", &geoff_geometry::Matrix::Inverse)///function Inverse
+		.def("Multiply", &Matrix::Multiply)///function Multiply///params Matrix m///transforms this matrix by the given one
+		.def("Inverse", &Matrix::Inverse)///function Inverse
 		.def("Rotate", &MatrixRotate)
-		.def("Translate", static_cast< void (geoff_geometry::Matrix::*)(double, double, double) >(&geoff_geometry::Matrix::Translate))
+		.def("Translate", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Translate))
 		;
 
 	///class Point3d
-	bp::class_<geoff_geometry::Point3d>("Point3D")
-		.def(bp::init<geoff_geometry::Point3d>())
+	bp::class_<Point3d>("Point3D")
+		.def(bp::init<Point3d>())
 		.def(bp::init<double, double, double>())///function Point3d///params float x, float y, float z///return Point3d///makes a new Point3d with given x, y, z values
 		.def("Transform", &Point3dTransform)
-		.def("Transformed", &geoff_geometry::Point3d::Transformed)
-		.def_readwrite("x", &geoff_geometry::Point3d::x)
-		.def_readwrite("y", &geoff_geometry::Point3d::y)
-		.def_readwrite("z", &geoff_geometry::Point3d::z)
+		.def("Transformed", &Point3d::Transformed)
+		.def_readwrite("x", &Point3d::x)
+		.def_readwrite("y", &Point3d::y)
+		.def_readwrite("z", &Point3d::z)
 		.def(bp::self * bp::other<double>())/// function *///params float multiplier/// returns a Point with x and y multiplied by the by the multiplier///you can also do multiplication the other way round; p2 = 3.0 * p///return Point
 		.def(bp::self / bp::other<double>())/// function / ///params float divider/// returns a Point with x and y divided by the by the divider///return Point
-		.def(bp::self * bp::other<geoff_geometry::Point3d>())/// function *///params Point p2/// returns the dot product of this point and p2///return float
-		.def(bp::self - bp::other<geoff_geometry::Point3d>())/// function - ///params Point p2/// returns a Point wit:///x = this points x - p2.x///y = this points y - p2.y///you can also use "-" to return the Point with (-x, -y)///return Point
-		.def(bp::self + bp::other<geoff_geometry::Point3d>())/// function + ///params Point p2/// returns a Point with:///x = this points x + p2.x///y = this points y + p2.y///return Point
-		.def(bp::self ^ bp::other<geoff_geometry::Point3d>())/// function ^///params Point p2/// returns the 2D cross product of this point and p2///return float
-		.def(bp::self == bp::other<geoff_geometry::Point3d>())/// function ==///params Point p2/// returns true if x == p2.x and y == p2.y///return Boolean
-		.def(bp::self != bp::other<geoff_geometry::Point3d>())/// function !=///params Point p2/// returns true if x != p2.x or y != p2.y///return Boolean
+		.def(bp::self * bp::other<Point3d>())/// function *///params Point p2/// returns the dot product of this point and p2///return float
+		.def(bp::self - bp::other<Point3d>())/// function - ///params Point p2/// returns a Point wit:///x = this points x - p2.x///y = this points y - p2.y///you can also use "-" to return the Point with (-x, -y)///return Point
+		.def(bp::self + bp::other<Point3d>())/// function + ///params Point p2/// returns a Point with:///x = this points x + p2.x///y = this points y + p2.y///return Point
+		.def(bp::self ^ bp::other<Point3d>())/// function ^///params Point p2/// returns the 2D cross product of this point and p2///return float
+		.def(bp::self == bp::other<Point3d>())/// function ==///params Point p2/// returns true if x == p2.x and y == p2.y///return Boolean
+		.def(bp::self != bp::other<Point3d>())/// function !=///params Point p2/// returns true if x != p2.x or y != p2.y///return Boolean
 		.def(-bp::self)
-		.def("Normalized", &geoff_geometry::Point3d::Normalized)
-		.def("Dist", &geoff_geometry::Point3d::Dist)
-		.def("Length", &geoff_geometry::Point3d::magnitude)
+		.def("Normalized", &Point3d::Normalized)
+		.def("Dist", &Point3d::Dist)
+		.def("Length", &Point3d::magnitude)
 		;
 
 	///class Plane
-	bp::class_<geoff_geometry::Plane>("Plane")
-		.def(bp::init<geoff_geometry::Plane>())
+	bp::class_<Plane>("Plane")
+		.def(bp::init<Plane>())
 		.def("__init__", bp::make_constructor(&plane_constructor))
 		.def("Intof", &PlaneIntofPlane)
-		.def_readwrite("normal", &geoff_geometry::Plane::normal)
+		.def_readwrite("normal", &Plane::normal)
 		;
 
 	///class Line
-	bp::class_<geoff_geometry::Line>("Line")
-		.def(bp::init<geoff_geometry::Line>())
-		.def(bp::init<const geoff_geometry::Point3d &, const geoff_geometry::Point3d &>())
-		.def(bp::init<const geoff_geometry::Point3d &, const geoff_geometry::Vector3d &>())
+	bp::class_<Line>("Line")
+		.def(bp::init<Line>())
+		.def(bp::init<const Point3d &, const Point3d &>())
+		.def(bp::init<const Point3d &, const Point3d &>())
 		.def("Transform", &LineTransform)
-		.def_readwrite("p", &geoff_geometry::Line::p0)
-		.def_readwrite("v", &geoff_geometry::Line::v)
+		.def_readwrite("p", &Line::p0)
+		.def_readwrite("v", &Line::v)
 		.def("IntersectPlane", &LineIntersectPlane)
 		;
 

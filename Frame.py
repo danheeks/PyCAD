@@ -9,6 +9,7 @@ import sys
 import os
 from HeeksConfig import HeeksConfig
 from Printout import Printout
+from PointDrawing import point_drawing
 import geom
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
@@ -537,25 +538,29 @@ class Frame(wx.Frame):
         self.ShowFullScreen(True)
         
     def OnRedraw(self, e):
-        pass
+        cad.GetApp().KillGLLists()
+        self.graphics_canvas.Refresh()
         
     def OnLines(self, e):
-        pass
+        cad.SetLineArcDrawing()
         
     def OnCircles3p(self, e):
-        pass
+        cad.SetCircles3pDrawing()
         
     def OnCircles2p(self, e):
-        pass
+        cad.SetCircles2pDrawing()
+        
+    def OnCircles1p(self, e):
+        cad.SetCircle1pDrawing()
         
     def OnEllipse(self, e):
-        pass
+        cad.SetEllipseDrawing()
         
     def OnILine(self, e):
-        pass
+        cad.SetILineDrawing()
         
     def OnPoints(self, e):
-        pass
+        cad.SetInputMode(point_drawing)
         
     def OnGear(self, e):
         pass

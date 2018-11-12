@@ -55,7 +55,7 @@ public:
 	EnumCircleDrawingMode circle_mode;
 	EnumSplineDrawingMode spline_mode;
 	bool m_previous_direction_set;
-	geoff_geometry::Point3d m_previous_direction;
+	Point3d m_previous_direction;
 
 	LineArcDrawing(void);
 	virtual ~LineArcDrawing(void);

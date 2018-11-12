@@ -21,7 +21,7 @@ public:
 	int GetType()const{return GripperType;}
 	void glCommands(bool select, bool marked, bool no_color);
 	const wchar_t* GetTypeString(void)const{return L"Gripper";}
-	void Transform(const geoff_geometry::Matrix &m);
+	void Transform(const Matrix &m);
 
 	//Gripper's virtual functions
 //	virtual wxCursor* get_gripper_cursor(){return NULL;}

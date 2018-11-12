@@ -13,12 +13,12 @@ private:
 	HeeksColor color;
 
 public:
-	geoff_geometry::Point3d m_c;
-	geoff_geometry::Point3d m_axis;
+	Point3d m_c;
+	Point3d m_axis;
 	double m_radius;
 
 	~HCircle(void);
-	HCircle(const geoff_geometry::Point3d &c, const geoff_geometry::Point3d& axis, double radius, const HeeksColor* col);
+	HCircle(const Point3d &c, const Point3d& axis, double radius, const HeeksColor* col);
 	HCircle(const HCircle &c);
 	HCircle(){}
 
@@ -33,16 +33,16 @@ public:
 	int GetIDGroupType()const{ return SketchType; }
 	HeeksObj *MakeACopy(void)const;
 	const wchar_t* GetIconFilePath();
-	void Transform(const geoff_geometry::Matrix& m);
+	void Transform(const Matrix& m);
 	void SetColor(const HeeksColor &col){ color = col; }
 	const HeeksColor* GetColor()const{ return &color; }
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
-	bool FindNearPoint(const geoff_geometry::Line &ray, double *point);
-	bool FindPossTangentPoint(const geoff_geometry::Line &ray, double *point);
+	bool FindNearPoint(const Line &ray, double *point);
+	bool FindPossTangentPoint(const Line &ray, double *point);
 	bool Stretch(const double *p, const double* shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
-	bool GetCentrePoint(geoff_geometry::Point3d &pos);
+	bool GetCentrePoint(Point3d &pos);
 	void WriteXML(TiXmlNode *root);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	bool DescendForUndo(){ return false; }
@@ -50,13 +50,15 @@ public:
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 #if 0
-	static bool GetLineTangentPoints(const gp_Circ& c1, const gp_Circ& c2, const geoff_geometry::Point3d& a, const geoff_geometry::Point3d& b, geoff_geometry::Point3d& p1, geoff_geometry::Point3d& p2);
-	static bool GetLineTangentPoint(const gp_Circ& c, const geoff_geometry::Point3d& a, const geoff_geometry::Point3d& b, geoff_geometry::Point3d& p);
-	static bool GetArcTangentPoints(const gp_Circ& c, const gp_Lin &line, const geoff_geometry::Point3d& p, double radius, geoff_geometry::Point3d& p1, geoff_geometry::Point3d& p2, geoff_geometry::Point3d& centre, geoff_geometry::Point3d& axis);
-	static bool GetArcTangentPoints(const gp_Circ& c1, const gp_Circ &c2, const geoff_geometry::Point3d& a, const geoff_geometry::Point3d& b, double radius, geoff_geometry::Point3d& p1, geoff_geometry::Point3d& p2, geoff_geometry::Point3d& centre, geoff_geometry::Point3d& axis);
-	static bool GetArcTangentPoints(const gp_Lin& l1, const gp_Lin &l2, const geoff_geometry::Point3d& a, const geoff_geometry::Point3d& b, double radius, geoff_geometry::Point3d& p1, geoff_geometry::Point3d& p2, geoff_geometry::Point3d& centre, geoff_geometry::Point3d& axis);
-	static bool GetArcTangentPoint(const gp_Lin& l, const geoff_geometry::Point3d& a, const geoff_geometry::Point3d& b, const gp_Vec *final_direction, double* radius, geoff_geometry::Point3d& p, geoff_geometry::Point3d& centre, geoff_geometry::Point3d& axis);
-	static bool GetArcTangentPoint(const gp_Circ& c, const geoff_geometry::Point3d& a, const geoff_geometry::Point3d& b, const gp_Vec *final_direction, double* radius, geoff_geometry::Point3d& p, geoff_geometry::Point3d& centre, geoff_geometry::Point3d& axis);
+	static bool GetLineTangentPoints(const gp_Circ& c1, const gp_Circ& c2, const Point3d& a, const Point3d& b, Point3d& p1, Point3d& p2);
+	static bool GetLineTangentPoint(const gp_Circ& c, const Point3d& a, const Point3d& b, Point3d& p);
+	static bool GetArcTangentPoints(const gp_Circ& c, const gp_Lin &line, const Point3d& p, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis);
+	static bool GetArcTangentPoints(const gp_Circ& c1, const gp_Circ &c2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis);
+	static bool GetArcTangentPoints(const gp_Lin& l1, const gp_Lin &l2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis);
+	static bool GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis);
+	static bool GetArcTangentPoint(const gp_Circ& c, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis);
 #endif
+	void SetCircle(Circle c);
+	Circle GetCircle()const;
 	double GetDiameter()const;
 };

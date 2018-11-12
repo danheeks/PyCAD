@@ -116,9 +116,9 @@ void CViewport::glCommands()
 		// draw sky dome
 		glClear(GL_DEPTH_BUFFER_BIT);
 		double radius = m_view_point.m_far_plane * 0.5;
-		geoff_geometry::Point3d x(1, 0, 0);
-		geoff_geometry::Point3d y(0, 1, 0);
-		geoff_geometry::Point3d z(0, 0, 1);
+		Point3d x(1, 0, 0);
+		Point3d y(0, 1, 0);
+		Point3d z(0, 0, 1);
 		glShadeModel(GL_SMOOTH);
 		glBegin(GL_TRIANGLES);
 		glEnable(GL_CULL_FACE);
@@ -131,10 +131,10 @@ void CViewport::glCommands()
 			{
 				double vang0 = -1.5707963267948 + 0.7853981633974 * panel;
 				double vang1 = -1.5707963267948 + 0.7853981633974 * (panel + 1);
-				geoff_geometry::Point3d p0 = m_view_point.m_lens_point + (x * (radius * cos(ang0) * cos(vang0))) + (y * radius * sin(ang0) * cos(vang0)) + (z * radius * sin(vang0));
-				geoff_geometry::Point3d p1 = m_view_point.m_lens_point + (x * (radius * cos(ang1) * cos(vang0))) + (y * radius * sin(ang1) * cos(vang0)) + (z * radius * sin(vang0));
-				geoff_geometry::Point3d p2 = m_view_point.m_lens_point + (x * (radius * cos(ang0) * cos(vang1))) + (y * radius * sin(ang0) * cos(vang1)) + (z * radius * sin(vang1));
-				geoff_geometry::Point3d p3 = m_view_point.m_lens_point + (x * (radius * cos(ang1) * cos(vang1))) + (y * radius * sin(ang1) * cos(vang1)) + (z * radius * sin(vang1));
+				Point3d p0 = m_view_point.m_lens_point + (x * (radius * cos(ang0) * cos(vang0))) + (y * radius * sin(ang0) * cos(vang0)) + (z * radius * sin(vang0));
+				Point3d p1 = m_view_point.m_lens_point + (x * (radius * cos(ang1) * cos(vang0))) + (y * radius * sin(ang1) * cos(vang0)) + (z * radius * sin(vang0));
+				Point3d p2 = m_view_point.m_lens_point + (x * (radius * cos(ang0) * cos(vang1))) + (y * radius * sin(ang0) * cos(vang1)) + (z * radius * sin(vang1));
+				Point3d p3 = m_view_point.m_lens_point + (x * (radius * cos(ang1) * cos(vang1))) + (y * radius * sin(ang1) * cos(vang1)) + (z * radius * sin(vang1));
 				HeeksColor c0, c1;
 				switch (panel)
 				{
@@ -280,12 +280,12 @@ void CViewport::OnMagExtents(bool rotate, int margin)
 	}
 }
 
-geoff_geometry::Point3d getClosestOrthogonal(const geoff_geometry::Point3d &v)
+Point3d getClosestOrthogonal(const Point3d &v)
 {
 	double best_dp = 0;
-	geoff_geometry::Point3d best_v;
+	Point3d best_v;
 
-	geoff_geometry::Point3d test_v[6] = { geoff_geometry::Point3d(1, 0, 0), geoff_geometry::Point3d(-1, 0, 0), geoff_geometry::Point3d(0, 1, 0), geoff_geometry::Point3d(0, -1, 0), geoff_geometry::Point3d(0, 0, 1), geoff_geometry::Point3d(0, 0, -1) };
+	Point3d test_v[6] = { Point3d(1, 0, 0), Point3d(-1, 0, 0), Point3d(0, 1, 0), Point3d(0, -1, 0), Point3d(0, 0, 1), Point3d(0, 0, -1) };
 	for (int i = 0; i<6; i++)
 	{
 		double dp = test_v[i] * v;
@@ -300,16 +300,16 @@ geoff_geometry::Point3d getClosestOrthogonal(const geoff_geometry::Point3d &v)
 
 void CViewport::SetViewPoint(int margin){
 	if (m_orthogonal){
-		geoff_geometry::Point3d vz = getClosestOrthogonal(-m_view_point.forwards_vector());
-		geoff_geometry::Point3d v2 = m_view_point.m_vertical;
+		Point3d vz = getClosestOrthogonal(-m_view_point.forwards_vector());
+		Point3d v2 = m_view_point.m_vertical;
 		v2 = v2 + vz * (-(v2 * vz)); // remove any component in new vz direction	    
-		geoff_geometry::Point3d vy = getClosestOrthogonal(v2);
+		Point3d vy = getClosestOrthogonal(v2);
 		m_view_point.SetView(vy, vz, margin);
 		StoreViewPoint();
 		return;
 	}
 
-	geoff_geometry::Point3d vy(0, 1, 0), vz(0, 0, 1);
+	Point3d vy(0, 1, 0), vz(0, 0, 1);
 	m_view_point.SetView(vy, vz, margin);
 	StoreViewPoint();
 }

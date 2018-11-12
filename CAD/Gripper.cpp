@@ -84,8 +84,8 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 	}
 }
 
-void Gripper::Transform(const geoff_geometry::Matrix &m){
-	geoff_geometry::Point3d position(m_data.m_x, m_data.m_y, m_data.m_z);
+void Gripper::Transform(const Matrix &m){
+	Point3d position(m_data.m_x, m_data.m_y, m_data.m_z);
 	position = position.Transformed(m);
 	m_data.m_x = position.x;
 	m_data.m_y = position.y;

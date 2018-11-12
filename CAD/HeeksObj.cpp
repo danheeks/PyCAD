@@ -70,7 +70,7 @@ void HeeksObj::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyCheck(this, L"visible", &m_visible));
 }
 
-bool HeeksObj::GetScaleAboutMatrix(geoff_geometry::Matrix &m)
+bool HeeksObj::GetScaleAboutMatrix(Matrix &m)
 {
 #if 0
 	to do
@@ -78,8 +78,8 @@ bool HeeksObj::GetScaleAboutMatrix(geoff_geometry::Matrix &m)
 	CBox box;
 	GetBox(box);
 	if(!box.m_valid)return false;
-	geoff_geometry::Matrix mat;
-	mat.SetTranslationPart(geoff_geometry::Point3d(box.m_x[0], box.m_x[1], box.m_x[2]));
+	Matrix mat;
+	mat.SetTranslationPart(Point3d(box.m_x[0], box.m_x[1], box.m_x[2]));
 	extract(mat, m);
 #endif
 	return true;

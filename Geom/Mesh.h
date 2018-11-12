@@ -37,7 +37,7 @@ class CMeshFace
 public:
 	std::vector<CMeshVertex*> m_vertices;
 	std::vector<CMeshEdgeAndDir> m_edges;
-	bool GetNormal(geoff_geometry::Vector3d &norm)const;
+	bool GetNormal(Point3d &norm)const;
 	void GetJoiningFaces(std::list<CMeshFace*> &joining_faces)const;
 	void GetTri(CTri& tri)const;
 };

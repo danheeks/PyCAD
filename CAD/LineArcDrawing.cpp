@@ -6,15 +6,15 @@
 
 #include "LineArcDrawing.h"
 #include "HeeksObj.h"
-#if 0
 #include "HLine.h"
 #include "HArc.h"
 #include "HILine.h"
 #include "HCircle.h"
+#if 0
 #include "HEllipse.h"
 #include "HSpline.h"
-#include "Sketch.h"
 #endif
+#include "Sketch.h"
 #include "SelectMode.h"
 #include "DigitizeMode.h"
 #include "HeeksConfig.h"
@@ -25,7 +25,7 @@ LineArcDrawing line_strip;
 
 LineArcDrawing::LineArcDrawing(void){
 	m_previous_direction_set = false;
-	m_previous_direction = geoff_geometry::Point3d(1, 0, 0);
+	m_previous_direction = Point3d(1, 0, 0);
 	drawing_mode = LineDrawingMode;
 	m_A_down = false;
 	m_container = NULL;
@@ -40,12 +40,12 @@ LineArcDrawing::~LineArcDrawing(void){
 class SetPreviousDirection:public Undoable{
 private:
 	LineArcDrawing *drawing;
-	geoff_geometry::Point3d old_direction;
-	geoff_geometry::Point3d new_direction;
+	Point3d old_direction;
+	Point3d new_direction;
 	bool old_previous_direction_set;
 
 public:
-	SetPreviousDirection(LineArcDrawing *d, const geoff_geometry::Point3d& n)
+	SetPreviousDirection(LineArcDrawing *d, const Point3d& n)
 	{
 		drawing = d;
 		old_direction = drawing->m_previous_direction;
@@ -71,18 +71,16 @@ void LineArcDrawing::set_previous_direction(){
 	if(PrevObject() == NULL)return;
 
 	if(PrevObject()->GetType() == LineType){
-		geoff_geometry::Point3d s, e;
+		Point3d s, e;
 		if(PrevObject()->GetStartPoint(s) && PrevObject()->GetEndPoint(e))
 		{
-			theApp.DoUndoable(new SetPreviousDirection(this, geoff_geometry::Point3d(s, e)));
+			theApp.DoUndoable(new SetPreviousDirection(this, Point3d(s, e)));
 		}
 	}
 	else if(PrevObject()->GetType() == ArcType){
-#if 0
-		geoff_geometry::Point3d circlev(((HArc*)PrevObject())->m_axis.Direction());
-		geoff_geometry::Point3d endv(((HArc*)PrevObject())->C, ((HArc*)PrevObject())->B);
+		Point3d circlev(((HArc*)PrevObject())->m_axis);
+		Point3d endv(((HArc*)PrevObject())->C, ((HArc*)PrevObject())->B);
 		theApp.DoUndoable(new SetPreviousDirection(this, (circlev ^ endv).Normalized()));
-#endif
 	}
 }
 
@@ -203,9 +201,8 @@ void LineArcDrawing::AddPoint()
 			{
 				if(PrevObject())
 				{
-#if 0
-					geoff_geometry::Point3d spos;
-					geoff_geometry::Point3d epos;
+					Point3d spos;
+					Point3d epos;
 					TempObject()->GetStartPoint(spos);
 					PrevObject()->GetEndPoint(epos);
 					HeeksObj* tanobject = GetStartPos().m_object1;
@@ -218,21 +215,20 @@ void LineArcDrawing::AddPoint()
 						case ArcType:
 							{
 								HArc* arc = new HArc(*(HArc*)tanobject);
-								arc->A = geoff_geometry::Point3d(spos);
-								arc->B = geoff_geometry::Point3d(epos);
+								arc->A = Point3d(spos);
+								arc->B = Point3d(epos);
 								AddToTempObjects(arc);
 							}
 							break;
 						case CircleType:
 							{
-								HArc* arc = new HArc(geoff_geometry::Point3d(spos), geoff_geometry::Point3d(epos), ((HCircle*)tanobject)->GetCircle(), &theApp.current_color);
-								arc->A = geoff_geometry::Point3d(spos);
-								arc->B = geoff_geometry::Point3d(epos);
+								HArc* arc = new HArc(Point3d(spos), Point3d(epos), ((HCircle*)tanobject)->m_axis, ((HCircle*)tanobject)->m_c, &theApp.current_color);
+								arc->A = Point3d(spos);
+								arc->B = Point3d(epos);
 								AddToTempObjects(arc);
 							}
 							break;
-						}
-#endif
+					}
 				}
 			} 
 
@@ -253,14 +249,12 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 
 	switch(drawing_mode)
 	{
-#if 0
-		to do
 	case LineDrawingMode:
 		{
 			if(TempObject() && TempObject()->GetType() != LineType){
 				ClearObjectsMade();
 			}
-			geoff_geometry::Point3d p1, p2;
+			Point3d p1, p2;
 			DigitizedPoint::GetLinePoints(GetStartPos(), end, p1, p2);
 			if (p1 == p2)return false;
 			end.m_point = p2;
@@ -281,24 +275,23 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 				ClearObjectsMade();
 			}
 
-			geoff_geometry::Point3d centre;
-			geoff_geometry::Point3d axis;
-			geoff_geometry::Point3d p1, p2;
+			Point3d centre;
+			Point3d axis;
+			Point3d p1, p2;
 			bool arc_found = DigitizedPoint::GetArcPoints(GetStartPos(), m_previous_direction_set ? (&m_previous_direction) : NULL, end, p1, p2, centre, axis);
-			if (p1.IsEqual(p2, theApp.m_geom_tol))return false;
+			if (p1 == p2)return false;
 
 			if(arc_found)
 			{
 				if(HArc::TangentialArc(p1, m_previous_direction, p2, centre, axis))
 				{
 					// arc
-					gp_Circ circle(geoff_geometry::Point3d(centre, axis), centre.Distance(p1));
-
 					if(TempObject() == NULL){
-						AddToTempObjects(new HArc(p1, p2, circle, &theApp.current_color));
+						AddToTempObjects(new HArc(p1, p2, axis, centre, &theApp.current_color));
 					}
 					else{
-						((HArc*)TempObject())->SetCircle(circle);
+						((HArc*)TempObject())->m_axis = axis;
+						((HArc*)TempObject())->C = centre;
 						((HArc*)TempObject())->A = p1;
 						((HArc*)TempObject())->B = p2;
 					}
@@ -326,9 +319,9 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			if(TempObject() && TempObject()->GetType() != ILineType){
 				ClearObjectsMade();
 			}
-			geoff_geometry::Point3d p1, p2;
+			Point3d p1, p2;
 			DigitizedPoint::GetLinePoints(GetStartPos(), end, p1, p2);
-			if (p1.IsEqual(p2, theApp.m_geom_tol))return false;
+			if (p1 == p2)return false;
 			if(TempObject() == NULL){
 				AddToTempObjects(new HILine(p1, p2, &theApp.current_color));
 			}
@@ -338,7 +331,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			}
 		}
 		return true;
-
+#if 0
 	case EllipseDrawingMode:
 		if(TempObject() && TempObject()->GetType() != EllipseType){
 			ClearObjectsMade();
@@ -389,6 +382,8 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 
 			return true;
 		}
+#endif
+
 	case CircleDrawingMode:
 		{
 			if(TempObject() && TempObject()->GetType() != CircleType){
@@ -399,16 +394,16 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			{
 			case CentreAndPointCircleMode:
 				{
-					geoff_geometry::Point3d p1, p2, centre;
-					geoff_geometry::Point3d axis;
+					Point3d p1, p2, centre;
+					Point3d axis;
 					DigitizedPoint::GetArcPoints(GetStartPos(), NULL, end, p1, p2, centre, axis);
-					radius_for_circle = p1.Distance(p2);
+					radius_for_circle = p1.Dist(p2);
 
 					if(TempObject() == NULL){
-						AddToTempObjects(new HCircle(gp_Circ(geoff_geometry::Point3d(p1, geoff_geometry::Point3d(0, 0, 1)), radius_for_circle), &theApp.current_color));
+						AddToTempObjects(new HCircle(p1, Point3d(0, 0, 1), radius_for_circle, &theApp.current_color));
 					}
 					else{
-						((HCircle*)TempObject())->m_axis.SetLocation(p1);
+						((HCircle*)TempObject())->m_c = p1;
 						((HCircle*)TempObject())->m_radius = radius_for_circle;
 					}
 				}
@@ -416,11 +411,11 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 
 			case ThreePointsCircleMode:
 				{
-					gp_Circ c;
+					Circle c;
 					if(DigitizedPoint::GetTangentCircle(GetBeforeStartPos(), GetStartPos(), end, c))
 					{
 						if(TempObject() == NULL){
-							AddToTempObjects(new HCircle(c, &theApp.current_color));
+							AddToTempObjects(new HCircle(c.pc, Point3d(0,0,1), c.radius, &theApp.current_color));
 						}
 						else{
 							((HCircle*)TempObject())->SetCircle(c);
@@ -430,11 +425,11 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 				return true;
 			case TwoPointsCircleMode:
 				{
-					gp_Circ c;
+					Circle c;
 					if(DigitizedPoint::GetCircleBetween(GetStartPos(), end, c))
 					{
 						if(TempObject() == NULL){
-							AddToTempObjects(new HCircle(c, &theApp.current_color));
+							AddToTempObjects(new HCircle(c.pc, Point3d(0, 0, 1), c.radius, &theApp.current_color));
 						}
 						else{
 							((HCircle*)TempObject())->SetCircle(c);
@@ -445,10 +440,10 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			case CentreAndRadiusCircleMode:
 				{
 					if(TempObject()==NULL){
-						AddToTempObjects(new HCircle(gp_Circ(geoff_geometry::Point3d(end.m_point, geoff_geometry::Point3d(0, 0, 1)), radius_for_circle), &theApp.current_color));
+						AddToTempObjects(new HCircle(end.m_point, Point3d(0, 0, 1), radius_for_circle, &theApp.current_color));
 					}
 					else{
-						((HCircle*)TempObject())->m_axis.SetLocation(end.m_point);
+						((HCircle*)TempObject())->m_c = end.m_point;
 						((HCircle*)TempObject())->m_radius = radius_for_circle;
 					}
 				}
@@ -457,7 +452,6 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			}
 		}
 		break;
-#endif
 	}
 
 	return false;
@@ -470,7 +464,6 @@ HeeksObj* LineArcDrawing::GetOwnerForDrawingObjects()
 	case LineDrawingMode:
 	case ArcDrawingMode:
 		{
-#if 0
 			if(m_add_to_sketch)
 			{
 				if(m_container == NULL)
@@ -480,7 +473,6 @@ HeeksObj* LineArcDrawing::GetOwnerForDrawingObjects()
 				}
 				return m_container;
 			}
-#endif
 		}
 		break;
 	default:
@@ -495,128 +487,123 @@ static std::wstring str_for_GetTitle;
 
 const wchar_t* LineArcDrawing::GetTitle()
 {
-#if 0
-	to do
 	switch(drawing_mode)
 	{
 	case LineDrawingMode:
-		str_for_GetTitle = std::wstring(_("Line drawing mode"));
-		str_for_GetTitle.append(std::wstring(_T(" : ")));
-		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on start point")));
-		else str_for_GetTitle.append(std::wstring(_("click on end of line")));
+		str_for_GetTitle = std::wstring(L"Line drawing mode");
+		str_for_GetTitle.append(std::wstring(L" : "));
+		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
+		else str_for_GetTitle.append(std::wstring(L"click on end of line"));
 		return str_for_GetTitle.c_str();
 
 	case ArcDrawingMode:
-		str_for_GetTitle = std::wstring(_("Arc drawing mode"));
-		str_for_GetTitle.append(std::wstring(_T(" : ")));
-		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on start point")));
-		else str_for_GetTitle.append(std::wstring(_("click on end of arc")));
+		str_for_GetTitle = std::wstring(L"Arc drawing mode");
+		str_for_GetTitle.append(std::wstring(L" : "));
+		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
+		else str_for_GetTitle.append(std::wstring(L"click on end of arc"));
 		return str_for_GetTitle.c_str();
 
 	case ILineDrawingMode:
-		str_for_GetTitle = std::wstring(_("Infinite line drawing"));
-		str_for_GetTitle.append(std::wstring(_T(" : ")));
-		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on first point")));
-		else str_for_GetTitle.append(std::wstring(_("click on second point")));
+		str_for_GetTitle = std::wstring(L"Infinite line drawing");
+		str_for_GetTitle.append(std::wstring(L" : "));
+		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on first point"));
+		else str_for_GetTitle.append(std::wstring(L"click on second point"));
 		return str_for_GetTitle.c_str();
 
 	case EllipseDrawingMode:
-		str_for_GetTitle = std::wstring(_("Ellipse drawing mode"));
-		str_for_GetTitle.append(std::wstring(_T(" : ")));
+		str_for_GetTitle = std::wstring(L"Ellipse drawing mode");
+		str_for_GetTitle.append(std::wstring(L" : "));
 
-		str_for_GetTitle.append(std::wstring(_("center and 2 points mode")));
-		str_for_GetTitle.append(std::wstring(_T("\n  ")));
-		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on center point")));
+		str_for_GetTitle.append(std::wstring(L"center and 2 points mode"));
+		str_for_GetTitle.append(std::wstring(L"\n  "));
+		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on center point"));
 		else if(GetDrawStep() == 1) 
 		{
-			str_for_GetTitle.append(std::wstring(_("click on point on ellipse")));
-			str_for_GetTitle.append(std::wstring(_T("\n  ")));
-			str_for_GetTitle.append(std::wstring(_("(colinear or orthogonal to axis)")));
+			str_for_GetTitle.append(std::wstring(L"click on point on ellipse"));
+			str_for_GetTitle.append(std::wstring(L"\n  "));
+			str_for_GetTitle.append(std::wstring(L"(colinear or orthogonal to axis)"));
 		}
-		else str_for_GetTitle.append(std::wstring(_("click on another point on ellipse")));
+		else str_for_GetTitle.append(std::wstring(L"click on another point on ellipse"));
 		
 		return str_for_GetTitle.c_str();
 
 	case SplineDrawingMode:
 		
-		str_for_GetTitle = std::wstring(_("Spline drawing mode"));
-		str_for_GetTitle.append(std::wstring(_T(" : ")));
+		str_for_GetTitle = std::wstring(L"Spline drawing mode");
+		str_for_GetTitle.append(std::wstring(L" : "));
 
 		switch(spline_mode){
 			case CubicSplineMode:
-				str_for_GetTitle.append(std::wstring(_("cubic spline mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on start point")));
-				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(_("click on end point")));
-				else if (GetDrawStep() == 2) str_for_GetTitle.append(std::wstring(_("click on first control point")));
-				else str_for_GetTitle.append(std::wstring(_("click on second control point")));
+				str_for_GetTitle.append(std::wstring(L"cubic spline mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
+				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(L"click on end point"));
+				else if (GetDrawStep() == 2) str_for_GetTitle.append(std::wstring(L"click on first control point"));
+				else str_for_GetTitle.append(std::wstring(L"click on second control point"));
 				break;
 			case QuarticSplineMode:
-				str_for_GetTitle.append(std::wstring(_("quartic spline mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on start point")));
-				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(_("click on end point")));
-				else str_for_GetTitle.append(std::wstring(_("click on control point")));
+				str_for_GetTitle.append(std::wstring(L"quartic spline mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
+				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(L"click on end point"));
+				else str_for_GetTitle.append(std::wstring(L"click on control point"));
 				break;
 			case RationalSplineMode:
-				str_for_GetTitle.append(std::wstring(_("rational spline mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on start point")));
-				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(_("click on first control point")));
-				else if (GetDrawStep() == 2) str_for_GetTitle.append(std::wstring(_("click on second control point")));
-				else str_for_GetTitle.append(std::wstring(_("click on next control point or endpoint")));
+				str_for_GetTitle.append(std::wstring(L"rational spline mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
+				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(L"click on first control point"));
+				else if (GetDrawStep() == 2) str_for_GetTitle.append(std::wstring(L"click on second control point"));
+				else str_for_GetTitle.append(std::wstring(L"click on next control point or endpoint"));
 	
 				break;
 		}
 
-		return str_for_GetTitle;
+		return str_for_GetTitle.c_str();
 
 	case CircleDrawingMode:
-		str_for_GetTitle = std::wstring(_("Circle drawing mode"));
-		str_for_GetTitle.append(std::wstring(_T(" : ")));
+		str_for_GetTitle = std::wstring(L"Circle drawing mode");
+		str_for_GetTitle.append(std::wstring(L" : "));
 
 		switch(circle_mode){
 		case CentreAndPointCircleMode:
 			{
-				str_for_GetTitle.append(std::wstring(_("center and point mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on center point")));
-				else str_for_GetTitle.append(std::wstring(_("click on point on circle")));
+				str_for_GetTitle.append(std::wstring(L"center and point mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on center point"));
+				else str_for_GetTitle.append(std::wstring(L"click on point on circle"));
 			}
 			break;
 		case ThreePointsCircleMode:
 			{
-				str_for_GetTitle.append(std::wstring(_("three points mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on first point")));
-				else if (GetDrawStep() == 1)str_for_GetTitle.append(std::wstring(_("click on second point")));
-				else str_for_GetTitle.append(std::wstring(_("click on third point")));
+				str_for_GetTitle.append(std::wstring(L"three points mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on first point"));
+				else if (GetDrawStep() == 1)str_for_GetTitle.append(std::wstring(L"click on second point"));
+				else str_for_GetTitle.append(std::wstring(L"click on third point"));
 			}
 			break;
 		case TwoPointsCircleMode:
 			{
-				str_for_GetTitle.append(std::wstring(_("two points mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(_("click on first point")));
-				else str_for_GetTitle.append(std::wstring(_("click on second point")));
+				str_for_GetTitle.append(std::wstring(L"two points mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on first point"));
+				else str_for_GetTitle.append(std::wstring(L"click on second point"));
 			}
 			break;
 		case CentreAndRadiusCircleMode:
 			{
-				str_for_GetTitle.append(std::wstring(_("centre with radius mode")));
-				str_for_GetTitle.append(std::wstring(_T("\n  ")));
-				str_for_GetTitle.append(std::wstring(_("click on centre point")));
+				str_for_GetTitle.append(std::wstring(L"centre with radius mode"));
+				str_for_GetTitle.append(std::wstring(L"\n  "));
+				str_for_GetTitle.append(std::wstring(L"click on centre point"));
 			}
 			break;
 		}
-		return str_for_GetTitle;
+		return str_for_GetTitle.c_str();
 
 	default:
-		return _("unknown");
+		return L"unknown";
 	}
-#else
-return L"";
-#endif
 }
 
 void LineArcDrawing::set_cursor(void){

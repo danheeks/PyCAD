@@ -54,7 +54,7 @@ public:
 	void ExtractSeparateSketches(std::list<HeeksObj*> &new_separate_sketches, const bool allow_individual_objects = false);
 	int Intersects(const HeeksObj *object, std::list< double > *rl) const;
 	HeeksObj *Parallel( const double distance );
-	bool FilletAtPoint(const geoff_geometry::Point3d& p, double rad);
+	bool FilletAtPoint(const Point3d& p, double rad);
 	static void ReverseObject(HeeksObj* object);
 	double GetArea()const;
 	bool IsCircle()const;

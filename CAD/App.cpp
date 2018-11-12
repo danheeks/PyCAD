@@ -56,7 +56,7 @@ static unsigned int DecimalPlaces(const double value)
 CApp::CApp()
 {
 	m_version_number = std::wstring(HEEKSCAD_VERSION_MAIN) + L" " + HEEKSCAD_VERSION_SUB + L" 0";
-	TiXmlBase::SetRequiredDecimalPlaces(DecimalPlaces(geoff_geometry::TOLERANCE));	 // Ensure we write XML in enough accuracy to be useful when re-read.
+	TiXmlBase::SetRequiredDecimalPlaces(DecimalPlaces(TOLERANCE));	 // Ensure we write XML in enough accuracy to be useful when re-read.
 
 	m_sketch_reorder_tol = 0.01;
 	m_view_units = 1.0;
@@ -455,7 +455,7 @@ void CApp::Reset(){
 	history = new MainHistory;
 	m_current_coordinate_system = NULL;
 	m_doing_rollback = false;
-	geoff_geometry::Point3d vy(0, 1, 0), vz(0, 0, 1);
+	Point3d vy(0, 1, 0), vz(0, 0, 1);
 	m_current_viewport->m_view_point.SetView(vy, vz, 6);
 	m_hidden_for_drag.clear();
 	m_show_grippers_on_drag = true;
@@ -807,7 +807,7 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 
 	m_in_OpenFile = true;
 	m_file_open_or_import_type = FileOpenOrImportTypeOther;
-	geoff_geometry::Matrix file_open_matrix;
+	Matrix file_open_matrix;
 	if (import_not_open && m_current_coordinate_system)
 	{
 		file_open_matrix = m_current_coordinate_system->GetMatrix();
@@ -1051,15 +1051,15 @@ void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t 
 	{
 		NineFloatsThreeFloats t = *It;
 
-		geoff_geometry::Point3d p0(t.x[0], t.x[1], t.x[2]);
-		geoff_geometry::Point3d p1(t.x[3], t.x[4], t.x[5]);
-		geoff_geometry::Point3d p2(t.x[6], t.x[7], t.x[8]);
-		geoff_geometry::Point3d v1(p0, p1);
-		geoff_geometry::Point3d v2(p0, p2);
+		Point3d p0(t.x[0], t.x[1], t.x[2]);
+		Point3d p1(t.x[3], t.x[4], t.x[5]);
+		Point3d p2(t.x[6], t.x[7], t.x[8]);
+		Point3d v1(p0, p1);
+		Point3d v2(p0, p2);
 		float n[3] = { 0.0f, 0.0f, 1.0f };
 		try
 		{
-			geoff_geometry::Point3d norm = (v1 ^ v2).Normalized();
+			Point3d norm = (v1 ^ v2).Normalized();
 			n[0] = (float)(norm.x);
 			n[1] = (float)(norm.y);
 			n[2] = (float)(norm.z);
@@ -1112,8 +1112,8 @@ class ObjFileVertex
 {
 public:
 	int m_index;
-	geoff_geometry::Point3d m_p;
-	ObjFileVertex(int index, const geoff_geometry::Point3d& p) :m_index(index), m_p(p){}
+	Point3d m_p;
+	ObjFileVertex(int index, const Point3d& p) :m_index(index), m_p(p){}
 };
 
 class ObjFileTriangle
@@ -1141,7 +1141,7 @@ public:
 		}
 	}
 
-	int InsertVertex(const geoff_geometry::Point3d& p)
+	int InsertVertex(const Point3d& p)
 	{
 		ObjFileVertex* v = NULL;
 
@@ -1175,13 +1175,13 @@ public:
 
 	void InsertTriangle(const double* t)
 	{
-		int v0 = InsertVertex(geoff_geometry::Point3d(t[0], t[1], t[2]));
-		int v1 = InsertVertex(geoff_geometry::Point3d(t[3], t[4], t[5]));
-		int v2 = InsertVertex(geoff_geometry::Point3d(t[6], t[7], t[8]));
+		int v0 = InsertVertex(Point3d(t[0], t[1], t[2]));
+		int v1 = InsertVertex(Point3d(t[3], t[4], t[5]));
+		int v2 = InsertVertex(Point3d(t[6], t[7], t[8]));
 		m_tris.push_back(ObjFileTriangle(v0, v1, v2));
 	}
 
-	int GetIndex(const geoff_geometry::Point3d& p)
+	int GetIndex(const Point3d& p)
 	{
 		std::map<double, std::list<ObjFileVertex*> >::iterator FindIt = m_map.find(p.x);
 		if (FindIt != m_map.end())
@@ -1801,20 +1801,20 @@ void CApp::CopyUndoably(HeeksObj* object, HeeksObj* copy_with_new_data)
 	DoUndoable(new CopyObjectUndoable(object, copy_with_new_data));
 }
 
-void CApp::TransformUndoably(HeeksObj *object, const geoff_geometry::Matrix &m)
+void CApp::TransformUndoably(HeeksObj *object, const Matrix &m)
 {
 	if (!object)return;
-	geoff_geometry::Matrix mat = geoff_geometry::Matrix(m);
-	geoff_geometry::Matrix im = mat.Inverse();
+	Matrix mat = Matrix(m);
+	Matrix im = mat.Inverse();
 	TransformTool *undoable = new TransformTool(object, mat, im);
 	DoUndoable(undoable);
 }
 
-void CApp::TransformUndoably(const std::list<HeeksObj*> &list, const geoff_geometry::Matrix &m)
+void CApp::TransformUndoably(const std::list<HeeksObj*> &list, const Matrix &m)
 {
 	if (list.size() == 0)return;
-	geoff_geometry::Matrix mat = geoff_geometry::Matrix(m);
-	geoff_geometry::Matrix im = mat.Inverse();
+	Matrix mat = Matrix(m);
+	Matrix im = mat.Inverse();
 	TransformObjectsTool *undoable = new TransformObjectsTool(list, mat, im);
 	DoUndoable(undoable);
 }
@@ -1853,7 +1853,7 @@ void CApp::EditUndoably(HeeksObj *object)
 	}
 }
 
-void CApp::Transform(std::list<HeeksObj*> objects, const geoff_geometry::Matrix& m)
+void CApp::Transform(std::list<HeeksObj*> objects, const Matrix& m)
 {
 	std::list<HeeksObj*>::iterator it;
 	for (it = objects.begin(); it != objects.end(); ++it)
@@ -1919,25 +1919,25 @@ void CApp::WereRemoved(const std::list<HeeksObj*>& list)
 	SetAsModified();
 }
 
-geoff_geometry::Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
+Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 {
 #if 0
 	if (get_the_appropriate_orthogonal){
 		// choose from the three orthoganal possibilities, the one where it's z-axis closest to the camera direction
-		geoff_geometry::Point3d vx, vy;
+		Point3d vx, vy;
 		m_current_viewport->m_view_point.GetTwoAxes(vx, vy, false, 0);
 		{
-			geoff_geometry::Point3d o(0, 0, 0);
+			Point3d o(0, 0, 0);
 			if (m_current_coordinate_system)o.Transform(m_current_coordinate_system->GetMatrix());
 			return make_matrix(o, vx, vy);
 		}
 	}
 
-	geoff_geometry::Matrix mat;
+	Matrix mat;
 	if (m_current_coordinate_system)mat = m_current_coordinate_system->GetMatrix();
 	return mat;
 #endif
-	return geoff_geometry::Matrix();
+	return Matrix();
 }
 
 extern void PythonOnMessageBox(const wchar_t* message);

@@ -8,31 +8,31 @@
 #include "Viewport.h"
 
 static void RenderGrid(const CViewPoint *view_point, double max_number_across, bool in_between_spaces, bool miss_main_lines, const HeeksColor *bg, const HeeksColor *cc, unsigned char brightness, int plane_mode){
-	geoff_geometry::Point3d sp[4];
+	Point3d sp[4];
 	double zval = 0.5;
 	IPoint size = theApp.m_current_viewport->GetViewportSize();
-	sp[0] = geoff_geometry::Point3d(0, 0, zval);
-	sp[1] = geoff_geometry::Point3d(size.GetWidth(), 0, zval);
-	sp[2] = geoff_geometry::Point3d(size.GetWidth(), size.GetHeight(), zval);
-	sp[3] = geoff_geometry::Point3d(0, size.GetHeight(), zval);
-	geoff_geometry::Point3d vx, vy;
+	sp[0] = Point3d(0, 0, zval);
+	sp[1] = Point3d(size.GetWidth(), 0, zval);
+	sp[2] = Point3d(size.GetWidth(), size.GetHeight(), zval);
+	sp[3] = Point3d(0, size.GetHeight(), zval);
+	Point3d vx, vy;
 	int plane_mode2 = view_point->GetTwoAxes(vx, vy, false, plane_mode);
-	geoff_geometry::Point3d datum(0, 0, 0);
-	geoff_geometry::Matrix orimat = theApp.GetDrawMatrix(false);
+	Point3d datum(0, 0, 0);
+	Matrix orimat = theApp.GetDrawMatrix(false);
 	datum = datum.Transformed(orimat);
-	orimat = geoff_geometry::Matrix(datum, vx, vy);
-	geoff_geometry::Point3d unit_forward = view_point->forwards_vector().Normalized();
-	double plane_dp = fabs(geoff_geometry::Point3d(0, 0, 1).Transformed(orimat) * unit_forward);
+	orimat = Matrix(datum, vx, vy);
+	Point3d unit_forward = view_point->forwards_vector().Normalized();
+	double plane_dp = fabs(Point3d(0, 0, 1).Transformed(orimat) * unit_forward);
 	if(plane_dp < 0.3)return;
-	geoff_geometry::Plane plane(geoff_geometry::Point3d(0, 0, 0).Transformed(orimat), geoff_geometry::Point3d(0, 0, 1).Transformed(orimat));
+	Plane plane(Point3d(0, 0, 0).Transformed(orimat), Point3d(0, 0, 1).Transformed(orimat));
 	{
 		for(int i =0; i<4; i++){
-			geoff_geometry::Point3d p1 = view_point->glUnproject(sp[i]);
+			Point3d p1 = view_point->glUnproject(sp[i]);
 			sp[i].z = 0;
-			geoff_geometry::Point3d p2 = view_point->glUnproject(sp[i]);
+			Point3d p2 = view_point->glUnproject(sp[i]);
 			if(p1.Dist(p2) < 0.00000000001)return;
-			geoff_geometry::Line line = geoff_geometry::Line(p1, p2);
-			geoff_geometry::Point3d pnt;
+			Line line = Line(p1, p2);
+			Point3d pnt;
 			double t;
 			if(plane.Intof(line, pnt, t))
 			{
@@ -137,7 +137,7 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 			double xr = x/spacing/5;
 			if( fabs(  xr - (double)(int)(xr+ (xr>0 ? 0.5:-0.5)) ) < 0.1)continue;
 		}
-		geoff_geometry::Point3d temp(datum + (vx * x) + (vy * ext2d[1]));
+		Point3d temp(datum + (vx * x) + (vy * ext2d[1]));
 		glVertex3d(temp.x, temp.y, temp.z);
 		temp = (datum + (vx * x) + (vy * ext2d[3]));
 		glVertex3d(temp.x, temp.y, temp.z);
@@ -147,7 +147,7 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 			double yr = y/spacing/5;
 			if( fabs(  yr - (double)(int)(yr+(yr>0 ? 0.5:-0.5)) ) < 0.1)continue;
 		}
-		geoff_geometry::Point3d temp = (datum + (vx * ext2d[0]) + (vy * y));
+		Point3d temp = (datum + (vx * ext2d[0]) + (vy * y));
 		glVertex3d(temp.x, temp.y, temp.z);
 		temp = (datum + (vx * ext2d[2]) + (vy * y));
 		glVertex3d(temp.x, temp.y, temp.z);
@@ -156,27 +156,27 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 }
 
 void GetGridBox(const CViewPoint *view_point, CBox &ext){
-	geoff_geometry::Point3d sp[4];
+	Point3d sp[4];
 	double zval = 0.5;
 	IPoint size = theApp.m_current_viewport->GetViewportSize();
-	sp[0] = geoff_geometry::Point3d(0, 0, zval);
-	sp[1] = geoff_geometry::Point3d(size.GetWidth(), 0, zval);
-	sp[2] = geoff_geometry::Point3d(size.GetWidth(), size.GetHeight(), zval);
-	sp[3] = geoff_geometry::Point3d(0, size.GetHeight(), zval);
-	geoff_geometry::Point3d vx, vy;
+	sp[0] = Point3d(0, 0, zval);
+	sp[1] = Point3d(size.GetWidth(), 0, zval);
+	sp[2] = Point3d(size.GetWidth(), size.GetHeight(), zval);
+	sp[3] = Point3d(0, size.GetHeight(), zval);
+	Point3d vx, vy;
 	view_point->GetTwoAxes(vx, vy, false, 0);
-	geoff_geometry::Point3d datum(0, 0, 0);
-	geoff_geometry::Matrix orimat = theApp.GetDrawMatrix(false);
+	Point3d datum(0, 0, 0);
+	Matrix orimat = theApp.GetDrawMatrix(false);
 	datum = datum.Transformed(orimat);
-	orimat = geoff_geometry::Matrix(datum, vx, vy);
-	geoff_geometry::Plane plane(datum, geoff_geometry::Point3d(0, 0, 1).Transformed(orimat));
+	orimat = Matrix(datum, vx, vy);
+	Plane plane(datum, Point3d(0, 0, 1).Transformed(orimat));
 	{
 		for(int i =0; i<4; i++){
-			geoff_geometry::Point3d p1 = view_point->glUnproject(sp[i]);
+			Point3d p1 = view_point->glUnproject(sp[i]);
 			sp[i].z = 0;
-			geoff_geometry::Point3d p2 = view_point->glUnproject(sp[i]);
-			geoff_geometry::Line line = geoff_geometry::Line(p1, p2);
-			geoff_geometry::Point3d pnt;
+			Point3d p2 = view_point->glUnproject(sp[i]);
+			Line line = Line(p1, p2);
+			Point3d pnt;
 			double t;
 			if (plane.Intof(line, pnt, t))
 			{
@@ -193,12 +193,12 @@ static void RenderGrid(const CViewPoint *view_point, int plane)
 		{
 			const HeeksColor& bg = theApp.background_color[0];
 			HeeksColor cc = bg.best_black_or_white();
-			geoff_geometry::Point3d v_bg((double)bg.red, (double)bg.green, (double)bg.blue);
-			geoff_geometry::Point3d v_cc((double)cc.red, (double)cc.green, (double)cc.blue);
-			geoff_geometry::Point3d v_contrast = v_cc - v_bg;
-			geoff_geometry::Point3d unit_contrast = v_contrast.Normalized();
+			Point3d v_bg((double)bg.red, (double)bg.green, (double)bg.blue);
+			Point3d v_cc((double)cc.red, (double)cc.green, (double)cc.blue);
+			Point3d v_contrast = v_cc - v_bg;
+			Point3d unit_contrast = v_contrast.Normalized();
 			double l1, l2, l3;
-			if(v_cc * geoff_geometry::Point3d(1,1,1)>0){
+			if(v_cc * Point3d(1,1,1)>0){
 				l1 = 200;
 				l2 = 130;
 				l3 = 80;
@@ -211,23 +211,23 @@ static void RenderGrid(const CViewPoint *view_point, int plane)
 			if(l1>v_contrast.magnitude())l1 = v_contrast.magnitude();
 			if(l2>v_contrast.magnitude())l2 = v_contrast.magnitude();
 			if(l3>v_contrast.magnitude())l3 = v_contrast.magnitude();
-			geoff_geometry::Point3d uf = (view_point->forwards_vector()).Normalized();
-			geoff_geometry::Point3d vx, vy;
+			Point3d uf = (view_point->forwards_vector()).Normalized();
+			Point3d vx, vy;
 			view_point->GetTwoAxes(vx, vy, false, plane);
-			geoff_geometry::Point3d datum(0, 0, 0);
-			geoff_geometry::Matrix orimat = theApp.GetDrawMatrix(false);
+			Point3d datum(0, 0, 0);
+			Matrix orimat = theApp.GetDrawMatrix(false);
 			datum = datum.Transformed(orimat);
-			orimat = geoff_geometry::Matrix(datum, vx, vy);
-			geoff_geometry::Point3d v_up = geoff_geometry::Point3d(0,0, 1).Transformed(orimat);
+			orimat = Matrix(datum, vx, vy);
+			Point3d v_up = Point3d(0,0, 1).Transformed(orimat);
 			double fufz = fabs(uf * v_up);
 			if(fufz<0.7){
 				double there = (fufz - 0.3) / 0.4;
 				l1 *= there;
 				l2 *= there;
 			}
-			geoff_geometry::Point3d v_gc1 = v_bg + unit_contrast * l1;
-			geoff_geometry::Point3d v_gc2 = v_bg + unit_contrast * l2;
-			geoff_geometry::Point3d v_gc3 = v_bg + unit_contrast * l3;
+			Point3d v_gc1 = v_bg + unit_contrast * l1;
+			Point3d v_gc2 = v_bg + unit_contrast * l2;
+			Point3d v_gc3 = v_bg + unit_contrast * l3;
 			glColor3ub((unsigned char)(v_gc3.x), (unsigned char)(v_gc3.y), (unsigned char)(v_gc3.z));
 			RenderGrid(view_point, 200, false, true, NULL, NULL, 0, plane);
 			glColor3ub((unsigned char)(v_gc2.x), (unsigned char)(v_gc2.y), (unsigned char)(v_gc2.z));

@@ -69,7 +69,7 @@ void CSvgRead::Read(const wchar_t* filepath)
 {
 	// start the file
 	m_fail = false;
-	m_transform = geoff_geometry::Matrix();
+	m_transform = Matrix();
 
 	TiXmlDocument doc(Ttc(filepath));
 	if (!doc.LoadFile())
@@ -158,7 +158,7 @@ void CSvgRead::ProcessArea()
 			Span& span = *It2;
 			if (span.m_v.m_type == 0)
 			{
-				HLine *line = new HLine(geoff_geometry::Point3d(span.m_p.x, span.m_p.y, 0.0), geoff_geometry::Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), &theApp.current_color);
+				HLine *line = new HLine(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), &theApp.current_color);
 				ModifyByMatrix(line);
 				AddSketchIfNeeded();
 				m_sketch->Add(line, NULL);
@@ -166,7 +166,7 @@ void CSvgRead::ProcessArea()
 			else
 			{
 				// add an arc
-				HArc *arc = new HArc(geoff_geometry::Point3d(span.m_p.x, span.m_p.y, 0.0), geoff_geometry::Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(geoff_geometry::Point3d(geoff_geometry::Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), geoff_geometry::Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp.current_color);
+				HArc *arc = new HArc(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(Point3d(Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp.current_color);
 				ModifyByMatrix(arc);
 				AddSketchIfNeeded();
 				m_sketch->Add(arc, NULL);
@@ -296,7 +296,7 @@ void CSvgRead::ReadTransform(TiXmlElement *pElem)
 			const char* d = s.c_str();
 			int pos=0;
 			int count=0;
-			geoff_geometry::Matrix ntrsf;
+			Matrix ntrsf;
 			if(d[pos] == 0)
 				break;
 			if(strncmp(&d[pos],"translate",9)==0)
@@ -304,7 +304,7 @@ void CSvgRead::ReadTransform(TiXmlElement *pElem)
 				double x,y;
 				sscanf(&d[pos],"translate(%lf %lf)%n",&x,&y,&count);
 				y=-y;
-				ntrsf.SetTranslationPart(geoff_geometry::Point3d(x,y,0));
+				ntrsf.SetTranslationPart(Point3d(x,y,0));
 				m_transform.Multiply(ntrsf);
 				pos+=count;
 			}
@@ -364,7 +364,7 @@ void CSvgRead::ReadTransform(TiXmlElement *pElem)
 				if(y==0)
 					y=x;
 				//TODO: assymetric scaling
-				ntrsf.SetScale(geoff_geometry::Point3d(0,0,0),x);
+				ntrsf.SetScale(Point3d(0,0,0),x);
 				m_transform.Multiply(ntrsf);
 				pos+=count;
 			}
@@ -372,7 +372,7 @@ void CSvgRead::ReadTransform(TiXmlElement *pElem)
 			{
 				double rot;
 				sscanf(&d[pos],"rotate(%lf)%n",&rot,&count);
-				ntrsf.SetRotation(gp_Ax1(geoff_geometry::Point3d(0,0,0),geoff_geometry::Point3d(0,0,1)),3*M_PI/2-rot);
+				ntrsf.SetRotation(gp_Ax1(Point3d(0,0,0),Point3d(0,0,1)),3*M_PI/2-rot);
 				m_transform.Multiply(ntrsf);
 				pos+=count;
 
@@ -401,10 +401,10 @@ void CSvgRead::ReadRect(TiXmlElement *pElem)
 
 	y=-y;height=-height;
 
-	geoff_geometry::Point3d p1(x,y,0);
-	geoff_geometry::Point3d p2(x+width,y,0);
-	geoff_geometry::Point3d p3(x+width,y+height,0);
-	geoff_geometry::Point3d p4(x,y+height,0);
+	Point3d p1(x,y,0);
+	Point3d p2(x+width,y,0);
+	Point3d p3(x+width,y+height,0);
+	Point3d p4(x,y+height,0);
 
 	//TODO: add rounded rectangle support
 
@@ -440,7 +440,7 @@ void CSvgRead::ReadEllipse(TiXmlElement *pElem)
 		ry = temp;
 		rot = PI / 2;
 	}
-	OnReadEllipse(geoff_geometry::Point3d(x,y,0),rx,ry,rot,0,2*PI);
+	OnReadEllipse(Point3d(x,y,0),rx,ry,rot,0,2*PI);
 }
 
 void CSvgRead::ReadLine(TiXmlElement *pElem)
@@ -461,7 +461,7 @@ void CSvgRead::ReadLine(TiXmlElement *pElem)
 
 	y1=-y1; y2=-y2;
 
-	OnReadLine(geoff_geometry::Point3d(x1,y1,0),geoff_geometry::Point3d(x2,y2,0));
+	OnReadLine(Point3d(x1,y1,0),Point3d(x2,y2,0));
 }
 
 void CSvgRead::ReadPolyline(TiXmlElement *pElem, bool close)
@@ -472,8 +472,8 @@ void CSvgRead::ReadPolyline(TiXmlElement *pElem, bool close)
 		if(name == "points")
 		{
 			const char* d = a->Value();
-			geoff_geometry::Point3d ppnt(0,0,0);
-			geoff_geometry::Point3d spnt(0,0,0);
+			Point3d ppnt(0,0,0);
+			Point3d spnt(0,0,0);
 			bool has_point = false;
 
 			int pos = 0;
@@ -488,7 +488,7 @@ void CSvgRead::ReadPolyline(TiXmlElement *pElem, bool close)
 					int count=0;
 					sscanf(&d[pos],"%lf,%lf%n",&x,&y,&count);
 					y=-y;
-					geoff_geometry::Point3d cpnt(x,y,0);
+					Point3d cpnt(x,y,0);
 					if(has_point)
 						OnReadLine(ppnt,cpnt);
 					else
@@ -521,18 +521,18 @@ void CSvgRead::ReadCircle(TiXmlElement *pElem)
 	}
 	y=-y;
 
-	geoff_geometry::Point3d cp(x,y,0);
+	Point3d cp(x,y,0);
 	OnReadCircle(cp,r);
 }
 
-geoff_geometry::Point3d CSvgRead::ReadStart(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+Point3d CSvgRead::ReadStart(const char *text,Point3d ppnt,bool isupper)
 {
 #if 0
 	double x, y;
 cout << '@' << text <<'@';
 	sscanf(text, "%lf%lf", &x, &y);
 	y = -y;
-	geoff_geometry::Point3d npt(x,y,0);
+	Point3d npt(x,y,0);
 	if(!isupper)
 	{
 		npt.SetX(x+ppnt.x);
@@ -541,17 +541,17 @@ cout << '@' << text <<'@';
 	OnReadStart();
 	return npt;
 #else
-	return geoff_geometry::Point3d(0, 0, 0);
+	return Point3d(0, 0, 0);
 #endif
 }
 
-geoff_geometry::Point3d CSvgRead::ReadLine(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+Point3d CSvgRead::ReadLine(const char *text,Point3d ppnt,bool isupper)
 {
 #if 0
 	double x, y;
 	sscanf(text, "%lf%lf", &x, &y);
 	y = -y;
-	geoff_geometry::Point3d npt(x,y,0);
+	Point3d npt(x,y,0);
 	if(!isupper)
 	{
 		npt.SetX(x+ppnt.x);
@@ -560,48 +560,48 @@ geoff_geometry::Point3d CSvgRead::ReadLine(const char *text,geoff_geometry::Poin
 	OnReadLine(ppnt,npt);
 	return npt;
 #else
-	return geoff_geometry::Point3d(0, 0, 0);
+	return Point3d(0, 0, 0);
 #endif
 }
 
-void CSvgRead::ReadClose(geoff_geometry::Point3d ppnt,geoff_geometry::Point3d spnt)
+void CSvgRead::ReadClose(Point3d ppnt,Point3d spnt)
 {
 	OnReadLine(ppnt,spnt);
 }
 
-geoff_geometry::Point3d CSvgRead::ReadHorizontal(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+Point3d CSvgRead::ReadHorizontal(const char *text,Point3d ppnt,bool isupper)
 {
 #if 0
 	double x;
 	sscanf(text, "%lf", &x);
-	geoff_geometry::Point3d npt(x,ppnt.y,0);
+	Point3d npt(x,ppnt.y,0);
 	if(!isupper)
 		npt.SetX(x+ppnt.x);
 	OnReadLine(ppnt,npt);
 	return npt;
 #else
-	return geoff_geometry::Point3d(0, 0, 0);
+	return Point3d(0, 0, 0);
 #endif
 }
 
-geoff_geometry::Point3d CSvgRead::ReadVertical(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+Point3d CSvgRead::ReadVertical(const char *text,Point3d ppnt,bool isupper)
 {
 #if 0
 	double y;
 	sscanf(text, "%lf", &y);
 	y = -y;
-	geoff_geometry::Point3d npt(ppnt.x,y,0);
+	Point3d npt(ppnt.x,y,0);
 	if(!isupper)
 		npt.SetY(y+ppnt.y);
 	OnReadLine(ppnt,npt);
 	return npt;
 #else
-	return geoff_geometry::Point3d(0, 0, 0);
+	return Point3d(0, 0, 0);
 #endif
 }
 
 
-struct TwoPoints CSvgRead::ReadCubic(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+struct TwoPoints CSvgRead::ReadCubic(const char *text,Point3d ppnt,bool isupper)
 {
 	struct TwoPoints retpts;
 	double x1, y1, x2, y2, x3, y3;
@@ -619,15 +619,15 @@ cout << "x1=" << x1 << "y1=" << y1 << "x2=" << x2 << "y2=" << y2 << "x3=" << x3 
 cout << "x1=" << x1 << "y1=" << y1 << "x2=" << x2 << "y2=" << y2 << "x3=" << x3 << "y3=" << y3 << "\n";
 	}
 
-	geoff_geometry::Point3d pnt1(x1,y1,0);
-	retpts.pcpnt = geoff_geometry::Point3d(x2,y2,0);
-	retpts.ppnt = geoff_geometry::Point3d(x3,y3,0);
+	Point3d pnt1(x1,y1,0);
+	retpts.pcpnt = Point3d(x2,y2,0);
+	retpts.ppnt = Point3d(x3,y3,0);
 
 	OnReadCubic(ppnt,pnt1,retpts.pcpnt,retpts.ppnt);
 	return retpts;
 }
 
-struct TwoPoints CSvgRead::ReadCubic(const char *text,geoff_geometry::Point3d ppnt, geoff_geometry::Point3d pcpnt, bool isupper)
+struct TwoPoints CSvgRead::ReadCubic(const char *text,Point3d ppnt, Point3d pcpnt, bool isupper)
 {
 	struct TwoPoints retpts;
 	double x2, y2, x3, y3;
@@ -642,11 +642,11 @@ struct TwoPoints CSvgRead::ReadCubic(const char *text,geoff_geometry::Point3d pp
 	}
 
 #if 0
-	geoff_geometry::Point3d dir=ppnt-pcpnt;
+	Point3d dir=ppnt-pcpnt;
 	double d = ppnt.Distance(pcpnt);
-	geoff_geometry::Point3d pnt1(ppnt + dir * d);
-	retpts.pcpnt = geoff_geometry::Point3d(x2,y2,0);
-	retpts.ppnt = geoff_geometry::Point3d(x3,y3,0);
+	Point3d pnt1(ppnt + dir * d);
+	retpts.pcpnt = Point3d(x2,y2,0);
+	retpts.ppnt = Point3d(x3,y3,0);
 
 	OnReadCubic(ppnt,pnt1,retpts.pcpnt,retpts.ppnt);
 #endif
@@ -654,7 +654,7 @@ struct TwoPoints CSvgRead::ReadCubic(const char *text,geoff_geometry::Point3d pp
 	return retpts;
 }
 
-struct TwoPoints CSvgRead::ReadQuadratic(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+struct TwoPoints CSvgRead::ReadQuadratic(const char *text,Point3d ppnt,bool isupper)
 {
 	struct TwoPoints retpts;
 	double x1, y1, x2, y2;
@@ -667,14 +667,14 @@ struct TwoPoints CSvgRead::ReadQuadratic(const char *text,geoff_geometry::Point3
 		x2+=ppnt.x; y2+=ppnt.y;
 	}
 
-	retpts.pcpnt = geoff_geometry::Point3d(x1,y1,0);
-	retpts.ppnt = geoff_geometry::Point3d(x2,y2,0);
+	retpts.pcpnt = Point3d(x1,y1,0);
+	retpts.ppnt = Point3d(x2,y2,0);
 
 	OnReadQuadratic(ppnt,retpts.pcpnt,retpts.ppnt);
 	return retpts;
 }
 
-struct TwoPoints CSvgRead::ReadQuadratic(const char *text,geoff_geometry::Point3d ppnt, geoff_geometry::Point3d pcpnt, bool isupper)
+struct TwoPoints CSvgRead::ReadQuadratic(const char *text,Point3d ppnt, Point3d pcpnt, bool isupper)
 {
 	struct TwoPoints retpts;
 	double x2, y2;
@@ -686,18 +686,18 @@ struct TwoPoints CSvgRead::ReadQuadratic(const char *text,geoff_geometry::Point3
 		x2+=ppnt.x; y2+=ppnt.y;
 	}
 #if 0
-	geoff_geometry::Point3d dir=ppnt-pcpnt;
+	Point3d dir=ppnt-pcpnt;
 	double d = ppnt.Distance(pcpnt);
-	geoff_geometry::Point3d pnt1(ppnt + dir * d);
+	Point3d pnt1(ppnt + dir * d);
 	retpts.pcpnt = pnt1;
-	retpts.ppnt = geoff_geometry::Point3d(x2,y2,0);
+	retpts.ppnt = Point3d(x2,y2,0);
 
 	OnReadQuadratic(ppnt,retpts.pcpnt,retpts.ppnt);
 #endif
 	return retpts;
 }
 
-geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::Point3d ppnt,bool isupper)
+Point3d CSvgRead::ReadEllipse(const char *text,Point3d ppnt,bool isupper)
 {
 #if 0
 	int large_arc_flag, sweep_flag;
@@ -711,13 +711,13 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 
 	xrot = -M_PI*xrot/180.0;
 
-	geoff_geometry::Point3d ept(x,y,0);
-	geoff_geometry::Point3d up(0,0,1);
-	geoff_geometry::Point3d zp(0,0,0);
+	Point3d ept(x,y,0);
+	Point3d up(0,0,1);
+	Point3d zp(0,0,0);
 
 	//from http://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
 
-	geoff_geometry::Point3d mid((ppnt-ept)/2);
+	Point3d mid((ppnt-ept)/2);
 	mid.Rotate(gp_Ax1(zp,up),-xrot);
 	
 	double error = mid.x * mid.x/(rx*rx) + mid.y*mid.y/(ry*ry);
@@ -734,9 +734,9 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 	{
 		cx = -cx; cy = -cy;
 	}
-	geoff_geometry::Point3d cvec(cx,cy,0);
+	Point3d cvec(cx,cy,0);
 	cvec.Rotate(gp_Ax1(zp,up),xrot);
-	geoff_geometry::Point3d cpnt(cvec + (ept+ppnt)/2);
+	Point3d cpnt(cvec + (ept+ppnt)/2);
 
 	if(rx<ry)
 	{
@@ -746,8 +746,8 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 		xrot += M_PI/2;
 	}
 
-	geoff_geometry::Point3d start(ppnt - cpnt);
-	geoff_geometry::Point3d end(ept-cpnt);
+	Point3d start(ppnt - cpnt);
+	Point3d end(ept-cpnt);
 	start.Rotate(gp_Ax1(zp,up),-xrot);
 	end.Rotate(gp_Ax1(zp,up),-xrot);
 
@@ -773,7 +773,7 @@ geoff_geometry::Point3d CSvgRead::ReadEllipse(const char *text,geoff_geometry::P
 
 	OnReadEllipse(cpnt,rx,ry,xrot,start_angle,end_angle);
 #else
-	geoff_geometry::Point3d ept;
+	Point3d ept;
 #endif
 	return ept;
 }
@@ -808,9 +808,9 @@ void CSvgRead::ReadPath(TiXmlElement* pElem)
 			in = RemoveCommas(in);
 			const char* d = in.c_str();
 			int length = strlen(d);
-			geoff_geometry::Point3d spnt(0,0,0);
-			geoff_geometry::Point3d ppnt(0,0,0);
-			geoff_geometry::Point3d pcpnt(0,0,0);
+			Point3d spnt(0,0,0);
+			Point3d ppnt(0,0,0);
+			Point3d pcpnt(0,0,0);
 			int pos = 0;
 			cmd = 'l';
 			while(1){
@@ -909,7 +909,7 @@ void CSvgRead::OnReadStart()
 {
 }
 
-void CSvgRead::OnReadCubic(geoff_geometry::Point3d s, geoff_geometry::Point3d c1, geoff_geometry::Point3d c2, geoff_geometry::Point3d e)
+void CSvgRead::OnReadCubic(Point3d s, Point3d c1, Point3d c2, Point3d e)
 {
 #if 0
 	TColgp_Array1OfPnt poles(1,4);
@@ -932,7 +932,7 @@ void CSvgRead::OnReadCubic(geoff_geometry::Point3d s, geoff_geometry::Point3d c1
 #endif
 }
 
-void CSvgRead::OnReadQuadratic(geoff_geometry::Point3d s, geoff_geometry::Point3d c, geoff_geometry::Point3d e)
+void CSvgRead::OnReadQuadratic(Point3d s, Point3d c, Point3d e)
 {
 #if 0
 	TColgp_Array1OfPnt poles(1, 3);
@@ -955,7 +955,7 @@ void CSvgRead::OnReadQuadratic(geoff_geometry::Point3d s, geoff_geometry::Point3
 #endif
 }
 
-void CSvgRead::OnReadLine(geoff_geometry::Point3d p1, geoff_geometry::Point3d p2)
+void CSvgRead::OnReadLine(Point3d p1, Point3d p2)
 {
 #if 0
 	if (m_current_area != NULL && m_stroke_width > 0.00001)
@@ -984,11 +984,11 @@ void CSvgRead::OnReadLine(geoff_geometry::Point3d p1, geoff_geometry::Point3d p2
 #endif
 }
 
-void CSvgRead::OnReadEllipse(geoff_geometry::Point3d c, double maj_r, double min_r, double rot, double start, double end)
+void CSvgRead::OnReadEllipse(Point3d c, double maj_r, double min_r, double rot, double start, double end)
 {
 #if 0
-	geoff_geometry::Point3d up(0,0,1);
-	gp_Elips elip(geoff_geometry::Point3d(c,geoff_geometry::Point3d(0,0,1)),maj_r,min_r);
+	Point3d up(0,0,1);
+	gp_Elips elip(Point3d(c,Point3d(0,0,1)),maj_r,min_r);
 	elip.Rotate(gp_Ax1(c,up),rot);
 	HEllipse *new_object = new HEllipse(elip,start,end,&theApp.current_color);
 	ModifyByMatrix(new_object);
@@ -997,11 +997,11 @@ void CSvgRead::OnReadEllipse(geoff_geometry::Point3d c, double maj_r, double min
 #endif
 }
 
-void CSvgRead::OnReadCircle(geoff_geometry::Point3d c, double r)
+void CSvgRead::OnReadCircle(Point3d c, double r)
 {
 #if 0
-	geoff_geometry::Point3d up(0,0,1);
-	gp_Circ cir(geoff_geometry::Point3d(c,up),r);
+	Point3d up(0,0,1);
+	gp_Circ cir(Point3d(c,up),r);
 	HCircle *new_object = new HCircle(cir,&theApp.current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();

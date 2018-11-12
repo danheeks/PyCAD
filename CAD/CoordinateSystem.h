@@ -9,16 +9,16 @@
 class CoordinateSystem: public HeeksObj
 {
 public:
-	geoff_geometry::Point3d m_o;
-	geoff_geometry::Point3d m_x;
-	geoff_geometry::Point3d m_y;
+	Point3d m_o;
+	Point3d m_x;
+	Point3d m_y;
 	std::wstring m_title;
 
 	static double size;
 	static bool size_is_pixels; // false for mm
 	static bool rendering_current;
 
-	CoordinateSystem(const std::wstring& str, const geoff_geometry::Point3d &o, const geoff_geometry::Point3d &x, const geoff_geometry::Point3d &y);
+	CoordinateSystem(const std::wstring& str, const Point3d &o, const Point3d &x, const Point3d &y);
 	CoordinateSystem(const CoordinateSystem &c);
 	~CoordinateSystem(void);
 
@@ -35,21 +35,21 @@ public:
 	void OnEditString(const wchar_t* str);
 	HeeksObj *MakeACopy(void)const;
 	const wchar_t* GetIconFilePath();
-	void Transform(const geoff_geometry::Matrix &m);
+	void Transform(const Matrix &m);
 	void GetProperties(std::list<Property *> *list);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
-	bool GetScaleAboutMatrix(geoff_geometry::Matrix &m);
+	bool GetScaleAboutMatrix(Matrix &m);
 	void WriteXML(TiXmlNode *root);
 
-	geoff_geometry::Matrix GetMatrix();
+	Matrix GetMatrix();
 	void ApplyMatrix();
 
 	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	static void RenderArrow();
 	static void RenderDatum(bool bright, bool solid); // render a coordinate system at 0, 0, 0
-	static void AxesToAngles(const geoff_geometry::Point3d &x, const geoff_geometry::Point3d &y, double &v_angle, double &h_angle, double &t_angle);
-	static void AnglesToAxes(const double &v_angle, const double &h_angle, const double &t_angle, geoff_geometry::Point3d &x, geoff_geometry::Point3d &y);
-	//static void GetAx2Properties(std::list<Property *> *list, geoff_geometry::Point3d& a, HeeksObj* object);
+	static void AxesToAngles(const Point3d &x, const Point3d &y, double &v_angle, double &h_angle, double &t_angle);
+	static void AnglesToAxes(const double &v_angle, const double &h_angle, const double &t_angle, Point3d &x, Point3d &y);
+	//static void GetAx2Properties(std::list<Property *> *list, Point3d& a, HeeksObj* object);
 	bool PickFrom3Points();
 	bool PickFrom1Point();
 };

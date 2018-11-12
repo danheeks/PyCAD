@@ -19,7 +19,7 @@ HArc::HArc(const HArc &line):EndedObject(){
 	operator=(line);
 }
 
-HArc::HArc(const geoff_geometry::Point3d &a, const geoff_geometry::Point3d &b, const geoff_geometry::Point3d &axis, const geoff_geometry::Point3d &c, const HeeksColor* col) : EndedObject(){
+HArc::HArc(const Point3d &a, const Point3d &b, const Point3d &axis, const Point3d &c, const HeeksColor* col) : EndedObject(){
 	A = a;
 	B = b;
 	C = c;
@@ -41,7 +41,7 @@ bool HArc::IsDifferent(HeeksObj* other)
 {
 	HArc* arc = (HArc*)other;
 
-	if(arc->C.Dist(C) > geoff_geometry::TOLERANCE || arc->m_radius != m_radius)
+	if(arc->C.Dist(C) > TOLERANCE || arc->m_radius != m_radius)
 		return true;
 
 	return EndedObject::IsDifferent(other);
@@ -159,20 +159,20 @@ void HArc::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 //d_angle - determines the direction and the ammount of the arc to draw
 void HArc::GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const
 {
-	if(A.Dist(B) < geoff_geometry::TOLERANCE){
+	if(A.Dist(B) < TOLERANCE){
 		return;
 	}
 
 
-	geoff_geometry::Point3d axis = m_axis;
-	geoff_geometry::Point3d x_axis, y_axis;
+	Point3d axis = m_axis;
+	Point3d x_axis, y_axis;
 	axis.arbitrary_axes(x_axis, y_axis);
-	geoff_geometry::Point3d centre = C;
+	Point3d centre = C;
 
-	double ax = geoff_geometry::Point3d(A - centre) * x_axis;
-	double ay = geoff_geometry::Point3d(A - centre) * y_axis;
-	double bx = geoff_geometry::Point3d(B - centre) * x_axis;
-	double by = geoff_geometry::Point3d(B - centre) * y_axis;
+	double ax = Point3d(A - centre) * x_axis;
+	double ay = Point3d(A - centre) * y_axis;
+	double bx = Point3d(B - centre) * x_axis;
+	double by = Point3d(B - centre) * y_axis;
 
 	double start_angle = atan2(ay, ax);
 	double end_angle = atan2(by, bx);
@@ -197,7 +197,7 @@ void HArc::GetSegments(void(*callbackfunc)(const double *p, bool start), double 
 
    for(int i = 0; i < segments + 1; i++)
     {
-		geoff_geometry::Point3d p = centre + x * x_axis + y * y_axis;
+		Point3d p = centre + x_axis * x + y_axis * y;
 		p.get(pp);
 		(*callbackfunc)(pp, start);
 
@@ -246,7 +246,7 @@ HeeksObj *HArc::MakeACopy(void)const{
 		return new_object;
 }
 
-void HArc::Transform(const geoff_geometry::Matrix& m){
+void HArc::Transform(const Matrix& m){
 	EndedObject::Transform(m);
 	m_axis = m_axis.Transformed(m);
 	C = C.Transformed(m);
@@ -257,34 +257,34 @@ void HArc::GetBox(CBox &box){
 	box.Insert(A.x, A.y, A.z);
 	box.Insert(B.x, B.y, B.z);
 
-	if(IsIncluded(geoff_geometry::Point3d(0,m_radius,0)))
+	if(IsIncluded(Point3d(0,m_radius,0)))
 		box.Insert(C.x,C.y+m_radius,C.z);
-	if(IsIncluded(geoff_geometry::Point3d(0,-m_radius,0)))
+	if(IsIncluded(Point3d(0,-m_radius,0)))
 		box.Insert(C.x,C.y-m_radius,C.z);
-	if(IsIncluded(geoff_geometry::Point3d(m_radius,0,0)))
+	if(IsIncluded(Point3d(m_radius,0,0)))
 		box.Insert(C.x+m_radius,C.y,C.z);
-	if(IsIncluded(geoff_geometry::Point3d(-m_radius,0,0)))
+	if(IsIncluded(Point3d(-m_radius,0,0)))
 		box.Insert(C.x-m_radius,C.y,C.z);
 }
 
-bool HArc::IsIncluded(geoff_geometry::Point3d pnt)
+bool HArc::IsIncluded(Point3d pnt)
 {
-	geoff_geometry::Point3d axis(m_axis);
-	geoff_geometry::Point3d x_axis, y_axis;
+	Point3d axis(m_axis);
+	Point3d x_axis, y_axis;
 	axis.arbitrary_axes(x_axis, y_axis);
-	geoff_geometry::Point3d centre = C;
+	Point3d centre = C;
 
-	double ax = geoff_geometry::Point3d(A - centre) * x_axis;
-	double ay = geoff_geometry::Point3d(A - centre) * y_axis;
-	double bx = geoff_geometry::Point3d(B - centre) * x_axis;
-	double by = geoff_geometry::Point3d(B - centre) * y_axis;
+	double ax = Point3d(A - centre) * x_axis;
+	double ay = Point3d(A - centre) * y_axis;
+	double bx = Point3d(B - centre) * x_axis;
+	double by = Point3d(B - centre) * y_axis;
 
 	double start_angle = atan2(ay, ax);
 	double end_angle = atan2(by, bx);
 
 	if(start_angle > end_angle)end_angle += 6.28318530717958;
 
-	double pnt_angle = atan2(geoff_geometry::Point3d(pnt) * y_axis, geoff_geometry::Point3d(pnt) * x_axis);
+	double pnt_angle = atan2(Point3d(pnt) * y_axis, Point3d(pnt) * x_axis);
 	if(pnt_angle >= start_angle && pnt_angle <= end_angle)
 		return true;
 	return false;
@@ -321,11 +321,11 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 
 	case LineType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(((HLine*)object)->GetLine(), GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(Intersects(pnt) && ((HLine*)object)->Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -337,11 +337,11 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 
 	case ILineType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(((HILine*)object)->GetLine(), GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -353,11 +353,11 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 
 	case ArcType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(GetCircle(), ((HArc*)object)->GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(Intersects(pnt) && ((HArc*)object)->Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -369,11 +369,11 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 
 	case CircleType:
 		{
-			std::list<geoff_geometry::Point3d> plist;
+			std::list<Point3d> plist;
 			intersect(GetCircle(), ((HCircle*)object)->GetCircle(), plist);
-			for(std::list<geoff_geometry::Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				geoff_geometry::Point3d& pnt = *It;
+				Point3d& pnt = *It;
 				if(Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -388,7 +388,7 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 	return numi;
 }
 
-bool HArc::Intersects(const geoff_geometry::Point3d &pnt)const
+bool HArc::Intersects(const Point3d &pnt)const
 {
 #if 0 // to do
 	if(!intersect(pnt, GetCircle()))return false;
@@ -405,17 +405,17 @@ bool HArc::Intersects(const geoff_geometry::Point3d &pnt)const
 		return false; // no size arc!
 	}
 
-	geoff_geometry::Point3d axis(C,m_axis.Direction());
-	geoff_geometry::Point3d x_axis = axis.XDirection();
-	geoff_geometry::Point3d y_axis = axis.YDirection();
-	geoff_geometry::Point3d centre = C;
+	Point3d axis(C,m_axis.Direction());
+	Point3d x_axis = axis.XDirection();
+	Point3d y_axis = axis.YDirection();
+	Point3d centre = C;
 
-	double ax = geoff_geometry::Point3d(A - centre) * x_axis;
-	double ay = geoff_geometry::Point3d(A - centre) * y_axis;
-	double bx = geoff_geometry::Point3d(B - centre) * x_axis;
-	double by = geoff_geometry::Point3d(B - centre) * y_axis;
-	double px = geoff_geometry::Point3d(pnt - centre) * x_axis;
-	double py = geoff_geometry::Point3d(pnt - centre) * y_axis;
+	double ax = Point3d(A - centre) * x_axis;
+	double ay = Point3d(A - centre) * y_axis;
+	double bx = Point3d(B - centre) * x_axis;
+	double by = Point3d(B - centre) * y_axis;
+	double px = Point3d(pnt - centre) * x_axis;
+	double py = Point3d(pnt - centre) * y_axis;
 
 	double start_angle = atan2(ay, ax);
 	double end_angle = atan2(by, bx);
@@ -432,14 +432,14 @@ bool HArc::Intersects(const geoff_geometry::Point3d &pnt)const
 #endif
 }
 
-bool HArc::FindNearPoint(const geoff_geometry::Line &ray, double *point){
+bool HArc::FindNearPoint(const Line &ray, double *point){
 #if 0 // to do
 	gp_Lin ray(make_point(ray_start), make_vector(ray_direction));
-	std::list< geoff_geometry::Point3d > rl;
+	std::list< Point3d > rl;
 	ClosestPointsLineAndCircle(ray, GetCircle(), rl);
 	if(rl.size()>0)
 	{
-		geoff_geometry::Point3d p = rl.front();
+		Point3d p = rl.front();
 		if(Intersects(p))
 		{
 			extract(p, point);
@@ -450,21 +450,21 @@ bool HArc::FindNearPoint(const geoff_geometry::Line &ray, double *point){
 	return false;
 }
 
-bool HArc::FindPossTangentPoint(const geoff_geometry::Line &ray, double *point){
+bool HArc::FindPossTangentPoint(const Line &ray, double *point){
 	// any point on this arc is a possible tangent point
 	return FindNearPoint(ray, point);
 }
 
 bool HArc::Stretch(const double *p, const double* shift, void* data){
 #if 0 // to do
-	geoff_geometry::Point3d vp = make_point(p);
-	geoff_geometry::Point3d vshift = make_vector(shift);
+	Point3d vp = make_point(p);
+	Point3d vshift = make_vector(shift);
 
 	if(A.IsEqual(vp, theApp.m_geom_tol)){
-		geoff_geometry::Point3d direction = -(GetSegmentVector(1.0));
-		geoff_geometry::Point3d centre;
-		geoff_geometry::Point3d axis;
-		geoff_geometry::Point3d new_A = geoff_geometry::Point3d(A + vshift);
+		Point3d direction = -(GetSegmentVector(1.0));
+		Point3d centre;
+		Point3d axis;
+		Point3d new_A = Point3d(A + vshift);
 		if(HArc::TangentialArc(B, direction, new_A, centre, axis))
 		{
 			m_axis = gp_Ax1(centre, -axis);
@@ -473,10 +473,10 @@ bool HArc::Stretch(const double *p, const double* shift, void* data){
 		}
 	}
 	else if(B.IsEqual(vp, theApp.m_geom_tol)){
-		geoff_geometry::Point3d direction = GetSegmentVector(0.0);
-		geoff_geometry::Point3d centre;
-		geoff_geometry::Point3d axis;
-		geoff_geometry::Point3d new_B = geoff_geometry::Point3d(B + vshift);
+		Point3d direction = GetSegmentVector(0.0);
+		Point3d centre;
+		Point3d axis;
+		Point3d new_B = Point3d(B + vshift);
 		if(HArc::TangentialArc(A, direction, new_B, centre, axis))
 		{
 			m_axis = gp_Ax1(centre, axis);
@@ -488,38 +488,38 @@ bool HArc::Stretch(const double *p, const double* shift, void* data){
 	return false;
 }
 
-bool HArc::GetCentrePoint(geoff_geometry::Point3d &pos)
+bool HArc::GetCentrePoint(Point3d &pos)
 {
 	pos = C;
 	return true;
 }
 
-geoff_geometry::Point3d HArc::GetSegmentVector(double fraction)const
+Point3d HArc::GetSegmentVector(double fraction)const
 {
-	geoff_geometry::Point3d centre = C;
-	geoff_geometry::Point3d p = GetPointAtFraction(fraction);
-	geoff_geometry::Point3d vp(centre, p);
-	geoff_geometry::Point3d vd = geoff_geometry::Point3d(m_axis) ^ vp;
+	Point3d centre = C;
+	Point3d p = GetPointAtFraction(fraction);
+	Point3d vp(centre, p);
+	Point3d vd = Point3d(m_axis) ^ vp;
 	vd.Normalize();
 	return vd;
 }
 
-geoff_geometry::Point3d HArc::GetPointAtFraction(double fraction)const
+Point3d HArc::GetPointAtFraction(double fraction)const
 {
 #if 0 // to do
 	if(A.IsEqual(B, theApp.m_geom_tol)){
 		return A;
 	}
 
-	geoff_geometry::Point3d axis(C,m_axis.Direction());
-	geoff_geometry::Point3d x_axis = axis.XDirection();
-	geoff_geometry::Point3d y_axis = axis.YDirection();
-	geoff_geometry::Point3d centre = C;
+	Point3d axis(C,m_axis.Direction());
+	Point3d x_axis = axis.XDirection();
+	Point3d y_axis = axis.YDirection();
+	Point3d centre = C;
 
-	double ax = geoff_geometry::Point3d(A - centre) * x_axis;
-	double ay = geoff_geometry::Point3d(A - centre) * y_axis;
-	double bx = geoff_geometry::Point3d(B - centre) * x_axis;
-	double by = geoff_geometry::Point3d(B - centre) * y_axis;
+	double ax = Point3d(A - centre) * x_axis;
+	double ay = Point3d(A - centre) * y_axis;
+	double bx = Point3d(B - centre) * x_axis;
+	double by = Point3d(B - centre) * y_axis;
 
 	double start_angle = atan2(ay, ax);
 	double end_angle = atan2(by, bx);
@@ -534,26 +534,26 @@ geoff_geometry::Point3d HArc::GetPointAtFraction(double fraction)const
 
 	return centre + x * x_axis + y * y_axis;
 #else
-	return geoff_geometry::Point3d(0, 0, 0);
+	return Point3d(0, 0, 0);
 #endif
 }
 
 //static
-bool HArc::TangentialArc(const geoff_geometry::Point3d &p0, const geoff_geometry::Point3d &v0, const geoff_geometry::Point3d &p1, geoff_geometry::Point3d &centre, geoff_geometry::Point3d &axis)
+bool HArc::TangentialArc(const Point3d &p0, const Point3d &v0, const Point3d &p1, Point3d &centre, Point3d &axis)
 {
 	// returns false if a straight line is needed
 	// else returns true and sets centre and axis
 	if(p0.Dist(p1) > 0.0000000001 && v0.magnitude() > 0.0000000001){
-		geoff_geometry::Point3d v1(p0, p1);
-		geoff_geometry::Point3d halfway(p0 + v1 * 0.5);
-		geoff_geometry::Plane pl1(halfway, v1);
-		geoff_geometry::Plane pl2(p0, v0);
-		geoff_geometry::Line plane_line;
+		Point3d v1(p0, p1);
+		Point3d halfway(p0 + v1 * 0.5);
+		Plane pl1(halfway, v1);
+		Plane pl2(p0, v0);
+		Line plane_line;
 		if(pl1.Intof(pl2, plane_line))
 		{
-			geoff_geometry::Line l1(halfway, v1);
-			geoff_geometry::Point3d unused_p2;
-			geoff_geometry::Line lshort;
+			Line l1(halfway, v1);
+			Point3d unused_p2;
+			Line lshort;
 			double t1, t2;
 			plane_line.Shortest(l1, lshort, t1, t2);
 			centre = lshort.p0;
@@ -582,7 +582,7 @@ void HArc::WriteXML(TiXmlNode *root)
 HeeksObj* HArc::ReadFromXMLElement(TiXmlElement* pElem)
 {
 	double axis[3];
-	geoff_geometry::Point3d centre(0,0,0);
+	Point3d centre(0,0,0);
 	HeeksColor c;
 
 	// get the attributes
@@ -615,11 +615,11 @@ HeeksObj* HArc::ReadFromXMLElement(TiXmlElement* pElem)
 		}
 	}
 
-	HArc* new_object = new HArc(geoff_geometry::Point3d(), geoff_geometry::Point3d(), geoff_geometry::Point3d(), geoff_geometry::Point3d(), &c);
+	HArc* new_object = new HArc(Point3d(), Point3d(), Point3d(), Point3d(), &c);
 	new_object->ReadBaseXML(pElem);
 
 	new_object->C = centre;
-	new_object->m_axis = geoff_geometry::Point3d(axis);
+	new_object->m_axis = Point3d(axis);
 	new_object->m_radius = centre.Dist(new_object->A);
 
 	return new_object;
@@ -627,7 +627,7 @@ HeeksObj* HArc::ReadFromXMLElement(TiXmlElement* pElem)
 
 void HArc::Reverse()
 {
-	geoff_geometry::Point3d temp = A;
+	Point3d temp = A;
 	A = B;
 	B = temp;
 	m_axis = -m_axis;
@@ -635,8 +635,8 @@ void HArc::Reverse()
 
 double HArc::IncludedAngle()const
 {
-	geoff_geometry::Point3d vs = GetSegmentVector(0.0);
-	geoff_geometry::Point3d ve = GetSegmentVector(1.0);
+	Point3d vs = GetSegmentVector(0.0);
+	Point3d ve = GetSegmentVector(1.0);
 
 	double inc_ang = vs * ve;
 	int dir = (this->m_axis.z > 0) ? 1:-1;

@@ -90,10 +90,10 @@ bool ConvertCurveToEdges(const CCurve& curve, std::vector<TopoDS_Edge> &edges)
 					BRep_Builder aBuilder;
 					TopoDS_Vertex start, end;
 
-					aBuilder.MakeVertex(start, gp_Pnt(span.m_p.x, span.m_p.y, 0.0), geoff_geometry::TOLERANCE);
+					aBuilder.MakeVertex(start, gp_Pnt(span.m_p.x, span.m_p.y, 0.0), TOLERANCE);
 					start.Orientation(TopAbs_REVERSED);
 
-					aBuilder.MakeVertex(end, gp_Pnt(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), geoff_geometry::TOLERANCE);
+					aBuilder.MakeVertex(end, gp_Pnt(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), TOLERANCE);
 					end.Orientation(TopAbs_FORWARD);
 
 					if (vertex.m_type == 0)
@@ -433,15 +433,15 @@ CSolid::CSolid(const CCurve& curve, double thickness)
 	}
 }
 
-void CSolid::Translate(const geoff_geometry::Vector3d& v)
+void CSolid::Translate(const Point3d& v)
 {
 	gp_Trsf mat;
-	mat.SetTranslationPart(gp_Vec(v.getx(), v.gety(), v.getz()));
+	mat.SetTranslationPart(gp_Vec(v.x, v.y, v.z));
 	BRepBuilderAPI_Transform myBRepTransformation(m_shape, mat);
 	m_shape = myBRepTransformation.Shape();
 }
 
-void CSolid::Transform(const geoff_geometry::Matrix& tm)
+void CSolid::Transform(const Matrix& tm)
 {
 	gp_Trsf mat;
 	const double* m = tm.e;
@@ -518,14 +518,14 @@ void CSolid::GetBox(CBox& box)const
 	box.m_valid = GetExtents(box.m_x, orig, xdir, ydir, zdir);
 }
 
-CSolid* CSolid::Extrusion(const geoff_geometry::Vector3d& v)const
+CSolid* CSolid::Extrusion(const Point3d& v)const
 {
 #if 0
 	std::list<TopoDS_Shape> faces_or_wires;
 	faces_or_wires.push_back(m_shape);
 
 	std::list<TopoDS_Shape> new_shapes;
-	CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(v.getx(), v.gety(), v.getz()), 0.0, true);
+	CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(v.x, v.y, v.z), 0.0, true);
 
 	if (new_shapes.size() > 0)
 	{

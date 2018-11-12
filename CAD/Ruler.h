@@ -28,12 +28,12 @@ class HRuler: public HeeksObj{
 	int m_gl_list;
 	int m_select_gl_list;
 
-	void GetFourCorners(geoff_geometry::Point3d *point);
+	void GetFourCorners(Point3d *point);
 	void CalculateMarks(std::list<RulerMark> &marks);
 	double GetUnits();
 
 public:
-	geoff_geometry::Matrix m_trsf; // position and orientation ( no scaling allowed )
+	Matrix m_trsf; // position and orientation ( no scaling allowed )
 	bool m_use_view_units;
 	double m_units; // used, if m_use_view_units == false; 1.0 for mm, 25.4 for inches
 	double m_width; // in mm
@@ -50,10 +50,10 @@ public:
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{return L"Ruler";}
 	HeeksObj *MakeACopy(void)const;
-	void Transform(const geoff_geometry::Matrix& m);
+	void Transform(const Matrix& m);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
-	bool GetScaleAboutMatrix(geoff_geometry::Matrix &m);
+	bool GetScaleAboutMatrix(Matrix &m);
 	bool CanBeRemoved(){return false;}
 	bool CanBeCopied(){return false;}
 
