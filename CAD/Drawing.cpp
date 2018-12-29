@@ -12,6 +12,7 @@
 #include "SelectMode.h"
 #include "DigitizeMode.h"
 #include "Viewport.h"
+#include "KeyEvent.h"
 
 Drawing::Drawing(void): m_getting_position(false), m_inhibit_coordinate_change(false){
 	null_view = new ViewSpecific(0);
@@ -118,14 +119,12 @@ void Drawing::OnMouse( MouseEvent& event )
 {
 	bool event_used = false;
 
-#if 0
 	if(LeftAndRightPressed(event, event_used))
 	{
 		if(DragDoneWithXOR())theApp.m_current_viewport->EndDrawFront();
 		ClearObjectsMade();
 		theApp.SetInputMode(theApp.m_select_mode);
 	}
-#endif
 
 	if(!event_used){
 		if(event.m_middleDown || event.GetWheelRotation() != 0)
@@ -169,19 +168,17 @@ void Drawing::OnMouse( MouseEvent& event )
 	}
 }
 
-#if 0
-void Drawing::OnKeyDown(wxKeyEvent& event)
+void Drawing::OnKeyDown(KeyEvent& event)
 {
-	switch(event.GetKeyCode()){
-	case WXK_F1:
-	case WXK_RETURN:
-	case WXK_ESCAPE:
+	switch (event.m_key_code){
+	case KeyCode::K_F1:
+	case KeyCode::K_RETURN:
+	case KeyCode::K_ESCAPE:
 		// end drawing mode
 		ClearObjectsMade();
 		theApp.SetInputMode(theApp.m_select_mode);
 	}
 }
-#endif
 
 bool Drawing::IsDrawing(CInputMode* i){
 	if(i == &line_strip)return true;

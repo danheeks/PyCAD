@@ -9,6 +9,9 @@ pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
 def OnMessageBox(error_message):
     wx.MessageBox(error_message)
+        
+def OnContextMenu():
+    wx.MessageBox('In OnContextMenu')
 
 class App(wx.App):
     def __init__(self):
@@ -82,5 +85,6 @@ class App(wx.App):
     def InitCad(self):
         result = cad.OnInit()
         cad.SetResFolder(pycad_dir)
+        cad.SetContextMenuCallback(OnContextMenu)
         return result
     

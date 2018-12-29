@@ -11,6 +11,7 @@ from HeeksConfig import HeeksConfig
 from Printout import Printout
 from PointDrawing import point_drawing
 import geom
+import Gear
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
@@ -45,6 +46,7 @@ class Frame(wx.Frame):
         self.aui_manager.Update()
         
         self.Bind(wx.EVT_MENU_RANGE, self.OnOpenRecent, id=self.ID_RECENT_FIRST, id2=self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES)
+        self.gears = []
         
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
@@ -563,7 +565,9 @@ class Frame(wx.Frame):
         cad.SetInputMode(point_drawing)
         
     def OnGear(self, e):
-        pass
+        gear = Gear.Gear(1.0, 12)
+        self.gears.append(gear)
+        cad.AddUndoably(gear, None, None)
         
     def OnText(self, e):
         pass

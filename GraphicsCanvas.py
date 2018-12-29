@@ -82,16 +82,6 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             self.tools.append(tool)
 
     def OnMouse(self, event):
-      if event.RightUp():
-         if self.context_menu_enabled:
-             tools = cad.GetDropDownTools(event.GetX(), event.GetY(), False, event.m_controlDown)
-             if len(tools) > 0:
-                self.next_tool_id = 0
-                self.tools = []
-                menu = wx.Menu()
-                self.AppendToolsToMenu(menu, tools)
-                self.PopupMenu(menu)
-      else:
         e = Mouse.MouseEventFromWx(event)
         if e.m_controlDown and e.m_event_type == 1:
             e.m_controlDown = False

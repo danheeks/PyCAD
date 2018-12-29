@@ -125,6 +125,7 @@
     <ClCompile Include="HXml.cpp" />
     <ClCompile Include="IdNamedObj.cpp" />
     <ClCompile Include="IdNamedObjList.cpp" />
+    <ClCompile Include="LeftAndRight.cpp" />
     <ClCompile Include="LineArcDrawing.cpp" />
     <ClCompile Include="MagDragWindow.cpp" />
     <ClCompile Include="MarkedList.cpp" />
@@ -197,7 +198,9 @@
     <ClInclude Include="IdNamedObjList.h" />
     <ClInclude Include="InputMode.h" />
     <ClInclude Include="IPoint.h" />
+    <ClInclude Include="KeyCode.h" />
     <ClInclude Include="KeyEvent.h" />
+    <ClInclude Include="LeftAndRight.h" />
     <ClInclude Include="LineArcDrawing.h" />
     <ClInclude Include="MagDragWindow.h" />
     <ClInclude Include="MarkedList.h" />

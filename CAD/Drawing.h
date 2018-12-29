@@ -5,7 +5,7 @@
 #pragma once
 
 #include "InputMode.h"
-//#include "LeftAndRight.h"
+#include "LeftAndRight.h"
 #include "DigitizedPoint.h"
 
 class HeeksObj;
@@ -24,7 +24,7 @@ public:
 	}
 };
 
-class Drawing: public CInputMode/*, CLeftAndRight*/{
+class Drawing: public CInputMode, CLeftAndRight{
 private:
 	std::list<HeeksObj*> m_temp_object_in_list;
 	HeeksObj* m_prev_object;
@@ -64,7 +64,7 @@ public:
 
 	// InputMode's virtual functions
 	void OnMouse( MouseEvent& event );
-//	void OnKeyDown(wxKeyEvent& event);
+	void OnKeyDown(KeyEvent& event);
 	bool OnModeChange(void);
 	void GetProperties(std::list<Property *> *list);
 	void OnFrontRender();
