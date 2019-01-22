@@ -613,13 +613,6 @@ bool SaveObjects(std::wstring fp, bp::list &list)
 	return theApp.SaveFile(fp.c_str(), &o_list);
 }
 
-static std::list<PyObject*> new_or_open_callbacks;
-
-void RegisterNewOrOpen(PyObject *callback)
-{
-	new_or_open_callbacks.push_back(callback);
-}
-
 void RegisterObserver(Observer* observer)
 {
 	theApp.RegisterObserver(observer);
@@ -950,8 +943,7 @@ int GetTypeFromHeeksObj(const HeeksObj* object)
 
 int BaseObjectGetType(const HeeksObj& object)
 {
-	return GetTypeFromHeeksObj(&object);
-	//return object.GetType();
+	return PythonType;
 }
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
@@ -966,10 +958,10 @@ std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 	return std::wstring(s);
 }
 
-std::wstring BaseObjectGetTitle(const HeeksObj& object)
+std::wstring BaseObjectGetTitle(const BaseObject& object)
 {
-	return GetTitleFromHeeksObj(&object);
-	//return object.GetShortString();
+	//return GetTitleFromHeeksObj(&object);
+	return object.GetShortString();
 }
 
 unsigned int BaseObjectGetID(BaseObject& object)
@@ -1574,10 +1566,12 @@ void DeleteUndoably(HeeksObj *object)
 	theApp.DeleteUndoably(object);
 }
 
-void AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object)
+void AddUndoably(HeeksObj *object, HeeksObj* owner = NULL, HeeksObj* prev_object = NULL)
 {
 	theApp.AddUndoably(object, owner, prev_object);
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(AddUndoablyOverloads, AddUndoably, 1, 3)
 
 void DoUndoable(Undoable* undoable)
 {
@@ -2115,7 +2109,6 @@ double GetUnits()
 		bp::def("Import", CadImport);
 		bp::def("SaveFile", CadSaveFile);
 		bp::def("SaveObjects", SaveObjects);		
-		bp::def("RegisterNewOrOpen", RegisterNewOrOpen);
 		bp::def("DrawTriangle", &DrawTriangle);
 		bp::def("DrawLine", &DrawLine);
 		bp::def("AddProperty", AddProperty);
@@ -2148,7 +2141,10 @@ double GetUnits()
 		bp::def("RollBack", RollBack);
 		bp::def("RollForward", RollForward);
 		bp::def("DeleteUndoably", DeleteUndoably);
-		bp::def("AddUndoably", AddUndoably);
+		bp::def("AddUndoably", &AddUndoably, AddUndoablyOverloads(
+			(bp::arg("object"),
+			bp::arg("owner") = NULL,
+			bp::arg("prev_object") = NULL)));
 		bp::def("DoUndoable", DoUndoable);
 		bp::def("ShiftSelect", ShiftSelect);
 		bp::def("ChangePropertyString", ChangePropertyString);
@@ -2175,6 +2171,7 @@ double GetUnits()
 		bp::def("SetEllipseDrawing", SetEllipseDrawing);
 		bp::def("SetILineDrawing", SetILineDrawing);
 		bp::def("NewPoint", NewPoint, bp::return_value_policy<bp::reference_existing_object>());
+
 
 		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)OBJECT_TYPE_UNKNOWN;
 		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)OBJECT_TYPE_SKETCH;

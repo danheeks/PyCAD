@@ -37,9 +37,15 @@ class App(wx.App):
         self.frame = self.NewFrame()
         self.frame.Show()
         self.LoadConfig()
+        self.OnNewOrOpen(False)
+        cad.ClearHistory()
+        cad.SetLikeNewFile()
         self.frame.SetFrameTitle()
         
         return result
+    
+    def OnNewOrOpen(self, open):
+        pass
     
     def NewFrame(self):
         return Frame(None)

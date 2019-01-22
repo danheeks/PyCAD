@@ -195,7 +195,7 @@ class Frame(wx.Frame):
         res = self.CheckForModifiedDoc()
         if res != wx.CANCEL:
             cad.Reset()
-            # self.OnNewOrOpen(True, res)
+            wx.GetApp().OnNewOrOpen(False)
             cad.ClearHistory()
             cad.SetLikeNewFile()
             wx.GetApp().filepath = None
@@ -230,7 +230,7 @@ class Frame(wx.Frame):
             cad.Reset()
             if cad.OpenFile(filepath):
                 self.DoFileOpenViewMag()
-                # self.OnNewOrOpen(True, res)
+                wx.GetApp().OnNewOrOpen(True)
                 cad.ClearHistory()
                 cad.SetLikeNewFile()
                 wx.GetApp().filepath = filepath
