@@ -70,15 +70,6 @@ public:
 	bool GetBool(void)const{ return *m_pvar; }
 };
 
-class PropertyCheckWithConfig : public PropertyCheck
-{
-	const wchar_t* m_config_name;
-public:
-	PropertyCheckWithConfig(HeeksObj* object, const wchar_t* title, bool* pvar, const wchar_t* config_name) :PropertyCheck(object, title, pvar), m_config_name(config_name){}
-	void Set(bool value);
-	Property *MakeACopy(void)const;
-};
-
 class PropertyChoice :public Property{
 protected:
 	int* m_pvar;
@@ -174,15 +165,6 @@ public:
 	const wchar_t* GetString()const{ return m_value.c_str(); }
 };
 
-class PropertyStringWithConfig : public PropertyString
-{
-	const wchar_t* m_config_name;
-public:
-	PropertyStringWithConfig(HeeksObj* object, const wchar_t* title, std::wstring* pvar, const wchar_t* config_name) :PropertyString(object, title, pvar), m_config_name(config_name){}
-	void Set(const wchar_t* value);
-	Property *MakeACopy(void)const;
-};
-
 class PropertyFile :public PropertyString{
 public:
 	PropertyFile(HeeksObj* object, const wchar_t* title, std::wstring* pvar) :PropertyString(object, title, pvar){}
@@ -213,15 +195,6 @@ public:
 	PropertyLength(HeeksObj* object, const wchar_t* title, const double* pvar) :PropertyDouble(object, title, pvar){}
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	Property *MakeACopy(void)const;
-};
-
-class PropertyLengthWithConfig : public PropertyLength
-{
-	const wchar_t* m_config_name;
-public:
-	PropertyLengthWithConfig(HeeksObj* object, const wchar_t* title, double* pvar, const wchar_t* config_name) :PropertyLength(object, title, pvar), m_config_name(config_name){}
-	void Set(double value);
 	Property *MakeACopy(void)const;
 };
 

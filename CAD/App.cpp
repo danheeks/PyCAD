@@ -141,8 +141,6 @@ CApp::CApp()
 		RegisterFileOpenHandler(extensions, OpenSTLFile);
 	}
 
-	RegisterHeeksTypesConverter(HeeksCADType);
-
 	InitializeXMLFunctions();
 
 	m_settings_restored = false;
@@ -151,6 +149,7 @@ CApp::CApp()
 	m_settings_restored = false;
 
 	m_current_viewport = NULL;
+	m_gl_font_initialized = false;
 }
 
 CApp::~CApp()
@@ -169,212 +168,7 @@ CApp::~CApp()
 	delete m_ruler;
 }
 
-bool CApp::OnInit()
-{
-	m_gl_font_initialized = false;
-
-	int width = 996;
-	int height = 691;
-	int posx = 200;
-	int posy = 200;
-	HeeksConfig config;
-#if 0
-	config.Read(_T("MainFrameWidth"), &width);
-	config.Read(_T("MainFrameHeight"), &height);
-	config.Read(_T("MainFramePosX"), &posx);
-	config.Read(_T("MainFramePosY"), &posy);
-	if (posx < 0)posx = 0;
-	if (posy < 0)posy = 0;
-	config.Read(_T("DrawEnd"), &digitize_end, false);
-	config.Read(_T("DrawInters"), &digitize_inters, false);
-	config.Read(_T("DrawCentre"), &digitize_centre, false);
-	config.Read(_T("DrawMidpoint"), &digitize_midpoint, false);
-	config.Read(_T("DrawNearest"), &digitize_nearest, false);
-	config.Read(_T("DrawTangent"), &digitize_tangent, false);
-	config.Read(_T("DrawCoords"), &digitize_coords, true);
-	config.Read(_T("DrawScreen"), &digitize_screen, false);
-	config.Read(_T("DrawToGrid"), &draw_to_grid, true);
-	config.Read(_T("UseOldFuse"), &useOldFuse, false);
-	config.Read(_T("DrawGrid"), &digitizing_grid);
-	config.Read(_T("DrawRadius"), &digitizing_radius);
-	{
-		long default_color[NUM_BACKGROUND_COLORS] = {
-			HeeksColor(187, 233, 255).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color(),
-			HeeksColor(247, 198, 243).COLORREF_color(),
-			HeeksColor(193, 235, 236).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color(),
-			HeeksColor(255, 255, 255).COLORREF_color()
-		};
-
-		for (int i = 0; i<NUM_BACKGROUND_COLORS; i++)
-		{
-			wchar_t key[20] = _T("");
-			wsprintf(key, _T("BackgroundColor%d"), i);
-			int color = default_color[i];
-			config.Read(key, &color);
-			background_color[i] = HeeksColor((long)color);
-		}
-		int mode = (int)BackgroundModeTwoColors;
-		config.Read(_T("BackgroundMode"), &mode);
-		m_background_mode = (BackgroundMode)mode;
-	}
-
-	{
-		wchar_t str[32];
-		config.Read(_T("CurrentColor"), str, _T("0 0 0"));
-		int r = 0, g = 0, b = 0;
-		swscanf(str, _T("%d %d %d"), &r, &g, &b);
-		current_color = HeeksColor((unsigned char)r, (unsigned char)g, (unsigned char)b);
-	}
-	config.Read(_T("RotateMode"), &m_rotate_mode);
-	config.Read(_T("Antialiasing"), &m_antialiasing);
-	config.Read(_T("GridMode"), &grid_mode);
-	config.Read(_T("m_light_push_matrix"), &m_light_push_matrix);
-	config.Read(_T("WheelForwardAway"), &mouse_wheel_forward_away);
-	config.Read(_T("ZoomingReversed"), &ViewZooming::m_reversed);
-	config.Read(_T("CtrlDoesRotate"), &ctrl_does_rotate);
-	config.Read(_T("DrawDatum"), &m_show_datum_coords_system, true);
-	config.Read(_T("DrawDatumSolid"), &m_datum_coords_system_solid_arrows, true);
-	config.Read(_T("DatumSize"), &CoordinateSystem::size, 30);
-	config.Read(_T("DatumSizeIsPixels"), &CoordinateSystem::size_is_pixels, true);
-	config.Read(_T("DrawRuler"), &m_show_ruler, false);
-	config.Read(_T("RegularShapesMode"), (int*)(&(regular_shapes_drawing.m_mode)));
-	config.Read(_T("RegularShapesNSides"), &(regular_shapes_drawing.m_number_of_side_for_polygon));
-	config.Read(_T("RegularShapesRectRad"), &(regular_shapes_drawing.m_rect_radius));
-	config.Read(_T("RegularShapesObRad"), &(regular_shapes_drawing.m_obround_radius));
-	config.Read(_T("ExtrudeRemovesSketches"), &m_extrude_removes_sketches, true);
-	config.Read(_T("LoftRemovesSketches"), &m_loft_removes_sketches, true);
-	config.Read(_T("GraphicsTextMode"), (int*)(&m_graphics_text_mode), GraphicsTextModeWithHelp);
-
-	config.Read(_T("DxfMakeSketch"), &HeeksDxfRead::m_make_as_sketch, true);
-	config.Read(_T("DxfIgnoreErrors"), &HeeksDxfRead::m_ignore_errors, false);
-
-	config.Read(_T("ViewUnits"), &m_view_units);
-	config.Read(_T("STLFacetTolerance"), &m_stl_facet_tolerance, 0.1);
-	config.Read(_T("FitArcsOnSolidOutline"), &m_fit_arcs_on_solid_outline);
-	config.Read(_T("SolidViewMode"), (int*)(&m_solid_view_mode), 0);
-
-	config.Read(_T("DraggingMovesObjects"), &m_dragging_moves_objects, true);
-	config.Read(_T("STLSaveBinary"), &m_stl_save_as_binary, true);
-	config.Read(_T("MouseMoveHighlighting"), &m_mouse_move_highlighting, true);
-	{
-		int color = HeeksColor(128, 255, 0).COLORREF_color();
-		config.Read(_T("HighlightColor"), &color);
-		m_highlight_color = HeeksColor((long)color);
-	}
-	config.Read(_T("SketchReorderTolerance"), &m_sketch_reorder_tol, 0.01);
-	config.Read(_T("StlSolidRandomColors"), &m_stl_solid_random_colors, false);
-	config.Read(_T("SvgUnite"), &m_svg_unite, true);
-
-	HDimension::ReadFromConfig(config);
-#endif
-
-	m_ruler->ReadFromConfig(config);
-
-	m_current_viewport = NULL;
-
-	// NOTE: A side-effect of calling the SetInputMode() method is
-	// that the GetOptions() method is called.  To that end, all
-	// configuration settings should be read BEFORE this point.
-	SetInputMode(m_select_mode);
-
-		{
-			OnNewOrOpen(false, 0x08);
-			ClearHistory();
-			SetLikeNewFile();
-//			SetFrameTitle();
-		}
-
-	return true;
-}
-
-
-void CApp::WriteConfig()
-{
-	HeeksConfig config;
-#if 0
-	config.Write(_T("DrawEnd"), digitize_end);
-	config.Write(_T("DrawInters"), digitize_inters);
-	config.Write(_T("DrawCentre"), digitize_centre);
-	config.Write(_T("DrawMidpoint"), digitize_midpoint);
-	config.Write(_T("DrawNearest"), digitize_nearest);
-	config.Write(_T("DrawTangent"), digitize_tangent);
-	config.Write(_T("DrawCoords"), digitize_coords);
-	config.Write(_T("DrawScreen"), digitize_screen);
-	config.Write(_T("DrawToGrid"), draw_to_grid);
-	config.Write(_T("UseOldFuse"), useOldFuse);
-	config.Write(_T("DrawGrid"), digitizing_grid);
-	config.Write(_T("DrawRadius"), digitizing_radius);
-	for (int i = 0; i<NUM_BACKGROUND_COLORS; i++)
-	{
-		std::wstring key = std::wstring::Format(_T("BackgroundColor%d"), i);
-		config.Write(key, background_color[i].COLORREF_color());
-	}
-	config.Write(_T("BackgroundMode"), (int)m_background_mode);
-	config.Write(_T("FaceSelectionColor"), face_selection_color.COLORREF_color());
-	config.Write(_T("CurrentColor"), std::wstring::Format(_T("%d %d %d"), current_color.red, current_color.green, current_color.blue));
-	config.Write(_T("RotateMode"), m_rotate_mode);
-	config.Write(_T("Antialiasing"), m_antialiasing);
-	config.Write(_T("GridMode"), grid_mode);
-	config.Write(_T("m_light_push_matrix"), m_light_push_matrix);
-	config.Write(_T("WheelForwardAway"), mouse_wheel_forward_away);
-	config.Write(_T("ZoomingReversed"), ViewZooming::m_reversed);
-	config.Write(_T("CtrlDoesRotate"), ctrl_does_rotate);
-	config.Write(_T("DrawDatum"), m_show_datum_coords_system);
-	config.Write(_T("DrawDatumSolid"), m_show_datum_coords_system);
-	config.Write(_T("DatumSize"), CoordinateSystem::size);
-	config.Write(_T("DatumSizeIsPixels"), CoordinateSystem::size_is_pixels);
-	config.Write(_T("DrawRuler"), m_show_ruler);
-	config.Write(_T("RegularShapesMode"), (int)(regular_shapes_drawing.m_mode));
-	config.Write(_T("RegularShapesNSides"), regular_shapes_drawing.m_number_of_side_for_polygon);
-	config.Write(_T("RegularShapesRectRad"), regular_shapes_drawing.m_rect_radius);
-	config.Write(_T("RegularShapesObRad"), regular_shapes_drawing.m_obround_radius);
-	config.Write(_T("ExtrudeRemovesSketches"), m_extrude_removes_sketches);
-	config.Write(_T("LoftRemovesSketches"), m_loft_removes_sketches);
-	config.Write(_T("GraphicsTextMode"), (int)m_graphics_text_mode);
-	config.Write(_T("DxfMakeSketch"), HeeksDxfRead::m_make_as_sketch);
-	config.Write(_T("DxfIgnoreErrors"), HeeksDxfRead::m_ignore_errors);
-	config.Write(_T("FaceToSketchDeviation"), FaceToSketchTool::deviation);
-
-	config.Write(_T("MinCorrelationFactor"), m_min_correlation_factor);
-	config.Write(_T("MaxScaleThreshold"), m_max_scale_threshold);
-	config.Write(_T("NumberOfSamplePoints"), m_number_of_sample_points);
-	config.Write(_T("CorrelateByColor"), m_correlate_by_color);
-
-#ifndef WIN32
-	config.Write(_T("FontPaths"), m_font_paths);
-#endif
-	config.Write(_T("STLFacetTolerance"), m_stl_facet_tolerance);
-	config.Write(_T("AutoSaveInterval"), m_auto_save_interval);
-	config.Write(_T("ExtrudeToSolid"), m_extrude_to_solid);
-	config.Write(_T("RevolveAngle"), m_revolve_angle);
-	config.Write(_T("FitArcsOnSolidOutline"), m_fit_arcs_on_solid_outline);
-	config.Write(_T("SolidViewMode"), (int)m_solid_view_mode);
-	config.Write(_T("STLSaveBinary"), m_stl_save_as_binary);
-
-	config.Write(_T("MouseMoveHighlighting"), m_mouse_move_highlighting);
-	config.Write(_T("HighlightColor"), m_highlight_color.COLORREF_color());
-	config.Write(_T("StlSolidRandomColors"), m_stl_solid_random_colors);
-
-	config.Write(_T("IgesSewingTolerance"), m_iges_sewing_tolerance);
-	config.Write(_T("SvgUnite"), m_svg_unite);
-
-	HDimension::WriteToConfig(config);
-
-	m_ruler->WriteToConfig(config);
-
-	WriteRecentFilesProfileString(config);
-#endif
-}
-
 void CApp::OnExit(){
-	WriteConfig();
-
 	delete history;
 	history = NULL;
 }
@@ -2609,73 +2403,6 @@ void CApp::UnregisterUnitsChangeHandler(void(*units_changed_handler)(const doubl
 }
 
 
-void CApp::RegisterHeeksTypesConverter(std::wstring(*converter)(const int type))
-{
-	m_heeks_types_converters.push_back(converter);
-}
-
-void CApp::UnregisterHeeksTypesConverter(std::wstring(*converter)(const int type))
-{
-	for (HeeksTypesConverters_t::iterator itConverter = m_heeks_types_converters.begin(); itConverter != m_heeks_types_converters.end(); /* increment within loop */)
-	{
-		if (converter == *itConverter)
-		{
-			itConverter = m_heeks_types_converters.erase(itConverter);
-		}
-		else
-		{
-			itConverter++;
-		}
-	}
-}
-
-std::wstring HeeksCADType(const int type)
-{
-	switch (type)
-	{
-	case UnknownType:   return(L"Unknown");
-	case DocumentType:   return(L"Document");
-	case PointType:   return(L"Point");
-	case LineType:   return(L"Line");
-	case ArcType:   return(L"Arc");
-	case ILineType:   return(L"ILine");
-	case CircleType:   return(L"Circle");
-	case GripperType:   return(L"Gripper");
-	case StlSolidType:   return(L"StlSolid");
-	case SketchType:   return(L"Sketch");
-	case ImageType:   return(L"Image");
-	case CoordinateSystemType:   return(L"CoordinateSystem");
-	case TextType:   return(L"Text");
-	case DimensionType:   return(L"Dimension");
-	case RulerType:   return(L"Ruler");
-	case XmlType:   return(L"Xml");
-	case EllipseType:   return(L"Ellipse");
-	case GroupType:   return(L"Group");
-	case AngularDimensionType:   return(L"AngularDimension");
-	case ObjectMaximumType:   return(L"ObjectMaximum");
-	default:    return(L""); // Indicate that this routine could not find a conversion.
-	} // End switch
-} // End HeeksCADType() routine
-
-
-std::wstring CApp::HeeksType(const int type) const
-{
-
-	for (HeeksTypesConverters_t::const_iterator itConverter = m_heeks_types_converters.begin(); itConverter != m_heeks_types_converters.end(); itConverter++)
-	{
-		std::wstring result = (*itConverter)(type);
-		if (result.size() > 0)
-		{
-			return(result);
-		}
-	}
-
-	wchar_t buf[32];
-	swprintf(buf, 32, L"%d", type);
-	return std::wstring(buf);
-}
-
-
 unsigned int CApp::GetIndex(HeeksObj *object)
 {
 	return m_marked_list->GetIndex(object);
@@ -2686,21 +2413,3 @@ void CApp::ReleaseIndex(unsigned int index)
 {
 	if (m_marked_list)m_marked_list->ReleaseIndex(index);
 }
-
-void CApp::RegisterOnRestoreDefaults(void(*callbackfunc)())
-{
-	m_on_restore_defaults_callbacks.push_back(callbackfunc);
-}
-
-void CApp::RestoreDefaults()
-{
-	HeeksConfig config;
-	config.DeleteAll();
-	for (std::list< void(*)() >::iterator It = m_on_restore_defaults_callbacks.begin(); It != m_on_restore_defaults_callbacks.end(); It++)
-	{
-		void(*callbackfunc)() = *It;
-		(*callbackfunc)();
-	}
-	theApp.m_settings_restored = true;
-}
-

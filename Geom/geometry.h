@@ -207,6 +207,7 @@ public:
 	const Point operator/(double d)const{ return Point(x / d, y / d); }
 	bool operator==(const Point& p)const{ return fabs(x - p.x)<TOLERANCE && fabs(y - p.y)<TOLERANCE; }
 	bool operator!=(const Point &p)const{ return !(*this == p); }
+
 	double dist(const Point &p)const{ double dx = p.x - x; double dy = p.y - y; return sqrt(dx*dx + dy*dy); }
 	double Dist(const Point &p)const{ double dx = p.x - x; double dy = p.y - y; return sqrt(dx*dx + dy*dy); }
 	double length()const;
@@ -229,6 +230,7 @@ public:
 	Point Transformed(const Matrix& m);
 };
 const Point operator*(const double &d, const Point &p);
+ostream & operator<<(ostream &os, const Point &);
 
 // 3d point class
 class Point3d {
@@ -297,6 +299,8 @@ public:
 	void arbitrary_axes(Point3d& x, Point3d& y)const;
 
 };
+
+ostream & operator<<(ostream &os, const Point3d &);
 
 #define ORIGIN Point3d(0,0,0)
 #define NULL_VECTOR Point3d(0,0,0)

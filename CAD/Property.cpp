@@ -5,7 +5,6 @@
 #include "stdafx.h"
 
 #include "Property.h"
-#include "HeeksConfig.h"
 
 Property::Property(const Property& rhs) : m_editable(false), m_highlighted(false), m_object(NULL)
 {
@@ -32,19 +31,6 @@ PropertyCheck::~PropertyCheck()
 	int a = 0;
 	a = 3;
 }
-
-void PropertyCheckWithConfig::Set(bool value)
-{
-	PropertyCheck::Set(value);
-	HeeksConfig config;
-	config.Write(m_config_name, theApp.m_sketch_reorder_tol);
-}
-
-Property *PropertyCheckWithConfig::MakeACopy(void)const
-{
-	return new PropertyCheckWithConfig(*this);
-}
-
 
 Property *PropertyChoice::MakeACopy(void)const{
 	PropertyChoice* new_object = new PropertyChoice(*this);
@@ -81,19 +67,6 @@ Property *PropertyLength::MakeACopy(void)const{
 	return new_object;
 }
 
-void PropertyLengthWithConfig::Set(double value)
-{
-	PropertyLength::Set(value);
-	HeeksConfig config;
-	config.Write(m_config_name, *m_pvar);
-}
-
-Property *PropertyLengthWithConfig::MakeACopy(void)const{
-	PropertyLength* new_object = new PropertyLengthWithConfig(*this);
-	return new_object;
-}
-
-
 Property *PropertyList::MakeACopy(void)const{
 	PropertyList* new_object = new PropertyList(*this);
 	return new_object;
@@ -107,18 +80,6 @@ Property *PropertyString::MakeACopy(void)const{
 Property *PropertyStringReadOnly::MakeACopy(void)const{
 	PropertyStringReadOnly* new_object = new PropertyStringReadOnly(*this);
 	return new_object;
-}
-
-Property *PropertyStringWithConfig::MakeACopy(void)const{
-	PropertyStringWithConfig* new_object = new PropertyStringWithConfig(*this);
-	return new_object;
-}
-
-void PropertyStringWithConfig::Set(const wchar_t* value)
-{
-	PropertyString::Set(value);
-	HeeksConfig config;
-	config.Write(m_config_name, theApp.m_sketch_reorder_tol);
 }
 
 PropertyList* PropertyVertex(HeeksObj* object, const wchar_t* title, double* x)

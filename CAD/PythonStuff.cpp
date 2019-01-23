@@ -51,11 +51,6 @@
 
 namespace bp = boost::python;
 
-bool OnInit()
-{
-	return theApp.OnInit();
-}
-
 void OnExit()
 {
 	theApp.OnExit();
@@ -212,60 +207,18 @@ struct PyLockGIL
 	PyGILState_STATE gstate;
 };
 
-enum
-{
-	OBJECT_TYPE_UNKNOWN = 0,
-	OBJECT_TYPE_SOLID,
-	OBJECT_TYPE_SKETCH,
-	OBJECT_TYPE_SKETCH_CONTOUR,
-	OBJECT_TYPE_SKETCH_SEG,
-	OBJECT_TYPE_SKETCH_LINE,
-	OBJECT_TYPE_SKETCH_ARC,
-	OBJECT_TYPE_CIRCLE,
-	OBJECT_TYPE_POINT,
-};
-
-int HeeksTypeToObjectType(long type)
-{
-	switch (type)
-	{
-	case StlSolidType:
-		return OBJECT_TYPE_SOLID;
-	case SketchType:
-		return OBJECT_TYPE_SKETCH;
-	default:
-		return OBJECT_TYPE_UNKNOWN;
-	}
-}
-
-int ObjectTypeToHeeksType(long type)
-{
-	switch (type)
-	{
-	case OBJECT_TYPE_SKETCH:
-		return SketchType;
-	default:
-		return UnknownType;
-	}
-}
-
 void AddPropertyToPythonList(Property* p, boost::python::list& list)
 {
-	if (PropertyCheck* o = dynamic_cast<PropertyCheck*>(p)){
-		list.append(boost::python::ptr<Property*>(p)); return;
-	}
-	if (PropertyCheckWithConfig* o = dynamic_cast<PropertyCheckWithConfig*>(p)){ list.append(o); return; }
+	if (PropertyCheck* o = dynamic_cast<PropertyCheck*>(p)){ list.append(boost::python::ptr<Property*>(p)); return;	}
 	if (PropertyChoice* o = dynamic_cast<PropertyChoice*>(p)){ list.append(o); return; }
 	if (PropertyColor* o = dynamic_cast<PropertyColor*>(p)){ list.append(o); return; }
 	if (PropertyDoubleScaled* o = dynamic_cast<PropertyDoubleScaled*>(p)){ list.append(o); return; }
 	if (PropertyDoubleLimited* o = dynamic_cast<PropertyDoubleLimited*>(p)){ list.append(o); return; }
 	if (PropertyString* o = dynamic_cast<PropertyString*>(p)){ list.append(o); return; }
 	if (PropertyStringReadOnly* o = dynamic_cast<PropertyStringReadOnly*>(p)){ list.append(o); return; }
-	if (PropertyStringWithConfig* o = dynamic_cast<PropertyStringWithConfig*>(p)){ list.append(o); return; }
 	if (PropertyFile* o = dynamic_cast<PropertyFile*>(p)){ list.append(o); return; }
 	if (PropertyInt* o = dynamic_cast<PropertyInt*>(p)){ list.append(o); return; }
 	if (PropertyLength* o = dynamic_cast<PropertyLength*>(p)){ list.append(o); return; }
-	if (PropertyLengthWithConfig* o = dynamic_cast<PropertyLengthWithConfig*>(p)){ list.append(o); return; }
 	if (PropertyLengthWithKillGLLists* o = dynamic_cast<PropertyLengthWithKillGLLists*>(p)){ list.append(o); return; }
 	if (PropertyList* o = dynamic_cast<PropertyList*>(p)){ list.append(o); return; }
 	if (PropertyObjectTitle* o = dynamic_cast<PropertyObjectTitle*>(p)){ list.append(o); return; }
@@ -888,34 +841,7 @@ public:
 		}
 		WriteBaseXML(BaseObject::m_cur_element);
 	}
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem)
-	{
-#if 0
-		to do
-		Point3d p;
-		HeeksColor c;
-
-		// get the attributes
-		for (TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-		{
-			std::string name(a->Name());
-			if (name == "col"){ c = HeeksColor((long)(a->IntValue())); }
-			else if (name == "x"){ p.SetX(a->DoubleValue()); }
-			else if (name == "y"){ p.SetY(a->DoubleValue()); }
-			else if (name == "z"){ p.SetZ(a->DoubleValue()); }
-		}
-
-		HPoint* new_object = new HPoint(p, &c);
-		new_object->ReadBaseXML(pElem);
-
-		return new_object;
-#else
-		return NULL;
-#endif
-	}
 };
-
 
 // static definitions
 bool BaseObject::in_glCommands = false;
@@ -923,23 +849,6 @@ bool BaseObject::triangles_begun = false;
 bool BaseObject::lines_begun = false;
 TiXmlElement* BaseObject::m_cur_element = NULL;
 
-
-int GetTypeFromHeeksObj(const HeeksObj* object)
-{
-	switch (object->GetType())
-	{
-	case SketchType:
-		return (int)OBJECT_TYPE_SKETCH;
-	case CircleType:
-		return (int)OBJECT_TYPE_CIRCLE;
-	case StlSolidType:
-		return (int)OBJECT_TYPE_SOLID;
-	case PointType:
-		return (int)OBJECT_TYPE_POINT;
-	default:
-		return object->GetType();
-	}
-}
 
 int BaseObjectGetType(const HeeksObj& object)
 {
@@ -960,7 +869,6 @@ std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 
 std::wstring BaseObjectGetTitle(const BaseObject& object)
 {
-	//return GetTitleFromHeeksObj(&object);
 	return object.GetShortString();
 }
 
@@ -984,12 +892,6 @@ int PropertyGetInt(Property& property)
 	return property.GetInt();
 }
 
-
-int HeeksObjGetType(const HeeksObj& object)
-{
-	return GetTypeFromHeeksObj(&object);
-	//return object.GetType();
-}
 
 std::wstring HeeksObjGetTitle(const HeeksObj& object)
 {
@@ -1317,7 +1219,7 @@ bp::object GetObjectFromId(int type, int id) {
 	// this returns a list with the object in, because that works
 	// but it should just return an object
 	boost::python::list olist;
-	HeeksObj* object = theApp.GetIDObject(ObjectTypeToHeeksType(type), id);
+	HeeksObj* object = theApp.GetIDObject(type, id);
 	if (object != NULL)
 	{
 		AddObjectToPythonList(object, olist);
@@ -1721,6 +1623,11 @@ double GetUnits()
 	return theApp.m_view_units;
 }
 
+void PyIncref(PyObject* object)
+{
+	Py_IncRef(object);
+}
+
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
 			.def("GetType", &BaseObjectGetType)
@@ -1744,7 +1651,7 @@ double GetUnits()
 
 		bp::class_<HeeksObj, boost::noncopyable>("Object")
 			.def(bp::init<HeeksObj>())
-			.def("GetType", &HeeksObjGetType)
+			.def("GetType", &HeeksObj::GetType)
 			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
 			.def("GetID", &HeeksObj::GetID)
 			.def("GetIndex", &HeeksObj::GetIndex)
@@ -1828,7 +1735,6 @@ double GetUnits()
 			;
 
 		bp::class_<PropertyCheck, boost::noncopyable, bp::bases<Property>>("PropertyCheck", boost::python::no_init);
-		bp::class_<PropertyCheckWithConfig, bp::bases<PropertyCheck>>("PropertyCheckWithConfig", boost::python::no_init);
 		bp::class_<PropertyChoice, bp::bases<Property>>("PropertyChoice", boost::python::no_init);
 		bp::class_<PropertyColor, bp::bases<Property>>("PropertyColor", boost::python::no_init);
 		bp::class_<PropertyDouble, bp::bases<Property>>("PropertyDouble", boost::python::no_init);
@@ -1837,11 +1743,9 @@ double GetUnits()
 		bp::class_<PropertyDoubleLimited, bp::bases<PropertyDouble>>("PropertyDoubleLimited", boost::python::no_init);
 		bp::class_<PropertyString, bp::bases<Property>>("PropertyString", boost::python::no_init);
 		bp::class_<PropertyStringReadOnly, bp::bases<Property>>("PropertyStringReadOnly", boost::python::no_init);
-		bp::class_<PropertyStringWithConfig, bp::bases<PropertyString>>("PropertyStringWithConfig", boost::python::no_init);
 		bp::class_<PropertyFile, bp::bases<PropertyString>>("PropertyFile", boost::python::no_init);
 		bp::class_<PropertyInt, bp::bases<Property>>("PropertyInt", boost::python::no_init);
 		bp::class_<PropertyLength, bp::bases<PropertyDouble>>("PropertyLength", boost::python::no_init);
-		bp::class_<PropertyLengthWithConfig, bp::bases<PropertyLength>>("PropertyLengthWithConfig", boost::python::no_init);
 		bp::class_<PropertyLengthWithKillGLLists, bp::bases<PropertyLength>>("PropertyLengthWithKillGLLists", boost::python::no_init);
 		bp::class_<PropertyList, bp::bases<Property>>("PropertyList", boost::python::no_init);
 		bp::class_<PropertyObjectTitle, bp::bases<Property>>("PropertyObjectTitle", boost::python::no_init);
@@ -2101,9 +2005,7 @@ double GetUnits()
 			.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
 			;
 
-		bp::def("OnInit", OnInit);
 		bp::def("OnExit", OnExit);
-
 		bp::def("Reset", CadReset);
 		bp::def("OpenFile", CadOpenFile);
 		bp::def("Import", CadImport);
@@ -2171,15 +2073,15 @@ double GetUnits()
 		bp::def("SetEllipseDrawing", SetEllipseDrawing);
 		bp::def("SetILineDrawing", SetILineDrawing);
 		bp::def("NewPoint", NewPoint, bp::return_value_policy<bp::reference_existing_object>());
+		bp::def("PyIncref", PyIncref);
 
 
-		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)OBJECT_TYPE_UNKNOWN;
-		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)OBJECT_TYPE_SKETCH;
-		bp::scope().attr("OBJECT_TYPE_SKETCH_SEG") = (int)OBJECT_TYPE_SKETCH_SEG;
-		bp::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)OBJECT_TYPE_SKETCH_LINE;
-		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)OBJECT_TYPE_SKETCH_ARC;
-		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)OBJECT_TYPE_CIRCLE;
-		bp::scope().attr("OBJECT_TYPE_POINT") = (int)OBJECT_TYPE_POINT;
+		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
+		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
+		bp::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
+		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
+		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
+		bp::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
 
 		bp::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;

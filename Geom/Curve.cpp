@@ -40,6 +40,11 @@ Point Point::Mid(const Point& p1, double factor)const{
 	return ::Mid(*this, p1, factor);
 }
 
+ostream & operator<<(ostream &os, const Point &p)
+{
+	return os << "Point x = " << p.x << ", y = " << p.y;
+}
+
 Line2d::Line2d(const Point& P0, const Point& V) :p0(P0), v(V)
 {
 }
@@ -67,6 +72,16 @@ void CVertex::Transform(const Matrix& matrix)
 {
 	m_p.Transform(matrix);
 	m_c.Transform(matrix);
+}
+
+ostream & operator<<(ostream &os, const CVertex &v)
+{
+	os << "Vertex type = " << v.m_type << ", p = " << v.m_p;
+	if (v.m_type != 0)
+	{
+		os << ", c = " << v.m_c;
+	}
+	return os;
 }
 
 void CCurve::append(const CVertex& vertex)
@@ -1284,17 +1299,90 @@ Point Span::GetVector(double fraction)const
 	}
 }
 
+
+void LineLineIntof(const Span& sp0, const Span& sp1, std::list<Point> &pts) {
+	// intersection between 2 Line2d
+	// returns 0 for no intersection in range of either span
+	// returns 1 for intersction in range of both spans
+	// t[0] is parameter on sp0,
+	// t[1] is parameter on sp1
+	Point v0(sp0.m_p, sp0.m_v.m_p);
+	Point v1(sp1.m_p, sp1.m_v.m_p);
+	Point v2(sp0.m_p, sp1.m_p);
+
+	double cp = v1 ^ v0;
+
+	if (fabs(cp) >= UNIT_VECTOR_TOLERANCE) {
+		double t = (v1 ^ v2) / cp;
+		pts.push_back(v0 * t + sp0.m_p);
+	}
+}
+
+void LineArcIntof(const Span& line, const Span& arc, std::list<Point> &pts) {
+	// inters of line arc
+	// solving	x = x0 + dx * t			x = y0 + dy * t
+	//			x = xc + R * cos(a)		y = yc + R * sin(a)		for t
+	// gives :-  t² (dx² + dy²) + 2t(dx*dx0 + dy*dy0) + (x0-xc)² + (y0-yc)² - R² = 0
+	int nRoots;
+	Point v0(arc.m_v.m_c, line.m_p);
+	Point v1(line.m_p, line.m_v.m_p);
+	double s = v1.magnitudesqd();
+	double arc_radius = arc.GetRadius();
+
+	double t[2];
+
+	if ((nRoots = quadratic(s, 2 * (v0 * v1), v0.magnitudesqd() - arc_radius * arc_radius, t[0], t[1])) != 0) {
+		double toler = TOLERANCE / sqrt(s);							// calc a parametric tolerance
+		if (t[0] > -toler && t[0] < 1 + toler) {
+			Point p = v1 * t[0] + line.m_p;
+			if (arc.On(p))
+				pts.push_back(p);
+		}
+		if (nRoots == 2) {
+			if (t[1] > -toler && t[1] < 1 + toler) {
+				Point p = v1 * t[1] + line.m_p;
+				if (arc.On(p))
+					pts.push_back(p);
+			}
+		}
+	}
+}
+
+void ArcArcIntof(const Span& arc0, const Span& arc1, std::list<Point> &pts) {
+	// Intof 2 arcs
+	Point pLeft, pRight;
+	int numInts = Intof(Circle(arc0.m_v.m_c, arc0.GetRadius()), Circle(arc1.m_v.m_c, arc1.GetRadius()), pLeft, pRight);
+
+	if (numInts > 0) {
+		if (arc0.On(pLeft) && arc1.On(pLeft))
+			pts.push_back(pLeft);
+		if (arc0.On(pRight) && arc1.On(pRight))
+			pts.push_back(pRight);
+	}
+}
+
 void Span::Intersect(const Span& s, std::list<Point> &pts)const
 {
-#if 0
-	to do
-	// finds all the intersection points between two spans and puts them in the given list
-	Point pInt1, pInt2;
-	double t[4];
-	int num_int = MakeSpan(*this).Intof(MakeSpan(s), pInt1, pInt2, t);
-	if(num_int > 0)pts.push_back(Point(pInt1.x, pInt1.y));
-	if(num_int > 1)pts.push_back(Point(pInt2.x, pInt2.y));
-#endif
+	if (!m_v.m_type) {
+		if (!s.m_v.m_type) {
+			// line line
+			LineLineIntof(*this, s, pts);
+		}
+		else {
+			// line arc
+			LineArcIntof(*this, s, pts);
+}
+		}
+	else {
+		if (!s.m_v.m_type) {
+			// arc line
+			LineArcIntof(s, *this, pts);
+		}
+		else {
+			// arc arc
+			ArcArcIntof(*this, s, pts);
+		}
+	}
 }
 
 void Span::Reverse()
@@ -1313,6 +1401,11 @@ double Span::GetRadius()const
 	{
 		return m_p.dist(m_v.m_c);
 	}
+}
+
+ostream & operator<<(ostream &os, const Span &span)
+{
+	return os << "Span p = " << span.m_p << ", v = " << span.m_v;
 }
 
 void tangential_arc(const Point &p0, const Point &p1, const Point &v0, Point &c, int &dir)

@@ -10,8 +10,8 @@ class ObjPropsObserver(PropertiesObserver):
         self.window.objects = cad.GetSelectedObjects()
         self.window.RemoveAndAddAll()
 
-    def OnModified(self, modified):
-        self.window.RemoveAndAddAll()
+    #def OnModified(self, modified):
+        #self.window.RemoveAndAddAll()
 
 # This is a property grid for listing a cad object's properties
 

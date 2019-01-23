@@ -555,6 +555,31 @@ CTris* CSolidMakeStl(const CSolid& solid, double deviation)
 
 #endif
 
+static std::string Point__str__(const Point& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
+static std::string Point3d__str__(const Point3d& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
+static std::string CVertex__str__(const CVertex& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
+static std::string Span__str__(const Span& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
+
 BOOST_PYTHON_MODULE(geom) {
 	/// class Point
 	/// a 2D point, with x and y values, which can also be used as a vector
@@ -580,7 +605,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Transform", &Point::Transform)/// function Transform///params Matrix m/// transforms the point by the matrix
         .def_readwrite("x", &Point::x)/// variable x///type float/// the x value of the point
         .def_readwrite("y", &Point::y)/// variable y///type float/// the y value of the point
-    ;
+		.def("__str__", Point__str__);
 
 	/// class Vertex
 	/// a Curve has a list of these///it can have type 0, 1, -1 for line, ccw arc, cw arc, and a centre point
@@ -593,7 +618,8 @@ BOOST_PYTHON_MODULE(geom) {
         .def_readwrite("p", &CVertex::m_p)/// variable p///type Point///the end point of the span
         .def_readwrite("c", &CVertex::m_c)/// variable p///type Point///the center point of the span, for arcs
         .def_readwrite("user_data", &CVertex::m_user_data)
-    ;
+		.def("__str__", CVertex__str__);
+	;
 
 	/// class Span
 	/// this is just a Vertex with a start point, which defines a Span
@@ -617,7 +643,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetRadius", &Span::GetRadius)
         .def_readwrite("p", &Span::m_p)///variable p///type Point///the start point of this span
 		.def_readwrite("v", &Span::m_v)///variable v///type Vertex///the Vertex describing the span type, end and center
-    ;
+		.def("__str__", Span__str__);
+	;
 
 	/// class Curve
 	/// defined by a list of Vertex objects
@@ -745,7 +772,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Normalized", &Point3d::Normalized)
 		.def("Dist", &Point3d::Dist)
 		.def("Length", &Point3d::magnitude)
-		;
+		.def("__str__", Point3d__str__);
+	;
 
 	///class Plane
 	bp::class_<Plane>("Plane")

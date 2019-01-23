@@ -17,7 +17,6 @@
 #include "Sketch.h"
 #include "SelectMode.h"
 #include "DigitizeMode.h"
-#include "HeeksConfig.h"
 #include "Property.h"
 
 
@@ -676,7 +675,7 @@ void LineArcDrawing::GetProperties(std::list<Property *> *list){
 	case CircleDrawingMode:
 		{
 			list->push_back(new PropertyCircleMode());
-			list->push_back(new PropertyLengthWithConfig(NULL, L"radius", &radius_for_circle, L"RadiusForCircle"));
+			list->push_back(new PropertyLength(NULL, L"radius", &radius_for_circle));
 		}
 		break;
 
@@ -691,9 +690,6 @@ bool LineArcDrawing::OnModeChange(void){
 	// on start of drawing mode
 	if(!Drawing::OnModeChange())return false;
 	if(m_container)m_container = NULL;
-
-	HeeksConfig config;
-	config.Read(L"RadiusForCircle", &radius_for_circle, 5.0);
 
 	ClearPrevObject();
 	m_previous_direction_set = false;

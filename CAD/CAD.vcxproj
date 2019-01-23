@@ -116,7 +116,6 @@
     <ClCompile Include="HCircle.cpp" />
     <ClCompile Include="HDxf.cpp" />
     <ClCompile Include="HeeksColor.cpp" />
-    <ClCompile Include="HeeksConfig.cpp" />
     <ClCompile Include="HeeksObj.cpp" />
     <ClCompile Include="HILine.cpp" />
     <ClCompile Include="History.cpp" />
@@ -187,7 +186,6 @@
     <ClInclude Include="HCircle.h" />
     <ClInclude Include="HDxf.h" />
     <ClInclude Include="HeeksColor.h" />
-    <ClInclude Include="HeeksConfig.h" />
     <ClInclude Include="HeeksObj.h" />
     <ClInclude Include="HILine.h" />
     <ClInclude Include="History.h" />

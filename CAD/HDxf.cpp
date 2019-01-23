@@ -16,7 +16,6 @@
 #if 0
 #include "HText.h"
 #endif
-#include "HeeksConfig.h"
 #include "strconv.h"
 
 // static
@@ -28,14 +27,6 @@ bool HeeksDxfRead::m_add_uninstanced_blocks = false;
 
 HeeksDxfRead::HeeksDxfRead(const wchar_t* filepath, bool undoable) : CDxfRead(Ttc(filepath)), m_undoable(undoable)
 {
-	HeeksConfig config;
-
-	config.Read(L"ImportDxfAsSketches", &m_make_as_sketch);
-	config.Read(L"IgnoreDxfReadErrors", &m_ignore_errors);
-	config.Read(L"DxfReadPoints", &m_read_points);
-	config.Read(L"LayerNameSuffixesToDiscard", &m_layer_name_suffixes_to_discard);
-	config.Read(L"DxfAddUninstancedBlocks", &m_add_uninstanced_blocks);
-
 	m_current_block = NULL;
 	m_ucs_matrix = Matrix();
 }

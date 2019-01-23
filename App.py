@@ -29,7 +29,7 @@ class App(wx.App):
         
     def OnInit(self):
         self.RegisterMessageBoxCallback()
-        result = self.InitCad()
+        self.InitCad()
         
         self.printData = wx.PrintData()
         self.pageSetupData = wx.PageSetupDialogData(self.printData)
@@ -42,7 +42,7 @@ class App(wx.App):
         cad.SetLikeNewFile()
         self.frame.SetFrameTitle()
         
-        return result
+        return True
     
     def OnNewOrOpen(self, open):
         pass
@@ -89,8 +89,7 @@ class App(wx.App):
         self.hideable_windows.remove(w)
         
     def InitCad(self):
-        result = cad.OnInit()
+        cad.SetInputMode(cad.GetSelectMode());
         cad.SetResFolder(pycad_dir)
         cad.SetContextMenuCallback(OnContextMenu)
-        return result
     

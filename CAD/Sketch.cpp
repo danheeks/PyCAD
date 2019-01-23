@@ -7,7 +7,6 @@
 #include "HLine.h"
 #include "HArc.h"
 #include "CoordinateSystem.h"
-#include "HeeksConfig.h"
 #include "DigitizeMode.h"
 #include "Drawing.h"
 #include "Property.h"

@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "Ruler.h"
 #include "Gripper.h"
-#include "HeeksConfig.h"
 #include "Property.h"
 
 void RulerMark::glCommands(double units)
@@ -327,60 +326,4 @@ bool HRuler::GetScaleAboutMatrix(Matrix &m)
 {
 	m_trsf = m;
 	return true;
-}
-
-void HRuler::WriteToConfig(HeeksConfig& config)
-{
-#if 0
-	to do
-	config.Write(L"RulerTrsf11", m_trsf.Value(1, 1));
-	config.Write(L"RulerTrsf12", m_trsf.Value(1, 2));
-	config.Write(L"RulerTrsf13", m_trsf.Value(1, 3));
-	config.Write(L"RulerTrsf14", m_trsf.Value(1, 4));
-	config.Write(L"RulerTrsf21", m_trsf.Value(2, 1));
-	config.Write(L"RulerTrsf22", m_trsf.Value(2, 2));
-	config.Write(L"RulerTrsf23", m_trsf.Value(2, 3));
-	config.Write(L"RulerTrsf24", m_trsf.Value(2, 4));
-	config.Write(L"RulerTrsf31", m_trsf.Value(3, 1));
-	config.Write(L"RulerTrsf32", m_trsf.Value(3, 2));
-	config.Write(L"RulerTrsf33", m_trsf.Value(3, 3));
-	config.Write(L"RulerTrsf34", m_trsf.Value(3, 4));
-
-	config.Write(L"RulerUseViewUnits"), m_use_view_units);
-	config.Write(L"RulerUnits"), m_units);
-	config.Write(L"RulerWidth"), m_width);
-	config.Write(L"RulerLength"), m_length);
-	config.Write(L"RulerEmptyLength"), m_empty_length);
-#endif
-}
-
-void HRuler::ReadFromConfig(HeeksConfig& config)
-{
-#if 0
-	to do
-	double m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34;
-	config.Read(_T("RulerTrsf11"), &m11, 1.0);
-	config.Read(_T("RulerTrsf12"), &m12, 0.0);
-	config.Read(_T("RulerTrsf13"), &m13, 0.0);
-	config.Read(_T("RulerTrsf14"), &m14, 0.0);
-	config.Read(_T("RulerTrsf21"), &m21, 0.0);
-	config.Read(_T("RulerTrsf22"), &m22, 1.0);
-	config.Read(_T("RulerTrsf23"), &m23, 0.0);
-	config.Read(_T("RulerTrsf24"), &m24, 0.0);
-	config.Read(_T("RulerTrsf31"), &m31, 0.0);
-	config.Read(_T("RulerTrsf32"), &m32, 0.0);
-	config.Read(_T("RulerTrsf33"), &m33, 1.0);
-	config.Read(_T("RulerTrsf34"), &m34, 0.0);
-#if OCC_VERSION_HEX >= 0x060900
-	m_trsf.SetValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34);
-#else
-	m_trsf.SetValues(m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, 0.0001, 0.00000001);
-#endif
-
-	config.Read(_T("RulerUseViewUnits"), &m_use_view_units);
-	config.Read(_T("RulerUnits"), &m_units);
-	config.Read(_T("RulerWidth"), &m_width);
-	config.Read(_T("RulerLength"), &m_length);
-	config.Read(_T("RulerEmptyLength"), &m_empty_length);
-#endif
 }

@@ -5,6 +5,7 @@ class Object(cad.BaseObject):
     # derive from this, as cad.BaseObject isn't quite as pythonic as I hoped, yet.
     def __init__(self):
         cad.BaseObject.__init__(self)
+        #cad.PyIncref(self)
         
     def GetTitle(self):
         return self.GetTypeString()

@@ -38,6 +38,9 @@ public:
 	void Transform(const Matrix& matrix);
 };
 
+ostream & operator<<(ostream &os, const CVertex &);
+
+
 class Span
 {
 	Point NearestPointNotOnSpan(const Point& p)const;
@@ -67,6 +70,8 @@ public:
 	void Reverse();
 	double GetRadius()const;
 };
+
+ostream & operator<<(ostream &os, const Span &);
 
 class CCurve
 {

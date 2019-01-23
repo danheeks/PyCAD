@@ -152,7 +152,6 @@ public:
 	std::list< void(*)(int, int) > m_beforeneworopen_callbacks;
 	std::list< void(*)() > m_beforeframedelete_callbacks;
 	std::list< void(*)(std::list<Tool*>&) > m_markedlisttools_callbacks;
-	std::list< void(*)() > m_on_restore_defaults_callbacks;
 	int m_transform_gl_list;
 	Matrix m_drag_matrix;
 	bool m_extrude_removes_sketches;
@@ -197,14 +196,6 @@ public:
 	void RegisterUnitsChangeHandler(UnitsChangedHandler_t);
 	void UnregisterUnitsChangeHandler(UnitsChangedHandler_t);
 
-	typedef std::wstring(*HeeksTypesConverter_t)(const int type);
-	typedef std::list<HeeksTypesConverter_t> HeeksTypesConverters_t;
-
-	HeeksTypesConverters_t m_heeks_types_converters;
-
-	void RegisterHeeksTypesConverter(HeeksTypesConverter_t);
-	void UnregisterHeeksTypesConverter(HeeksTypesConverter_t);
-
 	bool m_settings_restored;
 
 	// HeeksObj's virtual functions
@@ -213,9 +204,7 @@ public:
 	bool CanAdd(HeeksObj* object){ return true; }
 	int GetType()const{ return DocumentType; }
 
-	bool OnInit();
 	void OnExit();
-	void WriteConfig();
 	void CreateLights(void);
 	void DestroyLights(void);
 	void FindMarkedObject(const IPoint &point, MarkedObject* marked_object);

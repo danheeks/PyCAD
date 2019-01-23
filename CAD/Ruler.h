@@ -5,7 +5,6 @@
 #pragma once
 
 #include "HeeksObj.h"
-class HeeksConfig;
 
 struct RulerMark{
 	int pos; // distance from the 0 mark
@@ -56,7 +55,4 @@ public:
 	bool GetScaleAboutMatrix(Matrix &m);
 	bool CanBeRemoved(){return false;}
 	bool CanBeCopied(){return false;}
-
-	void WriteToConfig(HeeksConfig& config);
-	void ReadFromConfig(HeeksConfig& config);
 };

@@ -129,6 +129,11 @@
 		return Point3d(*this, p) * factor + *this;
 	}
 
+	ostream & operator<<(ostream &os, const Point3d &p)
+	{
+		return os << "Point3d x = " << p.x << ", y = " << p.y << ", z = " << p.z;
+	}
+
 	Point Mid(const Point& p0, const Point& p1, double factor){
 		// mid or partway between 2 points
 		return Point(p0, p1) * factor + p0;

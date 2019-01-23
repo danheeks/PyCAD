@@ -14,5 +14,4 @@ extern "C" {
 #include "../Geom/Box.h"
 #include "tinyxml.h"
 #include "IPoint.h"
-#include "HeeksConfig.h"
 #include "App.h"
