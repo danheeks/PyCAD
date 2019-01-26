@@ -33,6 +33,7 @@ class ObjPropsCanvas(PropertiesCanvas):
             properties = object.GetProperties()
             if properties:
                 for property in properties:
+                    cad.PyIncref(property)
                     self.AddProperty(property)
         self.inRemoveAndAddAll = False
         

@@ -164,7 +164,7 @@ public:
 		}
 	}
 	Property *MakeACopy(void)const{ return new PropertySketchOrder(*this); }
-	virtual void GetChoices(std::list< std::wstring > &choices){
+	virtual void GetChoices(std::list< std::wstring > &choices)const{
 		choices = m_choices;
 	}
 	virtual int get_property_type(){ return ChoicePropertyType; }

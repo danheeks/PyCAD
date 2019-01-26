@@ -44,7 +44,7 @@ public:
 	virtual void Set(int value){} // only called by Property Changer, set Property::m_editable to enable this
 	virtual void Set(const Matrix& value){} // only called by Property Changer, set Property::m_editable to enable this
 	virtual bool GetBool()const{ return false; }
-	virtual void GetChoices(std::list< std::wstring > &choices){}
+	virtual void GetChoices(std::list< std::wstring > &choices)const{}
 	virtual const HeeksColor &GetColor()const{ return *((const HeeksColor*)NULL); }
 	virtual double GetDouble()const{ return 0.0; }
 	virtual const wchar_t* GetString()const{ return NULL; }
@@ -81,7 +81,7 @@ public:
 	Property *MakeACopy(void)const;
 	void Set(int value){ *m_pvar = value; }
 	int GetInt()const{ return *m_pvar; }
-	void GetChoices(std::list< std::wstring > &choices){ choices = m_choices; }
+	void GetChoices(std::list< std::wstring > &choices)const{ choices = m_choices; }
 };
 
 class PropertyColor :public Property{

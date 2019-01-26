@@ -292,7 +292,7 @@ class PropertyRulerUnits : public Property
 public:
 	PropertyRulerUnits(HeeksObj* object) : Property(object, L"units"){}
 	Property *MakeACopy(void)const{ return new PropertyRulerUnits(*this); }
-	virtual void GetChoices(std::list< std::wstring > &choices){
+	virtual void GetChoices(std::list< std::wstring > &choices)const{
 		choices.push_back ( std::wstring ( L"mm") );
 		choices.push_back ( std::wstring ( L"inch" ) );
 	}

@@ -492,7 +492,7 @@ public:
 	{
 		return (int)RegularShapesDrawing_for_GetProperties->m_mode;
 	}
-	void GetChoices(std::list< std::wstring > &choices)
+	void GetChoices(std::list< std::wstring > &choices)const
 	{
 		choices.push_back(std::wstring(L"draw rectangles"));
 		choices.push_back(std::wstring(L"draw polygons"));

@@ -8,7 +8,7 @@
 PropertyChangeString::PropertyChangeString(const std::wstring& value, Property* property) :m_property(property)
 {
 	m_value = value;
-	m_old = m_property->GetString();
+	//m_old = m_property->GetString();
 }
 
 void PropertyChangeString::Run(bool redo)

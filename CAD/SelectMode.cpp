@@ -577,10 +577,6 @@ void CSelectMode::OnMouse( MouseEvent& event )
 	}
 	else if(event.RightUp())
 	{
-		MarkedObjectOneOfEach marked_object;
-		theApp.FindMarkedObject(IPoint(event.GetX(), event.GetY()), &marked_object);
-		PythonOnContextMenu();
-		//theApp.DoDropDownMenu(theApp.m_frame->m_graphics, IPoint(event.GetX(), event.GetY()), &marked_object, false, event.m_controlDown);
 	}
 	else if(dragging)
 	{

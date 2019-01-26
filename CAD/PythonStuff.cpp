@@ -660,18 +660,18 @@ void CadMessageBox(std::wstring str)
 	theApp.MessageBox(str.c_str());
 }
 
-class BaseObject : public HeeksObj, public bp::wrapper<HeeksObj>
+class BaseObject : public ObjList, public bp::wrapper<ObjList>
 {
 public:
 	bool m_uses_display_list;
 	int m_display_list;
 
-	BaseObject() :HeeksObj(), m_uses_display_list(false), m_display_list(0){
+	BaseObject() :ObjList(), m_uses_display_list(false), m_display_list(0){
 	}
 	bool NeverDelete(){ return true; }
 	int GetType()const{return PythonType;}
 
-	const wchar_t* GetIconFilePath() override
+	const wchar_t* GetIconFilePath()
 	{
 		if (bp::override f = this->get_override("GetIconFilePath"))
 		{
@@ -679,10 +679,10 @@ public:
 			str_for_base_object = Ctt(s.c_str());
 			return str_for_base_object.c_str();
 		}
-		return HeeksObj::GetIconFilePath();
+		return ObjList::GetIconFilePath();
 	}
 
-	const wchar_t* GetShortString()const override
+	const wchar_t* GetShortString()const
 	{
 		if (bp::override f = this->get_override("GetTitle"))
 		{
@@ -690,10 +690,10 @@ public:
 			str_for_base_object = Ctt(s.c_str());
 			return str_for_base_object.c_str();
 		}
-		return HeeksObj::GetShortStringOrTypeString();
+		return ObjList::GetShortStringOrTypeString();
 	}
 
-	const wchar_t* GetTypeString()const override
+	const wchar_t* GetTypeString()const
 	{
 		if (bp::override f = this->get_override("GetTypeString"))
 		{
@@ -701,20 +701,26 @@ public:
 			str_for_base_object = Ctt(s.c_str());
 			return str_for_base_object.c_str();
 		}
-		return HeeksObj::GetTypeString();
+		return ObjList::GetTypeString();
 	}
 
-	const HeeksColor* GetColor()const override
+	const HeeksColor* GetColor()const
 	{
+		if (bp::override f = this->get_override("HasColor"))
+		{
+			bool has_color = f();
+			if (has_color == false)
+				return NULL;
+		}
 		if (bp::override f = this->get_override("GetColor"))
 		{
 			color_for_base_object = f();
 			return &color_for_base_object;
 		}
-		return HeeksObj::GetColor();
+		return ObjList::GetColor();
 	}
 
-	void SetColor(const HeeksColor &col) override
+	void SetColor(const HeeksColor &col)
 	{
 		if (bp::override f = this->get_override("SetColor"))
 		{
@@ -727,7 +733,7 @@ public:
 	static bool lines_begun;
 	static TiXmlElement* m_cur_element;
 
-	void glCommands(bool select, bool marked, bool no_color) override
+	void glCommands(bool select, bool marked, bool no_color)
 	{
 		if (in_glCommands)
 			return; // shouldn't be needed
@@ -790,7 +796,7 @@ public:
 
 	}
 
-	void GetProperties(std::list<Property *> *list) override
+	void GetProperties(std::list<Property *> *list)
 	{
 		if (bp::override f = this->get_override("GetProperties"))
 		{
@@ -798,11 +804,11 @@ public:
 			object_for_get_properties = this;
 			Property* p = Call_Override(f);
 		}
-		HeeksObj::GetProperties(list);
+		ObjList::GetProperties(list);
 	}
 
 
-	void GetBox(CBox &box) override
+	void GetBox(CBox &box)
 	{
 		if (bp::override f = this->get_override("GetBox"))
 		{
@@ -821,7 +827,7 @@ public:
 		}
 	}
 
-	void KillGLLists() override
+	void KillGLLists()
 	{
 		if (m_uses_display_list && m_display_list)
 		{
@@ -830,7 +836,7 @@ public:
 		}
 	}
 
-	void WriteXML(TiXmlNode *root)override
+	void WriteXML(TiXmlNode *root)
 	{
 		BaseObject::m_cur_element = new TiXmlElement(Ttc(this->GetTypeString()));
 		root->LinkEndChild(BaseObject::m_cur_element);
@@ -850,7 +856,7 @@ bool BaseObject::lines_begun = false;
 TiXmlElement* BaseObject::m_cur_element = NULL;
 
 
-int BaseObjectGetType(const HeeksObj& object)
+int BaseObjectGetType(const BaseObject& object)
 {
 	return PythonType;
 }
@@ -899,6 +905,11 @@ std::wstring HeeksObjGetTitle(const HeeksObj& object)
 	//return object.GetShortString();
 }
 
+std::wstring HeeksObjGetTypeString(HeeksObj& object)
+{
+	return std::wstring(object.GetTypeString());
+}
+
 std::wstring HeeksObjGetIconFilePath(HeeksObj& object)
 {
 	return std::wstring(object.GetIconFilePath());
@@ -908,6 +919,19 @@ boost::python::list HeeksObjGetProperties(HeeksObj& object) {
 	boost::python::list return_list;
 	std::list<Property*> p_list;
 	object.GetProperties(&p_list);
+	for (std::list<Property*>::iterator It = p_list.begin(); It != p_list.end(); It++)
+	{
+		Property* property = *It;
+		//AddPropertyToPythonList(property, return_list);
+		return_list.append(boost::python::ptr<Property*>(property));
+	}
+	return return_list;
+}
+
+boost::python::list HeeksObjGetBaseProperties(BaseObject& object) {
+	boost::python::list return_list;
+	std::list<Property*> p_list;
+	object.ObjList::GetProperties(&p_list);
 	for (std::list<Property*>::iterator It = p_list.begin(); It != p_list.end(); It++)
 	{
 		Property* property = *It;
@@ -1069,6 +1093,19 @@ boost::python::list PropertyGetProperties(Property& p) {
 HeeksColor PropertyGetColor(const Property& p)
 {
 	return p.GetColor();
+}
+
+boost::python::list PropertyGetChoices(const Property& p)
+{
+	boost::python::list return_list;
+	std::list< std::wstring > choices;
+	p.GetChoices(choices);
+	for (std::list<std::wstring>::iterator It = choices.begin(); It != choices.end(); It++)
+	{
+		std::wstring& choice = *It;
+		return_list.append(choice);
+	}
+	return return_list;
 }
 
 HeeksColor HeeksObjGetColor(const HeeksObj& object)
@@ -1326,7 +1363,7 @@ public:
 	}
 	const wchar_t* GetString()const override
 	{
-		if (bp::override f = this->get_override("GetStr"))return Call_Override(f);
+		if (bp::override f = this->get_override("GetString"))return Call_Override(f);
 		return Property::GetString();
 	}
 	void Set(bool value)override
@@ -1344,7 +1381,7 @@ public:
 	}
 	void Set(const wchar_t* value)override
 	{
-		if (bp::override f = this->get_override("SetStr"))Call_Override(f, value);
+		if (bp::override f = this->get_override("SetString"))Call_Override(f, std::wstring(value));
 	}
 	Property *MakeACopy(void)const{ return new PropertyWrap(*this); }
 };
@@ -1395,6 +1432,68 @@ boost::python::list GetObjects() {
 	{
 		AddObjectToPythonList(object, olist);
 	}
+	return olist;
+}
+
+
+boost::python::list GetClickedObjects(int x, int y) {
+	// for context menu, we want one object of each type, including child objects, if there are more than one the smae type, we want the one nearest to the camera
+
+	MarkedObjectOneOfEach marked_object;
+	theApp.FindMarkedObject(IPoint(x, y), &marked_object);
+
+	std::list<MarkedObject*> stack;
+	stack.push_back(&marked_object);
+	std::map<int, MarkedObject*> types;
+
+	while (stack.size() > 0)
+	{
+		MarkedObject* m = stack.front();
+		stack.pop_front();
+
+		for (std::map<HeeksObj*, MarkedObject*>::iterator It = m->m_map.begin(); It != m->m_map.end(); It++)
+		{
+			stack.push_back(It->second);
+		}
+
+		for (std::map<int, MarkedObject*>::iterator It = m->m_types.begin(); It != m->m_types.end(); It++)
+		{
+			int type = It->first;
+			MarkedObject* object = It->second;
+			std::map<int, MarkedObject*>::iterator FindIt = types.find(type);
+
+			if (FindIt == types.end())
+			{
+				types.insert(std::make_pair(type, object));
+			}
+			else
+			{
+				MarkedObject* existing_object = FindIt->second;
+				if (object->GetDepth() < existing_object->GetDepth())
+				{
+					types.erase(type);
+					types.insert(std::make_pair(type, object));
+				}
+			}
+		}
+	}
+
+	boost::python::list olist;
+
+	if (types.size() > 0)
+	{
+		for (std::map<int, MarkedObject*>::iterator It = types.begin(); It != types.end(); It++)
+		{
+			MarkedObject* object = It->second;
+			AddObjectToPythonList(object->GetObjectW(), olist);
+		}
+	}
+	else
+	{
+		HeeksObj* object = marked_object.GetObjectW();
+		if (object)AddObjectToPythonList(object, olist);
+	}
+
 	return olist;
 }
 
@@ -1563,7 +1662,7 @@ bool ShiftSelect(HeeksObj *object, bool control_down)
 	return waiting_until_left_up;
 }
 
-void ChangePropertyString(const wstring& value, Property* property)
+void ChangePropertyString(const std::wstring& value, Property* property)
 {
 	theApp.DoUndoable(new PropertyChangeString(value, property));
 }
@@ -1641,17 +1740,21 @@ void PyIncref(PyObject* object)
 			.def("AutoExpand", &BaseObject::AutoExpand)
 			.def("GetNumChildren", &BaseObject::GetNumChildren)
 			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
-			.def("GetFirstChild", &HeeksObj::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
-			.def("GetNextChild", &HeeksObj::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetFirstChild", &BaseObject::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetNextChild", &BaseObject::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
+			.def("GetProperties", &HeeksObjGetProperties)
+			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
 			;
 
 		bp::class_<HeeksObj, boost::noncopyable>("Object")
 			.def(bp::init<HeeksObj>())
 			.def("GetType", &HeeksObj::GetType)
+			.def("GetTypeString", HeeksObjGetTypeString)
 			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
 			.def("GetID", &HeeksObj::GetID)
 			.def("GetIndex", &HeeksObj::GetIndex)
@@ -1691,6 +1794,7 @@ void PyIncref(PyObject* object)
 			.def("GetInt", &Property::GetInt)
 			.def("GetBool", &Property::GetBool)
 			.def("GetColor", &PropertyGetColor)
+			.def("GetChoices", &PropertyGetChoices)
 			.def_readwrite("editable", &PropertyWrap::m_editable)
 			.def_readwrite("object", &PropertyWrap::m_object)
 			.def("GetProperties", &PropertyGetProperties)
@@ -1968,13 +2072,7 @@ void PyIncref(PyObject* object)
 			.def("OnKeyDown", &CInputMode::OnKeyDown)
 			.def("OnKeyUp", &CInputMode::OnKeyUp)
 			;
-
-//		bp::class_<MarkedObject>("MarkedObject")
-//			.def(bp::init<MarkedObject>())
-//			.def_readwrite("m_key_code", &KeyEvent::m_key_code)
-//			;
 		
-
 		bp::enum_<DigitizeType>("DigitizeType")
 			.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
 			.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
@@ -2028,6 +2126,7 @@ void PyIncref(PyObject* object)
 		bp::def("GetSelectedObjects", GetSelectedObjects);
 		bp::def("GetNumSelected", GetNumSelected);
 		bp::def("GetObjects", GetObjects);
+		bp::def("GetClickedObjects", GetClickedObjects);
 		bp::def("ObjectMarked", ObjectMarked);
 		bp::def("Select", Select);
 		bp::def("Unselect", Unselect);
@@ -2082,6 +2181,7 @@ void PyIncref(PyObject* object)
 		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
 		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
 		bp::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
+		bp::scope().attr("OBJECT_TYPE_PYTHON") = (int)PythonType;
 
 		bp::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;

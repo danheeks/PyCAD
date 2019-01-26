@@ -625,7 +625,7 @@ public:
 	{
 		return (int)line_drawing_for_GetProperties->drawing_mode;
 	}
-	void GetChoices(std::list< std::wstring > &choices)
+	void GetChoices(std::list< std::wstring > &choices)const
 	{
 		choices.push_back ( std::wstring ( L"draw tangential arcs" ) );
 		choices.push_back ( std::wstring ( L"infinite line" ) );
@@ -648,7 +648,7 @@ public:
 	{
 		return (int)line_drawing_for_GetProperties->circle_mode;
 	}
-	void GetChoices(std::list< std::wstring > &choices)
+	void GetChoices(std::list< std::wstring > &choices)const
 	{
 		choices.push_back(std::wstring(L"centre and point"));
 		choices.push_back(std::wstring(L"three points"));

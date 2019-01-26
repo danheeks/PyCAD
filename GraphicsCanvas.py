@@ -101,9 +101,12 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             e.m_middleDown = True
             e.m_controlDown = False
             
-        self.viewport.OnMouseEvent(e)
-        if self.viewport.m_need_update: self.Update()
-        if self.viewport.m_need_refresh: self.Refresh()
+        if event.RightUp():
+            wx.GetApp().DoDropDownMenu(self, event.GetX(), event.GetY(), event.ControlDown())
+        else:
+            self.viewport.OnMouseEvent(e)
+            if self.viewport.m_need_update: self.Update()
+            if self.viewport.m_need_refresh: self.Refresh()
         event.Skip()
 
     def OnEraseBackground(self, event):

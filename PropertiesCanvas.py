@@ -119,13 +119,13 @@ class PropertiesCanvas( wx.Panel ):
             wcol = wx.Colour(col.red, col.green, col.blue)
             new_prop = wxpg.ColourProperty(property.GetTitle(),value=wcol)
         elif property.GetType() == cad.PROPERTY_TYPE_CHOICE:
-            return # to do
+            new_prop = wxpg.EnumProperty(property.GetTitle(), labels = property.GetChoices(), value = property.GetInt())
         elif property.GetType() == cad.PROPERTY_TYPE_CHECK:
             new_prop = wxpg.BoolProperty(property.GetTitle(),value=property.GetBool())
         elif property.GetType() == cad.PROPERTY_TYPE_LIST:
             new_prop = wxpg.StringProperty(property.GetTitle())
         elif property.GetType() == cad.PROPERTY_TYPE_FILE:
-            return # to do
+            new_prop = wxpg.FileProperty(property.GetTitle(),value=property.GetString())
         else:
             wx.MessageBox('invalid property type: ' + str(property.GetType()))
             return
