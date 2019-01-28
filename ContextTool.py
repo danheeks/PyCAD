@@ -45,7 +45,6 @@ class ObjectToolList(ContextToolList):
     def __init__(self, object):
         self.object = object
         ContextToolList.__init__(self, object.GetTitle())
-        self.AddSpecificTools()
 
     def BitmapPath(self):
         return self.object.GetIconFilePath()
@@ -53,15 +52,34 @@ class ObjectToolList(ContextToolList):
     def BitmapSize(self):
         return 16
     
-    def AddSpecificTools(self):
-        type = self.object.GetType()
-        if type == cad.OBJECT_TYPE_SKETCH:
-            if self.object.GetNumChildren() > 1:
-                self.tools.append(CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
-            
-    def SplitSketch(self):
-        wx.MessageBox("Splitting " + str(self.object))
-            
+class SelectTool(ContextTool):
+    def __init__(self, object):
+        ContextTool.__init__(self)
+        self.object = object
+    
+    def GetTitle(self):
+        return "Select"
+
+    def BitmapName(self):
+        return "select"
+
+    def Run(self, event):
+        cad.Select(self.object)
+         
+class EditTool(ContextTool):
+    def __init__(self, object):
+        ContextTool.__init__(self)
+        self.object = object
+    
+    def GetTitle(self):
+        return "Edit"
+
+    def BitmapName(self):
+        return "edit"
+
+    def Run(self, event):
+        wx.GetApp().EditUndoably(self.object)
+        
 class CADContextTool(ContextTool):
     def __init__(self, title, bitmap_name, method):
         ContextTool.__init__(self)

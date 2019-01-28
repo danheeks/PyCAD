@@ -23,6 +23,9 @@ class Object(cad.BaseObject):
     
     def GetProperties(self):
         return cad.BaseObject.GetBaseProperties(self)
+        
+    def HasEdit(self):
+        return False
     
     
 class PyProperty(cad.Property):

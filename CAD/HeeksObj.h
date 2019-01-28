@@ -106,7 +106,6 @@ public:
 	virtual bool GetScaleAboutMatrix(Matrix &m);
 	virtual void GetProperties(std::list<Property *> *list);
 	virtual void GetOnEdit(bool(**callback)(HeeksObj*)){ *callback = NULL; } // returns a function for doing edit with a dialog
-	bool Edit(){bool(*fn)(HeeksObj*) = NULL;GetOnEdit(&fn);if(fn){if((*fn)(this)){WriteDefaultValues();return true;}}return false;}  // do edit with a dialog
 	virtual void OnApplyProperties(){}
 	virtual bool ValidateProperties(){return true;}
 	virtual const wchar_t* GetIconFilePath();  

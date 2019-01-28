@@ -1633,20 +1633,6 @@ void CApp::ReverseUndoably(HeeksObj *object)
 #endif
 }
 
-void CApp::EditUndoably(HeeksObj *object)
-{
-	HeeksObj* copy_object = object->MakeACopyWithID();
-	if (copy_object)
-	{
-		if (copy_object->Edit())
-		{
-			theApp.CopyUndoably(object, copy_object);
-		}
-		else
-			delete copy_object;
-	}
-}
-
 void CApp::Transform(std::list<HeeksObj*> objects, const Matrix& m)
 {
 	std::list<HeeksObj*>::iterator it;

@@ -847,6 +847,23 @@ public:
 		}
 		WriteBaseXML(BaseObject::m_cur_element);
 	}
+
+	HeeksObj* MakeACopy()const
+	{
+		if (bp::override f = this->get_override("MakeACopy"))
+		{
+			return f();
+		}
+		return NULL;
+	}
+
+	void CopyFrom(const HeeksObj* object)
+	{
+		if (bp::override f = this->get_override("CopyFrom"))
+		{
+			f(bp::object(bp::ptr(object)));
+		}
+	}
 };
 
 // static definitions
@@ -1113,6 +1130,11 @@ HeeksColor HeeksObjGetColor(const HeeksObj& object)
 	return *(object.GetColor());
 }
 
+bool HeeksObjHasEdit(const HeeksObj& object)
+{
+	return false;
+}
+
 bp::tuple SketchGetStartPoint(CSketch &sketch)
 {
 	Point3d s(0.0, 0.0, 0.0);
@@ -1136,7 +1158,7 @@ bp::tuple SketchGetEndPoint(CSketch &sketch)
 boost::python::list SketchSplit(CSketch& sketch) {
 	boost::python::list olist;
 	std::list<HeeksObj*> new_separate_sketches;
-	sketch.ExtractSeparateSketches(new_separate_sketches, false);
+	sketch.ExtractSeparateSketches(new_separate_sketches, true);
 	for (std::list<HeeksObj*>::iterator It = new_separate_sketches.begin(); It != new_separate_sketches.end(); It++)
 	{
 		HeeksObj* object = *It;
@@ -1502,10 +1524,13 @@ bool ObjectMarked(HeeksObj* object)
 	return theApp.m_marked_list->ObjectMarked(object);
 }
 
-void Select(HeeksObj* object, bool call_OnChanged)
+void Select(HeeksObj* object, bool call_OnChanged = true)
 {
 	theApp.m_marked_list->Add(object, call_OnChanged);
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(SelectOverloads, Select, 1, 2)
+
 
 void Unselect(HeeksObj* object, bool call_OnChanged)
 {
@@ -1567,12 +1592,19 @@ void DeleteUndoably(HeeksObj *object)
 	theApp.DeleteUndoably(object);
 }
 
+void CopyUndoably(HeeksObj* object, HeeksObj* copy_object)
+{
+	theApp.CopyUndoably(object, copy_object);
+}
+
 void AddUndoably(HeeksObj *object, HeeksObj* owner = NULL, HeeksObj* prev_object = NULL)
 {
 	theApp.AddUndoably(object, owner, prev_object);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(AddUndoablyOverloads, AddUndoably, 1, 3)
+
+
 
 void DoUndoable(Undoable* undoable)
 {
@@ -1746,7 +1778,7 @@ void PyIncref(PyObject* object)
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
-			.def("CopyFrom", &HeeksObj::CopyFrom)
+			.def("CopyFrom", &BaseObject::CopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
 			;
@@ -1760,6 +1792,7 @@ void PyIncref(PyObject* object)
 			.def("GetIndex", &HeeksObj::GetIndex)
 			.def("KillGLLists", &HeeksObj::KillGLLists)
 			.def("GetColor", &HeeksObjGetColor)
+			.def("HasEdit", &HeeksObjHasEdit)
 			.def("GetTitle", &HeeksObjGetTitle)
 			.def("AutoExpand", &HeeksObj::AutoExpand)
 			.def("GetNumChildren", &HeeksObj::GetNumChildren)
@@ -1773,6 +1806,7 @@ void PyIncref(PyObject* object)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetLines", &HeeksObjGetLines)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)
+			.def("MakeACopy", &HeeksObj::MakeACopy, bp::return_value_policy<bp::reference_existing_object>())
 			;
 
 		bp::class_<HeeksColor>("Color")
@@ -2129,6 +2163,9 @@ void PyIncref(PyObject* object)
 		bp::def("GetClickedObjects", GetClickedObjects);
 		bp::def("ObjectMarked", ObjectMarked);
 		bp::def("Select", Select);
+		bp::def("Select", &Select, SelectOverloads(
+			(bp::arg("object"),
+			bp::arg("CallOnChanged") = NULL)));
 		bp::def("Unselect", Unselect);
 		bp::def("ClearSelection", ClearSelection);
 		bp::def("GetViewUnits", GetViewUnits);
@@ -2146,6 +2183,7 @@ void PyIncref(PyObject* object)
 			(bp::arg("object"),
 			bp::arg("owner") = NULL,
 			bp::arg("prev_object") = NULL)));
+		bp::def("CopyUndoably", CopyUndoably);
 		bp::def("DoUndoable", DoUndoable);
 		bp::def("ShiftSelect", ShiftSelect);
 		bp::def("ChangePropertyString", ChangePropertyString);

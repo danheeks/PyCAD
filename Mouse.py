@@ -37,3 +37,20 @@ def MouseEventFromWx(w):
     e.m_linesPerAction = w.LinesPerAction
 
     return e
+
+def copy(e):
+    e2 = cad.MouseEvent()
+    e2.m_event_type = e.m_event_type
+    e2.m_x = e.m_x
+    e2.m_y = e.m_y
+    e2.m_leftDown = e.m_leftDown
+    e2.m_middleDown = e.m_middleDown
+    e2.m_rightDown = e.m_rightDown
+    e2.m_controlDown = e.m_controlDown
+    e2.m_shiftDown = e.m_shiftDown
+    e2.m_altDown = e.m_altDown
+    e2.m_metaDown = e.m_metaDown
+    e2.m_wheelRotation = e.m_wheelRotation
+    e2.m_wheelDelta = e.m_wheelDelta
+    e2.m_linesPerAction = e.m_linesPerAction
+    return e2

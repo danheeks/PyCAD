@@ -6,6 +6,7 @@ import cad
 import Mouse
 import Key
 from RefreshObserver import RefreshObserver
+import copy
 
 graphics_canvases = []
 repaint_registered = False
@@ -38,6 +39,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             cad.RegisterOnRepaint(OnRepaint)
             repaint_registered = True
         graphics_canvases.append(self)
+        self.right_down_and_no_left_clicked = False
 
     def OnSize(self, event):
        self.Resize()
@@ -84,25 +86,34 @@ class GraphicsCanvas(glcanvas.GLCanvas):
     def OnMouse(self, event):
         e = Mouse.MouseEventFromWx(event)
         if e.m_controlDown and e.m_event_type == 1:
-            e.m_controlDown = False
-            e.m_event_type = 6
-            e.m_leftDown = False
-            e.m_middleDown = True
+            e2 = Mouse.copy(e)
+            e2.m_controlDown = False
+            e2.m_event_type = 6
+            e2.m_leftDown = False
+            e2.m_middleDown = True
             self.m_middle_down = True
+            self.viewport.OnMouseEvent(e2)
         if e.m_controlDown and e.m_event_type == 2:
-            e.m_controlDown = False
-            e.m_event_type = 7
-            e.m_leftDown = False
-            e.m_middleDown = False
+            e2 = Mouse.copy(e)
+            e2.m_controlDown = False
+            e2.m_event_type = 7
+            e2.m_leftDown = False
+            e2.m_middleDown = False
             self.m_middle_down = False
-            
+            self.viewport.OnMouseEvent(e2)
         if self.m_middle_down:
             e.m_leftDown = False
             e.m_middleDown = True
             e.m_controlDown = False
+        
+        if event.RightDown():
+            self.right_down_and_no_left_clicked = True
+        if event.LeftIsDown(): 
+            self.right_down_and_no_left_clicked = False
             
-        if event.RightUp():
+        if event.RightUp() and self.right_down_and_no_left_clicked:
             wx.GetApp().DoDropDownMenu(self, event.GetX(), event.GetY(), event.ControlDown())
+            self.right_down_and_no_left_clicked = False
         else:
             self.viewport.OnMouseEvent(e)
             if self.viewport.m_need_update: self.Update()

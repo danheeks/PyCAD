@@ -263,7 +263,6 @@ public:
 	void TransformUndoably(HeeksObj *object, const Matrix &m);
 	void TransformUndoably(const std::list<HeeksObj*>& list, const Matrix &m);
 	void ReverseUndoably(HeeksObj *object);
-	void EditUndoably(HeeksObj *object);
 	void WasModified(HeeksObj *object);
 	void WasAdded(HeeksObj *object);
 	void WasRemoved(HeeksObj *object);

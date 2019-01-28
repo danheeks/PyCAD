@@ -191,70 +191,23 @@ class TreeCanvas(wx.ScrolledWindow):
                 self.clicked_object = button.obj
                 self.OnLabelRightDown(button.obj, event)
 
-#       if event.RightUp():
-#                // do a context menu
-#                MarkedObjectOneOfEach marked_object(0, clicked_object, 1, 0, NULL);
-#                if(m_dragging)
-#                {
-#                        m_dragging = false;
+        if event.RightUp():
+            if self.dragging:
+                self.dragging = False
+                wx.MessageBox('Right Drag Happenend')
+            else:
+                if self.clicked_object:
+                    tools = wx.GetApp().GetObjectTools(self.clicked_object, True)
+                    menu = wx.Menu()
+                    for tool in tools:
+                        wx.GetApp().AddToolToListAndMenu(tool, menu)
+                    self.PopupMenu(menu, event.GetPosition())
 
-#                        // find the object to drop on to
-#                        const CTreeButton* button = HitTest(event.GetPosition());
+        if event.LeftDClick():
+             if self.clicked_object:
+                 wx.GetApp().EditUndoably(self.clicked_object)
 
-#                        if(button == NULL || !wxGetApp().m_marked_list->ObjectMarked(button->obj)) // can only drop on to an item other than one of the items being dragged
-#                        {
-#                                // make a Move or Copy context menu
-#                                HeeksObj* paste_into = NULL;
-#                                HeeksObj* paste_before = NULL;
-#                                if(button)
-#                                {
-#                                        paste_into = button->paste_into;
-#                                        paste_before = button->paste_before;
-#                                }
-#                                wxGetApp().DoMoveOrCopyDropDownMenu(this, event.GetPosition(), &marked_object, paste_into, paste_before);
-#                        }
-#                        else
-#                        {
-#                                Refresh();
-#                        }
-#                }
-#                else
-#                {
-#                        // do a standard drop down menu
-#                        wxGetApp().DoDropDownMenu(this, event.GetPosition(), &marked_object, true, false);
-#                }
-
-#        if(event.Dragging())
-#        {
-#                if(event.LeftIsDown() || event.RightIsDown())
-#                {
-#                        if(!m_dragging && (abs(m_button_down_point.x - event.GetX())>2 || abs(m_button_down_point.y - event.GetY())>2))
-#                        {
-#                                m_dragging = true;
-#                                m_dragged_list = wxGetApp().m_marked_list->list();
-#                        }
-#                        if(m_dragging)
-#                        {
-#                                m_drag_position = CalcUnscrolledPosition(event.GetPosition());
-#                                const CTreeButton* button = HitTest(event.GetPosition());
-#                                m_drag_paste_rect = wxRect(0, 0, 0, 0);
-#                                if(button && button->type == ButtonTypeLabelBefore)m_drag_paste_rect = button->rect;
-#                                Refresh();
-#                        }
-#                }
-#        }
-
-#        if(event.LeftDClick())
-#        {
-#                const CTreeButton* button = HitTest(event.GetPosition());
-#                if(button)
-#                {
-#                        if(button->obj)
-#                                wxGetApp().EditUndoably(button->obj);
-#                }
-#        }
-
-        event.Skip();
+        event.Skip()
     
     def IsExpanded(self, object):
         if object.AutoExpand():

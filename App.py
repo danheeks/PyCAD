@@ -4,9 +4,7 @@ import cad
 from Frame import Frame
 import os
 from HeeksConfig import HeeksConfig
-from ContextTool import ContextTool
-from ContextTool import ContextToolList
-from ContextTool import ObjectToolList
+import ContextTool
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -97,9 +95,38 @@ class App(wx.App):
         cad.SetResFolder(pycad_dir)
         cad.SetContextMenuCallback(OnContextMenu)
         
-    def GetObjectTools(self, object):
+    def SplitSketch(self):
+        new_sketches = self.object.Split()
+        cad.StartHistory()
+        cad.DeleteUndoably(self.object)
+        for sketch in new_sketches:
+            cad.AddUndoably(sketch, self.object.GetOwner(), None)
+        cad.EndHistory()
+
+    def EditUndoably(self, object):
+        if object.HasEdit() == False:
+            return
+        
+        copy_object = object.MakeACopy()
+        if copy_object:
+            if copy_object.Edit():
+                cad.CopyUndoably(object, copy_object)
+
+    def GetObjectTools(self, object, from_tree_canvas = False):
         tools = []
-        tools.append(ContextTool())
+        self.object = object
+        type = self.object.GetType()
+        if type == cad.OBJECT_TYPE_SKETCH:
+            if self.object.GetNumChildren() > 1:
+                tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
+                
+        if len(tools)>0:
+            tools.append(None) # a separator
+            
+        if not from_tree_canvas: # tree window doesn't need a "Select" menu item, because right clicking will have selected the object anyway
+            tools.append(ContextTool.SelectTool(object))
+        if object.HasEdit():
+            tools.append(ContextTool.EditTool(object))
         return tools
         
     def GetTools(self, x, y, control_pressed):
@@ -108,7 +135,7 @@ class App(wx.App):
         make_container = len(objects)>1
         for object in objects:
             if make_container:
-                tool_list = ObjectToolList(object)
+                tool_list = ContextTool.ObjectToolList(object)
                 tool_list.tools += self.GetObjectTools(object)
                 tools.append(tool_list)
             else:
