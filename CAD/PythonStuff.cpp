@@ -1104,7 +1104,15 @@ boost::python::list PropertyGetProperties(Property& p) {
 	return return_list;
 }
 
+void ObjListClear(ObjList& objlist)
+{
+	objlist.Clear();
+}
 
+void ObjListAdd(ObjList& objlist, HeeksObj* object)
+{
+	objlist.Add(object, NULL);
+}
 
 
 HeeksColor PropertyGetColor(const Property& p)
@@ -1542,6 +1550,11 @@ void ClearSelection(bool call_OnChanged)
 	theApp.m_marked_list->Clear(call_OnChanged);
 }
 
+int PickObjects(const std::wstring& str, long marking_filter, bool just_one)
+{
+	return theApp.PickObjects(str.c_str(), marking_filter, just_one);
+}
+
 double GetViewUnits()
 {
 	return theApp.m_view_units;
@@ -1762,6 +1775,7 @@ void PyIncref(PyObject* object)
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
 			.def("GetType", &BaseObjectGetType)
+			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
 			.def("GetID", &BaseObjectGetID)
@@ -1781,11 +1795,14 @@ void PyIncref(PyObject* object)
 			.def("CopyFrom", &BaseObject::CopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
+			.def("Clear", &ObjListClear)
+			.def("Add", &ObjListAdd)
 			;
 
 		bp::class_<HeeksObj, boost::noncopyable>("Object")
 			.def(bp::init<HeeksObj>())
 			.def("GetType", &HeeksObj::GetType)
+			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
 			.def("GetTypeString", HeeksObjGetTypeString)
 			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
 			.def("GetID", &HeeksObj::GetID)
@@ -1836,7 +1853,8 @@ void PyIncref(PyObject* object)
 
 		bp::class_<ObjList, bp::bases<HeeksObj>, boost::noncopyable>("ObjList")
 			.def(bp::init<ObjList>())
-			.def("Clear", &ObjList::ClearUndoably)
+			.def("Clear", &ObjListClear)
+			.def("Add", &ObjListAdd)
 			;
 
 		bp::class_<IdNamedObj, bp::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
@@ -2106,7 +2124,7 @@ void PyIncref(PyObject* object)
 			.def("OnKeyDown", &CInputMode::OnKeyDown)
 			.def("OnKeyUp", &CInputMode::OnKeyUp)
 			;
-		
+
 		bp::enum_<DigitizeType>("DigitizeType")
 			.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
 			.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
@@ -2118,6 +2136,20 @@ void PyIncref(PyObject* object)
 			.value("DIGITIZE_NEAREST_TYPE", DigitizeNearestType)
 			.value("DIGITIZE_TANGENT_TYPE", DigitizeTangentType)
 			.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
+			;
+
+		bp::enum_<SketchOrderType>("SketchOrderType")
+			.value("SketchOrderTypeUnknown", SketchOrderTypeUnknown)
+			.value("SketchOrderTypeEmpty", SketchOrderTypeEmpty)
+			.value("SketchOrderTypeOpen", SketchOrderTypeOpen)
+			.value("SketchOrderTypeReverse", SketchOrderTypeReverse)
+			.value("SketchOrderTypeBad", SketchOrderTypeBad)
+			.value("SketchOrderTypeReOrder", SketchOrderTypeReOrder)
+			.value("SketchOrderTypeCloseCW", SketchOrderTypeCloseCW)
+			.value("SketchOrderTypeCloseCCW", SketchOrderTypeCloseCCW)
+			.value("SketchOrderTypeMultipleCurves", SketchOrderTypeMultipleCurves)
+			.value("SketchOrderHasCircles", SketchOrderHasCircles)
+			.value("MaxSketchOrderTypes", MaxSketchOrderTypes)
 			;
 
 		bp::class_<DigitizedPoint>("DigitizedPoint")
@@ -2168,6 +2200,7 @@ void PyIncref(PyObject* object)
 			bp::arg("CallOnChanged") = NULL)));
 		bp::def("Unselect", Unselect);
 		bp::def("ClearSelection", ClearSelection);
+		bp::def("PickObjects", PickObjects);
 		bp::def("GetViewUnits", GetViewUnits);
 		bp::def("SetViewUnits", SetViewUnits);
 		bp::def("GetApp", GetApp, bp::return_value_policy<bp::reference_existing_object>());

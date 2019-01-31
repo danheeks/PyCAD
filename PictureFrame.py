@@ -8,10 +8,10 @@ class PictureFrame(wx.ScrolledWindow):
         w = self.bitmap.GetWidth()
         h = self.bitmap.GetHeight()
         self.SetVirtualSize(w,h)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
         
     def OnPaint(self, event):
         dc = wx.PaintDC(self)
-        self.PrepareDC(dc)
         dc.DrawBitmap(self.bitmap, 0,0, False)
         
 class PictureWindow(wx.Window):
@@ -19,10 +19,10 @@ class PictureWindow(wx.Window):
         wx.Window.__init__(self, parent, wx.ID_ANY, wx.DefaultPosition, size)
         self.bitmap = None
         self.bitmaps = {}
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
         
     def OnPaint(self, event):
         dc = wx.PaintDC(self)
-        self.PrepareDC(dc)
         if self.bitmap:
             dc.DrawBitmap(self.bitmap, 0,0, False)
             

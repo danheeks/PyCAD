@@ -119,7 +119,6 @@ class TreeCanvas(wx.ScrolledWindow):
  
             if button:
                 if button.type == ButtonTypePlus or button.type == ButtonTypeMinus:
-                    print('button obj = ' + str(button.obj))
                     self.SetExpanded(button.obj, button.type == ButtonTypePlus)
                     self.SetVirtualSize(self.GetRenderSize())
                     self.Refresh()
