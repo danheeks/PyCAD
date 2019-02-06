@@ -330,6 +330,12 @@ class Frame(wx.Frame):
                 self.DoFileOpenViewMag()
                 config.Write('ImportDirectory', dialog.GetDirectory())
             
+    def GetPathSuffix(self, path):
+        dot = path.rfind('.')
+        if dot == -1:
+            return ''
+        return path[dot+1:].lower()
+        
     def OnExport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
@@ -337,8 +343,15 @@ class Frame(wx.Frame):
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
-            if cad.SaveFile(dialog.GetPath()):
-                config.Write('ExportDirectory', dialog.GetDirectory())
+            path = dialog.GetPath()
+            suffix = self.GetPathSuffix(path)
+            print('suffix = ' + suffix)
+            if suffix == 'svg':
+                import Svg
+                Svg.Export(path)
+            else:
+                cad.SaveFile(path)
+            config.Write('ExportDirectory', dialog.GetDirectory())
                 
     def OnPrint(self, e):
         printDialogData = wx.PrintDialogData(wx.GetApp().printData)

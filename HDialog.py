@@ -81,19 +81,19 @@ class HDialog(wx.Dialog):
     def AddLabelAndControl(self, sizer, label, control):
         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
         static_label = wx.StaticText(self, wx.ID_ANY, label)
-        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_LEFT + wx.ALIGN_CENTER_VERTICAL, self.control_border )
-        sizer_horizontal.Add( control, 1, wx.LEFT + wx.ALIGN_RIGHT + wx.ALIGN_CENTER_VERTICAL, self.control_border )
-        sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, self.control_border )
+        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_LEFT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer_horizontal.Add( control, 1, wx.LEFT + wx.ALIGN_RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, control_border )
         return static_label
         
     def AddFileNameControl(self, sizer, label, text_control):
         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
         static_label = wx.StaticText(self, wx.ID_ANY, label)
-        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_LEFT + wx.ALIGN_CENTER_VERTICAL, self.control_border )
-        sizer_horizontal.Add( text_control, 1, wx.LEFT + wx.RIGHT + wx.ALIGN_CENTER_VERTICAL, self.control_border )
+        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_LEFT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer_horizontal.Add( text_control, 1, wx.LEFT + wx.RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
         button_control = wx.Button(self, label = "...")
-        sizer_horizontal.Add( button_control, 0, wx.LEFT + wx.ALIGN_RIGHT + wx.ALIGN_CENTER_VERTICAL, self.control_border )
-        sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, self.control_border )
+        sizer_horizontal.Add( button_control, 0, wx.LEFT + wx.ALIGN_RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, control_border )
         self.button_id_txt_map[button_control.GetId()] = text_control
         self.Bind(wx.EVT_BUTTON, self.OnFileBrowseButton, button_control)
         return static_label, button_control

@@ -121,6 +121,18 @@ const wchar_t* HLine::GetIconFilePath()
 	return iconpath.c_str();
 }
 
+bool HLine::GetStartPoint(Point3d &pos)
+{
+	pos = A;
+	return true;
+}
+
+bool HLine::GetEndPoint(Point3d &pos)
+{
+	pos = B;
+	return true;
+}
+
 bool HLine::GetMidPoint(Point3d &pos)
 {
 	pos = (A + B) * 0.5;

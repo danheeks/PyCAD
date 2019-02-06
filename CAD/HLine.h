@@ -22,6 +22,8 @@ public:
 	const wchar_t* GetTypeString(void)const{return L"Line";}
 	HeeksObj *MakeACopy(void)const;
 	const wchar_t* GetIconFilePath();
+	bool GetStartPoint(Point3d &pos);
+	bool GetEndPoint(Point3d &pos);
 	bool GetMidPoint(Point3d &pos);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);

@@ -5,8 +5,8 @@ in_here = False
 class Object(cad.BaseObject):
     # a wrapper for cad.BaseObject, implementing defaults for the methods
     # derive from this, as cad.BaseObject isn't quite as pythonic as I hoped, yet.
-    def __init__(self):
-        cad.BaseObject.__init__(self)
+    def __init__(self, type):
+        cad.BaseObject.__init__(self, type)
         cad.PyIncref(self)
         
     def GetTitle(self):

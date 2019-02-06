@@ -39,7 +39,6 @@ enum{
 	GearType,
 	ImageType,
 	XmlType,
-	PythonType,
 	ObjectMaximumType,
 };
 

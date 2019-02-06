@@ -665,11 +665,16 @@ class BaseObject : public ObjList, public bp::wrapper<ObjList>
 public:
 	bool m_uses_display_list;
 	int m_display_list;
+	int m_type;
 
-	BaseObject() :ObjList(), m_uses_display_list(false), m_display_list(0){
-	}
+	BaseObject() :ObjList(), m_uses_display_list(false), m_display_list(0), m_type(0){}
+	BaseObject(int type) :ObjList(), m_uses_display_list(false), m_display_list(0), m_type(type){}
 	bool NeverDelete(){ return true; }
-	int GetType()const{return PythonType;}
+
+	int GetType()const{
+		return m_type;
+	}
+
 
 	const wchar_t* GetIconFilePath()
 	{
@@ -873,11 +878,6 @@ bool BaseObject::lines_begun = false;
 TiXmlElement* BaseObject::m_cur_element = NULL;
 
 
-int BaseObjectGetType(const BaseObject& object)
-{
-	return PythonType;
-}
-
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 {
 	return std::wstring(object.GetIconFilePath());
@@ -1080,6 +1080,20 @@ boost::python::list HeeksObjGetLines(HeeksObj& object)
 	return_list_ForGetLines = boost::python::list();
 	object.GetSegments(CallbackForGetLines, GetLines_pixels_per_mm);
 	return return_list_ForGetLines;
+}
+
+Point3d HeeksObjGetStartPoint(HeeksObj& object)
+{
+	Point3d p(0,0,0);
+	object.GetStartPoint(p);
+	return p;
+}
+
+Point3d HeeksObjGetEndPoint(HeeksObj& object)
+{
+	Point3d p(0, 0, 0);
+	object.GetEndPoint(p);
+	return p;
 }
 
 std::wstring PropertyGetShortString(Property& p)
@@ -1300,6 +1314,8 @@ bp::object GetObjectFromId(int type, int id) {
 }
 
 static std::map<std::string, PyObject*> xml_read_callbacks;
+static std::map<std::string, int> custom_object_type_map;
+static int next_available_custom_object_type = ObjectMaximumType;
 
 HeeksObj* ReadPyObjectFromXMLElement(TiXmlElement* pElem);
 
@@ -1334,22 +1350,33 @@ HeeksObj* ReadPyObjectFromXMLElementWithName(const std::string& name, TiXmlEleme
 	return object;
 }
 
-void RegisterXMLRead(std::wstring name, PyObject *callback)
+int RegisterXMLRead(std::wstring name, PyObject *callback)
 {
-	if (!PyCallable_Check(callback))
-	{
-		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-		return;
-	}
-
+	// I might change this to something like RegisterObjectType
 	const char* name_c = Ttc(name.c_str());
 
-	// add an entry in map from name to 
-	xml_read_callbacks.insert(std::make_pair(name_c, callback));
+	if (PyCallable_Check(callback))
+	{
+		// add an entry in map from name to 
+		xml_read_callbacks.insert(std::make_pair(name_c, callback));
 
-	// tell HeeksCAD that it's a python object callback by registering it's dummy callback.
-	// HeeksCAD will spot this and call ReadPyObjectFromXMLElementWithName
-	theApp.RegisterReadXMLfunction(name_c, ReadPyObjectFromXMLElement);
+		// tell HeeksCAD that it's a python object callback by registering it's dummy callback.
+		// HeeksCAD will spot this and call ReadPyObjectFromXMLElementWithName
+		theApp.RegisterReadXMLfunction(name_c, ReadPyObjectFromXMLElement);
+	}
+
+	std::map<std::string, int>::iterator FindIt = custom_object_type_map.find(name_c);
+
+	if (custom_object_type_map.find(name_c) == custom_object_type_map.end())
+	{
+		// not in map
+		int value = next_available_custom_object_type;
+		custom_object_type_map.insert(std::make_pair(std::string(name_c), value));
+		next_available_custom_object_type++;
+		return value;
+	}
+
+	return FindIt->second;
 }
 
 void SetXmlValue(const std::wstring &name, const std::wstring &value)
@@ -1358,7 +1385,7 @@ void SetXmlValue(const std::wstring &name, const std::wstring &value)
 	BaseObject::m_cur_element->SetAttribute(Ttc(name.c_str()), svalue.c_str());
 }
 
-std::wstring GetXmlValue(const std::wstring &name)
+std::wstring GetXmlValue(const std::wstring &name, const std::wstring *default_value = NULL)
 {
 	if (BaseObject::m_cur_element != NULL)
 	{
@@ -1366,8 +1393,15 @@ std::wstring GetXmlValue(const std::wstring &name)
 		if (value != NULL)
 			return std::wstring(Ctt(value));
 	}
+	if (default_value)
+		return *default_value;
 	return L"";
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlValueOverloads, GetXmlValue, 1, 2)
+
+
+
 
 class PropertyWrap : public Property, public bp::wrapper<Property>
 {
@@ -1774,7 +1808,8 @@ void PyIncref(PyObject* object)
 
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
-			.def("GetType", &BaseObjectGetType)
+			.def(bp::init<int>())
+			.def("GetType", &HeeksObj::GetType)
 			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
@@ -1823,6 +1858,8 @@ void PyIncref(PyObject* object)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetLines", &HeeksObjGetLines)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)
+			.def("GetStartPoint", &HeeksObjGetStartPoint)
+			.def("GetEndPoint", &HeeksObjGetEndPoint)
 			.def("MakeACopy", &HeeksObj::MakeACopy, bp::return_value_policy<bp::reference_existing_object>())
 			;
 
@@ -2181,7 +2218,10 @@ void PyIncref(PyObject* object)
 		bp::def("GetObjectFromId", &GetObjectFromId);
 		bp::def("RegisterXMLRead", RegisterXMLRead);
 		bp::def("SetXmlValue", SetXmlValue);
-		bp::def("GetXmlValue", GetXmlValue);
+		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads(
+			(bp::arg("name"),
+			bp::arg("default_value") = NULL)));
+//		bp::def("GetXmlInt", GetXmlInt);
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
 		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
@@ -2194,7 +2234,6 @@ void PyIncref(PyObject* object)
 		bp::def("GetObjects", GetObjects);
 		bp::def("GetClickedObjects", GetClickedObjects);
 		bp::def("ObjectMarked", ObjectMarked);
-		bp::def("Select", Select);
 		bp::def("Select", &Select, SelectOverloads(
 			(bp::arg("object"),
 			bp::arg("CallOnChanged") = NULL)));
@@ -2252,8 +2291,6 @@ void PyIncref(PyObject* object)
 		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
 		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
 		bp::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
-		bp::scope().attr("OBJECT_TYPE_PYTHON") = (int)PythonType;
-
 		bp::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_DOUBLE") = (int)DoublePropertyType;

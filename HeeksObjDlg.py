@@ -5,42 +5,67 @@ import PictureFrame
 import wx
 
 class HeeksObjDlg(HDialog):
-    def __init__(self, object, title = '', top_level = True, picture = True):
+    def __init__(self, object, title = '', add_picture = True):
         HDialog.__init__(self, title)
         self.object = object
-        self.leftControls = []
-        self.rightControls = []
+        self.add_picture = add_picture
         self.picture = None
         
-        if picture:
-            self.picture = PictureFrame.PictureWindow(self, wx.Size(300, 200))
-            pictureSizer = wx.BoxSizer(wx.VERTICAL)
-            pictureSizer.Add(self.picture, 1, wx.GROW)
-            self.rightControls.append(HControl(wx.ALL, sizer = pictureSizer))
-        else:
-            self.picture = None
+        sizerMain = wx.BoxSizer(wx.HORIZONTAL)
+        
+        # add left sizer
+        self.sizerLeft = wx.BoxSizer(wx.VERTICAL)
+        sizerMain.Add(self.sizerLeft, 0, wx.ALL, control_border)
             
-        if top_level:
-            self.AddControlsAndCreate()
+        # add right sizer
+        self.sizerRight = wx.BoxSizer(wx.VERTICAL)
+        sizerMain.Add(self.sizerRight, 0, wx.ALL, control_border)
+        
+        self.ignore_event_functions = True
+        
+        self.AddLeftControls()
+        if self.add_picture:
+            self.AddPictureControl()
+        self.AddRightControls()
+            
+        self.SetFromData()
+        
+        self.SetSizer( sizerMain )
+        sizerMain.SetSizeHints( self )
+        sizerMain.Fit( self )
+        
+        self.ignore_event_functions = False
+        
+        self.Bind(wx.EVT_CHILD_FOCUS, self.OnChildFocus)
+        
+        self.SetPicture()
+        self.SetDefaultFocus()
+
+    def AddLeftControls(self):
+        pass
+    
+    def AddRightControls(self):            
+        # add OK and Cancel to right side
+        self.MakeOkAndCancel(wx.HORIZONTAL).AddToSizer(self.sizerRight)
+
+    def SetDefaultFocus(self):
+        if self.picture:
             self.picture.SetFocus()
             
-    def GetData(self, object):
+    def GetData(self):
         if self.ignore_event_functions:
             return
         self.ignore_event_functions = True
-        self.GetDataRaw(object)
+        self.GetDataRaw()
         self.ignore_event_functions = False        
         
-    def SetFromData(self, object):
-        save_ignore_event_functions = self.ignore_event_functions
-        self.ignore_event_functions = True
-        self.SetFromDataRaw(object)
-        self.ignore_event_functions = False       
+    def SetFromData(self):
+        self.SetFromDataRaw()
         
-    def GetDataRaw(self, object):
+    def GetDataRaw(self):
         pass
         
-    def SetFromDataRaw(self, object):
+    def SetFromDataRaw(self):
         pass
     
     def SetPictureByName(self, name):
@@ -63,42 +88,16 @@ class HeeksObjDlg(HDialog):
             return
         if event.GetWindow():
             self.SetPicture()
+        event.Skip()
     
     def OnComboOrCheck(self, event):
         if self.ignore_event_functions:
             return
         self.SetPicture()
         
-    def AddControlsAndCreate(self, object):
-        self.ignore_event_functions = True
-        sizerMain = wx.BoxSizer(wx.HORIZONTAL)
+    def AddPictureControl(self):
+        self.picture = PictureFrame.PictureWindow(self, wx.Size(300, 200))
+        pictureSizer = wx.BoxSizer(wx.VERTICAL)
+        pictureSizer.Add(self.picture, 1, wx.GROW)
+        HControl(wx.ALL, sizer = pictureSizer).AddToSizer(self.sizerRight)
         
-        # add left sizer
-        sizerLeft = wx.BoxSizer(wx.VERTICAL)
-        sizerMain.Add(sizerLeft, 0, wx.ALL, control_border)
-        
-        for control in self.leftControls:
-            control.AddToSizer(sizerLeft)
-            
-        # add right sizer
-        sizerRight = wx.BoxSizer(wx.VERTICAL)
-        sizerMain.Add(sizerRight, 0, wx.ALL, control_border)
-        
-        # add OK and Cancel to right side
-        self.rightControls.append(self.MakeOkAndCancel(wx.HORIZONTAL))
-        
-        # add right controls
-        for control in self.rightControls:
-            control.AddToSizer(sizerRight)
-            
-        self.SetFromData(object)
-        
-        self.SetSizer( sizerMain )
-        sizerMain.SetSizeHints( self )
-        sizerMain.Fit( self )
-        
-        self.ignore_event_functions = False
-        
-        self.Bind(wx.EVT_CHILD_FOCUS, self.OnChildFocus)
-        
-        self.SetPicture()
