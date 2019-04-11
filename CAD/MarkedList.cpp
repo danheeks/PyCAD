@@ -250,9 +250,12 @@ void MarkedList::Remove(HeeksObj *object, bool call_OnChanged){
 
 void MarkedList::Add(HeeksObj *object, bool call_OnChanged){
 	if (!object) return;
-	std::list<HeeksObj *> list;
-	list.push_back(object);
-	Add(list, call_OnChanged);
+	if (m_set.find(object) == m_set.end())
+	{
+		std::list<HeeksObj *> list;
+		list.push_back(object);
+		Add(list, call_OnChanged);
+	}
 }
 
 void MarkedList::Remove(const std::list<HeeksObj *> &obj_list, bool call_OnChanged){

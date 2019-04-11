@@ -31,6 +31,6 @@ public:
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	HeeksObj* MakeACopyWithID();
 	bool IsDifferent(HeeksObj* other);
-	void WriteBaseXML(TiXmlElement *element);
-	void ReadBaseXML(TiXmlElement* element);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement* element);
 };

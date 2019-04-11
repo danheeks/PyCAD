@@ -355,37 +355,6 @@ Point3d HLine::GetSegmentVector(double fraction)
 	return Point3d(A, B).Normalized();
 }
 
-void HLine::WriteXML(TiXmlNode *root)
-{
-	TiXmlElement * element;
-	element = new TiXmlElement( "Line" );
-	root->LinkEndChild( element );
-
-	WriteBaseXML(element);
-}
-
-// static member function
-HeeksObj* HLine::ReadFromXMLElement(TiXmlElement* pElem)
-{
-	HeeksColor c;
-	HLine* new_object = new HLine(Point3d(), Point3d(), &c);
-	new_object->ReadBaseXML(pElem);
-
-	// The OpenCascade libraries throw an exception when one tries to
-	// create a gp_Lin() object using a vector that doesn't point
-	// anywhere.  If this is a zero-length line then we're in
-	// trouble.  Don't bother with it.
-	if ((new_object->A.x == new_object->B.x) &&
-		(new_object->A.y == new_object->B.y) &&
-		(new_object->A.z == new_object->B.z))
-	{
-		delete new_object;
-		return(NULL);
-	}
-
-	return new_object;
-}
-
 void HLine::Reverse()
 {
 	Point3d temp = A;

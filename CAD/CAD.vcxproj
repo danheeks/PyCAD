@@ -100,6 +100,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="ConversionTools.cpp" />
     <ClCompile Include="CoordinateSystem.cpp" />
     <ClCompile Include="DigitizedPoint.cpp" />
     <ClCompile Include="DigitizeMode.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="..\Geom\geometry.h" />
     <ClInclude Include="..\Geom\Point.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="ConversionTools.h" />
     <ClInclude Include="CoordinateSystem.h" />
     <ClInclude Include="DigitizedPoint.h" />
     <ClInclude Include="DigitizeMode.h" />

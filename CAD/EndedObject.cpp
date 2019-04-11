@@ -84,7 +84,7 @@ bool EndedObject::GetEndPoint(double* pos)
 	return true;
 }
 
-void EndedObject::WriteBaseXML(TiXmlElement *element)
+void EndedObject::WriteToXML(TiXmlElement *element)
 {
 	element->SetAttribute("col", color.COLORREF_color());
 	element->SetDoubleAttribute("sx", A.x);
@@ -94,10 +94,10 @@ void EndedObject::WriteBaseXML(TiXmlElement *element)
 	element->SetDoubleAttribute("ey", B.y);
 	element->SetDoubleAttribute("ez", B.z);
 
-	ExtrudedObj<HeeksObj>::WriteBaseXML(element);
+	ExtrudedObj<HeeksObj>::WriteToXML(element);
 }
 
-void EndedObject::ReadBaseXML(TiXmlElement* pElem)
+void EndedObject::ReadFromXML(TiXmlElement* pElem)
 {
 	HeeksColor c;
 
@@ -137,5 +137,5 @@ void EndedObject::ReadBaseXML(TiXmlElement* pElem)
 		}
 	}
 
-	ExtrudedObj<HeeksObj>::ReadBaseXML(pElem);
+	ExtrudedObj<HeeksObj>::ReadFromXML(pElem);
 }

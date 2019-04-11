@@ -78,6 +78,7 @@ class EditTool(ContextTool):
         return "edit"
 
     def Run(self, event):
+        print('EditTool.Run')
         wx.GetApp().EditUndoably(self.object)
         
 class CADContextTool(ContextTool):

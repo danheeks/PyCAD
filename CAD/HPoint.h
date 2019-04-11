@@ -39,8 +39,7 @@ public:
 	void SetStartPoint(const Point3d &pos);
 	bool GetEndPoint(Point3d& pos);
 	void CopyFrom(const HeeksObj* object){operator=(*((HPoint*)object));}
-	void WriteXML(TiXmlNode *root);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement *element);
 	bool IsDifferent(HeeksObj* other);
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

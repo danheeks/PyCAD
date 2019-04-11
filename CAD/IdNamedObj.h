@@ -18,8 +18,8 @@ public:
 	IdNamedObj():m_title_made_from_id(true){}
 
 	// HeeksObj's virtual functions
-	void WriteBaseXML(TiXmlElement *element);
-	void ReadBaseXML(TiXmlElement* element);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement* element);
     const wchar_t* GetShortString(void)const;
     bool CanEditString(void)const{return true;}
     void OnEditString(const wchar_t* str);

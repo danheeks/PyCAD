@@ -512,29 +512,6 @@ HeeksObj *CSketch::MakeACopy(void)const
 	return (IdNamedObjList*)(new CSketch(*this));
 }
 
-void CSketch::WriteXML(TiXmlNode *root)
-{
-    if (GetNumChildren() > 0)
-    {
-        TiXmlElement * element = new TiXmlElement( "Sketch" );
-        root->LinkEndChild( element );
-        element->SetAttribute("title", Ttc(m_title.c_str()));
-        WriteBaseXML(element);
-    }
-}
-
-// static member function
-HeeksObj* CSketch::ReadFromXMLElement(TiXmlElement* pElem)
-{
-	CSketch* new_object = new CSketch;
-	if(pElem->Attribute("title"))new_object->m_title = Ctt(pElem->Attribute("title"));
-	new_object->ReadBaseXML(pElem);
-
-	new_object->ReloadPointers();
-
-	return (IdNamedObjList*)new_object;
-}
-
 void CSketch::SetColor(const HeeksColor &col)
 {
 	std::list<HeeksObj*>::iterator It;

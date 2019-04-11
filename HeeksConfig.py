@@ -1,8 +1,13 @@
 import wx
 
+app_name = None
+
 class HeeksConfig(wx.Config):
     def __init__(self, disabled = False):
-        wx.Config.__init__(self, wx.GetApp().GetAppName())
+        global app_name
+        if app_name == None:
+            app_name = wx.GetApp().GetAppName()
+        wx.Config.__init__(self, app_name)
         self.disabled = disabled
         
     def Write(self, key, value):

@@ -11,6 +11,7 @@ public:
 	TiXmlElement m_element;
 
 	~HXml(void);
+	HXml();
 	HXml(TiXmlElement* pElem);
 
 	// HeeksObj's virtual functions
@@ -21,8 +22,6 @@ public:
 	const wchar_t* GetIconFilePath();
 	void GetProperties(std::list<Property *> *list);
 	void CopyFrom(const HeeksObj* object){operator=(*((HXml*)object));}
-	void WriteXML(TiXmlNode *root);
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement *element);
 };

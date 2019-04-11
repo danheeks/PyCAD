@@ -1238,11 +1238,8 @@ bool CoordinateSystem::GetScaleAboutMatrix(Matrix &m)
 	return true;
 }
 
-void CoordinateSystem::WriteXML(TiXmlNode *root)
+void CoordinateSystem::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement * element;
-	element = new TiXmlElement( "CoordinateSystem" );
-	root->LinkEndChild( element );  
 	element->SetAttribute("title", Ttc(m_title.c_str()) );
 	element->SetDoubleAttribute("ox", m_o.x);
 	element->SetDoubleAttribute("oy", m_o.y);
@@ -1253,7 +1250,7 @@ void CoordinateSystem::WriteXML(TiXmlNode *root)
 	element->SetDoubleAttribute("yx", m_y.x);
 	element->SetDoubleAttribute("yy", m_y.y);
 	element->SetDoubleAttribute("yz", m_y.z);
-	WriteBaseXML(element);
+	WriteToXML(element);
 }
 
 Matrix CoordinateSystem::GetMatrix()
@@ -1261,33 +1258,20 @@ Matrix CoordinateSystem::GetMatrix()
 	return Matrix(m_o, m_x, m_y);
 }
 
-// static
-HeeksObj* CoordinateSystem::ReadFromXMLElement(TiXmlElement* pElem)
+void CoordinateSystem::ReadFromXML(TiXmlElement *element)
 {
-	Point3d o;
-	Point3d x, y;
-	std::wstring title;
-
-	// get the attributes
-	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-	{
-		std::string name(a->Name());
-		if(name == "title"){title.assign(Ctt(a->Value()));}
-		else if(name == "ox"){o.x = (a->DoubleValue());}
-		else if(name == "oy"){o.y = (a->DoubleValue());}
-		else if(name == "oz"){o.z = (a->DoubleValue());}
-		else if(name == "xx"){x.x = (a->DoubleValue());}
-		else if(name == "xy"){x.y = (a->DoubleValue());}
-		else if(name == "xz"){x.z = (a->DoubleValue());}
-		else if(name == "yx"){y.x = (a->DoubleValue());}
-		else if(name == "yy"){y.y = (a->DoubleValue());}
-		else if(name == "yz"){y.z = (a->DoubleValue());}
-	}
-
-	CoordinateSystem* new_object = new CoordinateSystem(title, o, x, y);
-	new_object->ReadBaseXML(pElem);
-
-	return new_object;
+	element->Attribute("ox", &m_o.x);
+	element->Attribute("oy", &m_o.y);
+	element->Attribute("oz", &m_o.z);
+	element->Attribute("xx", &m_x.x);
+	element->Attribute("xy", &m_x.y);
+	element->Attribute("xz", &m_x.z);
+	element->Attribute("yx", &m_y.x);
+	element->Attribute("yy", &m_y.y);
+	element->Attribute("yz", &m_y.z);
+	const char* title = element->Attribute("title");
+	if (title)m_title.assign(Ctt(title));
+	HeeksObj::ReadFromXML(element);
 }
 
 // code for AxesToAngles copied from http://tog.acm.org/GraphicsGems/gemsiv/euler_angle/EulerAngles.c

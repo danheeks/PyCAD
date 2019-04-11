@@ -32,10 +32,8 @@ public:
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	void CopyFrom(const HeeksObj* object){operator=(*((HLine*)object));}
-	void WriteXML(TiXmlNode *root);
 
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
-    bool UsesID(){return true;} 
+	bool UsesID(){return true;} 
 	bool Intersects(const Point3d &pnt)const;
 	Point3d GetSegmentVector(double fraction);
 	void Reverse();

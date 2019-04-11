@@ -77,7 +77,7 @@ private:
 	typedef std::map< GroupId_t, IdsToObjects_t > UsedIds_t;
 	UsedIds_t	used_ids;
 	std::map< int, int > next_id_map;
-	std::map< std::string, HeeksObj*(*)(TiXmlElement* pElem) > xml_read_fn_map;
+	std::map< std::string, HeeksObj*(*)() > object_create_fn_map;
 
 	void render_screen_text2(const wchar_t* str, bool select);
 	float get_text_scale();
@@ -232,10 +232,11 @@ public:
 	void Remove(std::list<HeeksObj*> objects);
 	void Transform(std::list<HeeksObj*> objects, const Matrix& m);
 	void Reset();
+	HeeksObj* CreateObjectOfType(const std::string& name);
 	HeeksObj* ReadXMLElement(TiXmlElement* pElem);
-	void ObjectWriteBaseXML(HeeksObj *object, TiXmlElement *element);
-	void ObjectReadBaseXML(HeeksObj *object, TiXmlElement* element);
-	void InitializeXMLFunctions();
+	void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element);
+	void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element);
+	void InitializeCreateFunctions();
 	void OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool undoably = false, bool show_error = true);
 	static void OpenSVGFile(const wchar_t *filepath);
 	static void OpenSTLFile(const wchar_t *filepath);
@@ -290,7 +291,6 @@ public:
 	void OnNewOrOpen(bool open, int res);
 	void OnBeforeNewOrOpen(bool open, int res);
 	void OnBeforeFrameDelete(void);
-	void RegisterReadXMLfunction(const char* type_name, HeeksObj*(*read_xml_function)(TiXmlElement* pElem));
 	HeeksObj* GetIDObject(int type, int id);
 	std::list<HeeksObj*> GetIDObjects(int type, int id);
 	void SetObjectID(HeeksObj* object, int id);

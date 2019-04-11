@@ -25,7 +25,8 @@ public:
 	int GetType()const{return GroupType;}
 	HeeksObj *MakeACopy(void)const{ return new CGroup(*this);}
 	const wchar_t* GetIconFilePath();
-	void WriteXML(TiXmlNode *root);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement* element);
 	bool UsesID(){return true;}
 	const wchar_t* GetShortString(void)const{return m_title.c_str();}
 	bool CanEditString(void)const{return true;}
@@ -37,7 +38,5 @@ public:
 	void Transform(const Matrix& m);
 
 	Matrix GetMatrix();
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };
 

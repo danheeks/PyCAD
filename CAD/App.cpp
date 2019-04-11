@@ -141,7 +141,7 @@ CApp::CApp()
 		RegisterFileOpenHandler(extensions, OpenSTLFile);
 	}
 
-	InitializeXMLFunctions();
+	InitializeCreateFunctions();
 
 	m_settings_restored = false;
 
@@ -259,111 +259,84 @@ void CApp::Reset(){
 	ResetIDs();
 }
 
-HeeksObj* ReadPyObjectFromXMLElement(TiXmlElement* pElem){ return NULL; } // dummy function
+static HeeksObj* CreateHLine(){ HeeksColor c; return new HLine(Point3d(), Point3d(), &c); }
+static HeeksObj* CreateHArc(){ HeeksColor c; return new HArc(Point3d(), Point3d(), Point3d(), Point3d(), &c); }
+static HeeksObj* CreateHPoint(){ HeeksColor c; return new HPoint(Point3d(), &c); }
+static HeeksObj* CreateCSketch(){ return new CSketch; }
+static HeeksObj* CreateCStlSolid(){ return new CStlSolid; }
+static HeeksObj* CreateCoordinateSystem(){ return new CoordinateSystem; }
 
-void CApp::InitializeXMLFunctions()
+void CApp::InitializeCreateFunctions()
 {
 	// set up function map
-	if(xml_read_fn_map.size() == 0)
+	if(object_create_fn_map.size() == 0)
 	{
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Line", HLine::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Arc", HArc::ReadFromXMLElement ) );
-#if 0
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "InfiniteLine", HILine::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Circle", HCircle::ReadFromXMLElement ) );
-#endif
-		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("Point", HPoint::ReadFromXMLElement));
-#if 0
-		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("Image", HImage::ReadFromXMLElement));
-#endif
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Sketch", CSketch::ReadFromXMLElement ) );
-#if 0
-		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("STEP_file", ReadSTEPFileFromXMLElement));
-#endif
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "STLSolid", CStlSolid::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "CoordinateSystem", CoordinateSystem::ReadFromXMLElement ) );
-#if 0
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Text", HText::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Dimension", HDimension::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Ellipse", HEllipse::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Spline", HSpline::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Group", CGroup::ReadFromXMLElement ) );
-		xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( "Gear", HGear::ReadFromXMLElement ) );
-		xml_read_fn_map.insert(std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) >("Area", HArea::ReadFromXMLElement));
-#endif
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Line", CreateHLine));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Arc", CreateHArc));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Point", CreateHPoint));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Sketch", CreateCSketch));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("STLSolid", CreateCStlSolid));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("CoordinateSystem", CreateCoordinateSystem));
 	}
 }
 
-void CApp::RegisterReadXMLfunction(const char* type_name, HeeksObj*(*read_xml_function)(TiXmlElement* pElem))
+HeeksObj* CreatePyObjectWithName(const std::string& name);
+
+HeeksObj* CApp::CreateObjectOfType(const std::string& name)
 {
-	if (xml_read_fn_map.find(type_name) != xml_read_fn_map.end()){
-//		wxMessageBox(_T("Error - trying to register an XML read function for an existing type"));
-		return;
-	}
-	xml_read_fn_map.insert( std::pair< std::string, HeeksObj*(*)(TiXmlElement* pElem) > ( type_name, read_xml_function ) );
-}
+	std::map< std::string, HeeksObj*(*)() >::iterator FindIt = object_create_fn_map.find(name);
+	if (FindIt != object_create_fn_map.end())
+		return (*(FindIt->second))();
 
-HeeksObj* ReadPyObjectFromXMLElementWithName(const std::string& name, TiXmlElement* pElem);
+	HeeksObj* object = CreatePyObjectWithName(name);
+
+	if (object)
+		return object;
+
+	return new HXml;
+}
 
 HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
 {
 	std::string name(pElem->Value());
 
-	std::map< std::string, HeeksObj*(*)(TiXmlElement* pElem) >::iterator FindIt = xml_read_fn_map.find( name );
-	HeeksObj* object = NULL;
-	if(FindIt != xml_read_fn_map.end())
+	HeeksObj* object = CreateObjectOfType(name);
+
+	if (object == NULL)
+		return NULL;
+
+	object->ReadFromXML(pElem);
+	object->ReloadPointers();
+
+	// Check to see if we already have an object for this type/id pair.  If so, use the existing one instead.
+	//
+	// NOTE: This would be better if another ObjList pointer was passed in and we checked the objects in that
+	// ObjList for pre-existing elements rather than going to the global one.  This would allow imported data
+	// (i.e. data read from another file and used to augment the current data) to work as well as the scenario
+	// where we are reading into an empty memory block. (new data)
+
+	HeeksObj *existing = NULL;
+
+	existing = GetIDObject(object->GetIDGroupType(), object->m_id);
+
+	if ((existing != NULL) && (existing != object))
 	{
-		HeeksObj*(*callback)(TiXmlElement* pElem) = FindIt->second;
-		if (callback == ReadPyObjectFromXMLElement)
-		{
-			object = ReadPyObjectFromXMLElementWithName(name, pElem);
-		}
-		else
-		{
-			object = (*(callback))(pElem);
-		}
-	}
-	else
-	{
-		object = HXml::ReadFromXMLElement(pElem);
-	}
-
-	if (object != NULL)
-	{
-		// Check to see if we already have an object for this type/id pair.  If so, use the existing one instead.
-		//
-		// NOTE: This would be better if another ObjList pointer was passed in and we checked the objects in that
-		// ObjList for pre-existing elements rather than going to the global one.  This would allow imported data
-		// (i.e. data read from another file and used to augment the current data) to work as well as the scenario
-		// where we are reading into an empty memory block. (new data)
-
-		HeeksObj *existing = NULL;
-
-		existing = GetIDObject(object->GetIDGroupType(), object->m_id);
-
-		if ((existing != NULL) && (existing != object))
-		{
-			// There was a pre-existing version of this type/id pair.  Don't replace it with another one.
-			delete object;
-			return(existing);
-		}
-		else
-		{
-			// It's new.  Keep this new copy.
-			return object;
-		}
+		// There was a pre-existing version of this type/id pair.  Don't replace it with another one.
+		delete object;
+		return(existing);
 	}
 
-	return(object);	//  NULL
+	// It's new.  Keep this new copy.
+	return object;
 }
 
-void CApp::ObjectWriteBaseXML(HeeksObj *object, TiXmlElement *element)
+void CApp::ObjectWriteToXML(HeeksObj *object, TiXmlElement *element)
 {
 	if (object->UsesID())element->SetAttribute("id", object->m_id);
 	if (!object->m_visible)element->SetAttribute("vis", 0);
 }
 
-void CApp::ObjectReadBaseXML(HeeksObj *object, TiXmlElement* element)
+void CApp::ObjectReadFromXML(HeeksObj *object, TiXmlElement* element)
 {
 	// get the attributes
 	for (TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
@@ -381,11 +354,10 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	{
 		if (show_error && doc.Error())
 		{
-#if 0
 			std::wstring msg(filepath);
-			msg << wxT(": ") << Ctt(doc.ErrorDesc());
-			wxMessageBox(msg);
-#endif
+			msg.append(L": ");
+			msg.append(Ctt(doc.ErrorDesc()));
+			MessageBox(msg.c_str());
 		}
 		return;
 	}

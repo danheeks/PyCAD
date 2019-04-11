@@ -28,7 +28,9 @@ class ObjPropsCanvas(PropertiesCanvas):
             cad.MessageBox('recursion = RemoveAndAddAll')
             return
         self.inRemoveAndAddAll = True
+        
         self.ClearProperties()
+
         for object in self.objects:
             properties = object.GetProperties()
             if properties:
@@ -36,6 +38,7 @@ class ObjPropsCanvas(PropertiesCanvas):
                     cad.PyIncref(property)
                     self.AddProperty(property)
         self.inRemoveAndAddAll = False
+
         
        
         

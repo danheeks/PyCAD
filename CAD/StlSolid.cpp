@@ -474,11 +474,8 @@ void CStlSolid::GetTriangles(void(*callbackfunc)(const double* x, const double* 
 	}
 }
 
-void CStlSolid::WriteXML(TiXmlNode *root)
+void CStlSolid::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement * element;
-	element = new TiXmlElement( "STLSolid" );
-	root->LinkEndChild( element );
 	element->SetAttribute("col", m_color.COLORREF_color());
 
 	for(std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
@@ -498,29 +495,18 @@ void CStlSolid::WriteXML(TiXmlNode *root)
 		child_element->SetDoubleAttribute("p3z", t.x[2][2]);
 	}
 
-	WriteBaseXML(element);
+	HeeksObj::WriteToXML(element);
 }
 
-
-// static member function
-HeeksObj* CStlSolid::ReadFromXMLElement(TiXmlElement* pElem)
+void CStlSolid::ReadFromXML(TiXmlElement *element)
 {
-	HeeksColor c;
-	CStlTri t;
-
-	// get the attributes
-	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-	{
-		std::string name(a->Name());
-		if(name == "col"){c = HeeksColor((long)(a->IntValue()));}
-	}
-
-	CStlSolid* new_object = new CStlSolid(&c);
+	int int_value;
+	if (element->Attribute("col", &int_value))m_color = HeeksColor((long)int_value);
 
 	// loop through all the "tri" objects
 	double x[3][3];
 
-	for(TiXmlElement* pTriElem = TiXmlHandle(pElem).FirstChildElement().Element(); pTriElem;	pTriElem = pTriElem->NextSiblingElement())
+	for (TiXmlElement* pTriElem = TiXmlHandle(element).FirstChildElement().Element(); pTriElem; pTriElem = pTriElem->NextSiblingElement())
 	{
 		// get the attributes
 		pTriElem->Attribute("p1x", &x[0][0]);
@@ -532,12 +518,10 @@ HeeksObj* CStlSolid::ReadFromXMLElement(TiXmlElement* pElem)
 		pTriElem->Attribute("p3x", &x[2][0]);
 		pTriElem->Attribute("p3y", &x[2][1]);
 		pTriElem->Attribute("p3z", &x[2][2]);
-		new_object->m_list.push_back(CStlTri(&x[0][0]));
+		m_list.push_back(CStlTri(&x[0][0]));
 	}
 
-	new_object->ReadBaseXML(pElem);
-
-	return new_object;
+	HeeksObj::ReadFromXML(element);
 }
 
 void CStlSolid::AddTriangle(float* t)

@@ -20,6 +20,7 @@ class Frame(wx.Frame):
     def __init__(self, parent, id=-1, title='', pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
         wx.Frame.__init__(self, parent, id, title, pos, size, style, name)
 
+        config = HeeksConfig()
         self.ID_RECENT_FIRST = wx.ID_HIGHEST + 1
         self.ID_RECENT_MENU = self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES
         self.windows_visible = {}
@@ -42,11 +43,33 @@ class Frame(wx.Frame):
         wx.GetApp().RegisterHideableWindow(self.tree_canvas)
         wx.GetApp().RegisterHideableWindow(self.properties_canvas)
 
-        self.Center()
+        perspective = config.Read('AuiPerspective', 'default')
+        if perspective != 'default':
+            self.aui_manager.LoadPerspective(perspective)
         self.aui_manager.Update()
         
         self.Bind(wx.EVT_MENU_RANGE, self.OnOpenRecent, id=self.ID_RECENT_FIRST, id2=self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_MOVE, self.OnMove)
         self.gears = []
+        
+    def __del__(self):
+        str = self.aui_manager.SavePerspective()
+        config = HeeksConfig()
+        config.Write('AuiPerspective', str)
+        self.aui_manager.UnInit()
+        
+    def OnSize(self, e):
+        size = e.GetSize()
+        config = HeeksConfig()
+        config.WriteInt('MainFrameWidth', size.GetWidth())
+        config.WriteInt('MainFrameHeight', size.GetHeight())
+        
+    def OnMove(self, e):
+        pos = self.GetPosition()
+        config = HeeksConfig()
+        config.WriteInt('MainFramePosX', pos.x)
+        config.WriteInt('MainFramePosY', pos.y)
         
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
@@ -223,8 +246,11 @@ class Frame(wx.Frame):
     def DoFileOpenViewMag(self):
         self.graphics_canvas.viewport.OnMagExtents(True, 25)
     
-    def OnOpenFilepath(self, filepath):
-        res = self.CheckForModifiedDoc()
+    def OnOpenFilepath(self, filepath, check = True):
+        if check:
+            res = self.CheckForModifiedDoc()
+        else:
+            res = wx.OK
         if res != wx.CANCEL:
             # self.OnBeforeNewOrOpen(True, res)
             cad.Reset()

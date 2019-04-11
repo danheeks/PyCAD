@@ -28,9 +28,6 @@ public:
 	bool FindPossTangentPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	void CopyFrom(const HeeksObj* object){operator=(*((HILine*)object));}
-	void WriteXML(TiXmlNode *root);
 	bool GetEndPoint(Point3d &pos);
 	bool GetStartPoint(Point3d &pos);
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 };

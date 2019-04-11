@@ -126,37 +126,23 @@ bool HPoint::GetEndPoint(Point3d& pos)
 	return true;
 }
 
-void HPoint::WriteXML(TiXmlNode *root)
+void HPoint::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement * element;
-	element = new TiXmlElement( "Point" );
-	root->LinkEndChild( element );  
 	element->SetAttribute("col", color.COLORREF_color());
 	element->SetDoubleAttribute("x", m_p.x);
 	element->SetDoubleAttribute("y", m_p.y);
 	element->SetDoubleAttribute("z", m_p.z);
-	WriteBaseXML(element);
+	IdNamedObj::WriteToXML(element);
 }
 
 
 //static
-HeeksObj* HPoint::ReadFromXMLElement(TiXmlElement* pElem)
+void HPoint::ReadFromXML(TiXmlElement *element)
 {
-	Point3d p;
-	HeeksColor c;
+	int int_value;
+	if (element->Attribute("col", &int_value))color = HeeksColor((long)int_value);
 
-	// get the attributes
-	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-	{
-		std::string name(a->Name());
-		if(name == "col"){c = HeeksColor((long)(a->IntValue()));}
-		else if(name == "x"){p.x = a->DoubleValue();}
-		else if(name == "y"){p.y = a->DoubleValue();}
-		else if(name == "z"){p.z = a->DoubleValue();}
-	}
-
-	HPoint* new_object = new HPoint(p, &c);
-	new_object->ReadBaseXML(pElem);
-
-	return new_object;
+	element->Attribute("x", &m_p.x);
+	element->Attribute("y", &m_p.y);
+	element->Attribute("z", &m_p.z);
 }

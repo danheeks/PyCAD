@@ -110,7 +110,6 @@ class TreeCanvas(wx.ScrolledWindow):
     
     def OnMouse(self, event):
         # to do? if(wxGetApp().m_property_grid_validation)return;
-
         if event.Entering():
             self.SetFocus()  # so middle wheel works
             
@@ -193,7 +192,6 @@ class TreeCanvas(wx.ScrolledWindow):
         if event.RightUp():
             if self.dragging:
                 self.dragging = False
-                wx.MessageBox('Right Drag Happenend')
             else:
                 if self.clicked_object:
                     tools = wx.GetApp().GetObjectTools(self.clicked_object, True)

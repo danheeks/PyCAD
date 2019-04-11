@@ -18,6 +18,7 @@ public:
 	static bool size_is_pixels; // false for mm
 	static bool rendering_current;
 
+	CoordinateSystem(){}
 	CoordinateSystem(const std::wstring& str, const Point3d &o, const Point3d &x, const Point3d &y);
 	CoordinateSystem(const CoordinateSystem &c);
 	~CoordinateSystem(void);
@@ -29,7 +30,8 @@ public:
 	long GetMarkingMask()const{return MARKING_FILTER_COORDINATE_SYSTEM;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
-	const wchar_t* GetTypeString(void)const{return L"Coordinate System";}
+	const wchar_t* GetTypeString(void)const{ return L"Coordinate System"; }
+	const wchar_t* GetXMLTypeString(void)const{ return L"CoordinateSystem"; }
 	const wchar_t* GetShortString(void)const{return m_title.c_str();}
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wchar_t* str);
@@ -39,12 +41,13 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	bool GetScaleAboutMatrix(Matrix &m);
-	void WriteXML(TiXmlNode *root);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement *element);
+
 
 	Matrix GetMatrix();
 	void ApplyMatrix();
 
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 	static void RenderArrow();
 	static void RenderDatum(bool bright, bool solid); // render a coordinate system at 0, 0, 0
 	static void AxesToAngles(const Point3d &x, const Point3d &y, double &v_angle, double &h_angle, double &t_angle);

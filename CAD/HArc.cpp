@@ -565,64 +565,27 @@ bool HArc::TangentialArc(const Point3d &p0, const Point3d &v0, const Point3d &p1
 	return false; // you'll have to do a line instead
 }
 
-void HArc::WriteXML(TiXmlNode *root)
+void HArc::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement *element = new TiXmlElement( "Arc" );
-	root->LinkEndChild( element );
 	element->SetDoubleAttribute("cx", C.x);
 	element->SetDoubleAttribute("cy", C.y);
 	element->SetDoubleAttribute("cz", C.z);
 	element->SetDoubleAttribute("ax", m_axis.x);
 	element->SetDoubleAttribute("ay", m_axis.y);
 	element->SetDoubleAttribute("az", m_axis.z);
-	WriteBaseXML(element);
+	EndedObject::WriteToXML(element);
 }
 
 // static member function
-HeeksObj* HArc::ReadFromXMLElement(TiXmlElement* pElem)
+void HArc::ReadFromXML(TiXmlElement *element)
 {
-	double axis[3];
-	Point3d centre(0,0,0);
-	HeeksColor c;
-
-	// get the attributes
-	double x;
-	if(pElem->Attribute("ax", &x))axis[0] = x;
-	if(pElem->Attribute("ay", &x))axis[1] = x;
-	if(pElem->Attribute("az", &x))axis[2] = x;
-	if(pElem->Attribute("cx", &x))centre.x = x;
-	if(pElem->Attribute("cy", &x))centre.y = x;
-	if(pElem->Attribute("cz", &x))centre.z = x;
-
-	else
-	{
-		// try the version where the points were children
-		int num_points = 0;
-		for(TiXmlElement* pElem2 = TiXmlHandle(pElem).FirstChildElement().Element(); pElem2;	pElem2 = pElem2->NextSiblingElement())
-		{
-			HeeksObj* object = theApp.ReadXMLElement(pElem2);
-			if(object->GetType() == PointType)
-			{
-				num_points++;
-				if(num_points == 3)
-				{
-					centre = ((HPoint*)object)->m_p;
-					delete object;
-					break;
-				}
-			}
-			delete object;
-		}
-	}
-
-	HArc* new_object = new HArc(Point3d(), Point3d(), Point3d(), Point3d(), &c);
-	new_object->ReadBaseXML(pElem);
-
-	new_object->C = centre;
-	new_object->m_axis = Point3d(axis);
-	new_object->m_radius = centre.Dist(new_object->A);
-
-	return new_object;
+	element->Attribute("cx", &C.x);
+	element->Attribute("cy", &C.y);
+	element->Attribute("cz", &C.z);
+	element->Attribute("ax", &m_axis.x);
+	element->Attribute("ay", &m_axis.y);
+	element->Attribute("az", &m_axis.z);
+	EndedObject::ReadFromXML(element);
 }
 
 void HArc::Reverse()

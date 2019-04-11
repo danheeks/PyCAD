@@ -16,10 +16,8 @@ CGroup::CGroup()
 	m_custom_grippers_just_one_axis = true;
 }
 
-void CGroup::WriteXML(TiXmlNode *root)
+void CGroup::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement * element = new TiXmlElement( "Group" );
-	root->LinkEndChild( element );
     element->SetAttribute("title", Ttc(m_title.c_str()));
 	element->SetAttribute("custom_grippers", m_custom_grippers ? 1:0);
 	element->SetAttribute("custom_grippers_one_axis", m_custom_grippers_just_one_axis ? 1:0);
@@ -40,7 +38,7 @@ void CGroup::WriteXML(TiXmlNode *root)
 		element->SetDoubleAttribute("pzz", m_pz.z);
 	}
 
-	// instead of ObjList::WriteBaseXML(element), write the id of solids, or the object
+	// instead of ObjList::WriteToXML(element), write the id of solids, or the object
 	std::list<HeeksObj*>::iterator It;
 	for(It=m_objects.begin(); It!=m_objects.end() ;It++)
 	{
@@ -55,40 +53,37 @@ void CGroup::WriteXML(TiXmlNode *root)
 #endif
 		object->WriteXML(element);
 	}
-	HeeksObj::WriteBaseXML(element);
+	HeeksObj::WriteToXML(element);
 }
 
-// static member function
-HeeksObj* CGroup::ReadFromXMLElement(TiXmlElement* element)
+void CGroup::ReadFromXML(TiXmlElement *element)
 {
-	CGroup* new_object = new CGroup;
+	// instead of ( ObjList:: ) new_object->ReadFromXML(pElem);
 
-	// instead of ( ObjList:: ) new_object->ReadBaseXML(pElem);
-
-	if(element->Attribute("title"))new_object->m_title = Ctt(element->Attribute("title"));
+	if(element->Attribute("title"))m_title = Ctt(element->Attribute("title"));
 	int int_for_bool;
-	if(element->Attribute("custom_grippers", &int_for_bool))new_object->m_custom_grippers = (int_for_bool != 0);
-	if(element->Attribute("custom_grippers_one_axis", &int_for_bool))new_object->m_custom_grippers_just_one_axis = (int_for_bool != 0);
-	if(element->Attribute("gripper_datum_set", &int_for_bool))new_object->m_gripper_datum_set = (int_for_bool != 0);
-	if(new_object->m_gripper_datum_set)
+	if(element->Attribute("custom_grippers", &int_for_bool))m_custom_grippers = (int_for_bool != 0);
+	if(element->Attribute("custom_grippers_one_axis", &int_for_bool))m_custom_grippers_just_one_axis = (int_for_bool != 0);
+	if(element->Attribute("gripper_datum_set", &int_for_bool))m_gripper_datum_set = (int_for_bool != 0);
+	if(m_gripper_datum_set)
 	{
 		double o[3], px[3], py[3], pz[3];
 		element->Attribute("ox", &o[0]);
 		element->Attribute("oy", &o[1]);
 		element->Attribute("oz", &o[2]);
-		new_object->m_o = Point3d(o);
+		m_o = Point3d(o);
 		element->Attribute("pxx", &px[0]);
 		element->Attribute("pxy", &px[1]);
 		element->Attribute("pxz", &px[2]);
-		new_object->m_px = Point3d(px);
+		m_px = Point3d(px);
 		element->Attribute("pyx", &py[0]);
 		element->Attribute("pyy", &py[1]);
 		element->Attribute("pyz", &py[2]);
-		new_object->m_py = Point3d(py);
+		m_py = Point3d(py);
 		element->Attribute("pzx", &pz[0]);
 		element->Attribute("pzy", &pz[1]);
 		element->Attribute("pzz", &pz[2]);
-		new_object->m_pz = Point3d(pz);
+		m_pz = Point3d(pz);
 	}
 
 	// loop through all the objects
@@ -99,19 +94,17 @@ HeeksObj* CGroup::ReadFromXMLElement(TiXmlElement* element)
 		{
 			int id = 0;
 			pElem->Attribute("id", &id);
-			new_object->m_loaded_solid_ids.push_back(id); // solid found after load with CGroup::MoveSolidsToGroupsById
+			m_loaded_solid_ids.push_back(id); // solid found after load with CGroup::MoveSolidsToGroupsById
 		}
 		else
 		{
 			// load other objects normal
 			HeeksObj* object = theApp.ReadXMLElement(pElem);
-			if(object)new_object->Add(object, NULL);
+			if(object)Add(object, NULL);
 		}
 	}
 
-	new_object->HeeksObj::ReadBaseXML(element);
-
-	return (ObjList*)new_object;
+	HeeksObj::ReadFromXML(element);
 }
 
 const wchar_t* CGroup::GetIconFilePath()

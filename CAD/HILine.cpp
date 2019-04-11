@@ -185,24 +185,3 @@ bool HILine::GetEndPoint(Point3d &pos)
 	pos = B;
 	return true;
 }
-
-void HILine::WriteXML(TiXmlNode *root)
-{
-	TiXmlElement * element;
-	element = new TiXmlElement( "InfiniteLine" );
-	root->LinkEndChild( element );
-	WriteBaseXML(element);
-}
-
-// static member function
-HeeksObj* HILine::ReadFromXMLElement(TiXmlElement* pElem)
-{
-	Point3d p0, p1;
-	HeeksColor c;
-
-	HILine* new_object = new HILine(p0, p1, &c);
-	new_object->ReadBaseXML(pElem);
-
-	return new_object;
-}
-

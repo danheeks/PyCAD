@@ -8,6 +8,7 @@
 #include "ObjList.h"
 #include "Property.h"
 #include "GripData.h"
+#include "strconv.h"
 
 HeeksObj::HeeksObj(void): m_owner(NULL), m_id(0), m_visible(true), m_index(0)
 {
@@ -121,14 +122,22 @@ void HeeksObj::SetID(int id)
 	theApp.SetObjectID(this, id);
 }
 
-void HeeksObj::WriteBaseXML(TiXmlElement *element)
+void HeeksObj::WriteXML(TiXmlNode *root)
 {
-	theApp.ObjectWriteBaseXML(this, element);
+	TiXmlElement *element;
+	element = new TiXmlElement(Ttc(GetXMLTypeString()));
+	root->LinkEndChild(element);
+	WriteToXML(element);
 }
 
-void HeeksObj::ReadBaseXML(TiXmlElement* element)
+void HeeksObj::WriteToXML(TiXmlElement *element)
 {
-	theApp.ObjectReadBaseXML(this, element);
+	theApp.ObjectWriteToXML(this, element);
+}
+
+void HeeksObj::ReadFromXML(TiXmlElement* element)
+{
+	theApp.ObjectReadFromXML(this, element);
 }
 
 bool HeeksObj::OnVisibleLayer()

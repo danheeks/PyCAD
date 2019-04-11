@@ -37,14 +37,13 @@ public:
 	bool Stretch(const double *p, const double* shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	bool GetCentrePoint(Point3d &pos);
-	void WriteXML(TiXmlNode *root);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement *element);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	bool DescendForUndo(){return false;}
 	bool IsDifferent(HeeksObj* other);
 	HeeksObj* MakeACopyWithID();
 	void ReloadPointers();
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	bool Intersects(const Point3d &pnt)const;
 	Point3d GetSegmentVector(double fraction)const;

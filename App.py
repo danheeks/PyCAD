@@ -13,6 +13,8 @@ def OnMessageBox(error_message):
         
 def OnContextMenu():
     wx.MessageBox('In OnContextMenu')
+    
+tools = []
 
 class App(wx.App):
     def __init__(self):
@@ -32,11 +34,19 @@ class App(wx.App):
     def OnInit(self):
         self.RegisterMessageBoxCallback()
         self.InitCad()
+        self.RegisterObjectTypes()
         
         self.printData = wx.PrintData()
         self.pageSetupData = wx.PageSetupDialogData(self.printData)
         
-        self.frame = self.NewFrame()
+        size = wx.Size()
+        pos = wx.Point()
+        config = HeeksConfig()
+        size.x = config.ReadInt('MainFrameWidth', -1);
+        size.y = config.ReadInt('MainFrameHeight', -1);
+        pos.x = config.ReadInt('MainFramePosX', -1);
+        pos.y = config.ReadInt('MainFramePosY', -1);
+        self.frame = self.NewFrame(pos, size)
         self.frame.Show()
         self.LoadConfig()
         self.OnNewOrOpen(False)
@@ -46,11 +56,14 @@ class App(wx.App):
         
         return True
     
+    def RegisterObjectTypes(self):
+        pass
+    
     def OnNewOrOpen(self, open):
         pass
     
-    def NewFrame(self):
-        return Frame(None)
+    def NewFrame(self, pos=wx.DefaultPosition, size=wx.DefaultSize):
+        return Frame(None, pos = pos, size = size)
 
     def LoadConfig(self):
         config = HeeksConfig(self.settings_restored)
@@ -108,6 +121,7 @@ class App(wx.App):
             return
         
         copy_object = object.MakeACopy()
+        
         if copy_object:
             if copy_object.Edit():
                 cad.CopyUndoably(object, copy_object)
@@ -131,6 +145,7 @@ class App(wx.App):
         
     def GetTools(self, x, y, control_pressed):
         objects = cad.GetClickedObjects(x, y)
+        global tools
         tools = []
         make_container = len(objects)>1
         for object in objects:

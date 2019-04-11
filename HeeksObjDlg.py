@@ -24,6 +24,7 @@ class HeeksObjDlg(HDialog):
         self.ignore_event_functions = True
         
         self.AddLeftControls()
+
         if self.add_picture:
             self.AddPictureControl()
         self.AddRightControls()

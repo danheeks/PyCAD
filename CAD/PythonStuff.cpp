@@ -48,6 +48,7 @@
 #include "KeyEvent.h"
 #include "LineArcDrawing.h"
 #include "MarkedObject.h"
+#include "ConversionTools.h"
 
 namespace bp = boost::python;
 
@@ -59,10 +60,8 @@ void OnExit()
 PyObject *main_module = NULL;
 PyObject *globals = NULL;
 
-void MessageBoxPythonError()
+void GetPythonError(std::wstring& error_string)
 {
-	std::wstring error_string;
-
 	PyObject *errtype, *errvalue, *traceback;
 	PyErr_Fetch(&errtype, &errvalue, &traceback);
 	PyErr_NormalizeException(&errtype, &errvalue, &traceback);
@@ -137,27 +136,50 @@ void MessageBoxPythonError()
 	Py_XDECREF(errvalue);
 	Py_XDECREF(errtype);
 	Py_XDECREF(traceback);
-
-	theApp.MessageBox(error_string.c_str());
 }
+
+void HandlePythonCallError()
+{
+	std::wstring error_string;
+	GetPythonError(error_string);
+
+	wprintf(error_string.c_str());
+	//theApp.MessageBox(error_string.c_str());
+}
+
+int BeforePythonCall_level = 0;
 
 static void BeforePythonCall(PyObject **main_module, PyObject **globals)
 {
+	BeforePythonCall_level++;
+	if (BeforePythonCall_level > 1)
+		return;
+
 	if (*main_module == NULL)
 	{
 		*main_module = PyImport_ImportModule("__main__");
 		*globals = PyModule_GetDict(*main_module);
 	}
 
-	const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n  def write(self, txt):\n    self.value += txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
+	const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n    self.count = ''\n  def write(self, txt):\n    self.value += str(self.count)+txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
 	PyRun_String(str, Py_file_input, *globals, *globals); //invoke code to redirect
 
 	if (PyErr_Occurred())
-		MessageBoxPythonError();
+		HandlePythonCallError();
 }
 
 static void AfterPythonCall(PyObject *main_module)
 {
+	BeforePythonCall_level--;
+	if (BeforePythonCall_level > 0)
+		return;
+
+	if (BeforePythonCall_level < 0)
+	{
+		theApp.MessageBoxW(L"too many internal calls to AfterPythonCall");
+		return;
+	}
+
 	PyObject *catcher = PyObject_GetAttrString(main_module, "catchOutErr"); //get our catchOutErr created above
 	PyObject *output = PyObject_GetAttrString(catcher, "value"); //get the stdout and stderr from our catchOutErr object
 #if PY_MAJOR_VERSION >= 3
@@ -170,11 +192,13 @@ static void AfterPythonCall(PyObject *main_module)
 	}
 
 	if (PyErr_Occurred())
-		MessageBoxPythonError();
+		HandlePythonCallError();
 
-	const char* str = "sys.stdout = old_stdout\nsys.stderr = old_stderr"; 
-	PyRun_String(str, Py_file_input, globals, globals); //invoke code
-
+	if (BeforePythonCall_level == 0)
+	{
+		const char* str = "sys.stdout = old_stdout\nsys.stderr = old_stderr";
+		PyRun_String(str, Py_file_input, globals, globals); //invoke code
+	}
 }
 
 std::wstring str_for_base_object;
@@ -667,6 +691,11 @@ public:
 	int m_display_list;
 	int m_type;
 
+	static bool in_glCommands;
+	static bool triangles_begun;
+	static bool lines_begun;
+	static TiXmlElement* m_cur_element;
+
 	BaseObject() :ObjList(), m_uses_display_list(false), m_display_list(0), m_type(0){}
 	BaseObject(int type) :ObjList(), m_uses_display_list(false), m_display_list(0), m_type(type){}
 	bool NeverDelete(){ return true; }
@@ -732,11 +761,6 @@ public:
 			f(col);
 		}
 	}
-
-	static bool in_glCommands;
-	static bool triangles_begun;
-	static bool lines_begun;
-	static TiXmlElement* m_cur_element;
 
 	void glCommands(bool select, bool marked, bool no_color)
 	{
@@ -841,16 +865,25 @@ public:
 		}
 	}
 
-	void WriteXML(TiXmlNode *root)
+	void WriteToXML(TiXmlElement *element)
 	{
-		BaseObject::m_cur_element = new TiXmlElement(Ttc(this->GetTypeString()));
-		root->LinkEndChild(BaseObject::m_cur_element);
+		BaseObject::m_cur_element = element;
 
-		if (bp::override f = this->get_override("WriteXML"))
+		if (bp::override f = this->get_override("WriteXml"))
 		{
 			Call_Override(f);
 		}
-		WriteBaseXML(BaseObject::m_cur_element);
+		ObjList::WriteToXML(element);
+	}
+
+	void ReadFromXML(TiXmlElement *element)
+	{
+		BaseObject::m_cur_element = element;
+
+		if (bp::override f = this->get_override("ReadXml"))
+		{
+			Call_Override(f);
+		}
 	}
 
 	HeeksObj* MakeACopy()const
@@ -876,7 +909,6 @@ bool BaseObject::in_glCommands = false;
 bool BaseObject::triangles_begun = false;
 bool BaseObject::lines_begun = false;
 TiXmlElement* BaseObject::m_cur_element = NULL;
-
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 {
@@ -957,6 +989,19 @@ boost::python::list HeeksObjGetBaseProperties(BaseObject& object) {
 	}
 	return return_list;
 }
+
+boost::python::list BaseObjectGetChildren(BaseObject& object) {
+	boost::python::list return_list;
+	HeeksObj* obj = object.GetFirstChild();
+	while (obj)
+	{
+		return_list.append(boost::python::ptr<HeeksObj*>(obj));
+		obj = object.GetNextChild();
+	}
+
+	return return_list;
+}
+
 
 static double GetLines_pixels_per_mm = 0.0;
 static PyObject* GetLines_callback = NULL;
@@ -1128,6 +1173,11 @@ void ObjListAdd(ObjList& objlist, HeeksObj* object)
 	objlist.Add(object, NULL);
 }
 
+void ObjListReadFromXML(ObjList& objlist)
+{
+	objlist.ObjList::ReadFromXML(BaseObject::m_cur_element);
+}
+
 
 HeeksColor PropertyGetColor(const Property& p)
 {
@@ -1241,6 +1291,15 @@ void SketchWriteDXF(CSketch& sketch, std::wstring filepath)
 	theApp.SaveDXFFile(objects, filepath.c_str());
 }
 
+CCurve SketchGetCurve(CSketch& sketch)
+{
+	// this makes a Curve object, compatible with the geom library
+	CArea area = ObjectToArea(&sketch);
+	if (area.m_curves.size() == 0)
+		return CCurve();
+	return area.m_curves.front();
+}
+
 void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8)
 {
 	if (!BaseObject::triangles_begun)
@@ -1317,52 +1376,40 @@ static std::map<std::string, PyObject*> xml_read_callbacks;
 static std::map<std::string, int> custom_object_type_map;
 static int next_available_custom_object_type = ObjectMaximumType;
 
-HeeksObj* ReadPyObjectFromXMLElement(TiXmlElement* pElem);
-
-HeeksObj* ReadPyObjectFromXMLElementWithName(const std::string& name, TiXmlElement* pElem)
+HeeksObj* CreatePyObjectWithName(const std::string& name)
 {
 	std::map< std::string, PyObject* >::iterator FindIt = xml_read_callbacks.find(name);
 	HeeksObj* object = NULL;
-	if (FindIt != xml_read_callbacks.end())
+	if (FindIt == xml_read_callbacks.end())
+		return NULL;
+
+	PyObject* python_callback = FindIt->second;
+
+	//PyObject *main_module, *globals;
+	BeforePythonCall(&main_module, &globals);
+
+	// Execute the python function
+	PyObject* result = PyObject_CallFunction(python_callback, 0);
+	if (result)
 	{
-		PyObject* python_callback = FindIt->second;
-
-		BaseObject::m_cur_element = pElem;
-
-		//PyObject *main_module, *globals;
-		BeforePythonCall(&main_module, &globals);
-
-		// Execute the python function
-		PyObject* result = PyObject_CallFunction(python_callback, 0);
-		if (result)
-		{
-			object = bp::extract<HeeksObj*>(result);
-			object->ReadBaseXML(pElem);
-		}
-
-		AfterPythonCall(main_module);
+		object = bp::extract<HeeksObj*>(result);
 	}
-	else
-	{
-		object = HXml::ReadFromXMLElement(pElem);
-	}
+
+	AfterPythonCall(main_module);
 
 	return object;
 }
 
-int RegisterXMLRead(std::wstring name, PyObject *callback)
+int RegisterObjectType(std::wstring name, PyObject *callback)
 {
-	// I might change this to something like RegisterObjectType
+	// registers the Create function to be called in python from CApp::CreateObjectOfType
+	// returns the int type stored by CApp
 	const char* name_c = Ttc(name.c_str());
 
 	if (PyCallable_Check(callback))
 	{
 		// add an entry in map from name to 
 		xml_read_callbacks.insert(std::make_pair(name_c, callback));
-
-		// tell HeeksCAD that it's a python object callback by registering it's dummy callback.
-		// HeeksCAD will spot this and call ReadPyObjectFromXMLElementWithName
-		theApp.RegisterReadXMLfunction(name_c, ReadPyObjectFromXMLElement);
 	}
 
 	std::map<std::string, int>::iterator FindIt = custom_object_type_map.find(name_c);
@@ -1385,7 +1432,7 @@ void SetXmlValue(const std::wstring &name, const std::wstring &value)
 	BaseObject::m_cur_element->SetAttribute(Ttc(name.c_str()), svalue.c_str());
 }
 
-std::wstring GetXmlValue(const std::wstring &name, const std::wstring *default_value = NULL)
+std::wstring GetXmlValue(const std::wstring &name, const std::wstring &default_value = L"")
 {
 	if (BaseObject::m_cur_element != NULL)
 	{
@@ -1393,15 +1440,99 @@ std::wstring GetXmlValue(const std::wstring &name, const std::wstring *default_v
 		if (value != NULL)
 			return std::wstring(Ctt(value));
 	}
-	if (default_value)
-		return *default_value;
-	return L"";
+	return default_value;
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlValueOverloads, GetXmlValue, 1, 2)
 
+bool GetXmlBool(const std::wstring &name, bool default_value = false)
+{
+	int value = default_value ? 1:0;
+	if (BaseObject::m_cur_element != NULL)
+	{
+		BaseObject::m_cur_element->Attribute(Ttc(name.c_str()), &value);
+	}
+	return value != 0;
+}
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlBoolOverloads, GetXmlBool, 1, 2)
 
+int GetXmlInt(const std::wstring &name, int default_value = 0)
+{
+	int value = default_value;
+	if (BaseObject::m_cur_element != NULL)
+	{
+		BaseObject::m_cur_element->Attribute(Ttc(name.c_str()), &value);
+	}
+	return value;
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlIntOverloads, GetXmlInt, 1, 2)
+
+int GetXmlFloat(const std::wstring &name, double default_value = 0)
+{
+	double value = default_value;
+	if (BaseObject::m_cur_element != NULL)
+	{
+		BaseObject::m_cur_element->Attribute(Ttc(name.c_str()), &value);
+	}
+	return value;
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlFloatOverloads, GetXmlFloat, 1, 2)
+
+void ReturnFromXmlChild()
+{
+	if(BaseObject::m_cur_element)BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
+}
+
+bp::object GetFirstXmlChild()
+{
+	if (BaseObject::m_cur_element)
+	{
+		TiXmlElement* first_child = BaseObject::m_cur_element->FirstChildElement();
+		if (first_child == NULL)
+		{
+			// leave current object as it is, but return None
+			return bp::object(); // None
+		}
+		else
+		{
+			// set current to the first child and return it
+			BaseObject::m_cur_element = first_child;
+			return bp::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
+		}
+	}
+	return bp::object(); // None
+}
+
+bp::object GetNextXmlChild()
+{
+	if (BaseObject::m_cur_element)
+	{
+		TiXmlElement* next_sibling = BaseObject::m_cur_element->NextSiblingElement();
+		if (next_sibling == NULL)
+		{
+			// set current element to be the parent, but return None
+			BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
+			return bp::object(); // None
+		}
+		else
+		{
+			// set current to the next sibling and return it
+			BaseObject::m_cur_element = next_sibling;
+			return bp::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
+		}
+	}
+	return bp::object(); // None
+}
+
+void OpenXmlFile(const std::wstring &filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool undoably = false, bool show_error = true)
+{
+	theApp.OpenXMLFile(filepath.c_str(), paste_into, paste_before, undoably, show_error);
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(OpenXMLFileOverloads, OpenXmlFile, 1, 5)
 
 class PropertyWrap : public Property, public bp::wrapper<Property>
 {
@@ -1823,6 +1954,7 @@ void PyIncref(PyObject* object)
 			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
 			.def("GetFirstChild", &BaseObject::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
 			.def("GetNextChild", &BaseObject::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetChildren", &BaseObjectGetChildren)			
 			.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
@@ -1892,6 +2024,7 @@ void PyIncref(PyObject* object)
 			.def(bp::init<ObjList>())
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
+			.def("ReadXml", &ObjListReadFromXML)
 			;
 
 		bp::class_<IdNamedObj, bp::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
@@ -1913,6 +2046,9 @@ void PyIncref(PyObject* object)
 			.def("GetCircleDiameter", &SketchGetCircleDiameter)
 			.def("GetCircleCentre", &SketchGetCircleCentre)
 			.def("WriteDxf", &SketchWriteDXF)
+			.def("GetSketchOrder", &CSketch::GetSketchOrder)
+			.def("ReOrderSketch", &CSketch::ReOrderSketch)
+			.def("GetCurve", &SketchGetCurve)
 			;
 
 		bp::class_<HPoint, bp::bases<IdNamedObj>>("Point", boost::python::no_init)
@@ -2216,12 +2352,16 @@ void PyIncref(PyObject* object)
 		bp::def("DrawLine", &DrawLine);
 		bp::def("AddProperty", AddProperty);
 		bp::def("GetObjectFromId", &GetObjectFromId);
-		bp::def("RegisterXMLRead", RegisterXMLRead);
+		bp::def("RegisterObjectType", RegisterObjectType);
 		bp::def("SetXmlValue", SetXmlValue);
-		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads(
-			(bp::arg("name"),
-			bp::arg("default_value") = NULL)));
-//		bp::def("GetXmlInt", GetXmlInt);
+		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((bp::arg("name"),	bp::arg("default_value") = std::wstring(L""))));
+		bp::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((bp::arg("name"), bp::arg("default_value") = false)));
+		bp::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((bp::arg("name"), bp::arg("default_value") = 0)));
+		bp::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((bp::arg("name"), bp::arg("default_vaue") = 0.0)));
+		bp::def("ReturnFromXmlChild", ReturnFromXmlChild);
+		bp::def("GetFirstXmlChild", GetFirstXmlChild);
+		bp::def("GetNextXmlChild", GetNextXmlChild);
+		bp::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((bp::arg("filepath"), bp::arg("paste_into") = NULL, bp::arg("paste_before") = NULL, bp::arg("undoably") = false, bp::arg("show_error") = true)));
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
 		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
@@ -2234,9 +2374,7 @@ void PyIncref(PyObject* object)
 		bp::def("GetObjects", GetObjects);
 		bp::def("GetClickedObjects", GetClickedObjects);
 		bp::def("ObjectMarked", ObjectMarked);
-		bp::def("Select", &Select, SelectOverloads(
-			(bp::arg("object"),
-			bp::arg("CallOnChanged") = NULL)));
+		bp::def("Select", &Select, SelectOverloads(	(bp::arg("object"),	bp::arg("CallOnChanged") = NULL)));
 		bp::def("Unselect", Unselect);
 		bp::def("ClearSelection", ClearSelection);
 		bp::def("PickObjects", PickObjects);
@@ -2251,10 +2389,7 @@ void PyIncref(PyObject* object)
 		bp::def("RollBack", RollBack);
 		bp::def("RollForward", RollForward);
 		bp::def("DeleteUndoably", DeleteUndoably);
-		bp::def("AddUndoably", &AddUndoably, AddUndoablyOverloads(
-			(bp::arg("object"),
-			bp::arg("owner") = NULL,
-			bp::arg("prev_object") = NULL)));
+		bp::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((bp::arg("object"), bp::arg("owner") = NULL, bp::arg("prev_object") = NULL)));
 		bp::def("CopyUndoably", CopyUndoably);
 		bp::def("DoUndoable", DoUndoable);
 		bp::def("ShiftSelect", ShiftSelect);

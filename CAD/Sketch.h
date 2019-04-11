@@ -37,14 +37,11 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	HeeksObj *MakeACopy(void)const;
 	void CopyFrom(const HeeksObj* object){operator=(*((CSketch*)((IdNamedObjList*)object)));}
-	void WriteXML(TiXmlNode *root);
 	bool UsesID(){return true;}
 	void SetColor(const HeeksColor &col);
 	const HeeksColor* GetColor()const;
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void CalculateSketchOrder();
 	SketchOrderType GetSketchOrder();

@@ -61,7 +61,7 @@ class PropertiesCanvas( wx.Panel ):
         # Difference between using PropertyGridManager vs PropertyGrid is that
         # the manager supports multiple pages and a description box.
         self.pg = pg = wxpg.PropertyGrid(self.panel,
-                        style=wxpg.PG_SPLITTER_AUTO_CENTER)
+                        style=wxpg.PG_DEFAULT_STYLE | wxpg.PG_SPLITTER_AUTO_CENTER)
         
         self.topsizer = wx.BoxSizer(wx.VERTICAL)
         self.topsizer.Add(pg, 1, wx.EXPAND)
@@ -83,6 +83,8 @@ class PropertiesCanvas( wx.Panel ):
         self.sizer.Add(self.panel, 1, wx.EXPAND)
         self.SetSizer(self.sizer)
         self.SetAutoLayout(True)
+        
+        self.inAddProperty = 0
 
     def FindMapItem(self, p):
         if p in self.pmap:
@@ -105,6 +107,8 @@ class PropertiesCanvas( wx.Panel ):
         
 
     def AddProperty(self, property, parent_property = None):
+        self.inAddProperty += 1
+        
         # add a cad.property, optionally to an existing wx.PGProperty
         if property.GetType() == cad.PROPERTY_TYPE_STRING:
             new_prop = wxpg.StringProperty(property.GetTitle(),value=property.GetString())
@@ -123,7 +127,7 @@ class PropertiesCanvas( wx.Panel ):
         elif property.GetType() == cad.PROPERTY_TYPE_CHECK:
             new_prop = wxpg.BoolProperty(property.GetTitle(),value=property.GetBool())
         elif property.GetType() == cad.PROPERTY_TYPE_LIST:
-            new_prop = wxpg.StringProperty(property.GetTitle())
+            new_prop = wxpg.StringProperty(property.GetTitle(), value='<composed>')
         elif property.GetType() == cad.PROPERTY_TYPE_FILE:
             new_prop = wxpg.FileProperty(property.GetTitle(),value=property.GetString())
         else:
@@ -137,6 +141,8 @@ class PropertiesCanvas( wx.Panel ):
             plist = property.GetProperties()
             for p in plist:
                 self.AddProperty(p, new_prop)
+                
+        self.inAddProperty -= 1
        
     def ClearProperties(self):
         self.pg.Clear()

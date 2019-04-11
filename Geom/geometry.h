@@ -615,6 +615,4 @@ public:
 };
 
 
-
-
-
+bool calculate_biarc_points(const Point3d &p0, Point3d v_start, const Point3d &p4, Point3d v_end, Point3d &p1, Point3d &p2, Point3d &p3);

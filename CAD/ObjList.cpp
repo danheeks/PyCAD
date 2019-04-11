@@ -234,14 +234,14 @@ void ObjList::KillGLLists(void)
 	for(It=m_objects.begin(); It!=m_objects.end() ;It++) (*It)->KillGLLists();
 }
 
-void ObjList::WriteBaseXML(TiXmlElement *element)
+void ObjList::WriteToXML(TiXmlElement *element)
 {
 	std::list<HeeksObj*>::iterator It;
 	for(It=m_objects.begin(); It!=m_objects.end() ;It++) (*It)->WriteXML((TiXmlNode*)element);
-	HeeksObj::WriteBaseXML(element);
+	HeeksObj::WriteToXML(element);
 }
 
-void ObjList::ReadBaseXML(TiXmlElement* element)
+void ObjList::ReadFromXML(TiXmlElement* element)
 {
 	// loop through all the objects
 	for(TiXmlElement* pElem = TiXmlHandle(element).FirstChildElement().Element(); pElem;	pElem = pElem->NextSiblingElement())
@@ -270,7 +270,7 @@ void ObjList::ReadBaseXML(TiXmlElement* element)
         }
 	}
 
-	HeeksObj::ReadBaseXML(element);
+	HeeksObj::ReadFromXML(element);
 }
 
 void ObjList::Transform(const Matrix& m)

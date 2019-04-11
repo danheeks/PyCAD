@@ -27,8 +27,8 @@ public:
 	void CopyFrom(const HeeksObj* object){ operator=(*((ExtrudedObj*)object)); }
 	HeeksObj* MakeACopyWithID();
 	bool IsDifferent(HeeksObj* other);
-	void WriteBaseXML(TiXmlElement *element);
-	void ReadBaseXML(TiXmlElement* element);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement* element);
 };
 
 template<typename T>
@@ -84,22 +84,22 @@ template < typename T > void ExtrudedObj<T>::Transform(const Matrix& m){
 	v.get(m_extrusion_vector);
 }
 
-template < typename T > void ExtrudedObj<T>::WriteBaseXML(TiXmlElement *element)
+template < typename T > void ExtrudedObj<T>::WriteToXML(TiXmlElement *element)
 {
 	element->SetDoubleAttribute("thickness", m_thickness);
 	element->SetDoubleAttribute("extruX", m_extrusion_vector[0]);
 	element->SetDoubleAttribute("extruY", m_extrusion_vector[1]);
 	element->SetDoubleAttribute("extruZ", m_extrusion_vector[2]);
 
-	T::WriteBaseXML(element);
+	T::WriteToXML(element);
 }
 
-template < typename T > void ExtrudedObj<T>::ReadBaseXML(TiXmlElement* pElem)
+template < typename T > void ExtrudedObj<T>::ReadFromXML(TiXmlElement* pElem)
 {
 	pElem->Attribute("thickness", &m_thickness);
 	pElem->Attribute("extruX", &m_extrusion_vector[0]);
 	pElem->Attribute("extruY", &m_extrusion_vector[1]);
 	pElem->Attribute("extruZ", &m_extrusion_vector[2]);
 
-	T::ReadBaseXML(pElem);
+	T::ReadFromXML(pElem);
 }

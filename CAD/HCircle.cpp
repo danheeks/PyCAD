@@ -229,11 +229,8 @@ bool HCircle::GetCentrePoint(Point3d &pos)
 	return true;
 }
 
-void HCircle::WriteXML(TiXmlNode *root)
+void HCircle::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement * element;
-	element = new TiXmlElement("Circle");
-	root->LinkEndChild(element);
 	element->SetAttribute("col", color.COLORREF_color());
 	element->SetDoubleAttribute("r", m_radius);
 	element->SetDoubleAttribute("cx", m_c.x);
@@ -242,35 +239,23 @@ void HCircle::WriteXML(TiXmlNode *root)
 	element->SetDoubleAttribute("ax", m_axis.x);
 	element->SetDoubleAttribute("ay", m_axis.y);
 	element->SetDoubleAttribute("az", m_axis.z);
-	WriteBaseXML(element);
+	WriteToXML(element);
 }
 
 // static member function
-HeeksObj* HCircle::ReadFromXMLElement(TiXmlElement* pElem)
+void HCircle::ReadFromXML(TiXmlElement* element)
 {
-	Point3d centre;
-	Point3d axis;
-	double r = 0.0;
-	HeeksColor c;
+	int int_value;
+	if (element->Attribute("col", &int_value))color = HeeksColor((long)int_value);
+	element->Attribute("r", &m_radius);
+	element->Attribute("cx", &m_c.x);
+	element->Attribute("cy", &m_c.y);
+	element->Attribute("cz", &m_c.z);
+	element->Attribute("ax", &m_axis.x);
+	element->Attribute("ay", &m_axis.y);
+	element->Attribute("az", &m_axis.z);
 
-	// get the attributes
-	for (TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
-	{
-		std::string name(a->Name());
-		if (name == "col"){ c = HeeksColor((long)(a->IntValue())); }
-		else if (name == "r"){ r = a->DoubleValue(); }
-		else if (name == "cx"){ centre.x = a->DoubleValue(); }
-		else if (name == "cy"){ centre.y = a->DoubleValue(); }
-		else if (name == "cz"){ centre.z = a->DoubleValue(); }
-		else if (name == "ax"){ axis.x = a->DoubleValue(); }
-		else if (name == "ay"){ axis.y = a->DoubleValue(); }
-		else if (name == "az"){ axis.z = a->DoubleValue(); }
-	}
-
-	HCircle* new_object = new HCircle(centre, axis, r, &c);
-	new_object->ReadBaseXML(pElem);
-
-	return new_object;
+	ExtrudedObj<IdNamedObj>::ReadFromXML(element);
 }
 
 int HCircle::Intersects(const HeeksObj *object, std::list< double > *rl)const

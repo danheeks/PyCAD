@@ -53,8 +53,8 @@ public:
 	virtual void Remove(std::list<HeeksObj*> objects);
 	void Clear();
 	void KillGLLists(void);
-	void WriteBaseXML(TiXmlElement *element);
-	void ReadBaseXML(TiXmlElement* element);
+	void WriteToXML(TiXmlElement *element);
+	void ReadFromXML(TiXmlElement *element);
 	void Transform(const Matrix& m);
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;

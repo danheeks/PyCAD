@@ -759,3 +759,44 @@
 		}
 		return false;
 	}
+
+
+
+	bool calculate_biarc_points(const Point3d &p0, Point3d v_start, const Point3d &p4, Point3d v_end, Point3d &p1, Point3d &p2, Point3d &p3)
+	{
+		if (v_start.magnitude() < 0.0000000001)v_start = Point3d(p0, p1);
+		if (v_end.magnitude() < 0.0000000001)v_end = Point3d(p3, p4);
+
+		v_start.Normalize();
+		v_end.Normalize();
+
+		Point3d v = p0 - p4;
+
+		double a = 2 * (v_start*v_end - 1);
+		double c = v*v;
+		double b = (v * 2)*(v_start + v_end);
+
+		if (fabs(a) < 0.000000000000001)return false;
+
+		double d = b*b - 4 * a*c;
+
+		if (d < 0.0)return false;
+
+		double sd = sqrt(d);
+
+		double e1 = (-b - sd) / (2.0 * a);
+		double e2 = (-b + sd) / (2.0 * a);
+
+		if (e1 > 0 && e2 > 0)return false;
+
+		double e = e1;
+		if (e2 > e)e = e2;
+
+		if (e < 0)return false;
+
+		p1 = p0 + v_start * e;
+		p3 = p4 - v_end * e;
+		p2 = p1 * 0.5 + p3 * 0.5;
+
+		return true;
+	}

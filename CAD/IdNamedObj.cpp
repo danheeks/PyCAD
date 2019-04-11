@@ -7,19 +7,19 @@
 
 static std::wstring temp_pattern_string;
 
-void IdNamedObj::WriteBaseXML(TiXmlElement *element)
+void IdNamedObj::WriteToXML(TiXmlElement *element)
 {
 	element->SetAttribute("title_from_id", m_title_made_from_id ? 1:0);
 	if(!m_title_made_from_id)element->SetAttribute("title", Ttc(m_title.c_str()));
-	HeeksObj::WriteBaseXML(element);
+	HeeksObj::WriteToXML(element);
 }
 
-void IdNamedObj::ReadBaseXML(TiXmlElement* element)
+void IdNamedObj::ReadFromXML(TiXmlElement* element)
 {
 	if(const char* pstr = element->Attribute("title"))m_title = Ctt(pstr);
 	int i;
 	if(element->Attribute("title_from_id", &i))m_title_made_from_id = (i != 0);
-	HeeksObj::ReadBaseXML(element);
+	HeeksObj::ReadFromXML(element);
 }
 
 const wchar_t* IdNamedObj::GetShortString(void)const

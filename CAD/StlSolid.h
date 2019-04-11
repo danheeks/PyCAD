@@ -55,11 +55,10 @@ public:
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
 	void CopyFrom(const HeeksObj* object);
 	HeeksObj *MakeACopy()const;
-	void WriteXML(TiXmlNode *root);
+	void WriteToXML(TiXmlElement *element); 
+	void ReadFromXML(TiXmlElement *element);
 	bool IsDifferent(HeeksObj* obj);
 	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
-
-	static HeeksObj* ReadFromXMLElement(TiXmlElement* pElem);
 
 	void AddTriangle(float* t); // 9 floats
 };

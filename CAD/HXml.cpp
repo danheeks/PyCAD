@@ -6,7 +6,10 @@
 #include "HXml.h"
 #include "strconv.h"
 
-HXml::HXml(TiXmlElement* pElem):m_element(*pElem){
+HXml::HXml():m_element(TiXmlElement("")){
+}
+
+HXml::HXml(TiXmlElement* pElem) : m_element(*pElem){
 }
 
 HXml::~HXml(){
@@ -28,20 +31,14 @@ const wchar_t* HXml::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-void HXml::WriteXML(TiXmlNode *root)
+void HXml::WriteToXML(TiXmlElement *element)
 {
-	TiXmlElement * element = new TiXmlElement( m_element );
-	root->LinkEndChild( element );  
-	//WriteBaseXML(element);
+	*element = m_element;
 }
 
-// static member function
-HeeksObj* HXml::ReadFromXMLElement(TiXmlElement* pElem)
+void HXml::ReadFromXML(TiXmlElement* element)
 {
-	HXml* new_object = new HXml(pElem);
-	new_object->ReadBaseXML(pElem);
-
-	return new_object;
+	m_element = *element;
 }
 
 const wchar_t* HXml::GetShortString(void)const

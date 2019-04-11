@@ -40,6 +40,7 @@ class HTypeObjectDropDown(wx.ComboBox):
         object = obj_list.GetFirstChild()
         while object:
             if object.GetIDGroupType() == object_type:
+                object = obj_list.GetNextChild()
                 continue
             number = object.GetID()
             ids_for_combo.append((number, object.GetTitle()))
