@@ -32,8 +32,24 @@ class Object(cad.BaseObject):
     def WriteXml(self):
         pass
     
+    def CallsObjListReadXml(self):
+        return True
+    
     def ReadXml(self):
-        cad.ObjList.ReadXml(self)
+        if self.CallsObjListReadXml():
+            cad.ObjList.ReadXml(self)
+            
+    def ReloadPointers(self):
+        pass
+
+    def OneOfAKind(self):
+        return False
+    
+    def OnAdd(self):
+        pass
+    
+    def OnRemove(self):
+        pass
     
 class PyChoiceProperty(cad.Property):
     def __init__(self, title, value_name, choices, object, alternative_values = None):
@@ -150,7 +166,7 @@ class PyProperty(cad.Property):
         setattr(self.pyobj, self.value_name, value)
         if(self.recalc):self.recalc()
         
-    def SetStr(self, value):
+    def SetString(self, value):
         setattr(self.pyobj, self.value_name, value)
         if(self.recalc):self.recalc()
         
@@ -163,7 +179,7 @@ class PyProperty(cad.Property):
     def GetFloat(self):
         return getattr(self.pyobj, self.value_name)
     
-    def GetStr(self):
+    def GetString(self):
         return getattr(self.pyobj, self.value_name)
     
     def MakeACopy(self, o):

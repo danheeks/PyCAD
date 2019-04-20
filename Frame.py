@@ -42,6 +42,8 @@ class Frame(wx.Frame):
         
         wx.GetApp().RegisterHideableWindow(self.tree_canvas)
         wx.GetApp().RegisterHideableWindow(self.properties_canvas)
+        
+        self.AddExtraWindows()
 
         perspective = config.Read('AuiPerspective', 'default')
         if perspective != 'default':
@@ -162,11 +164,19 @@ class Frame(wx.Frame):
         self.AddMenuItem('Move Scale', self.OnMoveScale, None, 'moves')
         self.EndMenu()
 
+        self.window_menu = self.AddMenu('&Window')
+        self.AddMenuItem('Objects', self.OnViewObjects, self.OnUpdateViewObjects, check_item = True)
+        self.AddMenuItem('Properties', self.OnViewProperties, self.OnUpdateViewProperties, check_item = True)
+        self.EndMenu()
+
         self.AddExtraMenus();
 
         self.SetMenuBar(self.menuBar)
         
     def AddExtraMenus(self):
+        pass
+    
+    def AddExtraWindows(self):
         pass
     
     def CurrentMenu(self):
@@ -207,10 +217,11 @@ class Frame(wx.Frame):
         if current_menu:
             current_menu.AppendSeparator()
         
-    def AddMenuItem(self, title, onButton, onUpdate = None, bitmap_name = None):
-        item = wx.MenuItem(self.CurrentMenu(), wx.ID_ANY, title)        
+    def AddMenuItem(self, title, onButton, onUpdate = None, bitmap_name = None, check_item = False, menu = None):
+        men = menu if menu else self.CurrentMenu()
+        item = wx.MenuItem(men, wx.ID_ANY, title, kind = wx.ITEM_CHECK if check_item else wx.ITEM_NORMAL )        
         self.SetMenuItemBitmap(item, bitmap_name)
-        self.Bind(wx.EVT_MENU, onButton, self.CurrentMenu().Append(item))     
+        self.Bind(wx.EVT_MENU, onButton, men.Append(item))     
         if onUpdate:
             self.Bind(wx.EVT_UPDATE_UI, onUpdate, id = item.GetId())  
     
@@ -416,7 +427,8 @@ class Frame(wx.Frame):
     
             
     def OnResetDefaults(self, e):
-        pass # to do            
+        wx.GetApp().RestoreDefaults()
+        wx.MessageBox('You must restart the application for the settings to be changed')
             
     def OnQuit(self, e):
         pass # to do            
@@ -640,3 +652,23 @@ class Frame(wx.Frame):
         
     def OnMoveScale(self, e):
         pass
+    
+    def OnViewObjects(self, e):
+        pane_info = self.aui_manager.GetPane(self.tree_canvas)
+        if pane_info.IsOk():
+            pane_info.Show(e.IsChecked())
+            self.aui_manager.Update()
+    
+    def OnUpdateViewObjects(self, e):
+        e.Check(self.aui_manager.GetPane(self.tree_canvas).IsShown())
+
+    def OnViewProperties(self, e):
+        pane_info = self.aui_manager.GetPane(self.properties_canvas)
+        if pane_info.IsOk():
+            pane_info.Show(e.IsChecked())
+            self.aui_manager.Update()
+        
+    def OnUpdateViewProperties(self, e):
+        e.Check(self.aui_manager.GetPane(self.properties_canvas).IsShown())
+    
+                

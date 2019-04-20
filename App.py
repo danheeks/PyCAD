@@ -205,3 +205,9 @@ class App(wx.App):
         for tool in tools:
             self.AddToolToListAndMenu(tool, menu)
         wnd.PopupMenu(menu, wx.Point(x, y))
+        
+    def RestoreDefaults(self):
+        config = HeeksConfig()
+        config.DeleteAll()
+        self.settings_restored = True
+        
