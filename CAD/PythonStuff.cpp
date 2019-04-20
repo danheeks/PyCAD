@@ -152,17 +152,17 @@ int BeforePythonCall_level = 0;
 static void BeforePythonCall(PyObject **main_module, PyObject **globals)
 {
 	BeforePythonCall_level++;
-	if (BeforePythonCall_level > 1)
-		return;
-
-	if (*main_module == NULL)
+	if (BeforePythonCall_level <= 1)
 	{
-		*main_module = PyImport_ImportModule("__main__");
-		*globals = PyModule_GetDict(*main_module);
-	}
+		if (*main_module == NULL)
+		{
+			*main_module = PyImport_ImportModule("__main__");
+			*globals = PyModule_GetDict(*main_module);
+		}
 
-	const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n    self.count = ''\n  def write(self, txt):\n    self.value += str(self.count)+txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
-	PyRun_String(str, Py_file_input, *globals, *globals); //invoke code to redirect
+		const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n    self.count = ''\n  def write(self, txt):\n    self.value += str(self.count)+txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
+		PyRun_String(str, Py_file_input, *globals, *globals); //invoke code to redirect
+	}
 
 	if (PyErr_Occurred())
 		HandlePythonCallError();
@@ -172,7 +172,11 @@ static void AfterPythonCall(PyObject *main_module)
 {
 	BeforePythonCall_level--;
 	if (BeforePythonCall_level > 0)
+	{
+		if (PyErr_Occurred())
+			HandlePythonCallError();
 		return;
+	}
 
 	if (BeforePythonCall_level < 0)
 	{
@@ -404,6 +408,25 @@ bp::detail::method_result Call_Override(bp::override &f, const std::wstring& val
 	AfterPythonCall(main_module);
 }
 
+bp::detail::method_result Call_Override(bp::override &f, HeeksObj* value)
+{
+	//PyObject *main_module, *globals;
+	BeforePythonCall(&main_module, &globals);
+
+	// Execute the python function
+	PyLockGIL lock;
+	try
+	{
+		bp::detail::method_result result = f(bp::object(bp::ptr(value)));
+		AfterPythonCall(main_module);
+		return result;
+	}
+	catch (const bp::error_already_set&)
+	{
+	}
+	AfterPythonCall(main_module);
+}
+
 class ObserverWrap : public Observer, public bp::wrapper<Observer>
 {
 public:
@@ -610,13 +633,15 @@ void CallPythonCallback(PyObject* callback)
 
 }
 
-void PythonOnRepaint(bool soon)
+void PythonOnRepaint(bool soon = false)
 {
 	for (std::list<PyObject*>::iterator It = repaint_callbacks.begin(); It != repaint_callbacks.end(); It++)
 	{
 		CallPythonCallback(*It);
 	}
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(PythonOnRepaintOverloads, PythonOnRepaint, 0, 1)
 
 void RegisterOnRepaint(PyObject *callback)
 {
@@ -688,22 +713,26 @@ class BaseObject : public ObjList, public bp::wrapper<ObjList>
 {
 public:
 	bool m_uses_display_list;
+	bool m_uses_lights;
 	int m_display_list;
-	int m_type;
 
 	static bool in_glCommands;
 	static bool triangles_begun;
 	static bool lines_begun;
 	static TiXmlElement* m_cur_element;
+	static bool m_no_colour;
 
-	BaseObject() :ObjList(), m_uses_display_list(false), m_display_list(0), m_type(0){}
-	BaseObject(int type) :ObjList(), m_uses_display_list(false), m_display_list(0), m_type(type){}
+	BaseObject() :ObjList(), m_uses_display_list(false), m_uses_lights(true), m_display_list(0){}
+	BaseObject(int type) :ObjList(), m_uses_display_list(false), m_uses_lights(true), m_display_list(0){}
 	bool NeverDelete(){ return true; }
 
 	int GetType()const{
-		return m_type;
+		if (bp::override f = this->get_override("GetType"))
+		{
+			return Call_Override(f);
+		}
+		return 0;
 	}
-
 
 	const wchar_t* GetIconFilePath()
 	{
@@ -767,9 +796,11 @@ public:
 		if (in_glCommands)
 			return; // shouldn't be needed
 
+		m_no_colour = no_color;
+
 		if (!select)
 		{
-			glEnable(GL_LIGHTING);
+			if(m_uses_lights)glEnable(GL_LIGHTING);
 			if (!no_color)
 			{
 				const HeeksColor* c = this->GetColor();
@@ -821,7 +852,7 @@ public:
 			glEndList();
 		}
 
-		if (!select)glDisable(GL_LIGHTING);
+		if (!select && m_uses_lights)glDisable(GL_LIGHTING);
 
 	}
 
@@ -899,7 +930,40 @@ public:
 	{
 		if (bp::override f = this->get_override("CopyFrom"))
 		{
-			f(bp::object(bp::ptr(object)));
+			Call_Override(f, object);
+		}
+	}
+
+	void ReloadPointers()
+	{
+		if (bp::override f = this->get_override("ReloadPointers"))
+		{
+			Call_Override(f);
+		}
+	}
+
+	bool OneOfAKind()
+	{
+		if (bp::override f = this->get_override("OneOfAKind"))
+		{
+			return Call_Override(f);
+		}
+		return false;
+	}
+
+	void OnAdd()
+	{
+		if (bp::override f = this->get_override("OnAdd"))
+		{
+			Call_Override(f);
+		}
+	}
+
+	void OnRemove()
+	{
+		if (bp::override f = this->get_override("OnRemove"))
+		{
+			Call_Override(f);
 		}
 	}
 };
@@ -909,6 +973,7 @@ bool BaseObject::in_glCommands = false;
 bool BaseObject::triangles_begun = false;
 bool BaseObject::lines_begun = false;
 TiXmlElement* BaseObject::m_cur_element = NULL;
+bool BaseObject::m_no_colour = false;
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 {
@@ -935,6 +1000,11 @@ unsigned int BaseObjectGetID(BaseObject& object)
 void BaseObjectSetUsesGLList(BaseObject& object, bool on)
 {
 	object.m_uses_display_list = on;
+}
+
+void BaseObjectSetUsesLights(BaseObject& object, bool on)
+{
+	object.m_uses_lights = on;
 }
 
 HeeksColor BaseObjectGetColor(const BaseObject& object)
@@ -1300,7 +1370,7 @@ CCurve SketchGetCurve(CSketch& sketch)
 	return area.m_curves.front();
 }
 
-void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8)
+void BeginTriangles()
 {
 	if (!BaseObject::triangles_begun)
 	{
@@ -1312,6 +1382,39 @@ void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double 
 		glBegin(GL_TRIANGLES);
 		BaseObject::triangles_begun = true;
 	}
+}
+
+void BeginLines()
+{
+	if (!BaseObject::lines_begun)
+	{
+		if (BaseObject::triangles_begun)
+		{
+			glEnd();
+			BaseObject::triangles_begun = false;
+		}
+		glBegin(GL_LINE_STRIP);
+		BaseObject::lines_begun = true;
+	}
+}
+
+void EndLinesOrTriangles()
+{
+	if (BaseObject::triangles_begun)
+	{
+		glEnd();
+		BaseObject::triangles_begun = false;
+	}
+	else if (BaseObject::lines_begun)
+	{
+		glEnd();
+		BaseObject::lines_begun = false;
+	}
+}
+
+void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double x5, double x6, double x7, double x8)
+{
+	BeginTriangles();
 
 	Point3d p0(x0, x1, x2);
 	Point3d p1(x3, x4, x5);
@@ -1334,18 +1437,25 @@ void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double 
 
 void DrawLine(double x0, double x1, double x2, double x3, double x4, double x5)
 {
-	if (!BaseObject::lines_begun)
-	{
-		if (BaseObject::triangles_begun)
-		{
-			glEnd();
-			BaseObject::triangles_begun = false;
-		}
-		glBegin(GL_LINES);
-		BaseObject::lines_begun = true;
-	}
+	BeginLines();
 	glVertex3d(x0, x1, x2);
 	glVertex3d(x3, x4, x5);
+}
+
+void DrawColor(const HeeksColor& col)
+{
+	if (BaseObject::m_no_colour)return;
+	col.glColor();
+}
+
+void glVertexPoint3d(const Point3d& p)
+{
+	glVertex3dv(p.getBuffer());
+}
+
+void GlLineWidth(int width)
+{
+	glLineWidth(width);
 }
 
 void AddProperty(Property* property)
@@ -1445,6 +1555,14 @@ std::wstring GetXmlValue(const std::wstring &name, const std::wstring &default_v
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlValueOverloads, GetXmlValue, 1, 2)
 
+std::wstring GetXmlText()
+{
+	if (BaseObject::m_cur_element == NULL)return L"";
+	const char* text = BaseObject::m_cur_element->GetText();
+	if (text == NULL)return L"";
+	return Ctt(text);
+}
+
 bool GetXmlBool(const std::wstring &name, bool default_value = false)
 {
 	int value = default_value ? 1:0;
@@ -1469,7 +1587,7 @@ int GetXmlInt(const std::wstring &name, int default_value = 0)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlIntOverloads, GetXmlInt, 1, 2)
 
-int GetXmlFloat(const std::wstring &name, double default_value = 0)
+double GetXmlFloat(const std::wstring &name, double default_value = 0)
 {
 	double value = default_value;
 	if (BaseObject::m_cur_element != NULL)
@@ -1940,7 +2058,6 @@ void PyIncref(PyObject* object)
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
 			.def(bp::init<int>())
-			.def("GetType", &HeeksObj::GetType)
 			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
@@ -1948,6 +2065,7 @@ void PyIncref(PyObject* object)
 			.def("GetIndex", &HeeksObj::GetIndex)
 			.def("KillGLLists", &BaseObject::KillGLLists)
 			.def("SetUsesGLList", &BaseObjectSetUsesGLList)
+			.def("SetUsesLights", &BaseObjectSetUsesLights)
 			.def("GetColor", &BaseObjectGetColor)
 			.def("AutoExpand", &BaseObject::AutoExpand)
 			.def("GetNumChildren", &BaseObject::GetNumChildren)
@@ -2003,6 +2121,7 @@ void PyIncref(PyObject* object)
 			.def_readwrite("green", &HeeksColor::green)
 			.def_readwrite("blue", &HeeksColor::blue)
 			.def("ref", &HeeksColor::COLORREF_color)
+			.def("SetGlColor", &HeeksColor::glColor)
 			;
 
 		bp::class_<PropertyWrap, boost::noncopyable >("Property")
@@ -2350,11 +2469,18 @@ void PyIncref(PyObject* object)
 		bp::def("SaveObjects", SaveObjects);		
 		bp::def("DrawTriangle", &DrawTriangle);
 		bp::def("DrawLine", &DrawLine);
+		bp::def("DrawColor", &DrawColor);
+		bp::def("BeginTriangles", &BeginTriangles);
+		bp::def("BeginLines", &BeginLines);
+		bp::def("EndLinesOrTriangles", &EndLinesOrTriangles);
+		bp::def("GlVertex", &glVertexPoint3d);
+		bp::def("GlLineWidth", &GlLineWidth);
 		bp::def("AddProperty", AddProperty);
 		bp::def("GetObjectFromId", &GetObjectFromId);
 		bp::def("RegisterObjectType", RegisterObjectType);
 		bp::def("SetXmlValue", SetXmlValue);
 		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((bp::arg("name"),	bp::arg("default_value") = std::wstring(L""))));
+		bp::def("GetXmlText", &GetXmlText);
 		bp::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((bp::arg("name"), bp::arg("default_value") = false)));
 		bp::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((bp::arg("name"), bp::arg("default_value") = 0)));
 		bp::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((bp::arg("name"), bp::arg("default_vaue") = 0.0)));
@@ -2364,6 +2490,7 @@ void PyIncref(PyObject* object)
 		bp::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((bp::arg("filepath"), bp::arg("paste_into") = NULL, bp::arg("paste_before") = NULL, bp::arg("undoably") = false, bp::arg("show_error") = true)));
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
+		bp::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((bp::arg("soon") = false)));
 		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
 		bp::def("SetContextMenuCallback", SetContextMenuCallback);
 		bp::def("GetResFolder", GetResFolder);
