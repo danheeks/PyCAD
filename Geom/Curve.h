@@ -57,6 +57,7 @@ public:
 	Span();
 	Span(const Point& p, const CVertex& v, bool start_span = false):m_start_span(start_span), m_p(p), m_v(v){}
 	Point NearestPoint(const Point& p)const;
+	double Dist(const Point& p)const;
 	Point NearestPoint(const Span& p, double *d = NULL)const;
 	void GetBox(CBox2D &box)const;
 	double IncludedAngle()const;
@@ -69,6 +70,7 @@ public:
 	void Intersect(const Span& s, std::list<Point> &pts)const; // finds all the intersection points between two spans
 	void Reverse();
 	double GetRadius()const;
+	Span Offset(double offset);													// offset span method
 };
 
 ostream & operator<<(ostream &os, const Span &);
@@ -99,6 +101,7 @@ public:
 	void ChangeEnd(const Point &p);
 	bool Offset(double leftwards_value);
 	void OffsetForward(double forwards_value, bool refit_arcs = true); // for drag-knife compensation
+	int OffsetMethod1(CCurve& kOffset, double off, int direction, int& ret)const;
 	void Break(const Point &p);
 	void ExtractSeparateCurves(const std::list<Point> &ordered_points, std::list<CCurve> &separate_curves)const;
 	double Perim()const;

@@ -99,6 +99,7 @@
     <ClCompile Include="..\Geom\Matrix.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Geom\Offset.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="ConversionTools.cpp" />
     <ClCompile Include="CoordinateSystem.cpp" />

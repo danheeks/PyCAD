@@ -92,6 +92,7 @@
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="OctTree.cpp" />
+    <ClCompile Include="Offset.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="Solid.cpp" />
     <ClCompile Include="Tris.cpp" />

@@ -14,37 +14,26 @@ class HControl:
             return s.Add(self.window, 0, self.flag, control_border)
         return s.Add(self.sizer, 0, self.flag, control_border)
         
-ids_for_combo = []
-
 class HTypeObjectDropDown(wx.ComboBox):
     def __init__(self, parent, object_type, obj_list, OnComboOrCheck = None):
         choices = self.GetObjectChoices(object_type, obj_list)
         wx.ComboBox.__init__(self, parent, choices = choices)
         self.object_type = object_type
         self.obj_list = obj_list
-        self.ids = []
-        self.ids += ids_for_combo
         if OnComboOrCheck:
             parent.Bind(wx.EVT_COMBOBOX, OnComboOrCheck, self)
         
     def Recreate(self):
         self.Clear()
         self.Append(self.GetObjectChoices(self.object_type, self.obj_list))
-        global ids_for_combo
-        ids_for_combo = []
         
     def GetObjectChoices(self, object_type, obj_list):
-        global ids_for_combo
-        ids_for_combo = [(0, 'None')]
         choices = ['None']
         object = obj_list.GetFirstChild()
         while object:
             if object.GetIDGroupType() == object_type:
-                object = obj_list.GetNextChild()
-                continue
-            number = object.GetID()
-            ids_for_combo.append((number, object.GetTitle()))
-            choices.append(object.GetTitle())
+                number = object.GetID()
+                choices.append(object.GetTitle())
             object = obj_list.GetNextChild()
         return choices
             
@@ -52,16 +41,18 @@ class HTypeObjectDropDown(wx.ComboBox):
         sel = self.GetSelection()
         if sel < 0:
             return 0
-        global ids_for_combo
-        return ids_for_combo[sel][0]
+        return self.obj_list[sel].GetId()
         
     def SelectById(self, id):
         # set the combo to the correct item
-        global ids_for_combo
-        for i in range(0, len(ids_for_combo)):
-            if ids_for_combo[i][0] == id:
+        i = 0
+        object = self.obj_list.GetFirstChild()
+        while object:
+            if object.GetId() == id:
                 self.SetSelection(i)
                 return
+            i += 1
+            object = self.obj_list.GetNextChild()
         self.SetSelection(0)
      
 class XYZBoxes(wx.StaticBoxSizer):

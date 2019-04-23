@@ -716,22 +716,18 @@ bool CCurve::Offset(double leftwards_value)
 
 	CCurve save_curve = *this;
 
-#if 0
-	to do
 	try
 	{
-		Kurve k = MakeKurve(*this);
-		Kurve kOffset;
+		CCurve kOffset;
 		int ret = 0;
-		k.OffsetMethod1(kOffset, fabs(leftwards_value), (leftwards_value > 0) ? 1:-1, 1, ret);
+		OffsetMethod1(kOffset, fabs(leftwards_value), (leftwards_value > 0) ? 1:-1, ret);
 		success = (ret == 0);
-		if(success)*this = MakeCCurve(kOffset);
+		if(success)*this = kOffset;
 	}
 	catch(...)
 	{
 		success = false;
 	}
-#endif
 
 	if(success == false)
 	{
@@ -1069,6 +1065,11 @@ Point Span::NearestPoint(const Point& p)const
 	else return m_v.m_p;
 }
 
+double Span::Dist(const Point& p)const
+{
+	return p.Dist(NearestPoint(p));
+}
+
 Point Span::MidPerim(double d)const {
 	/// returns a point which is 0-d along span
 	Point p;
@@ -1313,7 +1314,12 @@ void LineLineIntof(const Span& sp0, const Span& sp1, std::list<Point> &pts) {
 	double cp = v1 ^ v0;
 
 	if (fabs(cp) >= UNIT_VECTOR_TOLERANCE) {
+		double toler = TOLERANCE / sp0.Length();				// calc a parametric tolerance
 		double t = (v1 ^ v2) / cp;
+		if (t < -toler || t > 1 + toler) return;
+		toler = TOLERANCE / sp1.Length();
+		t = (v0 ^ v2) / cp;
+		if (t < -toler || t > 1 + toler) return;
 		pts.push_back(v0 * t + sp0.m_p);
 	}
 }
@@ -1402,6 +1408,36 @@ double Span::GetRadius()const
 		return m_p.dist(m_v.m_c);
 	}
 }
+
+Span Span::Offset(double offset)
+{
+	Span Offsp = *this;
+	if (FNEZ(offset)) {
+		Point vs = this->GetVector(0.0);
+		if (!m_v.m_type) {
+			// straight
+			Offsp.m_p.x -= offset * vs.y;
+			Offsp.m_p.y += offset * vs.x;
+
+			Offsp.m_v.m_p.x -= offset * vs.y;
+			Offsp.m_v.m_p.y += offset * vs.x;
+		}
+		else {
+			//	 circular span
+			//	double coffset = (double) dir * offset;
+			Point ve = this->GetVector(1.0);
+			Offsp.m_p.x -= vs.y * offset;
+			Offsp.m_p.y += vs.x * offset;
+
+			Offsp.m_v.m_p.x -= ve.y * offset;
+			Offsp.m_v.m_p.y += ve.x * offset;
+
+			//				Offsp.radius -= dir * offset;
+		}
+	}
+	return Offsp;
+}
+
 
 ostream & operator<<(ostream &os, const Span &span)
 {

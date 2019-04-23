@@ -408,7 +408,7 @@ bp::detail::method_result Call_Override(bp::override &f, const std::wstring& val
 	AfterPythonCall(main_module);
 }
 
-bp::detail::method_result Call_Override(bp::override &f, HeeksObj* value)
+bp::detail::method_result Call_Override(bp::override &f, const HeeksObj* value)
 {
 	//PyObject *main_module, *globals;
 	BeforePythonCall(&main_module, &globals);
@@ -1248,6 +1248,11 @@ void ObjListReadFromXML(ObjList& objlist)
 	objlist.ObjList::ReadFromXML(BaseObject::m_cur_element);
 }
 
+void ObjListCopyFrom(ObjList& objlist, HeeksObj* object)
+{
+	objlist.ObjList::CopyFrom(object);
+}
+
 
 HeeksColor PropertyGetColor(const Property& p)
 {
@@ -1565,11 +1570,14 @@ std::wstring GetXmlText()
 
 bool GetXmlBool(const std::wstring &name, bool default_value = false)
 {
-	int value = default_value ? 1:0;
-	if (BaseObject::m_cur_element != NULL)
-	{
-		BaseObject::m_cur_element->Attribute(Ttc(name.c_str()), &value);
-	}
+	if (BaseObject::m_cur_element == NULL)
+		return default_value;
+
+	const char* cname = Ttc(name.c_str());
+	if (BaseObject::m_cur_element->Attribute(cname) == NULL)
+		return default_value;
+	int value;
+	BaseObject::m_cur_element->Attribute(cname, &value);
 	return value != 0;
 }
 
@@ -1577,11 +1585,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlBoolOverloads, GetXmlBool, 1, 2)
 
 int GetXmlInt(const std::wstring &name, int default_value = 0)
 {
-	int value = default_value;
-	if (BaseObject::m_cur_element != NULL)
-	{
-		BaseObject::m_cur_element->Attribute(Ttc(name.c_str()), &value);
-	}
+	if (BaseObject::m_cur_element == NULL)
+		return default_value;
+
+	const char* cname = Ttc(name.c_str());
+	if (BaseObject::m_cur_element->Attribute(cname) == NULL)
+		return default_value;
+	int value;
+	BaseObject::m_cur_element->Attribute(cname, &value);
 	return value;
 }
 
@@ -1589,11 +1600,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlIntOverloads, GetXmlInt, 1, 2)
 
 double GetXmlFloat(const std::wstring &name, double default_value = 0)
 {
-	double value = default_value;
-	if (BaseObject::m_cur_element != NULL)
-	{
-		BaseObject::m_cur_element->Attribute(Ttc(name.c_str()), &value);
-	}
+	if (BaseObject::m_cur_element == NULL)
+		return default_value;
+
+	const char* cname = Ttc(name.c_str());
+	if (BaseObject::m_cur_element->Attribute(cname) == NULL)
+		return default_value;
+	double value;
+	BaseObject::m_cur_element->Attribute(cname, &value);
 	return value;
 }
 
@@ -2144,6 +2158,7 @@ void PyIncref(PyObject* object)
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
 			.def("ReadXml", &ObjListReadFromXML)
+			.def("CopyFrom", &ObjListCopyFrom)
 			;
 
 		bp::class_<IdNamedObj, bp::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
@@ -2483,7 +2498,7 @@ void PyIncref(PyObject* object)
 		bp::def("GetXmlText", &GetXmlText);
 		bp::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((bp::arg("name"), bp::arg("default_value") = false)));
 		bp::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((bp::arg("name"), bp::arg("default_value") = 0)));
-		bp::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((bp::arg("name"), bp::arg("default_vaue") = 0.0)));
+		bp::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((bp::arg("name"), bp::arg("default_value") = 0.0)));
 		bp::def("ReturnFromXmlChild", ReturnFromXmlChild);
 		bp::def("GetFirstXmlChild", GetFirstXmlChild);
 		bp::def("GetNextXmlChild", GetNextXmlChild);
