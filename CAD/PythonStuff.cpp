@@ -1034,6 +1034,11 @@ std::wstring HeeksObjGetIconFilePath(HeeksObj& object)
 	return std::wstring(object.GetIconFilePath());
 }
 
+void HeeksObjReadFromXML(HeeksObj& object)
+{
+	object.HeeksObj::ReadFromXML(BaseObject::m_cur_element);
+}
+
 boost::python::list HeeksObjGetProperties(HeeksObj& object) {
 	boost::python::list return_list;
 	std::list<Property*> p_list;
@@ -2119,6 +2124,7 @@ void PyIncref(PyObject* object)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
+			.def("ReadXml", &HeeksObjReadFromXML)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetLines", &HeeksObjGetLines)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)

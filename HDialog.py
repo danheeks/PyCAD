@@ -15,7 +15,8 @@ class HControl:
         return s.Add(self.sizer, 0, self.flag, control_border)
         
 class HTypeObjectDropDown(wx.ComboBox):
-    def __init__(self, parent, object_type, obj_list, OnComboOrCheck = None):
+    def __init__(self, parent, object_type, obj_list, OnComboOrCheck = None, OnGetID = None):
+        self.OnGetID = OnGetID
         choices = self.GetObjectChoices(object_type, obj_list)
         wx.ComboBox.__init__(self, parent, choices = choices)
         self.object_type = object_type
@@ -27,12 +28,17 @@ class HTypeObjectDropDown(wx.ComboBox):
         self.Clear()
         self.Append(self.GetObjectChoices(self.object_type, self.obj_list))
         
+    def GetObjectID(self, object):
+        if self.OnGetID:
+            return self.OnGetID(object)
+        return object.GetID()
+        
     def GetObjectChoices(self, object_type, obj_list):
         choices = ['None']
         object = obj_list.GetFirstChild()
         while object:
             if object.GetIDGroupType() == object_type:
-                number = object.GetID()
+                number = self.GetObjectID(object)
                 choices.append(object.GetTitle())
             object = obj_list.GetNextChild()
         return choices
@@ -41,14 +47,22 @@ class HTypeObjectDropDown(wx.ComboBox):
         sel = self.GetSelection()
         if sel < 0:
             return 0
-        return self.obj_list[sel].GetId()
+        i = 1
+        object = self.obj_list.GetFirstChild()
+        while object:
+            if i == sel:
+                return self.GetObjectID(object)
+            i += 1
+            object = self.obj_list.GetNextChild()
+        
+        return 0
         
     def SelectById(self, id):
         # set the combo to the correct item
-        i = 0
+        i = 1
         object = self.obj_list.GetFirstChild()
         while object:
-            if object.GetId() == id:
+            if self.GetObjectID(object) == id:
                 self.SetSelection(i)
                 return
             i += 1

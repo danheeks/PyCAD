@@ -141,6 +141,7 @@ class PropertiesCanvas( wx.Panel ):
             plist = property.GetProperties()
             for p in plist:
                 self.AddProperty(p, new_prop)
+            new_prop.ChangeFlag(wxpg.PG_PROP_COLLAPSED, True)
                 
         self.inAddProperty -= 1
        

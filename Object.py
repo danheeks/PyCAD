@@ -38,6 +38,8 @@ class Object(cad.BaseObject):
     def ReadXml(self):
         if self.CallsObjListReadXml():
             cad.ObjList.ReadXml(self)
+        else:
+            cad.Object.ReadXml(self)
             
     def ReloadPointers(self):
         pass
