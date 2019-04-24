@@ -189,7 +189,7 @@ static CCurve eliminateLoops(const CCurve& k , const CCurve& originalk, double o
 						}
 						sp1.m_p = sp1.m_v.m_p ;		// next
 						SaveIt1 = SaveIt2;							// pos AA = BB
-						SaveIt2 = SaveIt;								// mark 
+						SaveIt2 = It;								// mark 
 
 						if ((It == k.m_vertices.end() || fwdCount++ > 25) && clipped == false) break;
 					}

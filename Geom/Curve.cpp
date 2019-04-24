@@ -1315,12 +1315,12 @@ void LineLineIntof(const Span& sp0, const Span& sp1, std::list<Point> &pts) {
 
 	if (fabs(cp) >= UNIT_VECTOR_TOLERANCE) {
 		double toler = TOLERANCE / sp0.Length();				// calc a parametric tolerance
-		double t = (v1 ^ v2) / cp;
-		if (t < -toler || t > 1 + toler) return;
+		double t0 = (v1 ^ v2) / cp;
+		if (t0 < -toler || t0 > 1 + toler) return;
 		toler = TOLERANCE / sp1.Length();
-		t = (v0 ^ v2) / cp;
-		if (t < -toler || t > 1 + toler) return;
-		pts.push_back(v0 * t + sp0.m_p);
+		double t1 = (v0 ^ v2) / cp;
+		if (t1 < -toler || t1 > 1 + toler) return;
+		pts.push_back(v0 * t0 + sp0.m_p);
 	}
 }
 
