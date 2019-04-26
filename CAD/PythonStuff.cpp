@@ -1039,6 +1039,11 @@ void HeeksObjReadFromXML(HeeksObj& object)
 	object.HeeksObj::ReadFromXML(BaseObject::m_cur_element);
 }
 
+void HeeksObjWriteToXML(HeeksObj& object)
+{
+	object.HeeksObj::WriteToXML(BaseObject::m_cur_element);
+}
+
 boost::python::list HeeksObjGetProperties(HeeksObj& object) {
 	boost::python::list return_list;
 	std::list<Property*> p_list;
@@ -1250,7 +1255,9 @@ void ObjListAdd(ObjList& objlist, HeeksObj* object)
 
 void ObjListReadFromXML(ObjList& objlist)
 {
+	TiXmlElement* save_element = BaseObject::m_cur_element;
 	objlist.ObjList::ReadFromXML(BaseObject::m_cur_element);
+	BaseObject::m_cur_element = save_element;
 }
 
 void ObjListCopyFrom(ObjList& objlist, HeeksObj* object)
@@ -1378,6 +1385,11 @@ CCurve SketchGetCurve(CSketch& sketch)
 	if (area.m_curves.size() == 0)
 		return CCurve();
 	return area.m_curves.front();
+}
+
+CArea SketchGetArea(CSketch& sketch)
+{
+	return ObjectToArea(&sketch);
 }
 
 void BeginTriangles()
@@ -1546,11 +1558,68 @@ int RegisterObjectType(std::wstring name, PyObject *callback)
 	return FindIt->second;
 }
 
-void SetXmlValue(const std::wstring &name, const std::wstring &value)
+void SetXmlValue(const std::wstring &name, PyObject* value)
 {
-	std::string svalue(Ttc(value.c_str()));
-	BaseObject::m_cur_element->SetAttribute(Ttc(name.c_str()), svalue.c_str());
+	const char* sname = Ttc(name.c_str());
+	if (PyLong_Check(value))
+	{
+		BaseObject::m_cur_element->SetAttribute(sname, PyLong_AsLong(value));
+	}
+	else if (PyFloat_Check(value))
+	{
+		BaseObject::m_cur_element->SetDoubleAttribute(sname, PyFloat_AsDouble(value));
+	}
+	else if (PyBool_Check(value))
+	{
+		BaseObject::m_cur_element->SetAttribute(sname, PyObject_IsTrue(value) ? 1:0);
+	}
+	else if (PyBytes_Check(value))
+	{
+		BaseObject::m_cur_element->SetAttribute(sname, PyBytes_AsString(value));
+	}
+	else if (PyUnicode_Check(value))
+	{
+		BaseObject::m_cur_element->SetAttribute(sname, PyBytes_AsString(PyUnicode_AsASCIIString(value)));
+	}
+	else
+	{
+		PyErr_SetString(PyExc_TypeError, "invalid value type");
+		bp::throw_error_already_set();
+	}
 }
+
+void BeginXmlChild(const std::wstring &child_name)
+{
+	std::string svalue(Ttc(child_name.c_str()));
+
+	TiXmlElement *element = new TiXmlElement(Ttc(child_name.c_str()));
+	BaseObject::m_cur_element->LinkEndChild(element);
+	BaseObject::m_cur_element = element;
+}
+
+void EndXmlChild()
+{
+	if (BaseObject::m_cur_element)BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
+}
+
+bp::object GetXmlObject() {
+	if (BaseObject::m_cur_element)
+	{
+		HeeksObj* object = theApp.ReadXMLElement(BaseObject::m_cur_element);
+		if (object != NULL)
+		{
+			boost::python::list olist;
+			AddObjectToPythonList(object, olist);
+			if (bp::len(olist) > 0)
+			{
+				return olist[0];
+			}
+		}
+	}
+
+	return boost::python::object(); // None
+}
+
 
 std::wstring GetXmlValue(const std::wstring &name, const std::wstring &default_value = L"")
 {
@@ -1571,6 +1640,15 @@ std::wstring GetXmlText()
 	const char* text = BaseObject::m_cur_element->GetText();
 	if (text == NULL)return L"";
 	return Ctt(text);
+}
+
+void SetXmlText(const std::wstring& str)
+{
+	if (BaseObject::m_cur_element == NULL)return;
+
+	// add actual text as a child object
+	TiXmlText* text = new TiXmlText(Ttc(str.c_str()));
+	BaseObject::m_cur_element->LinkEndChild(text);
 }
 
 bool GetXmlBool(const std::wstring &name, bool default_value = false)
@@ -2074,6 +2152,11 @@ void PyIncref(PyObject* object)
 	Py_IncRef(object);
 }
 
+int GetNextID(int id_group_type)
+{
+	return theApp.GetNextID(id_group_type);
+}
+
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
 			.def(bp::init<int>())
@@ -2081,6 +2164,7 @@ void PyIncref(PyObject* object)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
 			.def("GetID", &BaseObjectGetID)
+			.def("SetID", &HeeksObj::SetID)
 			.def("GetIndex", &HeeksObj::GetIndex)
 			.def("KillGLLists", &BaseObject::KillGLLists)
 			.def("SetUsesGLList", &BaseObjectSetUsesGLList)
@@ -2110,6 +2194,7 @@ void PyIncref(PyObject* object)
 			.def("GetTypeString", HeeksObjGetTypeString)
 			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
 			.def("GetID", &HeeksObj::GetID)
+			.def("SetID", &HeeksObj::SetID)
 			.def("GetIndex", &HeeksObj::GetIndex)
 			.def("KillGLLists", &HeeksObj::KillGLLists)
 			.def("GetColor", &HeeksObjGetColor)
@@ -2125,6 +2210,7 @@ void PyIncref(PyObject* object)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("ReadXml", &HeeksObjReadFromXML)
+			.def("WriteXml", &HeeksObjWriteToXML)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetLines", &HeeksObjGetLines)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)
@@ -2189,6 +2275,7 @@ void PyIncref(PyObject* object)
 			.def("GetSketchOrder", &CSketch::GetSketchOrder)
 			.def("ReOrderSketch", &CSketch::ReOrderSketch)
 			.def("GetCurve", &SketchGetCurve)
+			.def("GetArea", &SketchGetArea)
 			;
 
 		bp::class_<HPoint, bp::bases<IdNamedObj>>("Point", boost::python::no_init)
@@ -2500,8 +2587,12 @@ void PyIncref(PyObject* object)
 		bp::def("GetObjectFromId", &GetObjectFromId);
 		bp::def("RegisterObjectType", RegisterObjectType);
 		bp::def("SetXmlValue", SetXmlValue);
-		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((bp::arg("name"),	bp::arg("default_value") = std::wstring(L""))));
+		bp::def("BeginXmlChild", BeginXmlChild);
+		bp::def("EndXmlChild", EndXmlChild);
+		bp::def("GetXmlObject", &GetXmlObject);
+		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((bp::arg("name"), bp::arg("default_value") = std::wstring(L""))));
 		bp::def("GetXmlText", &GetXmlText);
+		bp::def("SetXmlText", &SetXmlText);		
 		bp::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((bp::arg("name"), bp::arg("default_value") = false)));
 		bp::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((bp::arg("name"), bp::arg("default_value") = 0)));
 		bp::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((bp::arg("name"), bp::arg("default_value") = 0.0)));
@@ -2566,6 +2657,7 @@ void PyIncref(PyObject* object)
 		bp::def("SetILineDrawing", SetILineDrawing);
 		bp::def("NewPoint", NewPoint, bp::return_value_policy<bp::reference_existing_object>());
 		bp::def("PyIncref", PyIncref);
+		bp::def("GetNextID", GetNextID);
 
 
 		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;

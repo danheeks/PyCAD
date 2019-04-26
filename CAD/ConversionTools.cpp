@@ -110,5 +110,6 @@ CArea ObjectToArea(HeeksObj* object)
 	std::list<HeeksObj*> objects_to_delete;
 	list.push_back(object);
 	ObjectsToArea(list, objects_to_delete, area_for_ObjectToArea);
+	area_for_ObjectToArea.Reorder();
 	return area_for_ObjectToArea;
 }

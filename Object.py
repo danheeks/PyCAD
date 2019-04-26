@@ -30,10 +30,14 @@ class Object(cad.BaseObject):
         return False
     
     def WriteXml(self):
-        pass
+        cad.Object.WriteXml(self)
     
     def CallsObjListReadXml(self):
         return True
+    
+    def CopyFrom(self, object):
+        for obj in object.GetChildren():
+            self.Add(obj.MakeACopy())
     
     def ReadXml(self):
         if self.CallsObjListReadXml():
@@ -130,6 +134,12 @@ class PyProperty(cad.Property):
         elif tt == int: t = cad.PROPERTY_TYPE_INT
         elif tt == float: t = cad.PROPERTY_TYPE_DOUBLE
         elif tt == str: t = cad.PROPERTY_TYPE_STRING
+        elif tt == geom.Point:
+            t = cad.PROPERTY_TYPE_LIST
+            self.children = []
+            a = getattr(object, value_name)
+            self.children.append(PyPropertyLength('X', 'x', a))
+            self.children.append(PyPropertyLength('Y', 'y', a))
         elif tt == geom.Point3D:
             t = cad.PROPERTY_TYPE_LIST
             self.children = []

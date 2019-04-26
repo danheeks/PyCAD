@@ -236,7 +236,8 @@ class Frame(wx.Frame):
             self.SetFrameTitle()
             
     def SetFrameTitle(self):
-        str = wx.GetApp().GetAppName() + ' - '
+        #str = wx.GetApp().GetAppName() + ' - '
+        str = self.GetTitle() + ' - '
         if wx.GetApp().filepath:
             str += wx.GetApp().filepath
         else:
