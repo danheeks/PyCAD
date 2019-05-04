@@ -322,7 +322,8 @@ HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
 	if ((existing != NULL) && (existing != object))
 	{
 		// There was a pre-existing version of this type/id pair.  Don't replace it with another one.
-		delete object;
+		if (!object->NeverDelete())
+			delete object;
 		return(existing);
 	}
 
@@ -347,7 +348,35 @@ void CApp::ObjectReadFromXML(HeeksObj *object, TiXmlElement* element)
 	}
 }
 
-void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* paste_before, bool undoably, bool show_error)
+
+static bool ImportObjectInto(HeeksObj* object, HeeksObj* add_to, HeeksObj* paste_before)
+{
+	if (object->OneOfAKind())
+	{
+		for (HeeksObj* child = add_to->GetFirstChild(); child; child = add_to->GetNextChild())
+		{
+			if (child->GetType() == object->GetType())
+			{
+				child->CopyFrom(object);
+				//// import all of the object's children into add_to's child
+				//for (HeeksObj* child2 = object->GetFirstChild(); child2; child2 = object->GetNextChild())
+				//{
+				//	ImportObjectInto(child2, child, NULL);
+				//}
+
+				return false;
+			}
+		}
+
+		add_to->Add(object, paste_before);
+		return true;
+	}
+
+	add_to->Add(object, paste_before);
+	return true;
+}
+
+void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* paste_before, bool call_was_added, bool show_error)
 {
 	TiXmlDocument doc(Ttc(filepath));
 	if (!doc.LoadFile())
@@ -402,29 +431,8 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 			{
 				if (add_to->CanAdd(object) && object->CanAddTo(add_to))
 				{
-					if (object->OneOfAKind())
-					{
-						bool one_found = false;
-						for (HeeksObj* child = add_to->GetFirstChild(); child; child = add_to->GetNextChild())
-						{
-							if (child->GetType() == object->GetType())
-							{
-								child->CopyFrom(object);
-								one_found = true;
-								break;
-							}
-						}
-						if (!one_found)
-						{
-							add_to->Add(object, paste_before);
-							if (m_inPaste)WasAdded(object);
-						}
-					}
-					else
-					{
-						add_to->Add(object, paste_before);
-						if (m_inPaste)WasAdded(object);
-					}
+					if (ImportObjectInto(object, add_to, paste_before))
+						if (call_was_added)WasAdded(object);
 					break;
 				}
 				else if (paste_into == NULL)
@@ -596,7 +604,7 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 		m_file_open_or_import_type = FileOpenTypeHeeks;
 		if (import_not_open)
 			m_file_open_or_import_type = FileImportTypeHeeks;
-		OpenXMLFile(filepath, paste_into, paste_before, history_started);
+		OpenXMLFile(filepath, paste_into, paste_before, m_inPaste);
 	}
 	else if (m_fileopen_handlers.find(extension) != m_fileopen_handlers.end())
 	{

@@ -16,10 +16,10 @@ class PropertyMapItem:
     def OnAddProperty(self, prop):
         label = prop.GetLabel()
         is_new = label not in self.children
-        new_map_item = PropertyMapItem(prop)
-        
-        self.children[label] = new_map_item
-        return new_map_item, is_new
+        if is_new:
+            new_map_item = PropertyMapItem(prop)
+            self.children[label] = new_map_item
+        return self.children[label], is_new
         
 class PropertiesObserver(cad.Observer):
     def __init__(self, window):
@@ -85,6 +85,7 @@ class PropertiesCanvas( wx.Panel ):
         self.SetAutoLayout(True)
         
         self.inAddProperty = 0
+        self.in_OnPropGridChange = False
 
     def FindMapItem(self, p):
         if p in self.pmap:
@@ -99,7 +100,8 @@ class PropertiesCanvas( wx.Panel ):
                 self.pg.AppendIn(parent_property, new_prop)
         else:
             new_item, newly_inserted = self.map.OnAddProperty(new_prop)
-            if newly_inserted: self.pg.Append(new_prop)
+            if newly_inserted:
+                self.pg.Append(new_prop)
 
         new_item.properties.append(property)
         self.pmap[new_prop] = new_item
@@ -158,6 +160,7 @@ class PropertiesCanvas( wx.Panel ):
         return item.properties
 
     def OnPropGridChange(self, event):
+        self.in_OnPropGridChange = True
         p = event.GetProperty()
         properties = self.GetProperties(p)
         if properties == None:
@@ -190,6 +193,8 @@ class PropertiesCanvas( wx.Panel ):
             #cad.DoUndoable(changer)
             
         cad.EndHistory()
+        
+        self.in_OnPropGridChange = False
 
     def OnPropGridSelect(self, event):
         p = event.GetProperty()

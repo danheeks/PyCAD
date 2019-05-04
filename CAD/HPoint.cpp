@@ -145,4 +145,5 @@ void HPoint::ReadFromXML(TiXmlElement *element)
 	element->Attribute("x", &m_p.x);
 	element->Attribute("y", &m_p.y);
 	element->Attribute("z", &m_p.z);
+	IdNamedObj::ReadFromXML(element);
 }

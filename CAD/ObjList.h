@@ -39,6 +39,7 @@ public:
 	void Clear(std::set<HeeksObj*> &to_delete);
 
 	HeeksObj* MakeACopy(void) const;
+	void CopyFrom(const HeeksObj* object);
 	void GetBox(CBox &box);
 	void glCommands(bool select, bool marked, bool no_color);
 	HeeksObj* GetFirstChild();

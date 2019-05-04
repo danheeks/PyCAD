@@ -75,6 +75,11 @@ void ObjList::ClearUndoably(void)
 
 HeeksObj* ObjList::MakeACopy(void) const { return new ObjList(*this); }
 
+void ObjList::CopyFrom(const HeeksObj* object)
+{
+	operator=((const ObjList&)(*object));
+}
+
 void ObjList::GetBox(CBox &box)
 {
 	std::list<HeeksObj*>::iterator It;

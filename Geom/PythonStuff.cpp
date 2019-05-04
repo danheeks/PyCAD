@@ -583,11 +583,11 @@ static std::string Span__str__(const Span& self) {
 BOOST_PYTHON_MODULE(geom) {
 	/// class Point
 	/// a 2D point, with x and y values, which can also be used as a vector
-	bp::class_<Point>("Point") 
+	bp::class_<Point>("Point", "2D Point can be used as a vector too.") 
         .def(bp::init<double, double>()) /// function Point///params float x, float y/// make a new Point from x and y values///return Point
         .def(bp::init<Point>())
         .def(bp::other<double>() * bp::self)
-        .def(bp::self * bp::other<double>())/// function *///params float multiplier/// returns a Point with x and y multiplied by the by the multiplier///you can also do multiplication the other way round; p2 = 3.0 * p///return Point
+        .def(bp::self * bp::other<double>())//, "returns a Point with x and y multiplied by the by the multiplier\nyou can also do multiplication the other way round; p2 = 3.0 * p\nreturn Point")
         .def(bp::self / bp::other<double>())/// function / ///params float divider/// returns a Point with x and y divided by the by the divider///return Point
         .def(bp::self * bp::other<Point>())/// function *///params Point p2/// returns the dot product of this point and p2///return float
         .def(bp::self - bp::other<Point>())/// function - ///params Point p2/// returns a Point wit:///x = this points x - p2.x///y = this points y - p2.y///you can also use "-" to return the Point with (-x, -y)///return Point
@@ -631,7 +631,7 @@ BOOST_PYTHON_MODULE(geom) {
         .def(bp::init<Point, CVertex, bool>())///function Span///params Point p, Vertex v, Boolean start_span///return Span///makes a new Span with a start point, an end Vertex, and a flag set to True if this is the start span of a curve
 		.def("NearestPoint", static_cast< Point (Span::*)(const Point& p)const >(&Span::NearestPoint))///function NearestPoint///params Point p///return Point///returns the nearest point on this span to the given point
 		.def("NearestPoint", &SpanNearestPoint)///function NearestPoint///params Span s2///return Point///return float///returns nearest point on this span to span s2 and returns the distance of that point to s2
-		.def("GetBox", &Span::GetBox)///function GetBox///return Box///returns the box that fits round the span
+		.def("GetBox", &Span::GetBox, "returns the box that fits round the span")
 		.def("IncludedAngle", &Span::IncludedAngle)/// function IncludedAngle///return float///returns the included angle of the arc, 1 for ccw, -1 for cw
 		.def("GetArea", &Span::GetArea)
 		.def("On", &SpanOn)/// function On///params Point p///returns True if point lies on span, else False

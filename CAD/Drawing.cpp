@@ -54,7 +54,7 @@ void Drawing::ClearObjectsMade()
 	for(std::list<HeeksObj*>::iterator It = m_temp_object_in_list.begin(); It != m_temp_object_in_list.end(); It++)
 	{
 		HeeksObj* object = *It;
-		delete object;
+		if (!object->NeverDelete())delete object;
 	}
 	m_temp_object_in_list.clear();
 }

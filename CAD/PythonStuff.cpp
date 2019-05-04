@@ -163,25 +163,22 @@ static void BeforePythonCall(PyObject **main_module, PyObject **globals)
 		const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n    self.count = ''\n  def write(self, txt):\n    self.value += str(self.count)+txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
 		PyRun_String(str, Py_file_input, *globals, *globals); //invoke code to redirect
 	}
-
-	if (PyErr_Occurred())
-		HandlePythonCallError();
 }
 
-static void AfterPythonCall(PyObject *main_module)
+static bool AfterPythonCall(PyObject *main_module)
 {
 	BeforePythonCall_level--;
 	if (BeforePythonCall_level > 0)
 	{
 		if (PyErr_Occurred())
 			HandlePythonCallError();
-		return;
+		return false;
 	}
 
 	if (BeforePythonCall_level < 0)
 	{
 		theApp.MessageBoxW(L"too many internal calls to AfterPythonCall");
-		return;
+		return false;
 	}
 
 	PyObject *catcher = PyObject_GetAttrString(main_module, "catchOutErr"); //get our catchOutErr created above
@@ -195,14 +192,20 @@ static void AfterPythonCall(PyObject *main_module)
 		wprintf(s.c_str());
 	}
 
+	bool return_value = true;
 	if (PyErr_Occurred())
+	{
 		HandlePythonCallError();
+		return_value = false;
+	}
 
 	if (BeforePythonCall_level == 0)
 	{
 		const char* str = "sys.stdout = old_stdout\nsys.stderr = old_stderr";
 		PyRun_String(str, Py_file_input, globals, globals); //invoke code
 	}
+
+	return return_value;
 }
 
 std::wstring str_for_base_object;
@@ -276,155 +279,208 @@ void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 
 bp::detail::method_result Call_Override(bp::override &f, bp::list &list)
 {
-	BeforePythonCall(&main_module, &globals);
-	// Execute the python function
-	PyLockGIL lock;
-	try
+	if (PyErr_Occurred())
 	{
-		bp::detail::method_result result = f(list);// , removed_list, modified_list);
+		HandlePythonCallError();
+	}
+	else
+	{
+		BeforePythonCall(&main_module, &globals);
+
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(list);// , removed_list, modified_list);
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 bp::detail::method_result Call_Override(bp::override &f, bp::list &added, bp::list &removed)
 {
-	BeforePythonCall(&main_module, &globals);
+	if (PyErr_Occurred())
+	{
+		HandlePythonCallError();
+	}
+	else
+	{
+		BeforePythonCall(&main_module, &globals);
 
-	// Execute the python function
-	PyLockGIL lock;
-	try
-	{
-		bp::detail::method_result result = f(added, removed);
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(added, removed);
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 
 
 bp::detail::method_result Call_Override(bp::override &f)
 {
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
+	if (PyErr_Occurred())
+	{
+		HandlePythonCallError();
+	}
+	else
+	{
+		BeforePythonCall(&main_module, &globals);
 
-	// Execute the python function
-	PyLockGIL lock;
-	try
-	{
-		bp::detail::method_result result = f();
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f();
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 
 bp::detail::method_result Call_Override(bp::override &f, int value)
 {
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
+	if (PyErr_Occurred())
+	{
+		HandlePythonCallError();
+	}
+	else
+	{
+		//PyObject *main_module, *globals;
+		BeforePythonCall(&main_module, &globals);
 
-	// Execute the python function
-	PyLockGIL lock;
-	try
-	{
-		bp::detail::method_result result = f(value);
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(value);
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 bp::detail::method_result Call_Override(bp::override &f, bool value)
 {
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
+	if (PyErr_Occurred())
+	{
+		HandlePythonCallError();
+	}
+	else
+	{
+		//PyObject *main_module, *globals;
+		BeforePythonCall(&main_module, &globals);
 
-	// Execute the python function
-	PyLockGIL lock;
-	try
-	{
-		bp::detail::method_result result = f(value);
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(value);
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 bp::detail::method_result Call_Override(bp::override &f, double value)
 {
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
-
-	// Execute the python function
-	PyLockGIL lock;
-	try
+	if (PyErr_Occurred())
 	{
-		bp::detail::method_result result = f(value);
+		HandlePythonCallError();
+	}
+	else
+	{
+		//PyObject *main_module, *globals;
+		BeforePythonCall(&main_module, &globals);
+
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(value);
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
-
 }
 
 bp::detail::method_result Call_Override(bp::override &f, const std::wstring& value)
 {
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
+	if (PyErr_Occurred())
+	{
+		HandlePythonCallError();
+	}
+	else
+	{
+		BeforePythonCall(&main_module, &globals);
 
-	// Execute the python function
-	PyLockGIL lock;
-	try
-	{
-		bp::detail::method_result result = f(value);
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(value);
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 bp::detail::method_result Call_Override(bp::override &f, const HeeksObj* value)
 {
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
+	if (PyErr_Occurred())
+	{
+		HandlePythonCallError();
+	}
+	else
+	{
+		BeforePythonCall(&main_module, &globals);
 
-	// Execute the python function
-	PyLockGIL lock;
-	try
-	{
-		bp::detail::method_result result = f(bp::object(bp::ptr(value)));
+		// Execute the python function
+		PyLockGIL lock;
+		try
+		{
+			bp::detail::method_result result = f(bp::object(bp::ptr(value)));
+			AfterPythonCall(main_module);
+			return result;
+		}
+		catch (const bp::error_already_set&)
+		{
+		}
 		AfterPythonCall(main_module);
-		return result;
 	}
-	catch (const bp::error_already_set&)
-	{
-	}
-	AfterPythonCall(main_module);
 }
 
 class ObserverWrap : public Observer, public bp::wrapper<Observer>
@@ -570,6 +626,16 @@ public:
 		return Drawing::number_of_steps();
 	}
 
+	HeeksObj* GetOwnerForDrawingObjects()override
+	{
+		if (bp::override f = this->get_override("GetOwnerForDrawingObjects"))
+		{
+			HeeksObj* result = Call_Override(f);
+			return result;
+		}
+		return Drawing::GetOwnerForDrawingObjects();
+	}
+
 	HeeksObj* TempObject(){
 		return Drawing::TempObject();
 	}
@@ -581,6 +647,7 @@ public:
 	void AddToTempObjects(HeeksObj* object){
 		return Drawing::AddToTempObjects(object);
 	}
+
 };
 
 void CadReset()
@@ -709,7 +776,189 @@ void CadMessageBox(std::wstring str)
 	theApp.MessageBox(str.c_str());
 }
 
-class BaseObject : public ObjList, public bp::wrapper<ObjList>
+
+template <class T>
+class cad_wrapper : public bp::wrapper<T>
+{
+public:
+
+	bool CallVoidReturn(const char* func)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+
+				HandlePythonCallError();
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		return false;
+	}
+
+	bool CallVoidReturn(const char* func, const HeeksColor& c)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+
+				HandlePythonCallError();
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(
+						c);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		return false;
+	}
+
+	std::pair<bool, bool> CallReturnBool(const char* func)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				HandlePythonCallError();
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (bool)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		return std::make_pair(false, false);
+	}
+
+	std::pair<bool, int> CallReturnInt(const char* func)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				HandlePythonCallError();
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (int)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
+		}
+		return std::make_pair(false, 0);
+	}
+
+	std::pair<bool, std::string> CallReturnString(const char* func)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				HandlePythonCallError();
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (std::string)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
+		}
+		return std::make_pair(false, std::string());
+	}
+
+	std::pair<bool, HeeksColor> CallReturnColor(const char* func)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				HandlePythonCallError();
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (HeeksColor)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
+		}
+		return std::make_pair(false, HeeksColor(0,0,0));
+	}
+
+	
+};
+
+class BaseObject : public ObjList, public cad_wrapper<ObjList>
 {
 public:
 	bool m_uses_display_list;
@@ -727,68 +976,55 @@ public:
 	bool NeverDelete(){ return true; }
 
 	int GetType()const{
-		if (bp::override f = this->get_override("GetType"))
-		{
-			return Call_Override(f);
-		}
+		std::pair<bool, int> result = CallReturnInt("GetType");
+		if (result.first)
+			return result.second;
 		return 0;
 	}
 
 	const wchar_t* GetIconFilePath()
 	{
-		if (bp::override f = this->get_override("GetIconFilePath"))
-		{
-			std::string s = f();
-			str_for_base_object = Ctt(s.c_str());
-			return str_for_base_object.c_str();
-		}
+		std::pair<bool, std::string> result = CallReturnString("GetIconFilePath");
+		if (result.first)
+			return Ctt(result.second.c_str());
 		return ObjList::GetIconFilePath();
 	}
 
 	const wchar_t* GetShortString()const
 	{
-		if (bp::override f = this->get_override("GetTitle"))
-		{
-			std::string s = f();
-			str_for_base_object = Ctt(s.c_str());
-			return str_for_base_object.c_str();
-		}
+		std::pair<bool, std::string> result = CallReturnString("GetTitle");
+		if (result.first)
+			return Ctt(result.second.c_str());
 		return ObjList::GetShortStringOrTypeString();
 	}
 
 	const wchar_t* GetTypeString()const
 	{
-		if (bp::override f = this->get_override("GetTypeString"))
-		{
-			std::string s = f();
-			str_for_base_object = Ctt(s.c_str());
-			return str_for_base_object.c_str();
-		}
+		std::pair<bool, std::string> result = CallReturnString("GetTypeString");
+		if (result.first)
+			return Ctt(result.second.c_str());
 		return ObjList::GetTypeString();
 	}
 
 	const HeeksColor* GetColor()const
 	{
-		if (bp::override f = this->get_override("HasColor"))
+		std::pair<bool, bool> result = CallReturnBool("HasColor");
+		if (result.first && result.second)
 		{
-			bool has_color = f();
-			if (has_color == false)
-				return NULL;
-		}
-		if (bp::override f = this->get_override("GetColor"))
-		{
-			color_for_base_object = f();
-			return &color_for_base_object;
+			// HasColor exists and HasColor returns True
+			std::pair<bool, HeeksColor> result2 = CallReturnColor("GetColor");
+			if (result2.first)
+			{
+				color_for_base_object = result2.second;
+				return &color_for_base_object;
+			}
 		}
 		return ObjList::GetColor();
 	}
 
 	void SetColor(const HeeksColor &col)
 	{
-		if (bp::override f = this->get_override("SetColor"))
-		{
-			f(col);
-		}
+		CallVoidReturn("SetColor", col);
 	}
 
 	void glCommands(bool select, bool marked, bool no_color)
@@ -904,7 +1140,6 @@ public:
 		{
 			Call_Override(f);
 		}
-		ObjList::WriteToXML(element);
 	}
 
 	void ReadFromXML(TiXmlElement *element)
@@ -944,19 +1179,15 @@ public:
 
 	bool OneOfAKind()
 	{
-		if (bp::override f = this->get_override("OneOfAKind"))
-		{
-			return Call_Override(f);
-		}
-		return false;
+		std::pair<bool, bool> result = CallReturnBool("OneOfAKind");
+		if (result.first)
+			return result.second;
+		return ObjList::OneOfAKind();
 	}
 
 	void OnAdd()
 	{
-		if (bp::override f = this->get_override("OnAdd"))
-		{
-			Call_Override(f);
-		}
+		CallVoidReturn("OnAdd");
 	}
 
 	void OnRemove()
@@ -965,6 +1196,15 @@ public:
 		{
 			Call_Override(f);
 		}
+	}
+
+	bp::override get_override(char const* name) const
+	{
+		bp::override result = bp::wrapper<ObjList>::get_override(name);
+		if (result != NULL)
+			return result;
+		PyErr_Clear();
+		return result;
 	}
 };
 
@@ -1260,6 +1500,13 @@ void ObjListReadFromXML(ObjList& objlist)
 	BaseObject::m_cur_element = save_element;
 }
 
+void ObjListWriteToXML(ObjList& objlist)
+{
+	TiXmlElement* save_element = BaseObject::m_cur_element;
+	objlist.ObjList::WriteToXML(BaseObject::m_cur_element);
+	BaseObject::m_cur_element = save_element;
+}
+
 void ObjListCopyFrom(ObjList& objlist, HeeksObj* object)
 {
 	objlist.ObjList::CopyFrom(object);
@@ -1468,6 +1715,23 @@ void DrawColor(const HeeksColor& col)
 {
 	if (BaseObject::m_no_colour)return;
 	col.glColor();
+}
+
+static unsigned char cross16[32] = { 0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01 };
+static unsigned char bmp16[10] = { 0x3f, 0xfc, 0x1f, 0xf8, 0x0f, 0xf0, 0x07, 0xe0, 0x03, 0xc0 };
+
+void DrawSymbol(int type, double x, double y, double z)
+{
+	glRasterPos3d(x, y, z);
+	switch (type)
+	{
+	case 0:
+		glBitmap(16, 16, 8, 8, 10.0, 0.0, cross16);
+		break;
+	case 1:
+		glBitmap(16, 5, 8, 3, 10.0, 0.0, bmp16);
+		break;
+	}
 }
 
 void glVertexPoint3d(const Point3d& p)
@@ -1742,12 +2006,12 @@ bp::object GetNextXmlChild()
 	return bp::object(); // None
 }
 
-void OpenXmlFile(const std::wstring &filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool undoably = false, bool show_error = true)
+void OpenXmlFile(const std::wstring &filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL)
 {
-	theApp.OpenXMLFile(filepath.c_str(), paste_into, paste_before, undoably, show_error);
+	theApp.OpenXMLFile(filepath.c_str(), paste_into, paste_before, true);
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(OpenXMLFileOverloads, OpenXmlFile, 1, 5)
+BOOST_PYTHON_FUNCTION_OVERLOADS(OpenXMLFileOverloads, OpenXmlFile, 1, 3)
 
 class PropertyWrap : public Property, public bp::wrapper<Property>
 {
@@ -1830,6 +2094,21 @@ boost::python::list GetSelectedObjects() {
 	}
 	return slist;
 }
+
+boost::python::list GetSelectionProperties()
+{
+	std::list<Property *> list;
+	theApp.m_marked_list->GetProperties(&list);
+	boost::python::list return_list;
+	for (std::list<Property *>::iterator It = list.begin(); It != list.end(); It++)
+	{
+		Property* prop = *It;
+		return_list.append(boost::python::ptr<Property*>(prop));
+	}
+	return return_list;
+}
+
+
 
 unsigned int GetNumSelected()
 {
@@ -2158,7 +2437,7 @@ int GetNextID(int id_group_type)
 }
 
 	BOOST_PYTHON_MODULE(cad) {
-		bp::class_<BaseObject, boost::noncopyable >("BaseObject")
+		bp::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
 			.def(bp::init<int>())
 			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
@@ -2179,6 +2458,7 @@ int GetNextID(int id_group_type)
 			.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
+			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &BaseObject::CopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
@@ -2207,6 +2487,7 @@ int GetNextID(int id_group_type)
 			.def("GetNextChild", &HeeksObj::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
+			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("ReadXml", &HeeksObjReadFromXML)
@@ -2250,6 +2531,7 @@ int GetNextID(int id_group_type)
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
 			.def("ReadXml", &ObjListReadFromXML)
+			.def("WriteXml", &ObjListWriteToXML)
 			.def("CopyFrom", &ObjListCopyFrom)
 			;
 
@@ -2578,6 +2860,7 @@ int GetNextID(int id_group_type)
 		bp::def("DrawTriangle", &DrawTriangle);
 		bp::def("DrawLine", &DrawLine);
 		bp::def("DrawColor", &DrawColor);
+		bp::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
 		bp::def("BeginTriangles", &BeginTriangles);
 		bp::def("BeginLines", &BeginLines);
 		bp::def("EndLinesOrTriangles", &EndLinesOrTriangles);
@@ -2599,7 +2882,7 @@ int GetNextID(int id_group_type)
 		bp::def("ReturnFromXmlChild", ReturnFromXmlChild);
 		bp::def("GetFirstXmlChild", GetFirstXmlChild);
 		bp::def("GetNextXmlChild", GetNextXmlChild);
-		bp::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((bp::arg("filepath"), bp::arg("paste_into") = NULL, bp::arg("paste_before") = NULL, bp::arg("undoably") = false, bp::arg("show_error") = true)));
+		bp::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((bp::arg("filepath"), bp::arg("paste_into") = NULL, bp::arg("paste_before") = NULL)));
 		bp::def("RegisterObserver", RegisterObserver);
 		bp::def("RegisterOnRepaint", RegisterOnRepaint);
 		bp::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((bp::arg("soon") = false)));
@@ -2616,6 +2899,7 @@ int GetNextID(int id_group_type)
 		bp::def("Select", &Select, SelectOverloads(	(bp::arg("object"),	bp::arg("CallOnChanged") = NULL)));
 		bp::def("Unselect", Unselect);
 		bp::def("ClearSelection", ClearSelection);
+		bp::def("GetSelectionProperties", GetSelectionProperties);
 		bp::def("PickObjects", PickObjects);
 		bp::def("GetViewUnits", GetViewUnits);
 		bp::def("SetViewUnits", SetViewUnits);
@@ -2676,4 +2960,6 @@ int GetNextID(int id_group_type)
 		bp::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
+
+		bp::scope().attr("MARKING_FILTER_SKETCH_GROUP") = (int)MARKING_FILTER_SKETCH_GROUP;
 	}

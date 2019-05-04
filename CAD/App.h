@@ -237,7 +237,7 @@ public:
 	void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element);
 	void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element);
 	void InitializeCreateFunctions();
-	void OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool undoably = false, bool show_error = true);
+	void OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool call_was_added = false, bool show_error = true);
 	static void OpenSVGFile(const wchar_t *filepath);
 	static void OpenSTLFile(const wchar_t *filepath);
 	static void OpenDXFFile(const wchar_t *filepath);

@@ -19,9 +19,38 @@ class DoubleCtrl(wx.TextCtrl):
         wx.TextCtrl.SetValue(self, self.DoubleToString(value))
         
 class LengthCtrl(DoubleCtrl):
+    '''
+    Use in a dialog
+    '''
     def __init__(self, parent, id = wx.ID_ANY):
+        '''
+        more doc
+        '''
         factor = 1.0/cad.GetViewUnits()
         DoubleCtrl.__init__(self, parent, id, factor)
+        
+class ObjectIdsCtrl(wx.TextCtrl):
+    def __init__(self, parent):
+        wx.TextCtrl.__init__(self, parent, wx.ID_ANY)
+        
+    def GetIdList(self):
+        id_list = []
+        strs = wx.TextCtrl.GetValue(self).split()
+        for s in strs:
+            id_list.append(int(s))
+        return id_list
+    
+    def SetFromIdList(self, id_list):
+        print('id_list = ' + str(id_list))
+        first = True
+        s = ""
+        for id in id_list:
+            if first == False:
+                s = s + " "
+            else:
+                first = False
+            s += str(id)
+        wx.TextCtrl.SetValue(self, s)
         
 class GeomCtrl(wx.TextCtrl):
     # for now this is just a list of profile names with quotes around them and spaces between them, but later it might have a diagram showing the geometry

@@ -141,6 +141,8 @@ class App(wx.App):
             tools.append(ContextTool.SelectTool(object))
         if object.HasEdit():
             tools.append(ContextTool.EditTool(object))
+        if object.CanBeDeleted():
+            tools.append(ContextTool.DeleteTool(object))
         return tools
         
     def GetTools(self, x, y, control_pressed):

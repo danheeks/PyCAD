@@ -78,8 +78,21 @@ class EditTool(ContextTool):
         return "edit"
 
     def Run(self, event):
-        print('EditTool.Run')
         wx.GetApp().EditUndoably(self.object)
+         
+class DeleteTool(ContextTool):
+    def __init__(self, object):
+        ContextTool.__init__(self)
+        self.object = object
+    
+    def GetTitle(self):
+        return "Delete"
+
+    def BitmapName(self):
+        return "delete"
+
+    def Run(self, event):
+        cad.DeleteUndoably(self.object)       
         
 class CADContextTool(ContextTool):
     def __init__(self, title, bitmap_name, method):

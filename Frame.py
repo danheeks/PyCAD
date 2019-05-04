@@ -53,6 +53,7 @@ class Frame(wx.Frame):
         self.Bind(wx.EVT_MENU_RANGE, self.OnOpenRecent, id=self.ID_RECENT_FIRST, id2=self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOVE, self.OnMove)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.gears = []
         
     def __del__(self):
@@ -72,6 +73,12 @@ class Frame(wx.Frame):
         config = HeeksConfig()
         config.WriteInt('MainFramePosX', pos.x)
         config.WriteInt('MainFramePosY', pos.y)
+        
+    def OnClose(self, e):
+        if e.CanVeto() and self.CheckForModifiedDoc() == wx.CANCEL:
+            e.Veto()
+            return
+        e.Skip()
         
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
@@ -244,14 +251,18 @@ class Frame(wx.Frame):
             str += 'Untitled'
         self.SetTitle(str)
         
-    def CheckForModifiedDoc(self):
+    def SaveProject(self, force_dialog = False):
+        if self.GetProjectFileName().IsOk():
+            self.SaveFile()
+        
+    def CheckForModifiedDoc(self, force_dialog = False):
         # returns wxCANCEL if not OK to continue opening file
         if cad.IsModified():
-            str = 'Save changes to file ' + wx.GetApp().filepath if wx.GetApp().filepath else 'Untitled'
-            res = wx.MessageBox(str, wx.MessageBoxCaptionStr, wx.CANCEL | wx.YES_NO|wx.CENTER)
+            str = 'Save changes to file ' + (wx.GetApp().filepath if wx.GetApp().filepath else 'Untitled')
+            res = wx.MessageBox(str, wx.MessageBoxCaptionStr, wx.CANCEL | wx.YES_NO | wx.CENTER | wx.ICON_QUESTION)
             if res == wx.CANCEL or res == wx.NO: return res
             if res == wx.YES:
-                return self.SaveFile(cad.GetFileFullPath(), True)
+                return self.OnSave(None)
 
         return wx.OK
     
@@ -320,16 +331,19 @@ class Frame(wx.Frame):
             self.SetFrameTitle()
             wx.GetApp().InsertRecentFileItem(filepath)
             wx.GetApp().WriteRecentFiles()
+            return wx.ID_OK
+        return wx.ID_CANCEL
             
     def OnSave(self, e):
         if wx.GetApp().filepath:
-            self.OnSaveFilepath(wx.GetApp().filepath)
-        else:
-            dialog = wx.FileDialog(self, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-            dialog.SetFilterIndex(1)
-            dialog.CenterOnParent()
-            if dialog.ShowModal() != wx.ID_CANCEL:
-                self.OnSaveFilepath(dialog.GetPath())
+            return self.OnSaveFilepath(wx.GetApp().filepath)
+
+        dialog = wx.FileDialog(self, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog.SetFilterIndex(1)
+        dialog.CenterOnParent()
+        if dialog.ShowModal() == wx.ID_CANCEL:
+            return wx.ID_CANCEL
+        return self.OnSaveFilepath(dialog.GetPath())
             
     def OnUpdateSave(self, e):
         e.Enable(cad.IsModified())            
@@ -364,8 +378,14 @@ class Frame(wx.Frame):
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
-            if self.OnOpenFilepath(dialog.GetPath()):
+            filepath = dialog.GetPath()
+            if cad.Import(filepath):
                 self.DoFileOpenViewMag()
+                if wx.GetApp().filepath == None:
+                    dot = filepath.rfind('.')
+                    if dot != -1:
+                        wx.GetApp().filepath = filepath[:dot+1] + '.heeks'
+                self.SetFrameTitle()
                 config.Write('ImportDirectory', dialog.GetDirectory())
             
     def GetPathSuffix(self, path):

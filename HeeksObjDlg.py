@@ -58,7 +58,8 @@ class HeeksObjDlg(HDialog):
             return
         self.ignore_event_functions = True
         self.GetDataRaw()
-        self.ignore_event_functions = False        
+        self.ignore_event_functions = False
+        self.object.WriteDefaultValues()       
         
     def SetFromData(self):
         self.SetFromDataRaw()

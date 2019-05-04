@@ -14,15 +14,6 @@ class Object(cad.BaseObject):
     def GetTitle(self):
         return self.GetTypeString()
         
-    def OnRenderTriangles(self):
-        pass
-        
-    def GetColor(self):
-        return cad.Color(0,0,0)
-        
-    def GetBox(self):
-        return 0,0,0,0,0,0
-    
     def GetProperties(self):
         return cad.BaseObject.GetBaseProperties(self)
         
@@ -30,7 +21,11 @@ class Object(cad.BaseObject):
         return False
     
     def WriteXml(self):
-        cad.Object.WriteXml(self)
+        if self.CallsObjListReadXml():
+            cad.ObjList.WriteXml(self)
+        else:
+            cad.Object.WriteXml(self)
+        
     
     def CallsObjListReadXml(self):
         return True
@@ -44,18 +39,6 @@ class Object(cad.BaseObject):
             cad.ObjList.ReadXml(self)
         else:
             cad.Object.ReadXml(self)
-            
-    def ReloadPointers(self):
-        pass
-
-    def OneOfAKind(self):
-        return False
-    
-    def OnAdd(self):
-        pass
-    
-    def OnRemove(self):
-        pass
     
 class PyChoiceProperty(cad.Property):
     def __init__(self, title, value_name, choices, object, alternative_values = None):
