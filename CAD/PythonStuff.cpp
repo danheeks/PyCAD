@@ -277,213 +277,491 @@ void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 	}
 }
 
-bp::detail::method_result Call_Override(bp::override &f, bp::list &list)
+template <class T>
+class cad_wrapper : public bp::wrapper<T>
 {
-	if (PyErr_Occurred())
+public:
+
+	bool CallVoidReturn(const char* func)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
 	}
-	else
+
+	bool CallVoidReturn(const char* func, CBox& box)const
 	{
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(list);// , removed_list, modified_list);
-			AfterPythonCall(main_module);
-			return result;
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(box);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return false;
 	}
-}
 
-bp::detail::method_result Call_Override(bp::override &f, bp::list &added, bp::list &removed)
-{
-	if (PyErr_Occurred())
+	bool CallVoidReturn(const char* func, const HeeksColor& c)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(
+						c);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
 	}
-	else
+
+	bool CallVoidReturn(const char* func, const HeeksObj* object)const
 	{
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(added, removed);
-			AfterPythonCall(main_module);
-			return result;
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(object);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return false;
 	}
-}
 
-
-
-bp::detail::method_result Call_Override(bp::override &f)
-{
-	if (PyErr_Occurred())
+	bool CallVoidReturn(const char* func, bool value)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
 	}
-	else
+
+	bool CallVoidReturn(const char* func, int value)const
 	{
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f();
-			AfterPythonCall(main_module);
-			return result;
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return false;
 	}
-}
 
-
-bp::detail::method_result Call_Override(bp::override &f, int value)
-{
-	if (PyErr_Occurred())
+	bool CallVoidReturn(const char* func, double value)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
 	}
-	else
+
+	bool CallVoidReturn(const char* func, std::wstring value)const
 	{
-		//PyObject *main_module, *globals;
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(value);
-			AfterPythonCall(main_module);
-			return result;
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return false;
 	}
-}
 
-bp::detail::method_result Call_Override(bp::override &f, bool value)
-{
-	if (PyErr_Occurred())
+	bool CallVoidReturn(const char* func, bp::list &value)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
 	}
-	else
+
+	bool CallVoidReturn(const char* func, bp::list &value1, bp::list &value2)const
 	{
-		//PyObject *main_module, *globals;
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func)){
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(value);
-			AfterPythonCall(main_module);
-			return result;
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					bp::detail::method_result result = f(value1, value2);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const bp::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return false;
 	}
-}
 
-bp::detail::method_result Call_Override(bp::override &f, double value)
-{
-	if (PyErr_Occurred())
+	std::pair<bool, bool> CallReturnBool(const char* func)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (bool)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return std::make_pair(false, false);
 	}
-	else
+
+	std::pair<bool, int> CallReturnInt(const char* func)const
 	{
-		//PyObject *main_module, *globals;
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(value);
-			AfterPythonCall(main_module);
-			return result;
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (int)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return std::make_pair(false, 0);
 	}
-}
 
-bp::detail::method_result Call_Override(bp::override &f, const std::wstring& value)
-{
-	if (PyErr_Occurred())
+	std::pair<bool, double> CallReturnDouble(const char* func)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (double)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return std::make_pair(false, 0.0);
 	}
-	else
+
+	std::pair<bool, std::string> CallReturnString(const char* func)const
 	{
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(value);
-			AfterPythonCall(main_module);
-			return result;
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (std::string)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return std::make_pair(false, std::string());
 	}
-}
 
-bp::detail::method_result Call_Override(bp::override &f, const HeeksObj* value)
-{
-	if (PyErr_Occurred())
+	std::pair<bool, std::wstring> CallReturnWString(const char* func)const
 	{
-		HandlePythonCallError();
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (std::wstring)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return std::make_pair(false, std::wstring());
 	}
-	else
+
+	std::pair<bool, HeeksObj*> CallReturnHeeksObj(const char* func)const
 	{
-		BeforePythonCall(&main_module, &globals);
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
 
-		// Execute the python function
-		PyLockGIL lock;
-		try
-		{
-			bp::detail::method_result result = f(bp::object(bp::ptr(value)));
-			AfterPythonCall(main_module);
-			return result;
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (HeeksObj*)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
 		}
-		catch (const bp::error_already_set&)
-		{
-		}
-		AfterPythonCall(main_module);
+		PyErr_Clear();
+		return std::make_pair(false, (HeeksObj*)NULL);
 	}
-}
 
-class ObserverWrap : public Observer, public bp::wrapper<Observer>
+	std::pair<bool, HeeksColor> CallReturnColor(const char* func)const
+	{
+		bool success = false;
+		if (bp::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					bp::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (HeeksColor)result);
+				}
+				catch (const bp::error_already_set&)
+				{
+				}
+				AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return std::make_pair(false, HeeksColor(0, 0, 0));
+	}
+};
+
+class ObserverWrap : public Observer, public cad_wrapper<Observer>
 {
 public:
 	ObserverWrap() :Observer(){}
@@ -500,21 +778,21 @@ public:
 				BOOST_FOREACH(HeeksObj* o, *added) {
 					AddObjectToPythonList(o, added_list);
 				}
-				if (bp::override f = this->get_override("OnAdded"))Call_Override(f, added_list);
+				CallVoidReturn("OnAdded", added_list);
 			}
 			if (removed && removed->size() > 0)
 			{
 				BOOST_FOREACH(HeeksObj* o, *removed) {
 					AddObjectToPythonList(o, removed_list);
 				}
-				if (bp::override f = this->get_override("OnRemoved"))Call_Override(f, removed_list);
+				CallVoidReturn("OnRemoved", removed_list);
 			}
 			if (modified && modified->size() > 0)
 			{
 				BOOST_FOREACH(HeeksObj* o, *modified) {
 					AddObjectToPythonList(o, modified_list);
 				}
-				if (bp::override f = this->get_override("OnModified"))Call_Override(f, modified_list);
+				CallVoidReturn("OnModified", modified_list);
 			}
 		}
 	}
@@ -535,7 +813,7 @@ public:
 				AddObjectToPythonList(o, removed_list);
 			}
 		}
-		if (bp::override f = this->get_override("OnSelectionChanged"))Call_Override(f, added_list, removed_list);
+		CallVoidReturn("OnSelectionChanged", added_list, removed_list);
 
 	}
 };
@@ -580,7 +858,7 @@ public:
 
 };
 
-class DrawingWrap : public Drawing, public bp::wrapper<Drawing>
+class DrawingWrap : public Drawing, public cad_wrapper<Drawing>
 {
 public:
 	DrawingWrap() :Drawing(){}
@@ -628,11 +906,9 @@ public:
 
 	HeeksObj* GetOwnerForDrawingObjects()override
 	{
-		if (bp::override f = this->get_override("GetOwnerForDrawingObjects"))
-		{
-			HeeksObj* result = Call_Override(f);
-			return result;
-		}
+		std::pair<bool, HeeksObj*> result = CallReturnHeeksObj("GetOwnerForDrawingObjects");
+		if (result.first)
+			return result.second;
 		return Drawing::GetOwnerForDrawingObjects();
 	}
 
@@ -776,188 +1052,6 @@ void CadMessageBox(std::wstring str)
 	theApp.MessageBox(str.c_str());
 }
 
-
-template <class T>
-class cad_wrapper : public bp::wrapper<T>
-{
-public:
-
-	bool CallVoidReturn(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-
-				HandlePythonCallError();
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, const HeeksColor& c)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-
-				HandlePythonCallError();
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(
-						c);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		return false;
-	}
-
-	std::pair<bool, bool> CallReturnBool(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				HandlePythonCallError();
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (bool)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		return std::make_pair(false, false);
-	}
-
-	std::pair<bool, int> CallReturnInt(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				HandlePythonCallError();
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (int)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		return std::make_pair(false, 0);
-	}
-
-	std::pair<bool, std::string> CallReturnString(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				HandlePythonCallError();
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (std::string)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		return std::make_pair(false, std::string());
-	}
-
-	std::pair<bool, HeeksColor> CallReturnColor(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				HandlePythonCallError();
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (HeeksColor)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		return std::make_pair(false, HeeksColor(0,0,0));
-	}
-
-	
-};
-
 class BaseObject : public ObjList, public cad_wrapper<ObjList>
 {
 public:
@@ -995,7 +1089,7 @@ public:
 		std::pair<bool, std::string> result = CallReturnString("GetTitle");
 		if (result.first)
 			return Ctt(result.second.c_str());
-		return ObjList::GetShortStringOrTypeString();
+		return ObjList::GetShortString();
 	}
 
 	const wchar_t* GetTypeString()const
@@ -1029,9 +1123,6 @@ public:
 
 	void glCommands(bool select, bool marked, bool no_color)
 	{
-		if (in_glCommands)
-			return; // shouldn't be needed
-
 		m_no_colour = no_color;
 
 		if (!select)
@@ -1062,12 +1153,9 @@ public:
 
 		if (do_render_commands)
 		{
-			if (bp::override f = this->get_override("OnRenderTriangles"))
+			in_glCommands = true;
+			if (CallVoidReturn("OnRenderTriangles"))
 			{
-				in_glCommands = true;
-
-				Call_Override(f);
-
 				if (triangles_begun)
 				{
 					glEnd();
@@ -1079,8 +1167,10 @@ public:
 					glEnd();
 					lines_begun = false;
 				}
-				in_glCommands = false;
 			}
+			else
+				ObjList::glCommands(select, marked, no_color);
+			in_glCommands = false;
 		}
 
 		if (display_list_started)
@@ -1094,33 +1184,17 @@ public:
 
 	void GetProperties(std::list<Property *> *list)
 	{
-		if (bp::override f = this->get_override("GetProperties"))
-		{
-			property_list = list;
-			object_for_get_properties = this;
-			Property* p = Call_Override(f);
-		}
-		ObjList::GetProperties(list);
+		property_list = list;
+		object_for_get_properties = this;
+		if(!CallVoidReturn("GetProperties"))
+			ObjList::GetProperties(list);
 	}
 
 
 	void GetBox(CBox &box)
 	{
-		if (bp::override f = this->get_override("GetBox"))
-		{
-			bp::tuple tuple = Call_Override(f);
-
-			if (bp::len(tuple) == 6)
-			{
-				double xmin = bp::extract<double>(tuple[0]);
-				double ymin = bp::extract<double>(tuple[1]);
-				double zmin = bp::extract<double>(tuple[2]);
-				double xmax = bp::extract<double>(tuple[3]);
-				double ymax = bp::extract<double>(tuple[4]);
-				double zmax = bp::extract<double>(tuple[5]);
-				box.Insert(CBox(xmin, ymin, zmin, xmax, ymax, zmax));
-			}
-		}
+		if (!CallVoidReturn("GetBox", box))
+			ObjList::GetBox(box);
 	}
 
 	void KillGLLists()
@@ -1135,46 +1209,32 @@ public:
 	void WriteToXML(TiXmlElement *element)
 	{
 		BaseObject::m_cur_element = element;
-
-		if (bp::override f = this->get_override("WriteXml"))
-		{
-			Call_Override(f);
-		}
+		CallVoidReturn("WriteXml");
 	}
 
 	void ReadFromXML(TiXmlElement *element)
 	{
 		BaseObject::m_cur_element = element;
-
-		if (bp::override f = this->get_override("ReadXml"))
-		{
-			Call_Override(f);
-		}
+		CallVoidReturn("ReadXml");
 	}
 
 	HeeksObj* MakeACopy()const
 	{
-		if (bp::override f = this->get_override("MakeACopy"))
-		{
-			return f();
-		}
+		std::pair<bool, HeeksObj*> result = CallReturnHeeksObj("MakeACopy");
+		if (result.first)
+			return result.second;
 		return NULL;
 	}
 
 	void CopyFrom(const HeeksObj* object)
 	{
-		if (bp::override f = this->get_override("CopyFrom"))
-		{
-			Call_Override(f, object);
-		}
+		CallVoidReturn("CopyFrom", object);
 	}
 
 	void ReloadPointers()
 	{
-		if (bp::override f = this->get_override("ReloadPointers"))
-		{
-			Call_Override(f);
-		}
+		if (!CallVoidReturn("ReloadPointers"))
+			ObjList::ReloadPointers();
 	}
 
 	bool OneOfAKind()
@@ -1185,6 +1245,10 @@ public:
 		return ObjList::OneOfAKind();
 	}
 
+	bool OneOfAKind_default(){
+		return ObjList::OneOfAKind();
+	}
+
 	void OnAdd()
 	{
 		CallVoidReturn("OnAdd");
@@ -1192,10 +1256,7 @@ public:
 
 	void OnRemove()
 	{
-		if (bp::override f = this->get_override("OnRemove"))
-		{
-			Call_Override(f);
-		}
+		CallVoidReturn("OnRemove");
 	}
 
 	bp::override get_override(char const* name) const
@@ -1217,7 +1278,7 @@ bool BaseObject::m_no_colour = false;
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 {
-	return std::wstring(object.GetIconFilePath());
+	return std::wstring(object.ObjList::GetIconFilePath());
 }
 
 std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
@@ -1229,12 +1290,7 @@ std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 
 std::wstring BaseObjectGetTitle(const BaseObject& object)
 {
-	return object.GetShortString();
-}
-
-unsigned int BaseObjectGetID(BaseObject& object)
-{
-	return object.GetID();
+	return object.ObjList::GetShortString();
 }
 
 void BaseObjectSetUsesGLList(BaseObject& object, bool on)
@@ -1249,7 +1305,7 @@ void BaseObjectSetUsesLights(BaseObject& object, bool on)
 
 HeeksColor BaseObjectGetColor(const BaseObject& object)
 {
-	return *(object.GetColor());
+	return *(object.ObjList::GetColor());
 }
 
 int PropertyGetInt(Property& property)
@@ -2013,7 +2069,7 @@ void OpenXmlFile(const std::wstring &filepath, HeeksObj* paste_into = NULL, Heek
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(OpenXMLFileOverloads, OpenXmlFile, 1, 3)
 
-class PropertyWrap : public Property, public bp::wrapper<Property>
+class PropertyWrap : public Property, public cad_wrapper<Property>
 {
 	int m_type;
 public:
@@ -2022,40 +2078,47 @@ public:
 	int get_property_type()const{ return m_type; }
 	int GetInt()const override
 	{
-		if (bp::override f = this->get_override("GetInt"))return Call_Override(f);
+		std::pair<bool, int> result = CallReturnInt("GetInt");
+		if (result.first)
+			return result.second;
 		return Property::GetInt();
 	}
 	bool GetBool()const override
 	{
-		if (bp::override f = this->get_override("GetBool"))return Call_Override(f);
+		std::pair<bool, bool> result = CallReturnBool("GetBool");
+		if (result.first)
+			return result.second;
 		return Property::GetBool();
 	}
 	double GetDouble()const override
 	{
-		if (bp::override f = this->get_override("GetFloat"))return Call_Override(f);
+		std::pair<bool, double> result = CallReturnDouble("GetFloat");
+		if (result.first)
+			return result.second;
 		return Property::GetDouble();
 	}
 	const wchar_t* GetString()const override
 	{
-		if (bp::override f = this->get_override("GetString"))return Call_Override(f);
+		std::pair<bool, std::wstring> result = CallReturnWString("GetString");
+		if (result.first)
+			return result.second.c_str();
 		return Property::GetString();
 	}
 	void Set(bool value)override
 	{
-		if (bp::override f = this->get_override("SetBool"))Call_Override(f, value);
-
+		CallVoidReturn("SetBool", value);
 	}
 	void Set(int value)override
 	{
-		if (bp::override f = this->get_override("SetInt"))Call_Override(f, value);
+		CallVoidReturn("SetInt", value);
 	}
 	void Set(double value)override
 	{
-		if (bp::override f = this->get_override("SetFloat"))Call_Override(f, value);
+		CallVoidReturn("SetFloat", value);
 	}
 	void Set(const wchar_t* value)override
 	{
-		if (bp::override f = this->get_override("SetString"))Call_Override(f, std::wstring(value));
+		CallVoidReturn("SetString", std::wstring(value));
 	}
 	Property *MakeACopy(void)const{ return new PropertyWrap(*this); }
 };
@@ -2439,12 +2502,12 @@ int GetNextID(int id_group_type)
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
 			.def(bp::init<int>())
-			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
+			.def("GetIDGroupType", &BaseObject::GetIDGroupType)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
-			.def("GetID", &BaseObjectGetID)
-			.def("SetID", &HeeksObj::SetID)
-			.def("GetIndex", &HeeksObj::GetIndex)
+			.def("GetID", &BaseObject::GetID)
+			.def("SetID", &BaseObject::SetID)
+			.def("GetIndex", &BaseObject::GetIndex)
 			.def("KillGLLists", &BaseObject::KillGLLists)
 			.def("SetUsesGLList", &BaseObjectSetUsesGLList)
 			.def("SetUsesLights", &BaseObjectSetUsesLights)
@@ -2459,8 +2522,8 @@ int GetNextID(int id_group_type)
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
-			.def("OneOfAKind", &HeeksObj::OneOfAKind)
-			.def("CopyFrom", &BaseObject::CopyFrom)
+			.def("OneOfAKind", &BaseObject::OneOfAKind_default)
+			.def("CopyFrom", &ObjListCopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
 			.def("Clear", &ObjListClear)

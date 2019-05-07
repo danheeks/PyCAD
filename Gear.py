@@ -38,8 +38,8 @@ class Gear(cad.BaseObject):
     def OnRenderTriangles(self):
         pass
     
-    def GetBox(self):
-        return 0,0,0,0,0,0   
+    def GetBox(self, box):
+        pass
      
     def GetProperties(self):
         return []
