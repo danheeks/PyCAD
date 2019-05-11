@@ -21,7 +21,8 @@ public:
 
   OBJECT_T find(INDEX_T x) {
     typename index_t::iterator it = index.find(x);
-    assert(it != index.end());
+	if (it == index.end())
+		return (OBJECT_T)NULL;
     return it->second;
   }
 

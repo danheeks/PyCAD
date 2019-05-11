@@ -25,7 +25,6 @@ class Object(cad.BaseObject):
             cad.ObjList.WriteXml(self)
         else:
             cad.Object.WriteXml(self)
-        
     
     def CallsObjListReadXml(self):
         return True

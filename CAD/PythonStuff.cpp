@@ -171,8 +171,11 @@ static bool AfterPythonCall(PyObject *main_module)
 	if (BeforePythonCall_level > 0)
 	{
 		if (PyErr_Occurred())
+		{
 			HandlePythonCallError();
-		return false;
+			return false;
+		}
+		return true;
 	}
 
 	if (BeforePythonCall_level < 0)
@@ -1055,18 +1058,16 @@ void CadMessageBox(std::wstring str)
 class BaseObject : public ObjList, public cad_wrapper<ObjList>
 {
 public:
-	bool m_uses_display_list;
-	bool m_uses_lights;
-	int m_display_list;
-
 	static bool in_glCommands;
 	static bool triangles_begun;
 	static bool lines_begun;
 	static TiXmlElement* m_cur_element;
-	static bool m_no_colour;
+	static bool m_no_colour; // from glCommands
+	static bool m_marked; // from glCommands
+	static bool m_select; // from glCommands
 
-	BaseObject() :ObjList(), m_uses_display_list(false), m_uses_lights(true), m_display_list(0){}
-	BaseObject(int type) :ObjList(), m_uses_display_list(false), m_uses_lights(true), m_display_list(0){}
+	BaseObject() :ObjList(){}
+	BaseObject(int type) :ObjList(){}
 	bool NeverDelete(){ return true; }
 
 	int GetType()const{
@@ -1124,62 +1125,11 @@ public:
 	void glCommands(bool select, bool marked, bool no_color)
 	{
 		m_no_colour = no_color;
+		m_marked = marked;
+		m_select = select;
 
-		if (!select)
-		{
-			if(m_uses_lights)glEnable(GL_LIGHTING);
-			if (!no_color)
-			{
-				const HeeksColor* c = this->GetColor();
-				if (c)Material(*c).glMaterial(1.0);
-			}
-		}
-
-		bool display_list_started = false;
-		bool do_render_commands = true;
-		if (m_uses_display_list)
-		{
-			if (m_display_list)
-			{
-				glCallList(m_display_list);
-				do_render_commands = false;
-			}
-			else{
-				m_display_list = glGenLists(1);
-				glNewList(m_display_list, GL_COMPILE_AND_EXECUTE);
-				display_list_started = true;
-			}
-		}
-
-		if (do_render_commands)
-		{
-			in_glCommands = true;
-			if (CallVoidReturn("OnRenderTriangles"))
-			{
-				if (triangles_begun)
-				{
-					glEnd();
-					triangles_begun = false;
-				}
-
-				if (lines_begun)
-				{
-					glEnd();
-					lines_begun = false;
-				}
-			}
-			else
-				ObjList::glCommands(select, marked, no_color);
-			in_glCommands = false;
-		}
-
-		if (display_list_started)
-		{
-			glEndList();
-		}
-
-		if (!select && m_uses_lights)glDisable(GL_LIGHTING);
-
+		if (!CallVoidReturn("OnGlCommands"))
+			ObjList::glCommands(select, marked, no_color);
 	}
 
 	void GetProperties(std::list<Property *> *list)
@@ -1199,11 +1149,8 @@ public:
 
 	void KillGLLists()
 	{
-		if (m_uses_display_list && m_display_list)
-		{
-			glDeleteLists(m_display_list, 1);
-			m_display_list = 0;
-		}
+		if (!CallVoidReturn("KillGLLists"))
+			ObjList::KillGLLists();
 	}
 
 	void WriteToXML(TiXmlElement *element)
@@ -1275,6 +1222,8 @@ bool BaseObject::triangles_begun = false;
 bool BaseObject::lines_begun = false;
 TiXmlElement* BaseObject::m_cur_element = NULL;
 bool BaseObject::m_no_colour = false;
+bool BaseObject::m_marked = false;
+bool BaseObject::m_select = false;
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 {
@@ -1291,16 +1240,6 @@ std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 std::wstring BaseObjectGetTitle(const BaseObject& object)
 {
 	return object.ObjList::GetShortString();
-}
-
-void BaseObjectSetUsesGLList(BaseObject& object, bool on)
-{
-	object.m_uses_display_list = on;
-}
-
-void BaseObjectSetUsesLights(BaseObject& object, bool on)
-{
-	object.m_uses_lights = on;
 }
 
 HeeksColor BaseObjectGetColor(const BaseObject& object)
@@ -1769,7 +1708,6 @@ void DrawLine(double x0, double x1, double x2, double x3, double x4, double x5)
 
 void DrawColor(const HeeksColor& col)
 {
-	if (BaseObject::m_no_colour)return;
 	col.glColor();
 }
 
@@ -1798,6 +1736,36 @@ void glVertexPoint3d(const Point3d& p)
 void GlLineWidth(int width)
 {
 	glLineWidth(width);
+}
+
+static unsigned int current_display_list_started = false;
+
+unsigned int DrawNewList()
+{
+	if (current_display_list_started != 0)
+		return 0;
+	current_display_list_started = glGenLists(1);
+	glNewList(current_display_list_started, GL_COMPILE_AND_EXECUTE);
+	return current_display_list_started;
+}
+
+
+void DrawEndList()
+{
+	if (current_display_list_started != 0)
+		glEndList();
+	current_display_list_started = 0;
+}
+
+void DrawCallList(unsigned int display_list)
+{
+	if (display_list != 0)
+		glCallList(display_list);
+}
+
+void DrawDeleteList(unsigned int display_list)
+{
+	glDeleteLists(display_list, 1);
 }
 
 void AddProperty(Property* property)
@@ -2143,6 +2111,11 @@ static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, cons
 	return boost::shared_ptr<CStlSolid>(new CStlSolid(title.c_str(), color));
 }
 
+static boost::shared_ptr<PropertyStringReadOnly> initPropertyStringReadOnly(const std::wstring& title, const std::wstring& value)
+{
+	return boost::shared_ptr<PropertyStringReadOnly>(new PropertyStringReadOnly(title.c_str(), value.c_str()));
+}
+
 static boost::shared_ptr<HPoint> initHPoint(const Point3d& p)
 {
 	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp.current_color));
@@ -2484,6 +2457,11 @@ HeeksObj* ObjectGetOwner(HeeksObj* object)
 	return object->m_owner;
 }
 
+void ObjectSetOwner(HeeksObj* object, HeeksObj* new_owner)
+{
+	object->m_owner = new_owner;
+}
+
 double GetUnits()
 {
 	return theApp.m_view_units;
@@ -2499,6 +2477,29 @@ int GetNextID(int id_group_type)
 	return theApp.GetNextID(id_group_type);
 }
 
+bool GetDrawSelect()
+{
+	return BaseObject::m_select;
+}
+
+bool GetDrawMarked()
+{
+	return BaseObject::m_marked;
+}
+
+int BaseObjectGetIndex(BaseObject& object)
+{
+	return object.GetIndex();
+}
+
+int HeeksObjGetIndex(HeeksObj& object)
+{
+	return object.GetIndex();
+}
+
+
+
+
 	BOOST_PYTHON_MODULE(cad) {
 		bp::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
 			.def(bp::init<int>())
@@ -2507,14 +2508,13 @@ int GetNextID(int id_group_type)
 			.def("GetTitle", &BaseObjectGetTitle)
 			.def("GetID", &BaseObject::GetID)
 			.def("SetID", &BaseObject::SetID)
-			.def("GetIndex", &BaseObject::GetIndex)
+			.def("GetIndex", &BaseObjectGetIndex)
 			.def("KillGLLists", &BaseObject::KillGLLists)
-			.def("SetUsesGLList", &BaseObjectSetUsesGLList)
-			.def("SetUsesLights", &BaseObjectSetUsesLights)
 			.def("GetColor", &BaseObjectGetColor)
 			.def("AutoExpand", &BaseObject::AutoExpand)
 			.def("GetNumChildren", &BaseObject::GetNumChildren)
 			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
+			.def("SetOwner", &ObjectSetOwner)
 			.def("GetFirstChild", &BaseObject::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
 			.def("GetNextChild", &BaseObject::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
 			.def("GetChildren", &BaseObjectGetChildren)			
@@ -2538,7 +2538,7 @@ int GetNextID(int id_group_type)
 			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
 			.def("GetID", &HeeksObj::GetID)
 			.def("SetID", &HeeksObj::SetID)
-			.def("GetIndex", &HeeksObj::GetIndex)
+			.def("GetIndex", &HeeksObjGetIndex)
 			.def("KillGLLists", &HeeksObj::KillGLLists)
 			.def("GetColor", &HeeksObjGetColor)
 			.def("HasEdit", &HeeksObjHasEdit)
@@ -2546,6 +2546,7 @@ int GetNextID(int id_group_type)
 			.def("AutoExpand", &HeeksObj::AutoExpand)
 			.def("GetNumChildren", &HeeksObj::GetNumChildren)
 			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
+			.def("SetOwner", &ObjectSetOwner)
 			.def("GetFirstChild", &HeeksObj::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
 			.def("GetNextChild", &HeeksObj::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
 			.def("CanAdd", &HeeksObj::CanAdd)
@@ -2643,7 +2644,9 @@ int GetNextID(int id_group_type)
 		bp::class_<PropertyLengthScaled, bp::bases<PropertyDoubleScaled>>("PropertyLengthScaled", boost::python::no_init);
 		bp::class_<PropertyDoubleLimited, bp::bases<PropertyDouble>>("PropertyDoubleLimited", boost::python::no_init);
 		bp::class_<PropertyString, bp::bases<Property>>("PropertyString", boost::python::no_init);
-		bp::class_<PropertyStringReadOnly, bp::bases<Property>>("PropertyStringReadOnly", boost::python::no_init);
+		bp::class_<PropertyStringReadOnly, bp::bases<Property>>("PropertyStringReadOnly", boost::python::no_init)
+			.def("__init__", bp::make_constructor(&initPropertyStringReadOnly))
+			;
 		bp::class_<PropertyFile, bp::bases<PropertyString>>("PropertyFile", boost::python::no_init);
 		bp::class_<PropertyInt, bp::bases<Property>>("PropertyInt", boost::python::no_init);
 		bp::class_<PropertyLength, bp::bases<PropertyDouble>>("PropertyLength", boost::python::no_init);
@@ -2929,6 +2932,10 @@ int GetNextID(int id_group_type)
 		bp::def("EndLinesOrTriangles", &EndLinesOrTriangles);
 		bp::def("GlVertex", &glVertexPoint3d);
 		bp::def("GlLineWidth", &GlLineWidth);
+		bp::def("DrawNewList", &DrawNewList);
+		bp::def("DrawEndList", &DrawEndList);
+		bp::def("DrawCallList", &DrawCallList); 
+		bp::def("DrawDeleteList", &DrawDeleteList);
 		bp::def("AddProperty", AddProperty);
 		bp::def("GetObjectFromId", &GetObjectFromId);
 		bp::def("RegisterObjectType", RegisterObjectType);
@@ -3005,8 +3012,8 @@ int GetNextID(int id_group_type)
 		bp::def("NewPoint", NewPoint, bp::return_value_policy<bp::reference_existing_object>());
 		bp::def("PyIncref", PyIncref);
 		bp::def("GetNextID", GetNextID);
-
-
+		bp::def("GetDrawSelect", GetDrawSelect);
+		bp::def("GetDrawMarked", GetDrawMarked);
 		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		bp::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
@@ -3023,6 +3030,5 @@ int GetNextID(int id_group_type)
 		bp::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
 		bp::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
-
 		bp::scope().attr("MARKING_FILTER_SKETCH_GROUP") = (int)MARKING_FILTER_SKETCH_GROUP;
 	}
