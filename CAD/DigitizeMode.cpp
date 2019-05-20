@@ -93,7 +93,7 @@ const wchar_t* DigitizeMode::GetHelpText()
 void DigitizeMode::OnMouse( MouseEvent& event ){
 	if(event.m_middleDown || event.GetWheelRotation() != 0)
 	{
-		theApp.m_select_mode->OnMouse(event);
+		theApp->m_select_mode->OnMouse(event);
 		return;
 	}
 
@@ -114,8 +114,8 @@ void DigitizeMode::OnMouse( MouseEvent& event ){
 		point_or_window->OnMouse(event);
 		if(m_doing_a_main_loop)
 		{
-//			theApp.m_frame->RefreshInputCanvas();
-			theApp.OnInputModeTitleChanged();
+//			theApp->m_frame->RefreshInputCanvas();
+			theApp->OnInputModeTitleChanged();
 		}
 		if(m_callback)
 		{
@@ -143,20 +143,20 @@ static Matrix global_matrix_relative_to_screen;
 
 static const Matrix& digitizing_matrix(bool calculate = false){
 	if(calculate){
-		if(theApp.digitize_screen){
-			Matrix mat = theApp.GetDrawMatrix(false);
+		if(theApp->digitize_screen){
+			Matrix mat = theApp->GetDrawMatrix(false);
 			Point3d origin = Point3d(0, 0, 0).Transformed(mat);
 			Point3d x1 = origin + Point3d(1, 0, 0);
 			Point3d y1 = origin + Point3d(0, 1, 0);
 			Point3d po = origin;
-			po = theApp.m_current_viewport->m_view_point.glUnproject(po);
-			x1 = theApp.m_current_viewport->m_view_point.glUnproject(x1);
-			y1 = theApp.m_current_viewport->m_view_point.glUnproject(y1);
+			po = theApp->m_current_viewport->m_view_point.glUnproject(po);
+			x1 = theApp->m_current_viewport->m_view_point.glUnproject(x1);
+			y1 = theApp->m_current_viewport->m_view_point.glUnproject(y1);
 			
 			global_matrix_relative_to_screen = Matrix(origin, Point3d(po, x1).Normalized(), Point3d(po, y1).Normalized());
 		}
 		else{
-			global_matrix_relative_to_screen = theApp.GetDrawMatrix(true);
+			global_matrix_relative_to_screen = theApp->GetDrawMatrix(true);
 		}
 	}
 	return global_matrix_relative_to_screen;
@@ -165,7 +165,7 @@ static const Matrix& digitizing_matrix(bool calculate = false){
 bool DigitizeMode::OnModeChange(void){
 	point_or_window->reset();
 	if(!point_or_window->OnModeChange())return false;
-	digitize(theApp.cur_mouse_pos);
+	digitize(theApp->cur_mouse_pos);
 	return true;
 }
 
@@ -212,16 +212,16 @@ int convert_gripdata_to_pnts(const std::list<GripData> &dlist, std::list<Point3d
 
 
 DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
-	Line ray = theApp.m_current_viewport->m_view_point.SightLine(input_point);
+	Line ray = theApp->m_current_viewport->m_view_point.SightLine(input_point);
 	std::list<DigitizedPoint> compare_list;
 	MarkedObjectManyOfSame marked_object;
-	if(theApp.digitize_end || theApp.digitize_inters || theApp.digitize_centre || theApp.digitize_midpoint || theApp.digitize_nearest || theApp.digitize_tangent){
+	if(theApp->digitize_end || theApp->digitize_inters || theApp->digitize_centre || theApp->digitize_midpoint || theApp->digitize_nearest || theApp->digitize_tangent){
 		point_or_window->SetWithPoint(input_point);
-		theApp.m_marked_list->ignore_coords_only = true;
-		theApp.m_marked_list->ObjectsInWindow(point_or_window->box_chosen, &marked_object);
-		theApp.m_marked_list->ignore_coords_only = false;
+		theApp->m_marked_list->ignore_coords_only = true;
+		theApp->m_marked_list->ObjectsInWindow(point_or_window->box_chosen, &marked_object);
+		theApp->m_marked_list->ignore_coords_only = false;
 	}
-	if(theApp.digitize_end){
+	if(theApp->digitize_end){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
 			while(object){
@@ -238,7 +238,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			}
 		}
 	}
-	if(theApp.digitize_inters){
+	if(theApp->digitize_inters){
 		if(marked_object.m_map.size()>0){
 			std::list<HeeksObj*> object_list;
 			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
@@ -273,7 +273,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			}
 		}
 	}
-	if(theApp.digitize_midpoint){
+	if(theApp->digitize_midpoint){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
 			while(object){
@@ -285,7 +285,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			}
 		}
 	}
-	if(theApp.digitize_nearest){
+	if(theApp->digitize_nearest){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfEverything();
 			while(object){
@@ -298,7 +298,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			}
 		}
 	}
-	if(theApp.digitize_tangent){
+	if(theApp->digitize_tangent){
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfEverything();
 			while(object){
@@ -323,8 +323,8 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			double t;
 			dist = ray.Near(this_digitized_point->m_point, t).Dist(this_digitized_point->m_point);
 			dp = ray.v * this_digitized_point->m_point - ray.v * ray.p0;
-			if(dist * theApp.GetPixelScale() < 2)dist = 2/theApp.GetPixelScale();
-			if(dist * theApp.GetPixelScale()>10)continue;
+			if(dist * theApp->GetPixelScale() < 2)dist = 2/theApp->GetPixelScale();
+			if(dist * theApp->GetPixelScale()>10)continue;
 			bool use_this = false;
 			if(best_digitized_point == NULL)use_this = true;
 			else if(this_digitized_point->importance() > best_digitized_point->importance())use_this = true;
@@ -336,7 +336,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			}
 		}
 	}
-	if(theApp.digitize_centre && (min_dist == -1 || min_dist * theApp.GetPixelScale()>5)){
+	if(theApp->digitize_centre && (min_dist == -1 || min_dist * theApp->GetPixelScale()>5)){
 		Point3d pos;
 		for(HeeksObj* object = marked_object.GetFirstOfEverything(); object != NULL; object = marked_object.Increment()){
 			Point3d p, p2;
@@ -363,7 +363,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	if(best_digitized_point){
 		point = *best_digitized_point;
 	}
-	else if(theApp.digitize_coords){
+	else if(theApp->digitize_coords){
 		point = Digitize(ray);
 	}
 	
@@ -385,7 +385,7 @@ DigitizedPoint DigitizeMode::Digitize(const Line &ray){
 
 	DigitizedPoint point(pnt, DigitizeCoordsType);
 
-	if(theApp.draw_to_grid){
+	if(theApp->draw_to_grid){
 		Point3d plane_vx = Point3d(1, 0, 0).Transformed(digitizing_matrix());
 		Point3d plane_vy = Point3d(0, 1, 0).Transformed(digitizing_matrix());
 		Point3d datum = Point3d(0, 0, 0).Transformed(digitizing_matrix());
@@ -394,13 +394,13 @@ DigitizedPoint DigitizeMode::Digitize(const Line &ray){
 		double b = Point3d(point.m_point) * plane_vx;
 		double c = b - a;
 		double extra1 = c > -0.00000001 ? 0.5:-0.5;
-		c = (int)(c / theApp.digitizing_grid + extra1) * theApp.digitizing_grid;
+		c = (int)(c / theApp->digitizing_grid + extra1) * theApp->digitizing_grid;
 
 		double datum_dotp_y = Point3d(datum) * plane_vy;
 		double rp_dotp_y = Point3d(point.m_point) * plane_vy;
 		double d = rp_dotp_y - datum_dotp_y;
 		double extra2 = d > -0.00000001 ? 0.5:-0.5;
-		d = (int)(d / theApp.digitizing_grid + extra2) * theApp.digitizing_grid;
+		d = (int)(d / theApp->digitizing_grid + extra2) * theApp->digitizing_grid;
 
 		point.m_point = datum + plane_vx * c + plane_vy * d;
 	}

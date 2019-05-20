@@ -22,10 +22,10 @@ Gripper::Gripper(const GripData& data, HeeksObj* parent):m_data(data){
 
 void Gripper::glCommands(bool select, bool marked, bool no_color){
 	if(!no_color){
-		theApp.glColorEnsuringContrast(HeeksColor(0, 0, 0));
+		theApp->glColorEnsuringContrast(HeeksColor(0, 0, 0));
 	}
 
-	if (theApp.m_dragging_moves_objects)
+	if (theApp->m_dragging_moves_objects)
 	{
 		{
 			glRasterPos3d(m_data.m_x, m_data.m_y, m_data.m_z);

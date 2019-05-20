@@ -450,9 +450,9 @@ void HeeksDxfRead::AddObject(HeeksObj *object)
 		return;
 	}
 
-	if(theApp.m_in_OpenFile && theApp.m_file_open_matrix)
+	if(theApp->m_in_OpenFile && theApp->m_file_open_matrix)
 	{
-		object->Transform(*theApp.m_file_open_matrix);
+		object->Transform(*theApp->m_file_open_matrix);
 	}
 
 	if(m_make_as_sketch)
@@ -478,8 +478,8 @@ void HeeksDxfRead::AddObject(HeeksObj *object)
 		else
 		{
 			object->Transform(m_ucs_matrix);
-			if(m_undoable)theApp.AddUndoably(object, NULL, NULL);
-			else theApp.Add( object, NULL );
+			if(m_undoable)theApp->AddUndoably(object, NULL, NULL);
+			else theApp->Add( object, NULL );
 		}
 	}
 }
@@ -515,8 +515,8 @@ void HeeksDxfRead::AddGraphics()
 			{
 				((CSketch *)l_itSketch->second)->OnEditString( l_itSketch->first.c_str() );
 				l_itSketch->second->ModifyByMatrix(m_ucs_matrix);
-				if(m_undoable)theApp.AddUndoably(l_itSketch->second, NULL, NULL );
-				else theApp.Add( l_itSketch->second, NULL );
+				if(m_undoable)theApp->AddUndoably(l_itSketch->second, NULL, NULL );
+				else theApp->Add( l_itSketch->second, NULL );
 			} // End if - then
 		}
 	}

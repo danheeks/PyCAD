@@ -118,7 +118,7 @@ void EndedObject::ReadFromXML(TiXmlElement* pElem)
 		bool a_found = false;
 		for(TiXmlElement* pElem2 = TiXmlHandle(pElem).FirstChildElement().Element(); pElem2;	pElem2 = pElem2->NextSiblingElement())
 		{
-			HeeksObj* object = theApp.ReadXMLElement(pElem2);
+			HeeksObj* object = theApp->ReadXMLElement(pElem2);
 			if(object->GetType() == PointType)
 			{
 				if(!a_found)

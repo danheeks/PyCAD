@@ -65,7 +65,7 @@ void ObjList::ClearUndoably(void)
 	std::list<HeeksObj*>::iterator It;
 	for (It=objects_to_delete.begin();It!=objects_to_delete.end();It++)
 	{
-		theApp.DeleteUndoably(*It);
+		theApp->DeleteUndoably(*It);
 	}
 	m_objects.clear();
 	LoopItStack.clear();
@@ -105,7 +105,7 @@ void ObjList::glCommands(bool select, bool marked, bool no_color)
 		if(object->OnVisibleLayer() && object->m_visible)
 		{
 			if (select)SetPickingColor(object->GetIndex());
-			(*It)->glCommands(select, marked || theApp.m_marked_list->ObjectMarked(object), select | no_color);
+			(*It)->glCommands(select, marked || theApp->m_marked_list->ObjectMarked(object), select | no_color);
 		}
 	}
 }
@@ -192,9 +192,9 @@ bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)
 	m_index_list_valid = false;
 	HeeksObj::Add(object, prev_object);
 
-	if(((!theApp.m_in_OpenFile || theApp.m_file_open_or_import_type != FileOpenTypeHeeks || theApp.m_inPaste) && object->UsesID() && (object->m_id == 0 || (theApp.m_file_open_or_import_type == FileImportTypeHeeks && theApp.m_in_OpenFile))))
+	if(((!theApp->m_in_OpenFile || theApp->m_file_open_or_import_type != FileOpenTypeHeeks || theApp->m_inPaste) && object->UsesID() && (object->m_id == 0 || (theApp->m_file_open_or_import_type == FileImportTypeHeeks && theApp->m_in_OpenFile))))
 	{
-		object->SetID(theApp.GetNextID(object->GetIDGroupType()));
+		object->SetID(theApp->GetNextID(object->GetIDGroupType()));
 	}
 
 	return true;
@@ -224,12 +224,12 @@ void ObjList::Remove(HeeksObj* object)
 	std::list<HeeksObj*> parents;
 	parents.push_back(this);
 
-	if( (!theApp.m_in_OpenFile || theApp.m_file_open_or_import_type != FileOpenTypeHeeks) &&
+	if( (!theApp->m_in_OpenFile || theApp->m_file_open_or_import_type != FileOpenTypeHeeks) &&
 		object->UsesID() &&
-		(object->m_id == 0 || (theApp.m_file_open_or_import_type == FileImportTypeHeeks && theApp.m_in_OpenFile))
+		(object->m_id == 0 || (theApp->m_file_open_or_import_type == FileImportTypeHeeks && theApp->m_in_OpenFile))
 		)
 	{
-		theApp.RemoveID(object);
+		theApp->RemoveID(object);
 	}
 }
 
@@ -253,11 +253,11 @@ void ObjList::ReadFromXML(TiXmlElement* element)
 	{
 	    HeeksObj *existing = NULL;
 
-		HeeksObj* object = theApp.ReadXMLElement(pElem);
+		HeeksObj* object = theApp->ReadXMLElement(pElem);
 
 		if ((object != NULL) && (object->GetType() != 0) && (object->m_id != 0))
 		{
-			existing = theApp.GetIDObject( object->GetType(), object->m_id );
+			existing = theApp->GetIDObject( object->GetType(), object->m_id );
 		}
 
 		// Check to see if this object has not already been read into memory (duplicate child of two parents)
@@ -365,6 +365,17 @@ void ObjList::OnChangeViewUnits(const double units)
 
 	HeeksObj::OnChangeViewUnits(units);
 }
+
+bool ObjList::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)
+{
+	for (std::list<HeeksObj*>::iterator itObject = m_objects.begin(); itObject != m_objects.end(); itObject++)
+	{
+		if ((*itObject)->SetClickMarkPoint(marked_object, ray_start, ray_direction))
+			return true;
+	}
+	return false;
+}
+
 
 ReorderTool::ReorderTool(ObjList* object, std::list<HeeksObj *> &new_order)
 {

@@ -219,7 +219,7 @@ void CViewPoint::SetProjection2(bool use_depth_testing){
 	CBox box;
 	if(use_depth_testing)
 	{
-		theApp.GetBox(box);
+		theApp->GetBox(box);
 		box.Insert(m_extra_depth_box);
 		box.Insert(m_extra_view_box);
 	}
@@ -339,7 +339,7 @@ void CViewPoint::SetPolygonOffset(void)const{
 void CViewPoint::SetViewAroundAllObjects(int margin){
 	CBox box;
 
-	theApp.GetBox(box);
+	theApp->GetBox(box);
 	box.Insert(m_extra_view_box);
 
 	if(!box.m_valid)return;
@@ -394,7 +394,7 @@ Line CViewPoint::SightLine(const IPoint &point){
 int CViewPoint::ChooseBestPlane(int plane)const{
 	Point3d f = forwards_vector();
 	double dp[3];
-	Matrix orimat = theApp.GetDrawMatrix(false);
+	Matrix orimat = theApp->GetDrawMatrix(false);
 	dp[0] = Point3d(0, 0, 1).Transformed(orimat) * f;
 	dp[1] = Point3d(0, 1, 0).Transformed(orimat) * f;
 	dp[2] = Point3d(1, 0, 0).Transformed(orimat) * f;
@@ -450,7 +450,7 @@ int CViewPoint::ChooseBestPlane(int plane)const{
 
 int CViewPoint::GetTwoAxes(Point3d& vx, Point3d& vy, bool flattened_onto_screen, int plane)const{
 	int plane_mode = ChooseBestPlane(plane);
-	Matrix orimat = theApp.GetDrawMatrix(false);
+	Matrix orimat = theApp->GetDrawMatrix(false);
 
 	switch(plane_mode){
 	case 0:
@@ -500,7 +500,7 @@ int CViewPoint::GetTwoAxes(Point3d& vx, Point3d& vy, bool flattened_onto_screen,
 
 void CViewPoint::Set90PlaneDrawMatrix(Matrix &mat)const{
 	int plane = ChooseBestPlane(0);
-	mat = theApp.GetDrawMatrix(false);
+	mat = theApp->GetDrawMatrix(false);
 	switch(plane){
 	case 1:
 		mat = Matrix(Point3d(0, 0, 0).Transformed(mat), Point3d(1, 0, 0).Transformed(mat), Point3d(0, 0, 1).Transformed(mat));

@@ -58,7 +58,7 @@ public:
 	void WriteToXML(TiXmlElement *element); 
 	void ReadFromXML(TiXmlElement *element);
 	bool IsDifferent(HeeksObj* obj);
-	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
+	bool SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction);
 
 	void AddTriangle(float* t); // 9 floats
 };

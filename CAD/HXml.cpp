@@ -27,7 +27,7 @@ void HXml::GetProperties(std::list<Property *> *list){
 
 const wchar_t* HXml::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/xml.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/xml.png";
 	return iconpath.c_str();
 }
 

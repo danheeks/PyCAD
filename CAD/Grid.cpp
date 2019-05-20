@@ -10,7 +10,7 @@
 static void RenderGrid(const CViewPoint *view_point, double max_number_across, bool in_between_spaces, bool miss_main_lines, const HeeksColor *bg, const HeeksColor *cc, unsigned char brightness, int plane_mode){
 	Point3d sp[4];
 	double zval = 0.5;
-	IPoint size = theApp.m_current_viewport->GetViewportSize();
+	IPoint size = theApp->m_current_viewport->GetViewportSize();
 	sp[0] = Point3d(0, 0, zval);
 	sp[1] = Point3d(size.GetWidth(), 0, zval);
 	sp[2] = Point3d(size.GetWidth(), size.GetHeight(), zval);
@@ -18,7 +18,7 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 	Point3d vx, vy;
 	int plane_mode2 = view_point->GetTwoAxes(vx, vy, false, plane_mode);
 	Point3d datum(0, 0, 0);
-	Matrix orimat = theApp.GetDrawMatrix(false);
+	Matrix orimat = theApp->GetDrawMatrix(false);
 	datum = datum.Transformed(orimat);
 	orimat = Matrix(datum, vx, vy);
 	Point3d unit_forward = view_point->forwards_vector().Normalized();
@@ -59,8 +59,8 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 	double spacing;
 
 	/*
-	if(theApp.draw_to_grid){
-		spacing = theApp.digitizing_grid;
+	if(theApp->draw_to_grid){
+		spacing = theApp->digitizing_grid;
 		if(!miss_main_lines)spacing *= 10;
 		if(spacing<0.0000000001)return;
 		if(biggest_dimension / spacing > max_number_across * 1.5)return;
@@ -71,15 +71,15 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 
 	}
 	else*/{
-		double l = log10(widest_spacing / theApp.m_view_units);
+		double l = log10(widest_spacing / theApp->m_view_units);
 
 		double intl = (int)l;
 		if(l>0)intl++;
 
-		spacing = pow(10.0, intl) * theApp.m_view_units;
+		spacing = pow(10.0, intl) * theApp->m_view_units;
 	}
 
-	if(theApp.grid_mode == 3){
+	if(theApp->grid_mode == 3){
 		dimmer = true;
 		dimness_ratio *= plane_dp;
 		dimness_ratio *= plane_dp;
@@ -104,7 +104,7 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 	}
 	if(cc){
 		HeeksColor col = *cc;
-		if(theApp.grid_mode == 3){
+		if(theApp->grid_mode == 3){
 			switch(plane_mode2){
 			case 0:
 				col.green = (unsigned char)(0.6 * (double)(bg->green));
@@ -158,7 +158,7 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 void GetGridBox(const CViewPoint *view_point, CBox &ext){
 	Point3d sp[4];
 	double zval = 0.5;
-	IPoint size = theApp.m_current_viewport->GetViewportSize();
+	IPoint size = theApp->m_current_viewport->GetViewportSize();
 	sp[0] = Point3d(0, 0, zval);
 	sp[1] = Point3d(size.GetWidth(), 0, zval);
 	sp[2] = Point3d(size.GetWidth(), size.GetHeight(), zval);
@@ -166,7 +166,7 @@ void GetGridBox(const CViewPoint *view_point, CBox &ext){
 	Point3d vx, vy;
 	view_point->GetTwoAxes(vx, vy, false, 0);
 	Point3d datum(0, 0, 0);
-	Matrix orimat = theApp.GetDrawMatrix(false);
+	Matrix orimat = theApp->GetDrawMatrix(false);
 	datum = datum.Transformed(orimat);
 	orimat = Matrix(datum, vx, vy);
 	Plane plane(datum, Point3d(0, 0, 1).Transformed(orimat));
@@ -188,10 +188,10 @@ void GetGridBox(const CViewPoint *view_point, CBox &ext){
 
 static void RenderGrid(const CViewPoint *view_point, int plane)
 {
-	switch(theApp.grid_mode){
+	switch(theApp->grid_mode){
 	case 1:
 		{
-			const HeeksColor& bg = theApp.background_color[0];
+			const HeeksColor& bg = theApp->background_color[0];
 			HeeksColor cc = bg.best_black_or_white();
 			Point3d v_bg((double)bg.red, (double)bg.green, (double)bg.blue);
 			Point3d v_cc((double)cc.red, (double)cc.green, (double)cc.blue);
@@ -215,7 +215,7 @@ static void RenderGrid(const CViewPoint *view_point, int plane)
 			Point3d vx, vy;
 			view_point->GetTwoAxes(vx, vy, false, plane);
 			Point3d datum(0, 0, 0);
-			Matrix orimat = theApp.GetDrawMatrix(false);
+			Matrix orimat = theApp->GetDrawMatrix(false);
 			datum = datum.Transformed(orimat);
 			orimat = Matrix(datum, vx, vy);
 			Point3d v_up = Point3d(0,0, 1).Transformed(orimat);
@@ -240,14 +240,14 @@ static void RenderGrid(const CViewPoint *view_point, int plane)
 	case 2:
 	case 3:
 		{
-			const HeeksColor& bg = theApp.background_color[0];
+			const HeeksColor& bg = theApp->background_color[0];
 			HeeksColor cc = bg.best_black_or_white();
 			bool light_color = cc.red + cc.green + cc.blue > 384;
-			theApp.EnableBlend();
+			theApp->EnableBlend();
 			RenderGrid(view_point, 200, false, true, &bg, &cc, light_color ? 40:10, plane);
 			RenderGrid(view_point, 20, true, false, &bg, &cc, light_color ? 80:20, plane);
 			RenderGrid(view_point, 20, false, false, &bg, &cc, light_color ? 120:30, plane);
-			theApp.DisableBlend();
+			theApp->DisableBlend();
 		}
 		break;
 	}

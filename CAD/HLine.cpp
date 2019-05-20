@@ -40,9 +40,9 @@ public:
 	void Run(){
 		Point3d v(line_for_tool->A, line_for_tool->B);
 		CCylinder* new_object = new CCylinder(Point3d(line_for_tool->A, v), 1.0, v.Magnitude(), _("Cylinder"), HeeksColor(191, 191, 240), 1.0f);
-		theApp.StartHistory();
-		theApp.AddUndoably(new_object,NULL,NULL);
-		theApp.EndHistory();
+		theApp->StartHistory();
+		theApp->AddUndoably(new_object,NULL,NULL);
+		theApp->EndHistory();
 	}
 	const wchar_t* GetTitle(){return _("Make Cylinder On Line");}
 	std::wstring BitmapPath(){return _T("cylonlin");}
@@ -54,9 +54,9 @@ public:
 	void Run(){
 		Point3d v(line_for_tool->A, line_for_tool->B);
 		CCone* new_object = new CCone(Point3d(line_for_tool->A, v), 2.0, 1.0, v.Magnitude(), _("Cone"), HeeksColor(240, 240, 191), 1.0f);
-		theApp.StartHistory();
-		theApp.AddUndoably(new_object,NULL,NULL);
-		theApp.EndHistory();
+		theApp->StartHistory();
+		theApp->AddUndoably(new_object,NULL,NULL);
+		theApp->EndHistory();
 	}
 	const wchar_t* GetTitle(){return _("Make Cone On Line");}
 	std::wstring BitmapPath(){return _T("coneonlin");}
@@ -69,8 +69,8 @@ public:
 	void Run(){
 		Point3d midpoint((line_for_tool->A + line_for_tool->B) /2);
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(midpoint, DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(midpoint, DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -85,8 +85,8 @@ static ClickMidpointOnLine click_midpoint_on_line;
 class ClickStartPointOnLine:public Tool{
 public:
 	void Run(){
-		theApp.m_digitizing->digitized_point = DigitizedPoint(line_for_tool->A, DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(line_for_tool->A, DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -101,8 +101,8 @@ static ClickStartPointOnLine click_start_point_on_line;
 class ClickEndPointOnLine:public Tool{
 public:
 	void Run(){
-		theApp.m_digitizing->digitized_point = DigitizedPoint(line_for_tool->B, DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(line_for_tool->B, DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -117,7 +117,7 @@ static ClickEndPointOnLine click_end_point_on_line;
 
 const wchar_t* HLine::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/line.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/line.png";
 	return iconpath.c_str();
 }
 
@@ -146,7 +146,7 @@ void HLine::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	t_list->push_back(&make_cylinder_on_line);
 	t_list->push_back(&make_cone_on_line);
 
-	Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+	Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 	if (pDrawingMode != NULL)
 	{
 		t_list->push_back(&click_start_point_on_line);
@@ -158,7 +158,7 @@ void HLine::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 
 void HLine::glCommands(bool select, bool marked, bool no_color){
 	if(!no_color){
-		theApp.glColorEnsuringContrast(color);
+		theApp->glColorEnsuringContrast(color);
 	}
 	GLfloat save_depth_range[2];
 	if(marked){
@@ -337,7 +337,7 @@ bool HLine::Intersects(const Point3d &pnt)const
 	double dpA = Point3d(A) * v;
 	double dpB = Point3d(B) * v;
 	double dp = Point3d(pnt) * v;
-	return dp >= dpA - theApp.m_geom_tol && dp <= dpB + theApp.m_geom_tol;
+	return dp >= dpA - theApp->m_geom_tol && dp <= dpB + theApp->m_geom_tol;
 #else
 	return false;
 #endif

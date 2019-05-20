@@ -234,8 +234,8 @@ public:
 	void Reset();
 	HeeksObj* CreateObjectOfType(const std::string& name);
 	HeeksObj* ReadXMLElement(TiXmlElement* pElem);
-	void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element);
-	void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element);
+	virtual void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element);
+	virtual void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element);
 	void InitializeCreateFunctions();
 	void OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool call_was_added = false, bool show_error = true);
 	static void OpenSVGFile(const wchar_t *filepath);
@@ -281,7 +281,7 @@ public:
 	void ObserversFreeze();
 	void ObserversThaw();
 	std::wstring GetExeFolder()const;
-	std::wstring GetResFolder()const;
+	virtual std::wstring GetResFolder()const;
 	void get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy));
 	int PickObjects(const wchar_t* str, long marking_filter = -1, bool just_one = false);
 	void StartPickObjects(const wchar_t* str, long marking_filter = -1, bool just_one = false);
@@ -293,7 +293,7 @@ public:
 	void OnBeforeFrameDelete(void);
 	HeeksObj* GetIDObject(int type, int id);
 	std::list<HeeksObj*> GetIDObjects(int type, int id);
-	void SetObjectID(HeeksObj* object, int id);
+	virtual void SetObjectID(HeeksObj* object, int id);
 	int GetNextID(int type);
 	void RemoveID(HeeksObj* object); // only call this from ObjList::Remove()
 	void ResetIDs();
@@ -340,8 +340,8 @@ public:
 	typedef std::map< ObjectReference_t, HeeksObj * > ObjectReferences_t;
 
 	std::wstring HeeksType(const int type) const;
-	unsigned int GetIndex(HeeksObj *object);
-	void ReleaseIndex(unsigned int index);
+	virtual unsigned int GetIndex(HeeksObj *object);
+	virtual void ReleaseIndex(unsigned int index);
 
 	void GetExternalMarkedListTools(std::list<Tool*>& t_list);
 	void RegisterMarkeListTools(void(*callbackfunc)(std::list<Tool*>& t_list));
@@ -359,4 +359,4 @@ public:
 	void Unmark(HeeksObj* object);
 };
 
-extern CApp theApp;
+extern CApp* theApp;

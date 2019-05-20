@@ -28,12 +28,12 @@ bool CClickPoint::GetPos(double *pos)
 {
 	if(!m_valid)
 	{
-		theApp.m_current_viewport->SetViewport();
-		theApp.m_current_viewport->m_view_point.SetProjection(true);
-		theApp.m_current_viewport->m_view_point.SetModelview();
+		theApp->m_current_viewport->SetViewport();
+		theApp->m_current_viewport->m_view_point.SetProjection(true);
+		theApp->m_current_viewport->m_view_point.SetModelview();
 
-		Point3d screen_pos(m_point.x, theApp.m_current_viewport->GetViewportSize().GetHeight() - m_point.y, (double)m_depth/4294967295.0);
-		Point3d world_pos = theApp.m_current_viewport->m_view_point.glUnproject(screen_pos);
+		Point3d screen_pos(m_point.x, theApp->m_current_viewport->GetViewportSize().GetHeight() - m_point.y, (double)m_depth/4294967295.0);
+		Point3d world_pos = theApp->m_current_viewport->m_view_point.glUnproject(screen_pos);
 		world_pos.get(m_pos);
 		m_valid = true;
 	}
@@ -75,10 +75,10 @@ const wchar_t* CSelectMode::GetHelpText()
 		+ _T("\n") + _("( with Shift key for similar objects)")
 		+ _T("\n") + _("Drag with left button to window select");
 
-	if(theApp.m_dragging_moves_objects)str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("or to move object if on an object"));
+	if(theApp->m_dragging_moves_objects)str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("or to move object if on an object"));
 	str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Mouse wheel to zoom in and out"));
 
-	if(theApp.ctrl_does_rotate){
+	if(theApp->ctrl_does_rotate){
 		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Middle button to pan view"));
 		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("( with Ctrl key to rotate view )"));
 	}
@@ -94,7 +94,7 @@ const wchar_t* CSelectMode::GetHelpText()
 	if(m_doing_a_main_loop)
 	{
 		str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Press Esc key to cancel"));
-		if(theApp.m_marked_list->size() > 0)str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Press Return key to accept selection"));
+		if(theApp->m_marked_list->size() > 0)str_for_GetHelpText.Append(std::wstring(_T("\n")) + _("Press Return key to accept selection"));
 	}
 #endif
 	return str_for_GetHelpText.c_str();
@@ -110,10 +110,10 @@ void CSelectMode::OnLeftDown( MouseEvent& event )
 
 	m_highlighted_objects.clear();
 
-	if(theApp.m_dragging_moves_objects)
+	if(theApp->m_dragging_moves_objects)
 	{
 		MarkedObjectManyOfSame marked_object;
-		theApp.FindMarkedObject(button_down_point, &marked_object);
+		theApp->FindMarkedObject(button_down_point, &marked_object);
 		if(marked_object.m_map.size()>0)
 		{
 			HeeksObj* object = marked_object.GetFirstOfTopOnly();
@@ -126,27 +126,27 @@ void CSelectMode::OnLeftDown( MouseEvent& event )
 			{
 				if(object->GetType() == GripperType)
 				{
-					theApp.m_current_viewport->DrawFront();
-					theApp.drag_gripper = (Gripper*)object;
-					theApp.m_digitizing->SetOnlyCoords(theApp.drag_gripper, true);
-					theApp.m_digitizing->digitize(button_down_point);
-					theApp.grip_from = theApp.m_digitizing->digitized_point.m_point;
-					theApp.grip_to = theApp.grip_from;
+					theApp->m_current_viewport->DrawFront();
+					theApp->drag_gripper = (Gripper*)object;
+					theApp->m_digitizing->SetOnlyCoords(theApp->drag_gripper, true);
+					theApp->m_digitizing->digitize(button_down_point);
+					theApp->grip_from = theApp->m_digitizing->digitized_point.m_point;
+					theApp->grip_to = theApp->grip_from;
 					double from[3];
-					from[0] = theApp.grip_from.x;
-					from[1] = theApp.grip_from.y;
-					from[2] = theApp.grip_from.z;
+					from[0] = theApp->grip_from.x;
+					from[1] = theApp->grip_from.y;
+					from[2] = theApp->grip_from.z;
 
 					std::list<HeeksObj*> selected_objects;
-					for(std::list<HeeksObj*>::iterator It = theApp.m_marked_list->list().begin(); It != theApp.m_marked_list->list().end(); It++)
+					for(std::list<HeeksObj*>::iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++)
 					{
 						HeeksObj* object = *It;
 						if(object->CanBeDragged())selected_objects.push_back(object);
 					}
 
-					theApp.drag_gripper->OnGripperGrabbed(selected_objects, true, from);
-					theApp.grip_from = Point3d(from[0], from[1], from[2]);
-					theApp.m_current_viewport->EndDrawFront();
+					theApp->drag_gripper->OnGripperGrabbed(selected_objects, true, from);
+					theApp->grip_from = Point3d(from[0], from[1], from[2]);
+					theApp->m_current_viewport->EndDrawFront();
 					return;
 				}
 				object = marked_object.Increment();
@@ -160,8 +160,8 @@ void CSelectMode::OnMiddleDown( MouseEvent& event )
 	m_middle_button_down = true;
 	button_down_point = IPoint(event.GetX(), event.GetY());
 	CurrentPoint = button_down_point;
-	theApp.m_current_viewport->StoreViewPoint();
-	theApp.m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
+	theApp->m_current_viewport->StoreViewPoint();
+	theApp->m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
 }
 
 void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &objects)
@@ -169,7 +169,7 @@ void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &ob
 	if(window_box.width > 0){
 		// only select objects which are completely within the window
 		MarkedObjectManyOfSame marked_object;
-		theApp.m_marked_list->ObjectsInWindow(window_box, &marked_object, false);
+		theApp->m_marked_list->ObjectsInWindow(window_box, &marked_object, false);
 		std::set<HeeksObj*> obj_set;
 		for(HeeksObj* object = marked_object.GetFirstOfTopOnly(); object; object = marked_object.Increment())if(object->GetType() != GripperType)
 			obj_set.insert(object);
@@ -197,23 +197,23 @@ void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &ob
 		for(int i = 0; i<4; i++)
 		{
 			MarkedObjectManyOfSame marked_object2;
-			theApp.m_marked_list->ObjectsInWindow(strip_boxes[i], &marked_object2, false);
+			theApp->m_marked_list->ObjectsInWindow(strip_boxes[i], &marked_object2, false);
 			for(HeeksObj* object = marked_object2.GetFirstOfTopOnly(); object; object = marked_object2.Increment())if(object->GetType() != GripperType)
 				obj_set.erase(object);
 		}
 
 		for(std::set<HeeksObj*>::iterator It = obj_set.begin(); It != obj_set.end(); It++)
 		{
-			if(!event.m_controlDown || !theApp.m_marked_list->ObjectMarked(*It))objects.push_back(*It);
+			if(!event.m_controlDown || !theApp->m_marked_list->ObjectMarked(*It))objects.push_back(*It);
 		}
 	}
 	else{
 		// select all the objects in the window, even if only partly in the window
 		MarkedObjectManyOfSame marked_object;
-		theApp.m_marked_list->ObjectsInWindow(window_box, &marked_object, false);
+		theApp->m_marked_list->ObjectsInWindow(window_box, &marked_object, false);
 		for(HeeksObj* object = marked_object.GetFirstOfTopOnly(); object; object = marked_object.Increment())
 		{
-			if (object->GetType() != GripperType && (!event.m_controlDown || !theApp.m_marked_list->ObjectMarked(object)))
+			if (object->GetType() != GripperType && (!event.m_controlDown || !theApp->m_marked_list->ObjectMarked(object)))
 				objects.push_back(object);
 		}
 	}
@@ -221,24 +221,24 @@ void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &ob
 
 void CSelectMode::OnLeftUp( MouseEvent& event )
 {
-	if(theApp.drag_gripper)
+	if(theApp->drag_gripper)
 	{
 		double to[3], from[3];
-		theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
-		theApp.m_digitizing->digitized_point.m_point.get(to);
-		theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
-		theApp.grip_from.get(from);
-		theApp.drag_gripper->OnGripperReleased(from, to);
-		theApp.m_digitizing->SetOnlyCoords(theApp.drag_gripper, false);
-		theApp.drag_gripper = NULL;
+		theApp->m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
+		theApp->m_digitizing->digitized_point.m_point.get(to);
+		theApp->grip_to = theApp->m_digitizing->digitized_point.m_point;
+		theApp->grip_from.get(from);
+		theApp->drag_gripper->OnGripperReleased(from, to);
+		theApp->m_digitizing->SetOnlyCoords(theApp->drag_gripper, false);
+		theApp->drag_gripper = NULL;
 	}
 	else if(window_box_exists)
 	{
-		if (!event.m_controlDown)theApp.m_marked_list->Clear(true);
+		if (!event.m_controlDown)theApp->m_marked_list->Clear(true);
 		std::list<HeeksObj*> obj_list;
 		GetObjectsInWindow(event, obj_list);
-		theApp.m_marked_list->Add(obj_list, true);
-		theApp.m_current_viewport->DrawWindow(window_box, true); // undraw the window
+		theApp->m_marked_list->Add(obj_list, true);
+		theApp->m_current_viewport->DrawWindow(window_box, true); // undraw the window
 		window_box_exists = false;
 	}
 	else
@@ -246,12 +246,12 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 		// select one object
 		m_last_click_point = CClickPoint();
 		MarkedObjectOneOfEach marked_object;
-		theApp.FindMarkedObject(IPoint(event.GetX(), event.GetY()), &marked_object);
+		theApp->FindMarkedObject(IPoint(event.GetX(), event.GetY()), &marked_object);
 		if(marked_object.m_map.size()>0){
 			HeeksObj* previously_marked = NULL;
-			if(theApp.m_marked_list->size() == 1)
+			if(theApp->m_marked_list->size() == 1)
 			{
-				previously_marked = *(theApp.m_marked_list->list().begin());
+				previously_marked = *(theApp->m_marked_list->list().begin());
 			}
 			HeeksObj* o = marked_object.GetFirstOfTopOnly();
 			unsigned long depth = marked_object.GetDepth();
@@ -279,43 +279,40 @@ void CSelectMode::OnLeftUp( MouseEvent& event )
 			}
 			if (!event.m_shiftDown && !event.m_controlDown)
 			{
-				theApp.m_marked_list->Clear(true);
+				theApp->m_marked_list->Clear(true);
 			}
-			if (theApp.m_marked_list->ObjectMarked(object))
+			if (theApp->m_marked_list->ObjectMarked(object))
 			{
 				if (!event.m_shiftDown)
 				{
-					theApp.m_marked_list->Remove(object, true);
+					theApp->m_marked_list->Remove(object, true);
 				}
 			}
 			else
 			{
-				theApp.m_marked_list->Add(object, true);
+				theApp->m_marked_list->Add(object, true);
 				m_last_click_point = CClickPoint(IPoint(event.GetX(), event.GetY()), depth);
-				Line ray = theApp.m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
-				double ray_start[3], ray_direction[3];
-				ray.p0.get(ray_start);
-				ray.v.get(ray_direction);
+				Line ray = theApp->m_current_viewport->m_view_point.SightLine(IPoint(event.GetX(), event.GetY()));
 				marked_object.GetFirstOfTopOnly();
-				object->SetClickMarkPoint(marked_object.GetCurrent(), ray_start, ray_direction);
+				object->SetClickMarkPoint(marked_object.GetCurrent(), ray.p0, ray.v);
 			}
 		}
 		else
 		{
 			if (!event.m_shiftDown && !event.m_controlDown)
 			{
-				theApp.m_marked_list->Clear(true);
+				theApp->m_marked_list->Clear(true);
 			}
 		}
 	}
 
-	if(m_just_one && m_doing_a_main_loop && (theApp.m_marked_list->size() > 0))
+	if(m_just_one && m_doing_a_main_loop && (theApp->m_marked_list->size() > 0))
 	{
 //		ExitMainLoop();
 	}
 	else
 	{
-		theApp.m_current_viewport->m_need_refresh = true;
+		theApp->m_current_viewport->m_need_refresh = true;
 	}
 }
 
@@ -327,46 +324,46 @@ void CSelectMode::OnDragging( MouseEvent& event )
 		dm.x = event.GetX() - CurrentPoint.x;
 		dm.y = event.GetY() - CurrentPoint.y;
 
-		if (theApp.ctrl_does_rotate == event.m_controlDown)
+		if (theApp->ctrl_does_rotate == event.m_controlDown)
 		{
-			if(theApp.m_rotate_mode)
+			if(theApp->m_rotate_mode)
 			{
-				theApp.m_current_viewport->m_view_point.Turn(dm);
+				theApp->m_current_viewport->m_view_point.Turn(dm);
 			}
 			else
 			{
-				theApp.m_current_viewport->m_view_point.TurnVertical(dm);
+				theApp->m_current_viewport->m_view_point.TurnVertical(dm);
 			}
 		}
 		else
 		{
-			theApp.m_current_viewport->m_view_point.Shift(dm, IPoint(event.GetX(), event.GetY()));
+			theApp->m_current_viewport->m_view_point.Shift(dm, IPoint(event.GetX(), event.GetY()));
 		}
-		theApp.m_current_viewport->m_need_update = true;
-		theApp.m_current_viewport->m_need_refresh = true;
+		theApp->m_current_viewport->m_need_update = true;
+		theApp->m_current_viewport->m_need_refresh = true;
 	}
 	else if(event.m_leftDown)
 	{
-		if(theApp.drag_gripper)
+		if(theApp->drag_gripper)
 		{
 			double to[3], from[3];
-			theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
-			theApp.m_digitizing->digitized_point.m_point.get(to);
-			theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
-			theApp.grip_from.get(from);
-			theApp.drag_gripper->OnGripperMoved(from, to);
-			theApp.grip_from = Point3d(from[0], from[1], from[2]);
+			theApp->m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
+			theApp->m_digitizing->digitized_point.m_point.get(to);
+			theApp->grip_to = theApp->m_digitizing->digitized_point.m_point;
+			theApp->grip_from.get(from);
+			theApp->drag_gripper->OnGripperMoved(from, to);
+			theApp->grip_from = Point3d(from[0], from[1], from[2]);
 		}
 		else if(abs(button_down_point.x - event.GetX())>2 || abs(button_down_point.y - event.GetY())>2)
 		{
-			if(theApp.m_dragging_moves_objects && !window_box_exists)
+			if(theApp->m_dragging_moves_objects && !window_box_exists)
 			{
 				std::list<HeeksObj*> selected_objects_dragged;
-				theApp.m_show_grippers_on_drag = true;
+				theApp->m_show_grippers_on_drag = true;
 
-				if(	theApp.m_marked_list->list().size() > 0)
+				if(	theApp->m_marked_list->list().size() > 0)
 				{
-					for(std::list<HeeksObj*>::iterator It = theApp.m_marked_list->list().begin(); It != theApp.m_marked_list->list().end(); It++)
+					for(std::list<HeeksObj*>::iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++)
 					{
 						HeeksObj* object = *It;
 						if(object->CanBeDragged())selected_objects_dragged.push_back(object);
@@ -375,7 +372,7 @@ void CSelectMode::OnDragging( MouseEvent& event )
 				else
 				{
 					MarkedObjectManyOfSame marked_object;
-					theApp.FindMarkedObject(button_down_point, &marked_object);
+					theApp->FindMarkedObject(button_down_point, &marked_object);
 					if(marked_object.m_map.size()>0){
 						HeeksObj* object = marked_object.GetFirstOfTopOnly();
 						double min_depth = 0.0;
@@ -395,53 +392,53 @@ void CSelectMode::OnDragging( MouseEvent& event )
 						}
 						if(selected_objects_dragged.size() == 0 && closest_object){
 							selected_objects_dragged.push_back(closest_object);
-							theApp.m_show_grippers_on_drag = false;
+							theApp->m_show_grippers_on_drag = false;
 						}
 					}
 				}
 
 				if(selected_objects_dragged.size() > 0)
 				{
-					theApp.drag_gripper = &drag_object_gripper;
-					theApp.m_digitizing->SetOnlyCoords(theApp.drag_gripper, true);
-					theApp.m_digitizing->digitize(button_down_point);
-					theApp.grip_from = theApp.m_digitizing->digitized_point.m_point;
-					theApp.grip_to = theApp.grip_from;
+					theApp->drag_gripper = &drag_object_gripper;
+					theApp->m_digitizing->SetOnlyCoords(theApp->drag_gripper, true);
+					theApp->m_digitizing->digitize(button_down_point);
+					theApp->grip_from = theApp->m_digitizing->digitized_point.m_point;
+					theApp->grip_to = theApp->grip_from;
 					double from[3];
-					from[0] = theApp.grip_from.x;
-					from[1] = theApp.grip_from.y;
-					from[2] = theApp.grip_from.z;
-					theApp.drag_gripper->OnGripperGrabbed(selected_objects_dragged, theApp.m_show_grippers_on_drag, from);
-					theApp.grip_from = Point3d(from[0], from[1], from[2]);
+					from[0] = theApp->grip_from.x;
+					from[1] = theApp->grip_from.y;
+					from[2] = theApp->grip_from.z;
+					theApp->drag_gripper->OnGripperGrabbed(selected_objects_dragged, theApp->m_show_grippers_on_drag, from);
+					theApp->grip_from = Point3d(from[0], from[1], from[2]);
 					double to[3];
-					theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
-					theApp.m_digitizing->digitized_point.m_point.get(to);
-					theApp.grip_to = theApp.m_digitizing->digitized_point.m_point;
-					theApp.grip_from.get(from);
-					theApp.drag_gripper->OnGripperMoved(from, to);
-					theApp.grip_from = Point3d(from[0], from[1], from[2]);
+					theApp->m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
+					theApp->m_digitizing->digitized_point.m_point.get(to);
+					theApp->grip_to = theApp->m_digitizing->digitized_point.m_point;
+					theApp->grip_from.get(from);
+					theApp->drag_gripper->OnGripperMoved(from, to);
+					theApp->grip_from = Point3d(from[0], from[1], from[2]);
 					return;
 				}
 			}
 
-			if(window_box_exists && theApp.m_mouse_move_highlighting)
+			if(window_box_exists && theApp->m_mouse_move_highlighting)
 			{
 				m_highlighted_objects.clear();
 				GetObjectsInWindow(event, m_highlighted_objects);
-				theApp.Repaint();
+				theApp->Repaint();
 			}
 
 			// do window selection
 			if(!m_just_one)
 			{
-				theApp.m_current_viewport->SetXOR();
-				if(window_box_exists)theApp.m_current_viewport->DrawWindow(window_box, true); // undraw the window
+				theApp->m_current_viewport->SetXOR();
+				if(window_box_exists)theApp->m_current_viewport->DrawWindow(window_box, true); // undraw the window
 				window_box.x = button_down_point.x;
 				window_box.width = event.GetX() - button_down_point.x;
-				window_box.y = theApp.m_current_viewport->GetViewportSize().GetHeight() - button_down_point.y;
+				window_box.y = theApp->m_current_viewport->GetViewportSize().GetHeight() - button_down_point.y;
 				window_box.height = button_down_point.y - event.GetY();
-				theApp.m_current_viewport->DrawWindow(window_box, true);// draw the window
-				theApp.m_current_viewport->EndXOR();
+				theApp->m_current_viewport->DrawWindow(window_box, true);// draw the window
+				theApp->m_current_viewport->EndXOR();
 				window_box_exists = true;
 			}
 		}
@@ -453,18 +450,18 @@ void CSelectMode::OnMoving( MouseEvent& event )
 {
 	CurrentPoint = IPoint(event.GetX(), event.GetY());
 
-	if(theApp.m_mouse_move_highlighting)
+	if(theApp->m_mouse_move_highlighting)
 	{
 		m_highlighted_objects.clear();
 
 		// highlight one object
 		MarkedObjectOneOfEach marked_object;
-		theApp.FindMarkedObject(IPoint(event.GetX(), event.GetY()), &marked_object);
+		theApp->FindMarkedObject(IPoint(event.GetX(), event.GetY()), &marked_object);
 		if(marked_object.m_map.size()>0){
 			HeeksObj* object = marked_object.GetFirstOfTopOnly();
 			m_highlighted_objects.push_back(object);
 		}
-		theApp.Repaint();
+		theApp->Repaint();
 	}
 }
 
@@ -472,8 +469,8 @@ void CSelectMode::OnRender()
 {
 	if (m_highlighted_objects.size() > 0)
 	{
-		theApp.m_highlight_color.glColor();
-		Material(theApp.m_highlight_color).glMaterial(1.0);
+		theApp->m_highlight_color.glColor();
+		Material(theApp->m_highlight_color).glMaterial(1.0);
 	}
 
 	for (std::list<HeeksObj*>::iterator It = m_highlighted_objects.begin(); It != m_highlighted_objects.end(); It++)
@@ -489,7 +486,7 @@ void CSelectMode::OnWheelRotation( MouseEvent& event )
 	double multiplier = wheel_value /1000.0, multiplier2;
 
 	// to do
-	if(theApp.mouse_wheel_forward_away)multiplier = -multiplier;
+	if(theApp->mouse_wheel_forward_away)multiplier = -multiplier;
 
 	// make sure these are actually inverses, so if you
 	// zoom in and out the same number of steps, you'll be
@@ -501,11 +498,11 @@ void CSelectMode::OnWheelRotation( MouseEvent& event )
 		multiplier2 = 1/(1 - multiplier);
 	}
 
-	IPoint client_size = theApp.m_current_viewport->GetViewportSize();
+	IPoint client_size = theApp->m_current_viewport->GetViewportSize();
 
-	double pixelscale_before = theApp.GetPixelScale();
-	theApp.m_current_viewport->m_view_point.Scale(multiplier2);
-	double pixelscale_after = theApp.GetPixelScale();
+	double pixelscale_before = theApp->GetPixelScale();
+	theApp->m_current_viewport->m_view_point.Scale(multiplier2);
+	double pixelscale_after = theApp->GetPixelScale();
 
 	double event_x = event.GetX();
 	double event_y = event.GetY();
@@ -535,8 +532,8 @@ void CSelectMode::OnWheelRotation( MouseEvent& event )
 
 	// so move that many pixels to keep the coordinate
 	// under the cursor approximately the same
-	theApp.m_current_viewport->m_view_point.Shift(IPoint((int)x_moved_by, (int)y_moved_by), IPoint(0, 0));
-	theApp.m_current_viewport->m_need_refresh = true;
+	theApp->m_current_viewport->m_view_point.Shift(IPoint((int)x_moved_by, (int)y_moved_by), IPoint(0, 0));
+	theApp->m_current_viewport->m_need_refresh = true;
 }
 
 void CSelectMode::OnMouse( MouseEvent& event )
@@ -598,7 +595,7 @@ void CSelectMode::OnKeyDown(wxKeyEvent& event)
 {
 	switch(event.GetKeyCode()){
 	case WXK_RETURN:
-		if(m_doing_a_main_loop && theApp.m_marked_list->size() > 0)ExitMainLoop();
+		if(m_doing_a_main_loop && theApp->m_marked_list->size() > 0)ExitMainLoop();
 		break;
 
 	case WXK_ESCAPE:
@@ -616,10 +613,10 @@ void CSelectMode::OnKeyUp(wxKeyEvent& event)
 #endif
 
 void CSelectMode::OnFrontRender(){
-	if(theApp.drag_gripper){
-		theApp.drag_gripper->OnFrontRender();
+	if(theApp->drag_gripper){
+		theApp->drag_gripper->OnFrontRender();
 	}
-	if(window_box_exists)theApp.m_current_viewport->DrawWindow(window_box, true);
+	if(window_box_exists)theApp->m_current_viewport->DrawWindow(window_box, true);
 }
 
 bool CSelectMode::OnStart(){

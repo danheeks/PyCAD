@@ -6,12 +6,12 @@
 
 CViewport::CViewport() :m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(0), m_h(0), m_view_point(this), m_need_update(false), m_need_refresh(false)
 {
-	theApp.m_current_viewport = this;
+	theApp->m_current_viewport = this;
 }
 
 CViewport::CViewport(int w, int h) : m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(w), m_h(h), m_view_point(this), m_need_update(false), m_need_refresh(false)
 {
-	theApp.m_current_viewport = this;
+	theApp->m_current_viewport = this;
 }
 
 void CViewport::SetViewport()
@@ -24,7 +24,7 @@ void CViewport::glCommands()
 	glDrawBuffer(GL_BACK);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	if (theApp.m_antialiasing)
+	if (theApp->m_antialiasing)
 	{
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_BLEND);
@@ -39,7 +39,7 @@ void CViewport::glCommands()
 
 	SetViewport();
 
-	switch (theApp.m_background_mode)
+	switch (theApp->m_background_mode)
 	{
 	case BackgroundModeTwoColors:
 	case BackgroundModeTwoColorsLeftToRight:
@@ -56,8 +56,8 @@ void CViewport::glCommands()
 
 		// set up which colors to use
 		HeeksColor c[4];
-		for (int i = 0; i<4; i++)c[i] = theApp.background_color[i];
-		switch (theApp.m_background_mode)
+		for (int i = 0; i<4; i++)c[i] = theApp->background_color[i];
+		switch (theApp->m_background_mode)
 		{
 		case BackgroundModeTwoColors:
 			c[2] = c[0];
@@ -95,12 +95,12 @@ void CViewport::glCommands()
 	m_view_point.SetProjection(true);
 	m_view_point.SetModelview();
 
-	switch (theApp.m_background_mode)
+	switch (theApp->m_background_mode)
 	{
 	case BackgroundModeOneColor:
 	{
 		// clear the back buffer
-		theApp.background_color[0].glClearColor(theApp.m_antialiasing ? 0.0f : 1.0f);
+		theApp->background_color[0].glClearColor(theApp->m_antialiasing ? 0.0f : 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	break;
@@ -139,20 +139,20 @@ void CViewport::glCommands()
 				switch (panel)
 				{
 				case 0:
-					c0 = theApp.background_color[9];
-					c1 = theApp.background_color[8];
+					c0 = theApp->background_color[9];
+					c1 = theApp->background_color[8];
 					break;
 				case 1:
-					c0 = theApp.background_color[8];
-					c1 = theApp.background_color[7];
+					c0 = theApp->background_color[8];
+					c1 = theApp->background_color[7];
 					break;
 				case 2:
-					c0 = theApp.background_color[6];
-					c1 = theApp.background_color[5];
+					c0 = theApp->background_color[6];
+					c1 = theApp->background_color[5];
 					break;
 				case 3:
-					c0 = theApp.background_color[5];
-					c1 = theApp.background_color[4];
+					c0 = theApp->background_color[5];
+					c1 = theApp->background_color[4];
 					break;
 				default:
 					break;
@@ -187,7 +187,7 @@ void CViewport::glCommands()
 	}
 
 	// render everything
-	theApp.glCommandsAll(m_view_point);
+	theApp->glCommandsAll(m_view_point);
 
 	// mark various XOR drawn items as not drawn
 	m_render_on_front_done = false;
@@ -214,7 +214,7 @@ void CViewport::FrontRender(void){
 
 	SetXOR();
 
-	theApp.input_mode_object->OnFrontRender();
+	theApp->input_mode_object->OnFrontRender();
 
 	EndXOR();
 
@@ -250,7 +250,7 @@ void CViewport::EndXOR(void){
 
 void CViewport::OnMouseEvent(MouseEvent& event)
 {
-	theApp.m_current_viewport = this;
+	theApp->m_current_viewport = this;
 	this->m_need_refresh = false;
 	this->m_need_update = false;
 	if (event.m_leftDown)
@@ -258,9 +258,9 @@ void CViewport::OnMouseEvent(MouseEvent& event)
 		int a = 0;
 		a = 3;
 	}
-	if (theApp.input_mode_object)theApp.input_mode_object->OnMouse(event);
+	if (theApp->input_mode_object)theApp->input_mode_object->OnMouse(event);
 
-	for (std::list< void(*)(MouseEvent&) >::iterator It = theApp.m_lbutton_up_callbacks.begin(); It != theApp.m_lbutton_up_callbacks.end(); It++)
+	for (std::list< void(*)(MouseEvent&) >::iterator It = theApp->m_lbutton_up_callbacks.begin(); It != theApp->m_lbutton_up_callbacks.end(); It++)
 	{
 		void(*callbackfunc)(MouseEvent& event) = *It;
 		(*callbackfunc)(event);
@@ -343,7 +343,7 @@ void CViewport::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_dep
 	glDrawBuffer(GL_FRONT);
 	glDepthFunc(GL_LEQUAL);
 
-	theApp.CreateLights();
+	theApp->CreateLights();
 	glDisable(GL_LIGHTING);
 	Material().glMaterial(1.0);
 
@@ -360,7 +360,7 @@ void CViewport::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_dep
 		object->glCommands(false, false, false);
 	}
 
-	theApp.DestroyLights();
+	theApp->DestroyLights();
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -368,7 +368,7 @@ void CViewport::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_dep
 }
 
 void CViewport::FindMarkedObject(const IPoint &point, MarkedObject* marked_object){
-	theApp.m_marked_list->FindMarkedObject(point, marked_object);
+	theApp->m_marked_list->FindMarkedObject(point, marked_object);
 }
 
 void CViewport::DrawWindow(IRect &rect, bool allow_extra_bits){
@@ -430,5 +430,5 @@ void CViewport::DrawWindow(IRect &rect, bool allow_extra_bits){
 void CViewport::WindowMag(IRect &window_box){
 	StoreViewPoint();
 	m_view_point.WindowMag(window_box);
-	theApp.Repaint();
+	theApp->Repaint();
 }

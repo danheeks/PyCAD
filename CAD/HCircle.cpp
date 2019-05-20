@@ -37,7 +37,7 @@ const HCircle& HCircle::operator=(const HCircle &c){
 
 const wchar_t* HCircle::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/circle.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/circle.png";
 	return iconpath.c_str();
 }
 
@@ -110,7 +110,7 @@ static void glVertexThickened(const double *p, bool start)
 
 void HCircle::glCommands(bool select, bool marked, bool no_color){
 	if (!no_color){
-		theApp.glColorEnsuringContrast(color);
+		theApp->glColorEnsuringContrast(color);
 	}
 	GLfloat save_depth_range[2];
 	if (marked){
@@ -121,11 +121,11 @@ void HCircle::glCommands(bool select, bool marked, bool no_color){
 
 
 	glBegin(GL_LINE_STRIP);
-	GetSegments(glVertexFunction, theApp.GetPixelScale());
+	GetSegments(glVertexFunction, theApp->GetPixelScale());
 	if (m_thickness != 0.0)
 	{
 		circle_for_glVertexFunction = this;
-		GetSegments(glVertexThickened, theApp.GetPixelScale());
+		GetSegments(glVertexThickened, theApp->GetPixelScale());
 	}
 	glEnd();
 
@@ -334,7 +334,7 @@ bool HCircle::GetLineTangentPoints(const gp_Circ& c1, const gp_Circ& c2, const P
 	if (fabs(gp_Vec(c1.Location().XYZ()) * c1.Axis().Direction() - gp_Vec(c2.Location().XYZ()) * c1.Axis().Direction()) > 0.00000001)return false;
 
 	// not concentric
-	if (c1.Location().IsEqual(c2.Location(), theApp.m_geom_tol))return false;
+	if (c1.Location().IsEqual(c2.Location(), theApp->m_geom_tol))return false;
 
 	// find left and right
 	gp_Vec join(c1.Location(), c2.Location());
@@ -536,7 +536,7 @@ bool HCircle::GetArcTangentPoints(const gp_Circ& c1, const gp_Circ &c2, const Po
 	if (fabs(gp_Vec(c1.Location().XYZ()) * c1.Axis().Direction() - gp_Vec(c2.Location().XYZ()) * c1.Axis().Direction()) > 0.00000001)return false;
 
 	// not concentric
-	if (c1.Location().IsEqual(c2.Location(), theApp.m_geom_tol))return false;
+	if (c1.Location().IsEqual(c2.Location(), theApp->m_geom_tol))return false;
 
 	// find left and right
 	gp_Vec join(c1.Location(), c2.Location());

@@ -99,7 +99,7 @@ void CGroup::ReadFromXML(TiXmlElement *element)
 		else
 		{
 			// load other objects normal
-			HeeksObj* object = theApp.ReadXMLElement(pElem);
+			HeeksObj* object = theApp->ReadXMLElement(pElem);
 			if(object)Add(object, NULL);
 		}
 	}
@@ -109,7 +109,7 @@ void CGroup::ReadFromXML(TiXmlElement *element)
 
 const wchar_t* CGroup::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/group.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/group.png";
 	return iconpath.c_str();
 }
 
@@ -185,7 +185,7 @@ static void on_set_o(const double* pos)
 	object_for_tools->m_px = object_for_tools->m_px + shift;
 	object_for_tools->m_py = object_for_tools->m_py + shift;
 	object_for_tools->m_pz = object_for_tools->m_pz + shift;
-	theApp.Repaint();
+	theApp->Repaint();
 }
 
 Matrix CGroup::GetMatrix()

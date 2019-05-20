@@ -44,8 +44,8 @@ void Drawing::AddToTempObjects(HeeksObj* object)
 
 void Drawing::AddObjectsMade()
 {
-	theApp.AddUndoably(m_temp_object_in_list,((ObjList*)GetOwnerForDrawingObjects()));
-	if(DragDoneWithXOR())theApp.m_current_viewport->DrawObjectsOnFront(m_temp_object_in_list, true);
+	theApp->AddUndoably(m_temp_object_in_list,((ObjList*)GetOwnerForDrawingObjects()));
+	if(DragDoneWithXOR())theApp->m_current_viewport->DrawObjectsOnFront(m_temp_object_in_list, true);
 	m_temp_object_in_list.clear();
 }
 
@@ -68,30 +68,30 @@ void Drawing::RecalculateAndRedraw(const IPoint& point)
 {
 	set_digitize_plane();
 
-	DigitizedPoint end = theApp.m_digitizing->digitize(point);
+	DigitizedPoint end = theApp->m_digitizing->digitize(point);
 	if(end.m_type == DigitizeNoItemType)return;
 
 	if(is_a_draw_level(GetDrawStep()))
 	{
-		if(DragDoneWithXOR())theApp.m_current_viewport->EndDrawFront();
+		if(DragDoneWithXOR())theApp->m_current_viewport->EndDrawFront();
 		calculate_item(end);
-		if(DragDoneWithXOR())theApp.m_current_viewport->DrawFront();
-		else theApp.Repaint(true);
+		if(DragDoneWithXOR())theApp->m_current_viewport->DrawFront();
+		else theApp->Repaint(true);
 	}
 }
 
 void Drawing::AddPoint()
 {
 	// kill focus on control being typed into
-//	theApp.m_frame->m_input_canvas->DeselectProperties();
-//	theApp.ProcessPendingEvents();
+//	theApp->m_frame->m_input_canvas->DeselectProperties();
+//	theApp->ProcessPendingEvents();
 
-	if(theApp.m_digitizing->digitized_point.m_type == DigitizeNoItemType)return;
+	if(theApp->m_digitizing->digitized_point.m_type == DigitizeNoItemType)return;
 
 	bool calculated = false;
-	theApp.StartHistory();
+	theApp->StartHistory();
 	if(is_an_add_level(GetDrawStep())){
-		calculated = calculate_item(theApp.m_digitizing->digitized_point);
+		calculated = calculate_item(theApp->m_digitizing->digitized_point);
 		if(calculated){
 			before_add_item();
 			m_prev_object = TempObject();
@@ -101,18 +101,18 @@ void Drawing::AddPoint()
 	}
 	
 	ClearObjectsMade();
-	SetStartPosUndoable(theApp.m_digitizing->digitized_point);
-	theApp.m_digitizing->reference_point = theApp.m_digitizing->digitized_point;
+	SetStartPosUndoable(theApp->m_digitizing->digitized_point);
+	theApp->m_digitizing->reference_point = theApp->m_digitizing->digitized_point;
 
 	int next_step = GetDrawStep() + 1;
 	if(next_step >= number_of_steps()){
 		next_step = step_to_go_to_after_last_step();
 	}
 	SetDrawStepUndoable(next_step);
-	theApp.EndHistory();
+	theApp->EndHistory();
 	m_getting_position = false;
 	m_inhibit_coordinate_change = false;
-	theApp.OnInputModeTitleChanged();
+	theApp->OnInputModeTitleChanged();
 }
 
 void Drawing::OnMouse( MouseEvent& event )
@@ -121,21 +121,21 @@ void Drawing::OnMouse( MouseEvent& event )
 
 	if(LeftAndRightPressed(event, event_used))
 	{
-		if(DragDoneWithXOR())theApp.m_current_viewport->EndDrawFront();
+		if(DragDoneWithXOR())theApp->m_current_viewport->EndDrawFront();
 		ClearObjectsMade();
-		theApp.SetInputMode(theApp.m_select_mode);
+		theApp->SetInputMode(theApp->m_select_mode);
 	}
 
 	if(!event_used){
 		if(event.m_middleDown || event.GetWheelRotation() != 0)
 		{
-			theApp.m_select_mode->OnMouse(event);
+			theApp->m_select_mode->OnMouse(event);
 		}
 		else{
 			if(event.LeftDown()){
 				if(!m_inhibit_coordinate_change)
 				{
-					button_down_point = theApp.m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
+					button_down_point = theApp->m_digitizing->digitize(IPoint(event.GetX(), event.GetY()));
 				}
 			}
 			else if(event.LeftUp()){
@@ -144,7 +144,7 @@ void Drawing::OnMouse( MouseEvent& event )
 				}
 				else{
 					set_digitize_plane();
-					theApp.m_digitizing->digitized_point = button_down_point;
+					theApp->m_digitizing->digitized_point = button_down_point;
 					if(m_getting_position){
 						m_inhibit_coordinate_change = true;
 						m_getting_position = false;
@@ -156,12 +156,12 @@ void Drawing::OnMouse( MouseEvent& event )
 			}
 			else if(event.RightUp()){
 				// do context menu same as select mode
-				theApp.m_select_mode->OnMouse(event);
+				theApp->m_select_mode->OnMouse(event);
 			}
 			else if(event.Moving()){
 				if(!m_inhibit_coordinate_change){
 					RecalculateAndRedraw(IPoint(event.GetX(), event.GetY()));
-//					theApp.m_frame->RefreshInputCanvas();
+//					theApp->m_frame->RefreshInputCanvas();
 				}
 			}
 		}
@@ -176,7 +176,7 @@ void Drawing::OnKeyDown(KeyEvent& event)
 	case KeyCode::K_ESCAPE:
 		// end drawing mode
 		ClearObjectsMade();
-		theApp.SetInputMode(theApp.m_select_mode);
+		theApp->SetInputMode(theApp->m_select_mode);
 	}
 }
 
@@ -192,13 +192,13 @@ bool Drawing::OnModeChange(void){
 	*null_view = ViewSpecific(0);
 	current_view_stuff = null_view;
 
-	if(!IsDrawing(theApp.input_mode_object))SetDrawStepUndoable(0);
+	if(!IsDrawing(theApp->input_mode_object))SetDrawStepUndoable(0);
 	return true;
 }
 
 HeeksObj* Drawing::GetOwnerForDrawingObjects()
 {
-	return &theApp; //Object always needs to be added somewhere
+	return theApp; //Object always needs to be added somewhere
 }
 
 void Drawing::SetView(int v){
@@ -258,11 +258,11 @@ public:
 };
 
 void Drawing::SetDrawStepUndoable(int s){
-	theApp.DoUndoable(new SetDrawingDrawStep(this, s));
+	theApp->DoUndoable(new SetDrawingDrawStep(this, s));
 }
 
 void Drawing::SetStartPosUndoable(const DigitizedPoint& pos){
-	theApp.DoUndoable(new SetDrawingPosition(this, pos));
+	theApp->DoUndoable(new SetDrawingPosition(this, pos));
 }
 
 void Drawing::OnFrontRender(){
@@ -273,7 +273,7 @@ void Drawing::OnFrontRender(){
 		}
 	}
 
-	theApp.m_digitizing->OnFrontRender();
+	theApp->m_digitizing->OnFrontRender();
 }
 
 void Drawing::OnRender(){
@@ -286,5 +286,5 @@ void Drawing::OnRender(){
 }
 
 void Drawing::GetProperties(std::list<Property *> *list){
-	theApp.m_digitizing->GetProperties(list); // x, y, z
+	theApp->m_digitizing->GetProperties(list); // x, y, z
 }

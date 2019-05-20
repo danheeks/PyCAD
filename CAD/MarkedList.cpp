@@ -38,8 +38,8 @@ void MarkedList::delete_move_grips(bool check_app_grippers){
 	for(It = move_grips.begin(); It != move_grips.end(); It++){
 		Gripper* gripper = *It;
 		if(check_app_grippers){
-			if(gripper == theApp.cursor_gripper)theApp.cursor_gripper = NULL;
-			if(gripper == theApp.drag_gripper)theApp.drag_gripper = NULL;
+			if(gripper == theApp->cursor_gripper)theApp->cursor_gripper = NULL;
+			if(gripper == theApp->drag_gripper)theApp->drag_gripper = NULL;
 		}
 		delete gripper;
 	}
@@ -110,16 +110,16 @@ void MarkedList::GrippersGLCommands(bool select, bool no_color){
 void MarkedList::ObjectsInWindow( IRect window, MarkedObject* marked_object, bool single_picking){
 	// render everything with unique colors
 
-	//theApp.m_current_viewport->SetCurrent();
+	//theApp->m_current_viewport->SetCurrent();
 
 	glDrawBuffer(GL_BACK);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
 
-	theApp.m_current_viewport->SetViewport();
-	theApp.m_current_viewport->m_view_point.SetProjection(true);
-	theApp.m_current_viewport->m_view_point.SetModelview();
+	theApp->m_current_viewport->SetViewport();
+	theApp->m_current_viewport->m_view_point.SetProjection(true);
+	theApp->m_current_viewport->m_view_point.SetModelview();
 
 	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -130,12 +130,12 @@ void MarkedList::ObjectsInWindow( IRect window, MarkedObject* marked_object, boo
 	glDepthMask(1);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glShadeModel(GL_FLAT);
-	theApp.m_current_viewport->m_view_point.SetPolygonOffset();
+	theApp->m_current_viewport->m_view_point.SetPolygonOffset();
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 	glEnable(GL_COLOR_MATERIAL);
 
-	theApp.glCommands(true, false, true);
+	theApp->glCommands(true, false, true);
 
 	GrippersGLCommands(true, true);
 
@@ -197,7 +197,7 @@ void MarkedList::ObjectsInWindow( IRect window, MarkedObject* marked_object, boo
 				HeeksObj *object = m_name_index.find(name);
 
 				std::list<HeeksObj*> owner_list;
-				while (object && (object != &(theApp)))
+				while (object && (object != theApp))
 				{
 					owner_list.push_front(object);
 					object = object->m_owner;
@@ -209,7 +209,7 @@ void MarkedList::ObjectsInWindow( IRect window, MarkedObject* marked_object, boo
 
 					//bool custom_names = object->UsesCustomSubNames();
 					if (!ignore_coords_only_found && current_found_object != NULL){
-						if (ignore_coords_only && theApp.m_digitizing->OnlyCoords(object)){
+						if (ignore_coords_only && theApp->m_digitizing->OnlyCoords(object)){
 							ignore_coords_only_found = true;
 						}
 						else{
@@ -288,7 +288,7 @@ bool MarkedList::ObjectMarked(HeeksObj *object){
 
 void MarkedList::OnChanged(bool selection_cleared, const std::list<HeeksObj *>* added, const std::list<HeeksObj *>* removed){
 	gripper_marked_list_changed = true;
-	theApp.ObserversMarkedListChanged(selection_cleared, added, removed);
+	theApp->ObserversMarkedListChanged(selection_cleared, added, removed);
 }
 
 void MarkedList::OnChangedAdded(HeeksObj* object)
@@ -335,7 +335,7 @@ void MarkedList::GetProperties(std::list<Property *> *list){
 void MarkedList::CutSelectedItems()
 {
 	CopySelectedItems();
-	theApp.Remove(m_list);
+	theApp->Remove(m_list);
 }
 
 void MarkedList::CopySelectedItems()
@@ -350,7 +350,7 @@ void MarkedList::CopySelectedItems()
 	sp.GetTempDir();
 	wxFileName temp_file(sp.GetTempDir().c_str(), _T("temp_Heeks_clipboard_file.xml"));
 
-	theApp.SaveXMLFile(m_list, temp_file.GetFullPath().c_str(), true);
+	theApp->SaveXMLFile(m_list, temp_file.GetFullPath().c_str(), true);
 
 #if wxUSE_UNICODE
 	wifstream ifs(Ttc(temp_file.GetFullPath().c_str()));

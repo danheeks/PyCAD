@@ -56,7 +56,7 @@ const CSketch& CSketch::operator=(const CSketch& c)
 
 const wchar_t* CSketch::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/sketch.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/sketch.png";
 	return iconpath.c_str();
 }
 
@@ -206,8 +206,8 @@ public:
 		if(sketch_for_tools == NULL)return;
 		std::list<HeeksObj*> new_sketches;
 		sketch_for_tools->ExtractSeparateSketches(new_sketches, true);
-		theApp.DeleteUndoably(sketch_for_tools);
-		theApp.AddUndoably(new_sketches, sketch_for_tools->m_owner);
+		theApp->DeleteUndoably(sketch_for_tools);
+		theApp->AddUndoably(new_sketches, sketch_for_tools->m_owner);
 	}
 	const wchar_t* GetTitle(){return _("Split Sketch");}
 	std::wstring BitmapPath(){return _T("splitsketch");}
@@ -223,13 +223,13 @@ public:
 		std::list<TopoDS_Shape> faces;
 		if(ConvertSketchToFaceOrWire(sketch_for_tools, faces, true))
 		{
-			theApp.StartHistory();
+			theApp->StartHistory();
 			for(std::list<TopoDS_Shape>::iterator It2 = faces.begin(); It2 != faces.end(); It2++)
 			{
 				TopoDS_Shape& face = *It2;
-				theApp.AddUndoably(new CFace(TopoDS::Face(face)), NULL, NULL);
+				theApp->AddUndoably(new CFace(TopoDS::Face(face)), NULL, NULL);
 			}
-			theApp.EndHistory();
+			theApp->EndHistory();
 		}
 	}
 	const wchar_t* GetTitle(){return _("Convert sketch to face");}
@@ -247,13 +247,13 @@ public:
 		std::list<TopoDS_Shape> wires;
 		if(ConvertSketchToFaceOrWire(sketch_for_tools, wires, false))
 		{
-			theApp.StartHistory();
+			theApp->StartHistory();
 			for(std::list<TopoDS_Shape>::iterator It2 = wires.begin(); It2 != wires.end(); It2++)
 			{
 				TopoDS_Shape& wire = *It2;
-				theApp.AddUndoably(new CWire(TopoDS::Wire(wire), _T("Wire from sketch")), NULL, NULL);
+				theApp->AddUndoably(new CWire(TopoDS::Wire(wire), _T("Wire from sketch")), NULL, NULL);
 			}
-			theApp.EndHistory();
+			theApp->EndHistory();
 		}
 	}
 	const wchar_t* GetTitle(){return _("Convert sketch to wire");}
@@ -266,7 +266,7 @@ static ConvertSketchToWire convert_sketch_to_wire;
 HeeksObj *CSketch::Parallel( const double distance )
 {
     try {
-            double deviation = theApp.m_geom_tol;
+            double deviation = theApp->m_geom_tol;
             std::list<TopoDS_Shape> wires;
             if(ConvertSketchToFaceOrWire(this, wires, false))
             {
@@ -302,15 +302,15 @@ public:
 		double distance;
 		HeeksConfig config;
 		config.Read(_T("CopyParallelDistance"), &distance, 1.0);
-		if(theApp.InputDouble(std::wstring(_("Use negative for smaller and Positive for larger)") ), _("Enter the distance"), distance))
+		if(theApp->InputDouble(std::wstring(_("Use negative for smaller and Positive for larger)") ), _("Enter the distance"), distance))
 		{
 			config.Write(_T("CopyParallelDistance"), distance);
 			HeeksObj *parallel_sketch = sketch_for_tools->Parallel( double(distance) );
 			if (parallel_sketch != NULL)
 			{
-				theApp.StartHistory();
-				theApp.AddUndoably(parallel_sketch, NULL, NULL);
-				theApp.EndHistory();
+				theApp->StartHistory();
+				theApp->AddUndoably(parallel_sketch, NULL, NULL);
+				theApp->EndHistory();
 			}
 			else
 			{
@@ -331,9 +331,9 @@ public:
 	void Run()
 	{
 		HeeksObj* new_object = SplitArcsIntoLittleLines(sketch_for_tools);
-		theApp.DeleteUndoably(sketch_for_tools);
+		theApp->DeleteUndoably(sketch_for_tools);
 		sketch_for_tools = NULL;
-		theApp.AddUndoably(new_object, NULL, NULL);
+		theApp->AddUndoably(new_object, NULL, NULL);
 	}
 
 	const wchar_t* GetTitle(){return _("Split arcs to little lines");}
@@ -352,8 +352,8 @@ public:
 		double centre[3];
 		box.Centre(centre);
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], centre[1], centre[2]), DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], centre[1], centre[2]), DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -377,8 +377,8 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], box.MaxY(), centre[2]), DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], box.MaxY(), centre[2]), DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -401,8 +401,8 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], box.MinY(), centre[2]), DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(Point3d(centre[0], box.MinY(), centre[2]), DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -425,8 +425,8 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(box.MaxX(), centre[1], centre[2]), DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(Point3d(box.MaxX(), centre[1], centre[2]), DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -449,8 +449,8 @@ public:
 		double centre[3];
 		box.Centre(centre);		
 
-		theApp.m_digitizing->digitized_point = DigitizedPoint(Point3d(box.MinX(), centre[1], centre[2]), DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(Point3d(box.MinX(), centre[1], centre[2]), DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -478,7 +478,7 @@ void CSketch::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 	t_list->push_back(&sketch_arcs_to_lines);
 	t_list->push_back(&copy_parallel);
 
-	Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+	Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 	if (pDrawingMode != NULL)
 	{
 		// We're drawing something.  Allow these options.
@@ -563,7 +563,7 @@ void CSketch::CalculateSketchOrder()
 			Point3d prev_e, s;
 			if(!prev_object->GetEndPoint(prev_e)){well_ordered = false; break;}
 			if(!object->GetStartPoint(s)){well_ordered = false; break;}
-			if (!(Point3d(prev_e).Dist(s) < theApp.m_sketch_reorder_tol)){ well_ordered = false; break; }
+			if (!(Point3d(prev_e).Dist(s) < theApp->m_sketch_reorder_tol)){ well_ordered = false; break; }
 		}
 
 		if(first_object == NULL)first_object = object;
@@ -579,7 +579,7 @@ void CSketch::CalculateSketchOrder()
 			{
 				if(first_object->GetStartPoint(s))
 				{
-					if(e.Dist(s) < theApp.m_sketch_reorder_tol)
+					if(e.Dist(s) < theApp->m_sketch_reorder_tol)
 					{
 						// closed
 						if(IsClockwise())m_order = SketchOrderTypeCloseCW;
@@ -602,7 +602,7 @@ bool CSketch::ReOrderSketch(SketchOrderType new_order)
 	SketchOrderType old_order = GetSketchOrder();
 
 	SetOrderUndoable* reorder_undoable = new SetOrderUndoable(this, m_order);
-	theApp.DoUndoable(reorder_undoable);
+	theApp->DoUndoable(reorder_undoable);
 
 	bool done = false;
 
@@ -682,7 +682,7 @@ void CSketch::ReLinkSketch()
 		}
 	}
 
-	theApp.DoUndoable(new ReorderTool(this, new_list));
+	theApp->DoUndoable(new ReorderTool(this, new_list));
 
 	if(relinker.m_new_lists.size() > 1)
 	{
@@ -705,11 +705,11 @@ void CSketch::ReverseSketch()
 	for(std::list<HeeksObj*>::iterator It=m_objects.begin(); It!=m_objects.end() ;It++)
 	{
 		HeeksObj* object = *It;
-		theApp.ReverseUndoably(object);
+		theApp->ReverseUndoably(object);
 		new_list.push_front(object);
 	}
 
-	theApp.DoUndoable(new ReorderTool(this, new_list));
+	theApp->DoUndoable(new ReorderTool(this, new_list));
 
 	if(old_order == SketchOrderTypeCloseCW)m_order = SketchOrderTypeCloseCCW;
 	else if(old_order == SketchOrderTypeCloseCCW)m_order = SketchOrderTypeCloseCW;
@@ -840,7 +840,7 @@ bool CSketchRelinker::TryAdd(HeeksObj* object)
 
 		// try the object, the right way round
 		object->GetStartPoint(new_point);
-		if(old_point.Dist(new_point) < theApp.m_sketch_reorder_tol)
+		if(old_point.Dist(new_point) < theApp->m_sketch_reorder_tol)
 		{
 			m_new_lists.back().push_back(object);
 			m_new_back = object;
@@ -850,7 +850,7 @@ bool CSketchRelinker::TryAdd(HeeksObj* object)
 
 		// try the object, the wrong way round
 		object->GetEndPoint(new_point);
-		if(old_point.Dist(new_point) < theApp.m_sketch_reorder_tol)
+		if(old_point.Dist(new_point) < theApp->m_sketch_reorder_tol)
 		{
 			CSketch::ReverseObject(object);
 			m_new_lists.back().push_back(object);
@@ -864,7 +864,7 @@ bool CSketchRelinker::TryAdd(HeeksObj* object)
 
 		// try the object, the right way round
 		object->GetEndPoint(new_point);
-		if (old_point.Dist(new_point) < theApp.m_sketch_reorder_tol)
+		if (old_point.Dist(new_point) < theApp->m_sketch_reorder_tol)
 		{
 			m_new_lists.back().push_front(object);
 			m_new_front = object;
@@ -874,7 +874,7 @@ bool CSketchRelinker::TryAdd(HeeksObj* object)
 
 		// try the object, the wrong way round
 		object->GetStartPoint(new_point);
-		if (old_point.Dist(new_point) < theApp.m_sketch_reorder_tol)
+		if (old_point.Dist(new_point) < theApp->m_sketch_reorder_tol)
 		{
 			CSketch::ReverseObject(object);
 			m_new_lists.back().push_front(object);
@@ -1066,7 +1066,7 @@ bool CSketch::IsCircle()const
 			HArc* arc = (HArc*)span;
 			gp_Circ circle = arc->GetCircle();
 
-			if (fabs(circle.Radius() - reference_circle.Radius()) > theApp.m_geom_tol)
+			if (fabs(circle.Radius() - reference_circle.Radius()) > theApp->m_geom_tol)
 				return false;
 
 			if (!circle.Axis().Direction().IsEqual(reference_circle.Axis().Direction(), 0.01))

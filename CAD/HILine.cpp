@@ -31,7 +31,7 @@ const HILine& HILine::operator=(const HILine &b){
 
 const wchar_t* HILine::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/iline.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/iline.png";
 	return iconpath.c_str();
 }
 
@@ -39,7 +39,7 @@ void HILine::glCommands(bool select, bool marked, bool no_color)
 {
 	if(!no_color)
 	{
-		theApp.glColorEnsuringContrast(*GetColor());
+		theApp->glColorEnsuringContrast(*GetColor());
 	}
 	GLfloat save_depth_range[2];
 	if(marked)

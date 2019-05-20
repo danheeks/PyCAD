@@ -33,7 +33,7 @@ HArc::~HArc(){
 
 const wchar_t* HArc::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/arc.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/arc.png";
 	return iconpath.c_str();
 }
 
@@ -77,8 +77,8 @@ public:
 public:
 	void Run()
 	{
-		theApp.m_digitizing->digitized_point = DigitizedPoint(pArc->C, DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(pArc->C, DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -99,8 +99,8 @@ public:
 public:
 	void Run()
 	{
-		theApp.m_digitizing->digitized_point = DigitizedPoint(pArc->A, DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(pArc->A, DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -121,8 +121,8 @@ public:
 public:
 	void Run()
 	{
-		theApp.m_digitizing->digitized_point = DigitizedPoint(pArc->B, DigitizeInputType);
-		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+		theApp->m_digitizing->digitized_point = DigitizedPoint(pArc->B, DigitizeInputType);
+		Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 		if (pDrawingMode != NULL)
 		{
 			pDrawingMode->AddPoint();
@@ -139,7 +139,7 @@ void HArc::GetTools(std::list<Tool*>* t_list, const wxPoint* p)
 {
 	arc_for_tool = this;
 
-	Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp.input_mode_object);
+	Drawing *pDrawingMode = dynamic_cast<Drawing *>(theApp->input_mode_object);
 	if (pDrawingMode != NULL)
 	{
 		click_arc_centre.pArc = this;
@@ -221,7 +221,7 @@ static void glVertexFunction(const double *p, bool start){ glVertex3d(p[0], p[1]
 
 void HArc::glCommands(bool select, bool marked, bool no_color){
 	if(!no_color){
-		theApp.glColorEnsuringContrast(*GetColor());
+		theApp->glColorEnsuringContrast(*GetColor());
 	}
 	GLfloat save_depth_range[2];
 	if(marked){
@@ -231,7 +231,7 @@ void HArc::glCommands(bool select, bool marked, bool no_color){
 	}
 
 	glBegin(GL_LINE_STRIP);
-	GetSegments(glVertexFunction, theApp.GetPixelScale());
+	GetSegments(glVertexFunction, theApp->GetPixelScale());
 	glEnd();
 
 	if(marked){
@@ -393,15 +393,15 @@ bool HArc::Intersects(const Point3d &pnt)const
 #if 0 // to do
 	if(!intersect(pnt, GetCircle()))return false;
 
-	if(pnt.IsEqual(A, theApp.m_geom_tol)){
+	if(pnt.IsEqual(A, theApp->m_geom_tol)){
 		return true;
 	}
 
-	if(pnt.IsEqual(B, theApp.m_geom_tol)){
+	if(pnt.IsEqual(B, theApp->m_geom_tol)){
 		return true;
 	}
 
-	if(A.IsEqual(B, theApp.m_geom_tol)){
+	if(A.IsEqual(B, theApp->m_geom_tol)){
 		return false; // no size arc!
 	}
 
@@ -460,7 +460,7 @@ bool HArc::Stretch(const double *p, const double* shift, void* data){
 	Point3d vp = make_point(p);
 	Point3d vshift = make_vector(shift);
 
-	if(A.IsEqual(vp, theApp.m_geom_tol)){
+	if(A.IsEqual(vp, theApp->m_geom_tol)){
 		Point3d direction = -(GetSegmentVector(1.0));
 		Point3d centre;
 		Point3d axis;
@@ -472,7 +472,7 @@ bool HArc::Stretch(const double *p, const double* shift, void* data){
 			A = new_A;
 		}
 	}
-	else if(B.IsEqual(vp, theApp.m_geom_tol)){
+	else if(B.IsEqual(vp, theApp->m_geom_tol)){
 		Point3d direction = GetSegmentVector(0.0);
 		Point3d centre;
 		Point3d axis;
@@ -507,7 +507,7 @@ Point3d HArc::GetSegmentVector(double fraction)const
 Point3d HArc::GetPointAtFraction(double fraction)const
 {
 #if 0 // to do
-	if(A.IsEqual(B, theApp.m_geom_tol)){
+	if(A.IsEqual(B, theApp->m_geom_tol)){
 		return A;
 	}
 

@@ -155,7 +155,7 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const Point3d *initi
 
 	if (plc1.type == CircleType && plc2.type == CircleType)
 	{
-		bool success = HCircle::GetArcTangentPoints(plc1.c, plc2.c, d1.m_point, d2.m_point, theApp.digitizing_radius, P1, P2, centre, axis);
+		bool success = HCircle::GetArcTangentPoints(plc1.c, plc2.c, d1.m_point, d2.m_point, theApp->digitizing_radius, P1, P2, centre, axis);
 		if (success && initial_direction){
 			// get the axis the right way round
 		}
@@ -163,15 +163,15 @@ bool DigitizedPoint::GetArcPoints(const DigitizedPoint& d1, const Point3d *initi
 	}
 	else if (plc1.type == LineType && plc2.type == CircleType)
 	{
-		return HCircle::GetArcTangentPoints(plc2.c, plc1.l, d2.m_point, theApp.digitizing_radius, P1, P2, centre, axis);
+		return HCircle::GetArcTangentPoints(plc2.c, plc1.l, d2.m_point, theApp->digitizing_radius, P1, P2, centre, axis);
 	}
 	else if (plc1.type == CircleType && plc2.type == LineType)
 	{
-		return HCircle::GetArcTangentPoints(plc1.c, plc2.l, d1.m_point, theApp.digitizing_radius, P2, P1, centre, axis);
+		return HCircle::GetArcTangentPoints(plc1.c, plc2.l, d1.m_point, theApp->digitizing_radius, P2, P1, centre, axis);
 	}
 	else if (plc1.type == LineType && plc2.type == LineType)
 	{
-		return HCircle::GetArcTangentPoints(plc1.l, plc2.l, d1.m_point, d2.m_point, theApp.digitizing_radius, P1, P2, centre, axis);
+		return HCircle::GetArcTangentPoints(plc1.l, plc2.l, d1.m_point, d2.m_point, theApp->digitizing_radius, P1, P2, centre, axis);
 	}
 	else if (plc1.type == CircleType && plc2.type == PointType)
 	{

@@ -48,7 +48,7 @@ bool RegularShapesDrawing::calculate_item(DigitizedPoint &end)
 		AddToTempObjects(new CSketch);
 	}
 
-	Matrix mat = theApp.GetDrawMatrix(true);
+	Matrix mat = theApp->GetDrawMatrix(true);
 	Point3d xdir = Point3d(1, 0, 0).Transformed(mat);
 	Point3d ydir = Point3d(0, 1, 0).Transformed(mat);
 	Point3d zdir = Point3d(0, 0, 1).Transformed(mat);
@@ -150,7 +150,7 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			{
 				for(int i = 0; i<2; i++)
 				{
-					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp.current_color));
+					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
 					TempObject()->Add(arcs[i], NULL);
 				}
 			}
@@ -181,9 +181,9 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			{
 				for(int i = 0; i<2; i++)
 				{
-					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp.current_color));
+					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
 					TempObject()->Add(arcs[i], NULL);
-					lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp.current_color));
+					lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 					TempObject()->Add(lines[i], NULL);
 				}
 			}
@@ -232,9 +232,9 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			{
 				for(int i = 0; i<4; i++)
 				{
-					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp.current_color));
+					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
 					TempObject()->Add(arcs[i], NULL);
-					lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp.current_color));
+					lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 					TempObject()->Add(lines[i], NULL);
 				}
 			}
@@ -278,7 +278,7 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 		{
 			for(int i = 0; i<4; i++)
 			{
-				lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp.current_color));
+				lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 				TempObject()->Add(lines[i], NULL);
 			}
 		}
@@ -300,7 +300,7 @@ void RegularShapesDrawing::CalculatePolygon(const Point3d& p0, const Point3d& p1
 #if 0
 	to do
 
-	if(p0.IsEqual(p1, theApp.m_geom_tol))return;
+	if(p0.IsEqual(p1, theApp->m_geom_tol))return;
 
 	if(TempObject()->GetNumChildren() != m_number_of_side_for_polygon)
 		ClearSketch();
@@ -319,7 +319,7 @@ void RegularShapesDrawing::CalculatePolygon(const Point3d& p0, const Point3d& p1
 	{
 		for(int i = 0; i<m_number_of_side_for_polygon; i++)
 		{
-			lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp.current_color));
+			lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 			TempObject()->Add(lines[i], NULL);
 		}
 	}
@@ -372,7 +372,7 @@ void RegularShapesDrawing::CalculateObround(const Point3d& p0, const Point3d& p1
 
 	if(m_obround_radius > 0.0000000001)
 	{
-		if(p0.IsEqual(p1, theApp.m_geom_tol))lines_disappear = true;
+		if(p0.IsEqual(p1, theApp->m_geom_tol))lines_disappear = true;
 	}
 	else return;
 
@@ -398,7 +398,7 @@ void RegularShapesDrawing::CalculateObround(const Point3d& p0, const Point3d& p1
 		{
 			for(int i = 0; i<2; i++)
 			{
-				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp.current_color));
+				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
 				TempObject()->Add(arcs[i], NULL);
 			}
 		}
@@ -430,9 +430,9 @@ void RegularShapesDrawing::CalculateObround(const Point3d& p0, const Point3d& p1
 		{
 			for(int i = 0; i<2; i++)
 			{
-				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp.current_color));
+				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
 				TempObject()->Add(arcs[i], NULL);
-				lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp.current_color));
+				lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 				TempObject()->Add(lines[i], NULL);
 			}
 		}

@@ -40,7 +40,7 @@ const HPoint& HPoint::operator=(const HPoint &b)
 
 const wchar_t* HPoint::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/point.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/point.png";
 	return iconpath.c_str();
 }
 
@@ -56,7 +56,7 @@ bool HPoint::IsDifferent(HeeksObj* o)
 void HPoint::glCommands(bool select, bool marked, bool no_color)
 {
 	if(!no_color){
-		theApp.glColorEnsuringContrast(color);
+		theApp->glColorEnsuringContrast(color);
 	}
 	GLfloat save_depth_range[2];
 	if(marked){

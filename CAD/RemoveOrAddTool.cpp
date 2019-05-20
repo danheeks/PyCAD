@@ -33,22 +33,22 @@ const wchar_t* AddObjectTool::GetTitle()
 void RemoveOrAddTool::Add()
 {
 
-	if (theApp.m_doing_rollback && (m_owner == NULL))
+	if (theApp->m_doing_rollback && (m_owner == NULL))
 	{
 		m_owner = NULL;
 	}
 
 	if (m_owner == NULL)
 	{
-		theApp.MessageBox(L"Can't Have NULL owner!");
+		theApp->MessageBox(L"Can't Have NULL owner!");
 		return;
 	}
 
 	m_owner->Add(m_object, m_prev_object);
 	m_object->m_owner = m_owner;
 
-	theApp.WasAdded(m_object);
-	theApp.WasModified(m_owner);
+	theApp->WasAdded(m_object);
+	theApp->WasModified(m_owner);
 
 	m_belongs_to_owner = true;
 }
@@ -60,8 +60,8 @@ void RemoveOrAddTool::Remove()
 		// to do multiple owners
 		m_owner = m_object->m_owner;
 		m_owner->Remove(m_object);
-		theApp.WasRemoved(m_object);
-		theApp.WasModified(m_owner);
+		theApp->WasRemoved(m_object);
+		theApp->WasModified(m_owner);
 		m_object->m_owner = NULL;
 	}
 	m_belongs_to_owner = false;
@@ -109,7 +109,7 @@ void ManyRemoveOrAddTool::Add()
 {
 	if (m_owner == NULL)
 	{
-		theApp.MessageBox(L"Can't have NULL owner!");
+		theApp->MessageBox(L"Can't have NULL owner!");
 		return;
 	}
 
@@ -120,8 +120,8 @@ void ManyRemoveOrAddTool::Add()
 		object->m_owner = m_owner;
 	}
 
-	theApp.WereAdded(m_objects);
-	theApp.WasModified(m_owner);
+	theApp->WereAdded(m_objects);
+	theApp->WasModified(m_owner);
 
 	m_belongs_to_owner = true;
 }
@@ -132,11 +132,11 @@ void ManyRemoveOrAddTool::Remove()
 	for(It = m_objects.begin(); It != m_objects.end(); It++){
 		HeeksObj* object = *It;
 		m_owner->Remove(object);
-		theApp.m_marked_list->Remove(object, false);
+		theApp->m_marked_list->Remove(object, false);
 	}
 
-	theApp.WereRemoved(m_objects);
-	theApp.WasModified(m_owner);
+	theApp->WereRemoved(m_objects);
+	theApp->WasModified(m_owner);
 	for(It = m_objects.begin(); It != m_objects.end(); It++){
 		HeeksObj* object = *It;
 		object->m_owner = NULL;
@@ -191,11 +191,11 @@ CopyObjectUndoable::~CopyObjectUndoable()
 void CopyObjectUndoable::Run(bool redo)
 {
 	m_object->CopyFrom(m_new_copy);
-	theApp.WasModified(m_object);
+	theApp->WasModified(m_object);
 }
 
 void CopyObjectUndoable::RollBack()
 {
 	m_object->CopyFrom(m_old_copy);
-	theApp.WasModified(m_object);
+	theApp->WasModified(m_object);
 }

@@ -2,7 +2,7 @@
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include "HeeksObj.h"
 #include "tinyxml.h"
 #include "ObjList.h"
@@ -32,7 +32,7 @@ HeeksObj::~HeeksObj()
 {
 	if(m_owner)m_owner->Remove(this);
 
-	if (m_index) theApp.ReleaseIndex(m_index);
+	if (m_index) theApp->ReleaseIndex(m_index);
 }
 
 HeeksObj* HeeksObj::MakeACopyWithID()
@@ -54,7 +54,7 @@ void PropertyObjectColor::Set(const HeeksColor& value){ m_object->SetColor(value
 
 const wchar_t* HeeksObj::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/unknown.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/unknown.png";
 	return iconpath.c_str();
 }
 
@@ -119,7 +119,7 @@ void HeeksObj::OnRemove()
 
 void HeeksObj::SetID(int id)
 {
-	theApp.SetObjectID(this, id);
+	theApp->SetObjectID(this, id);
 }
 
 void HeeksObj::WriteXML(TiXmlNode *root)
@@ -132,12 +132,12 @@ void HeeksObj::WriteXML(TiXmlNode *root)
 
 void HeeksObj::WriteToXML(TiXmlElement *element)
 {
-	theApp.ObjectWriteToXML(this, element);
+	theApp->ObjectWriteToXML(this, element);
 }
 
 void HeeksObj::ReadFromXML(TiXmlElement* element)
 {
-	theApp.ObjectReadFromXML(this, element);
+	theApp->ObjectReadFromXML(this, element);
 }
 
 bool HeeksObj::OnVisibleLayer()
@@ -157,6 +157,6 @@ HeeksObj *HeeksObj::Find( const int type, const unsigned int id )
 #endif
 
 unsigned int HeeksObj::GetIndex() {
-	if (!m_index) m_index = theApp.GetIndex(this);
+	if (!m_index)m_index = theApp->GetIndex(this);
 	return m_index;
 }

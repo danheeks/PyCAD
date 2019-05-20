@@ -49,197 +49,13 @@
 #include "LineArcDrawing.h"
 #include "MarkedObject.h"
 #include "ConversionTools.h"
-
-namespace bp = boost::python;
+#include "PyWrapper.h"
+#include "PyBaseObject.h"
 
 void OnExit()
 {
-	theApp.OnExit();
+	theApp->OnExit();
 }
-
-PyObject *main_module = NULL;
-PyObject *globals = NULL;
-
-void GetPythonError(std::wstring& error_string)
-{
-	PyObject *errtype, *errvalue, *traceback;
-	PyErr_Fetch(&errtype, &errvalue, &traceback);
-	PyErr_NormalizeException(&errtype, &errvalue, &traceback);
-	if (errtype != NULL && 0)/* error type not as useful, less is more */ {
-		PyObject *s = PyObject_Str(errtype);
-		PyObject* pStrObj = PyUnicode_AsUTF8String(s);
-		char* c = PyBytes_AsString(pStrObj);
-		if (c)
-		{
-			wchar_t wstr[1024];
-			mbstowcs(wstr, c, 1024);
-			error_string.append(wstr);
-			error_string.append(L"\n\n");
-		}
-		Py_DECREF(s);
-		Py_DECREF(pStrObj);
-	}
-	if (errvalue != NULL) {
-		PyObject *s = PyObject_Str(errvalue);
-		PyObject* pStrObj = PyUnicode_AsUTF8String(s);
-		char* c = PyBytes_AsString(pStrObj);
-		if (c)
-		{
-			wchar_t wstr[1024];
-			mbstowcs(wstr, c, 1024);
-			error_string.append(wstr);
-			error_string.append(L"\n\n\n");
-		}
-		Py_DECREF(s);
-		Py_DECREF(pStrObj);
-	}
-
-	PyObject *pModule = PyImport_ImportModule("traceback");
-
-	if (traceback != NULL && pModule != NULL)
-	{
-		PyObject* pDict = PyModule_GetDict(pModule);
-		PyObject* pFunc = PyDict_GetItemString(pDict, "format_tb");
-		if (pFunc && PyCallable_Check(pFunc))
-		{
-			PyObject* pArgs = PyTuple_New(1);
-			pArgs = PyTuple_New(1);
-			PyTuple_SetItem(pArgs, 0, traceback);
-			PyObject* pValue = PyObject_CallObject(pFunc, pArgs);
-			if (pValue != NULL)
-			{
-				int len = PyList_Size(pValue);
-				if (len > 0) {
-					PyObject *t, *tt;
-					int i;
-					char *buffer;
-					for (i = 0; i < len; i++) {
-						tt = PyList_GetItem(pValue, i);
-						t = Py_BuildValue("(O)", tt);
-						if (!PyArg_ParseTuple(t, "s", &buffer)){
-							return;
-						}
-
-						wchar_t wstr[1024];
-						mbstowcs(wstr, buffer, 1024);
-						error_string.append(wstr);
-						error_string.append(L"\n");
-					}
-				}
-			}
-			Py_DECREF(pValue);
-			Py_DECREF(pArgs);
-		}
-	}
-	Py_DECREF(pModule);
-
-	Py_XDECREF(errvalue);
-	Py_XDECREF(errtype);
-	Py_XDECREF(traceback);
-}
-
-void HandlePythonCallError()
-{
-	std::wstring error_string;
-	GetPythonError(error_string);
-
-	wprintf(error_string.c_str());
-	//theApp.MessageBox(error_string.c_str());
-}
-
-int BeforePythonCall_level = 0;
-
-static void BeforePythonCall(PyObject **main_module, PyObject **globals)
-{
-	BeforePythonCall_level++;
-	if (BeforePythonCall_level <= 1)
-	{
-		if (*main_module == NULL)
-		{
-			*main_module = PyImport_ImportModule("__main__");
-			*globals = PyModule_GetDict(*main_module);
-		}
-
-		const char* str = "import sys\nold_stdout = sys.stdout\nold_stderr = sys.stderr\nclass CatchOutErr:\n  def __init__(self):\n    self.value = ''\n    self.count = ''\n  def write(self, txt):\n    self.value += str(self.count)+txt\n  def flush(self):\n    pass\ncatchOutErr = CatchOutErr()\nsys.stdout = catchOutErr\nsys.stderr = catchOutErr"; //this is python code to redirect stdouts/stderr
-		PyRun_String(str, Py_file_input, *globals, *globals); //invoke code to redirect
-	}
-}
-
-static bool AfterPythonCall(PyObject *main_module)
-{
-	BeforePythonCall_level--;
-	if (BeforePythonCall_level > 0)
-	{
-		if (PyErr_Occurred())
-		{
-			HandlePythonCallError();
-			return false;
-		}
-		return true;
-	}
-
-	if (BeforePythonCall_level < 0)
-	{
-		theApp.MessageBoxW(L"too many internal calls to AfterPythonCall");
-		return false;
-	}
-
-	PyObject *catcher = PyObject_GetAttrString(main_module, "catchOutErr"); //get our catchOutErr created above
-	PyObject *output = PyObject_GetAttrString(catcher, "value"); //get the stdout and stderr from our catchOutErr object
-#if PY_MAJOR_VERSION >= 3
-	std::wstring s(Ctt(PyUnicode_AsUTF8(output)));
-#else
-	std::wstring s(Ctt(PyString_AsString(output)));
-#endif
-	if (s.size() > 0) {
-		wprintf(s.c_str());
-	}
-
-	bool return_value = true;
-	if (PyErr_Occurred())
-	{
-		HandlePythonCallError();
-		return_value = false;
-	}
-
-	if (BeforePythonCall_level == 0)
-	{
-		const char* str = "sys.stdout = old_stdout\nsys.stderr = old_stderr";
-		PyRun_String(str, Py_file_input, globals, globals); //invoke code
-	}
-
-	return return_value;
-}
-
-std::wstring str_for_base_object;
-HeeksColor color_for_base_object;
-std::list<Property *> *property_list = NULL;
-HeeksObj* object_for_get_properties = NULL;
-
-
-/*
-This RAII structure ensures that threads created on the native C side
-adhere to the laws of Python and ensure they grab the GIL lock when
-calling into python
-*/
-struct PyLockGIL
-{
-
-	PyLockGIL()
-		: gstate(PyGILState_Ensure())
-	{
-	}
-
-	~PyLockGIL()
-	{
-		PyGILState_Release(gstate);
-	}
-
-	PyLockGIL(const PyLockGIL&) = delete;
-	PyLockGIL& operator=(const PyLockGIL&) = delete;
-
-	PyGILState_STATE gstate;
-};
 
 void AddPropertyToPythonList(Property* p, boost::python::list& list)
 {
@@ -280,490 +96,6 @@ void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 	}
 }
 
-template <class T>
-class cad_wrapper : public bp::wrapper<T>
-{
-public:
-
-	bool CallVoidReturn(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, CBox& box)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(box);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, const HeeksColor& c)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(
-						c);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, const HeeksObj* object)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(object);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, bool value)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(value);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, int value)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(value);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, double value)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(value);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, std::wstring value)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(value);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, bp::list &value)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(value);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	bool CallVoidReturn(const char* func, bp::list &value1, bp::list &value2)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func)){
-
-			if (PyErr_Occurred()){
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else{
-
-				BeforePythonCall(&main_module, &globals);
-				PyLockGIL lock;
-				try{
-
-					bp::detail::method_result result = f(value1, value2);
-					success = AfterPythonCall(main_module);
-					return success;
-				}
-				catch (const bp::error_already_set&){}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return false;
-	}
-
-	std::pair<bool, bool> CallReturnBool(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (bool)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				success = AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, false);
-	}
-
-	std::pair<bool, int> CallReturnInt(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (int)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, 0);
-	}
-
-	std::pair<bool, double> CallReturnDouble(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (double)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, 0.0);
-	}
-
-	std::pair<bool, std::string> CallReturnString(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (std::string)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, std::string());
-	}
-
-	std::pair<bool, std::wstring> CallReturnWString(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (std::wstring)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, std::wstring());
-	}
-
-	std::pair<bool, HeeksObj*> CallReturnHeeksObj(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (HeeksObj*)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, (HeeksObj*)NULL);
-	}
-
-	std::pair<bool, HeeksColor> CallReturnColor(const char* func)const
-	{
-		bool success = false;
-		if (bp::override f = this->get_override(func))
-		{
-			if (PyErr_Occurred())
-			{
-				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
-			}
-			else
-			{
-				BeforePythonCall(&main_module, &globals);
-
-				// Execute the python function
-				PyLockGIL lock;
-				try
-				{
-					bp::detail::method_result result = f();
-					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (HeeksColor)result);
-				}
-				catch (const bp::error_already_set&)
-				{
-				}
-				AfterPythonCall(main_module);
-			}
-		}
-		PyErr_Clear();
-		return std::make_pair(false, HeeksColor(0, 0, 0));
-	}
-};
-
 class ObserverWrap : public Observer, public cad_wrapper<Observer>
 {
 public:
@@ -773,9 +105,9 @@ public:
 	{
 		//		if (added && added->size() > 0)
 		{
-			bp::list added_list;
-			bp::list removed_list;
-			bp::list modified_list;
+			boost::python::list added_list;
+			boost::python::list removed_list;
+			boost::python::list modified_list;
 			if (added && added->size() > 0)
 			{
 				BOOST_FOREACH(HeeksObj* o, *added) {
@@ -802,8 +134,8 @@ public:
 
 	void WhenMarkedListChanges(bool selection_cleared, const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed)
 	{
-		bp::list added_list;
-		bp::list removed_list;
+		boost::python::list added_list;
+		boost::python::list removed_list;
 		if (added && added->size() > 0)
 		{
 			BOOST_FOREACH(HeeksObj* o, *added) {
@@ -823,14 +155,14 @@ public:
 
 static std::wstring str_for_input_mode;
 
-class InputModeWrap : public CInputMode, public bp::wrapper<CInputMode>
+class InputModeWrap : public CInputMode, public boost::python::wrapper<CInputMode>
 {
 public:
 	InputModeWrap() :CInputMode(){}
 
 	const wchar_t* GetTitle()override
 	{
-		if (bp::override f = this->get_override("GetTitle"))
+		if (boost::python::override f = this->get_override("GetTitle"))
 		{
 			std::string s = f();
 			str_for_input_mode = Ctt(s.c_str());
@@ -841,7 +173,7 @@ public:
 
 	void OnKeyDown(KeyEvent& e)override
 	{
-		if (bp::override f = this->get_override("OnKeyDown"))
+		if (boost::python::override f = this->get_override("OnKeyDown"))
 		{
 			f(e);
 		}
@@ -851,7 +183,7 @@ public:
 
 	void OnKeyUp(KeyEvent& e)override
 	{
-		if (bp::override f = this->get_override("OnKeyUp"))
+		if (boost::python::override f = this->get_override("OnKeyUp"))
 		{
 			f(e);
 		}
@@ -868,7 +200,7 @@ public:
 
 	void AddPoint()override
 	{
-		if (bp::override f = this->get_override("AddPoint"))
+		if (boost::python::override f = this->get_override("AddPoint"))
 		{
 			f();
 		}
@@ -878,7 +210,7 @@ public:
 
 	bool calculate_item(DigitizedPoint &end)override
 	{
-		if (bp::override f = this->get_override("CalculateItem"))
+		if (boost::python::override f = this->get_override("CalculateItem"))
 		{
 			bool result = f(end);
 			return result;
@@ -889,7 +221,7 @@ public:
 
 	bool is_an_add_level(int level)override
 	{
-		if (bp::override f = this->get_override("IsAnAddLevel"))
+		if (boost::python::override f = this->get_override("IsAnAddLevel"))
 		{
 			bool result = f(level);
 			return result;
@@ -899,7 +231,7 @@ public:
 
 	int number_of_steps()override
 	{
-		if (bp::override f = this->get_override("NumberOfSteps"))
+		if (boost::python::override f = this->get_override("NumberOfSteps"))
 		{
 			int result = f();
 			return result;
@@ -931,53 +263,41 @@ public:
 
 void CadReset()
 {
-	theApp.Reset();
+	theApp->Reset();
 }
 
 bool CadOpenFile(std::wstring fp)
 {
-	return theApp.OpenFile(fp.c_str(), false);
+	return theApp->OpenFile(fp.c_str(), false);
 }
 
 void CadImport(std::wstring fp)
 {
-	theApp.OpenFile(fp.c_str(), true);
+	theApp->OpenFile(fp.c_str(), true);
 }
 
 bool CadSaveFile(std::wstring fp)
 {
-	return theApp.SaveFile(fp.c_str());
+	return theApp->SaveFile(fp.c_str());
 }
 
-bool SaveObjects(std::wstring fp, bp::list &list)
+bool SaveObjects(std::wstring fp, boost::python::list &list)
 {
 	std::list<HeeksObj*> o_list;
 	for (int i = 0; i < len(list); ++i)
 	{
 		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
 	}
-	return theApp.SaveFile(fp.c_str(), &o_list);
+	return theApp->SaveFile(fp.c_str(), &o_list);
 }
 
 void RegisterObserver(Observer* observer)
 {
-	theApp.RegisterObserver(observer);
+	theApp->RegisterObserver(observer);
 }
 
 
 std::list<PyObject*>  repaint_callbacks;
-
-void CallPythonCallback(PyObject* callback)
-{
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
-
-	// Execute the python function
-	PyObject* result = PyObject_CallFunction(callback, 0);
-
-	AfterPythonCall(main_module);
-
-}
 
 void PythonOnRepaint(bool soon = false)
 {
@@ -1042,188 +362,18 @@ void SetContextMenuCallback(PyObject *callback)
 
 std::wstring GetResFolder()
 {
-	return theApp.m_res_folder;
+	return theApp->m_res_folder;
 }
 
 void SetResFolder(std::wstring str)
 {
-	theApp.m_res_folder = str;
+	theApp->m_res_folder = str;
 }
 
 void CadMessageBox(std::wstring str)
 {
-	theApp.MessageBox(str.c_str());
+	theApp->MessageBox(str.c_str());
 }
-
-class BaseObject : public ObjList, public cad_wrapper<ObjList>
-{
-public:
-	static bool in_glCommands;
-	static bool triangles_begun;
-	static bool lines_begun;
-	static TiXmlElement* m_cur_element;
-	static bool m_no_colour; // from glCommands
-	static bool m_marked; // from glCommands
-	static bool m_select; // from glCommands
-
-	BaseObject() :ObjList(){}
-	BaseObject(int type) :ObjList(){}
-	bool NeverDelete(){ return true; }
-
-	int GetType()const{
-		std::pair<bool, int> result = CallReturnInt("GetType");
-		if (result.first)
-			return result.second;
-		return 0;
-	}
-
-	const wchar_t* GetIconFilePath()
-	{
-		std::pair<bool, std::string> result = CallReturnString("GetIconFilePath");
-		if (result.first)
-			return Ctt(result.second.c_str());
-		return ObjList::GetIconFilePath();
-	}
-
-	const wchar_t* GetShortString()const
-	{
-		std::pair<bool, std::string> result = CallReturnString("GetTitle");
-		if (result.first)
-			return Ctt(result.second.c_str());
-		return ObjList::GetShortString();
-	}
-
-	const wchar_t* GetTypeString()const
-	{
-		std::pair<bool, std::string> result = CallReturnString("GetTypeString");
-		if (result.first)
-			return Ctt(result.second.c_str());
-		return ObjList::GetTypeString();
-	}
-
-	const HeeksColor* GetColor()const
-	{
-		std::pair<bool, bool> result = CallReturnBool("HasColor");
-		if (result.first && result.second)
-		{
-			// HasColor exists and HasColor returns True
-			std::pair<bool, HeeksColor> result2 = CallReturnColor("GetColor");
-			if (result2.first)
-			{
-				color_for_base_object = result2.second;
-				return &color_for_base_object;
-			}
-		}
-		return ObjList::GetColor();
-	}
-
-	void SetColor(const HeeksColor &col)
-	{
-		CallVoidReturn("SetColor", col);
-	}
-
-	void glCommands(bool select, bool marked, bool no_color)
-	{
-		m_no_colour = no_color;
-		m_marked = marked;
-		m_select = select;
-
-		if (!CallVoidReturn("OnGlCommands"))
-			ObjList::glCommands(select, marked, no_color);
-	}
-
-	void GetProperties(std::list<Property *> *list)
-	{
-		property_list = list;
-		object_for_get_properties = this;
-		if(!CallVoidReturn("GetProperties"))
-			ObjList::GetProperties(list);
-	}
-
-
-	void GetBox(CBox &box)
-	{
-		if (!CallVoidReturn("GetBox", box))
-			ObjList::GetBox(box);
-	}
-
-	void KillGLLists()
-	{
-		if (!CallVoidReturn("KillGLLists"))
-			ObjList::KillGLLists();
-	}
-
-	void WriteToXML(TiXmlElement *element)
-	{
-		BaseObject::m_cur_element = element;
-		CallVoidReturn("WriteXml");
-	}
-
-	void ReadFromXML(TiXmlElement *element)
-	{
-		BaseObject::m_cur_element = element;
-		CallVoidReturn("ReadXml");
-	}
-
-	HeeksObj* MakeACopy()const
-	{
-		std::pair<bool, HeeksObj*> result = CallReturnHeeksObj("MakeACopy");
-		if (result.first)
-			return result.second;
-		return NULL;
-	}
-
-	void CopyFrom(const HeeksObj* object)
-	{
-		CallVoidReturn("CopyFrom", object);
-	}
-
-	void ReloadPointers()
-	{
-		if (!CallVoidReturn("ReloadPointers"))
-			ObjList::ReloadPointers();
-	}
-
-	bool OneOfAKind()
-	{
-		std::pair<bool, bool> result = CallReturnBool("OneOfAKind");
-		if (result.first)
-			return result.second;
-		return ObjList::OneOfAKind();
-	}
-
-	bool OneOfAKind_default(){
-		return ObjList::OneOfAKind();
-	}
-
-	void OnAdd()
-	{
-		CallVoidReturn("OnAdd");
-	}
-
-	void OnRemove()
-	{
-		CallVoidReturn("OnRemove");
-	}
-
-	bp::override get_override(char const* name) const
-	{
-		bp::override result = bp::wrapper<ObjList>::get_override(name);
-		if (result != NULL)
-			return result;
-		PyErr_Clear();
-		return result;
-	}
-};
-
-// static definitions
-bool BaseObject::in_glCommands = false;
-bool BaseObject::triangles_begun = false;
-bool BaseObject::lines_begun = false;
-TiXmlElement* BaseObject::m_cur_element = NULL;
-bool BaseObject::m_no_colour = false;
-bool BaseObject::m_marked = false;
-bool BaseObject::m_select = false;
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
 {
@@ -1319,35 +469,12 @@ boost::python::list BaseObjectGetChildren(BaseObject& object) {
 
 
 static double GetLines_pixels_per_mm = 0.0;
-static PyObject* GetLines_callback = NULL;
-
 static boost::python::list return_list_ForGetLines;
 
 
 static void CallbackForGetLines(const double *p, bool start)
 {
-#if 0
-	if (GetLines_callback)
-	{
-		PyObject *args = PyTuple_New(6);
-		for (int i = 0; i<6; i++)PyTuple_SetItem(args, i, PyFloat_FromDouble(p[i]));
-		//BeforePythonCall(&main_module, &globals);
-		PyObject_CallObject(GetLines_callback, args);
-		//AfterPythonCall(main_module);
-	}
-#endif
-	return_list_ForGetLines.append(bp::make_tuple(start, p[0], p[1], p[2]));
-}
-
-void SetCallbackForGetLines(PyObject *callback)
-{
-	if (!PyCallable_Check(callback))
-	{
-		GetLines_callback = NULL;
-		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-		return;
-	}
-	GetLines_callback = callback;
+	return_list_ForGetLines.append(boost::python::make_tuple(start, p[0], p[1], p[2]));
 }
 
 void SetGetLinesPixelsPerMm(double pixels_per_mm)
@@ -1357,81 +484,81 @@ void SetGetLinesPixelsPerMm(double pixels_per_mm)
 
 CInputMode* GetSelectMode()
 {
-	return theApp.m_select_mode;
+	return theApp->m_select_mode;
 }
 
 CInputMode* GetMagnification()
 {
-	return theApp.magnification;
+	return theApp->magnification;
 }
 
 CInputMode* GetViewRotating()
 {
-	return theApp.viewrotating;
+	return theApp->viewrotating;
 }
 
 CInputMode* GetViewZooming()
 {
-	return theApp.viewzooming;
+	return theApp->viewzooming;
 }
 
 CInputMode* GetViewPanning()
 {
-	return theApp.viewpanning;
+	return theApp->viewpanning;
 }
 
 void SetInputMode(CInputMode* input_mode)
 {
-	theApp.SetInputMode(input_mode);
+	theApp->SetInputMode(input_mode);
 }
 
 CInputMode* GetInputMode()
 {
-	return theApp.input_mode_object;
+	return theApp->input_mode_object;
 }
 
 void SetLineArcDrawing()
 {
 	line_strip.drawing_mode = LineDrawingMode;
-	theApp.SetInputMode(&line_strip);
+	theApp->SetInputMode(&line_strip);
 }
 
 void SetCircles3pDrawing()
 {
 	line_strip.drawing_mode = CircleDrawingMode;
 	line_strip.circle_mode = ThreePointsCircleMode;
-	theApp.SetInputMode(&line_strip);
+	theApp->SetInputMode(&line_strip);
 }
 
 void SetCircles2pDrawing()
 {
 	line_strip.drawing_mode = CircleDrawingMode;
 	line_strip.circle_mode = CentreAndPointCircleMode;
-	theApp.SetInputMode(&line_strip);
+	theApp->SetInputMode(&line_strip);
 }
 
 void SetCircle1pDrawing()
 {
 	line_strip.drawing_mode = CircleDrawingMode;
 	line_strip.circle_mode = CentreAndRadiusCircleMode;
-	theApp.SetInputMode(&line_strip);
+	theApp->SetInputMode(&line_strip);
 }
 
 void SetEllipseDrawing()
 {
 	line_strip.drawing_mode = EllipseDrawingMode;
-	theApp.SetInputMode(&line_strip);
+	theApp->SetInputMode(&line_strip);
 }
 
 void SetILineDrawing()
 {
 	line_strip.drawing_mode = ILineDrawingMode;
-	theApp.SetInputMode(&line_strip);
+	theApp->SetInputMode(&line_strip);
 }
 
 HeeksObj* NewPoint(const Point3d& p)
 {
-	HPoint* point = new HPoint(p, &theApp.current_color);
+	HPoint* point = new HPoint(p, &theApp->current_color);
 	return point;
 }
 
@@ -1536,24 +663,24 @@ bool HeeksObjHasEdit(const HeeksObj& object)
 	return false;
 }
 
-bp::tuple SketchGetStartPoint(CSketch &sketch)
+boost::python::tuple SketchGetStartPoint(CSketch &sketch)
 {
 	Point3d s(0.0, 0.0, 0.0);
 
 	HeeksObj* last_child = NULL;
 	HeeksObj* child = sketch.GetFirstChild();
 	child->GetStartPoint(s);
-	return bp::make_tuple(s.x, s.y, s.z);
+	return boost::python::make_tuple(s.x, s.y, s.z);
 }
 
-bp::tuple SketchGetEndPoint(CSketch &sketch)
+boost::python::tuple SketchGetEndPoint(CSketch &sketch)
 {
 	Point3d s(0.0, 0.0, 0.0);
 
 	HeeksObj* last_child = NULL;
 	HeeksObj* child = sketch.GetFirstChild();
 	child->GetEndPoint(s);
-	return bp::make_tuple(s.x, s.y, s.z);
+	return boost::python::make_tuple(s.x, s.y, s.z);
 }
 
 boost::python::list SketchSplit(CSketch& sketch) {
@@ -1589,35 +716,35 @@ double SketchGetCircleDiameter(CSketch& sketch)
 	return 0.0;
 }
 
-bp::tuple SketchGetCircleCentre(CSketch& sketch)
+boost::python::tuple SketchGetCircleCentre(CSketch& sketch)
 {
 	HeeksObj* span = sketch.GetFirstChild();
 	if (span == NULL)
-		return bp::make_tuple(NULL);
+		return boost::python::make_tuple(NULL);
 
 	if (span->GetType() == ArcType)
 	{
 		HArc* arc = (HArc*)span;
 		Point3d& C = arc->C;
-		return bp::make_tuple(C.x, C.y, C.z);
+		return boost::python::make_tuple(C.x, C.y, C.z);
 	}
 	else if (span->GetType() == CircleType)
 	{
 #if 0 // to do
 		HCircle* circle = (HCircle*)span;
 		const Point3d& C = circle->m_axis.Location();
-		return bp::make_tuple(C.X(), C.Y(), C.Z());
+		return boost::python::make_tuple(C.X(), C.Y(), C.Z());
 #endif
 	}
 
-	return bp::make_tuple(NULL);
+	return boost::python::make_tuple(NULL);
 }
 
 void SketchWriteDXF(CSketch& sketch, std::wstring filepath)
 {
 	std::list<HeeksObj*> objects;
 	objects.push_back(&sketch);
-	theApp.SaveDXFFile(objects, filepath.c_str());
+	theApp->SaveDXFFile(objects, filepath.c_str());
 }
 
 CCurve SketchGetCurve(CSketch& sketch)
@@ -1768,82 +895,22 @@ void DrawDeleteList(unsigned int display_list)
 	glDeleteLists(display_list, 1);
 }
 
-void AddProperty(Property* property)
-{
-	if (property_list)
-		property_list->push_back(property);
-}
-
-bp::object GetObjectFromId(int type, int id) {
+boost::python::object GetObjectFromId(int type, int id) {
 	// to do
 	// this returns a list with the object in, because that works
 	// but it should just return an object
 	boost::python::list olist;
-	HeeksObj* object = theApp.GetIDObject(type, id);
+	HeeksObj* object = theApp->GetIDObject(type, id);
 	if (object != NULL)
 	{
 		AddObjectToPythonList(object, olist);
-		if (bp::len(olist) > 0)
+		if (boost::python::len(olist) > 0)
 		{
 			return olist[0];
 		}
 	}
 
 	return boost::python::object(); // None
-}
-
-static std::map<std::string, PyObject*> xml_read_callbacks;
-static std::map<std::string, int> custom_object_type_map;
-static int next_available_custom_object_type = ObjectMaximumType;
-
-HeeksObj* CreatePyObjectWithName(const std::string& name)
-{
-	std::map< std::string, PyObject* >::iterator FindIt = xml_read_callbacks.find(name);
-	HeeksObj* object = NULL;
-	if (FindIt == xml_read_callbacks.end())
-		return NULL;
-
-	PyObject* python_callback = FindIt->second;
-
-	//PyObject *main_module, *globals;
-	BeforePythonCall(&main_module, &globals);
-
-	// Execute the python function
-	PyObject* result = PyObject_CallFunction(python_callback, 0);
-	if (result)
-	{
-		object = bp::extract<HeeksObj*>(result);
-	}
-
-	AfterPythonCall(main_module);
-
-	return object;
-}
-
-int RegisterObjectType(std::wstring name, PyObject *callback)
-{
-	// registers the Create function to be called in python from CApp::CreateObjectOfType
-	// returns the int type stored by CApp
-	const char* name_c = Ttc(name.c_str());
-
-	if (PyCallable_Check(callback))
-	{
-		// add an entry in map from name to 
-		xml_read_callbacks.insert(std::make_pair(name_c, callback));
-	}
-
-	std::map<std::string, int>::iterator FindIt = custom_object_type_map.find(name_c);
-
-	if (custom_object_type_map.find(name_c) == custom_object_type_map.end())
-	{
-		// not in map
-		int value = next_available_custom_object_type;
-		custom_object_type_map.insert(std::make_pair(std::string(name_c), value));
-		next_available_custom_object_type++;
-		return value;
-	}
-
-	return FindIt->second;
 }
 
 void SetXmlValue(const std::wstring &name, PyObject* value)
@@ -1872,7 +939,7 @@ void SetXmlValue(const std::wstring &name, PyObject* value)
 	else
 	{
 		PyErr_SetString(PyExc_TypeError, "invalid value type");
-		bp::throw_error_already_set();
+		boost::python::throw_error_already_set();
 	}
 }
 
@@ -1890,15 +957,15 @@ void EndXmlChild()
 	if (BaseObject::m_cur_element)BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
 }
 
-bp::object GetXmlObject() {
+boost::python::object GetXmlObject() {
 	if (BaseObject::m_cur_element)
 	{
-		HeeksObj* object = theApp.ReadXMLElement(BaseObject::m_cur_element);
+		HeeksObj* object = theApp->ReadXMLElement(BaseObject::m_cur_element);
 		if (object != NULL)
 		{
 			boost::python::list olist;
 			AddObjectToPythonList(object, olist);
-			if (bp::len(olist) > 0)
+			if (boost::python::len(olist) > 0)
 			{
 				return olist[0];
 			}
@@ -1989,7 +1056,7 @@ void ReturnFromXmlChild()
 	if(BaseObject::m_cur_element)BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
 }
 
-bp::object GetFirstXmlChild()
+boost::python::object GetFirstXmlChild()
 {
 	if (BaseObject::m_cur_element)
 	{
@@ -1997,19 +1064,19 @@ bp::object GetFirstXmlChild()
 		if (first_child == NULL)
 		{
 			// leave current object as it is, but return None
-			return bp::object(); // None
+			return boost::python::object(); // None
 		}
 		else
 		{
 			// set current to the first child and return it
 			BaseObject::m_cur_element = first_child;
-			return bp::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
+			return boost::python::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
 		}
 	}
-	return bp::object(); // None
+	return boost::python::object(); // None
 }
 
-bp::object GetNextXmlChild()
+boost::python::object GetNextXmlChild()
 {
 	if (BaseObject::m_cur_element)
 	{
@@ -2018,21 +1085,21 @@ bp::object GetNextXmlChild()
 		{
 			// set current element to be the parent, but return None
 			BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
-			return bp::object(); // None
+			return boost::python::object(); // None
 		}
 		else
 		{
 			// set current to the next sibling and return it
 			BaseObject::m_cur_element = next_sibling;
-			return bp::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
+			return boost::python::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
 		}
 	}
-	return bp::object(); // None
+	return boost::python::object(); // None
 }
 
 void OpenXmlFile(const std::wstring &filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL)
 {
-	theApp.OpenXMLFile(filepath.c_str(), paste_into, paste_before, true);
+	theApp->OpenXMLFile(filepath.c_str(), paste_into, paste_before, true);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(OpenXMLFileOverloads, OpenXmlFile, 1, 3)
@@ -2103,7 +1170,7 @@ void StlSolidWriteSTL(CStlSolid& solid, double tolerance, std::wstring filepath)
 {
 	std::list<HeeksObj*> list;
 	list.push_back(&solid);
-	theApp.SaveSTLFileAscii(list, filepath.c_str(), tolerance);
+	theApp->SaveSTLFileAscii(list, filepath.c_str(), tolerance);
 }
 
 static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, const HeeksColor* color)
@@ -2118,12 +1185,12 @@ static boost::shared_ptr<PropertyStringReadOnly> initPropertyStringReadOnly(cons
 
 static boost::shared_ptr<HPoint> initHPoint(const Point3d& p)
 {
-	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp.current_color));
+	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp->current_color));
 }
 
 boost::python::list GetSelectedObjects() {
 	boost::python::list slist;
-	for (std::list<HeeksObj *>::iterator It = theApp.m_marked_list->list().begin(); It != theApp.m_marked_list->list().end(); It++)
+	for (std::list<HeeksObj *>::iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++)
 	{
 		HeeksObj* object = *It;
 		AddObjectToPythonList(object, slist);
@@ -2134,7 +1201,7 @@ boost::python::list GetSelectedObjects() {
 boost::python::list GetSelectionProperties()
 {
 	std::list<Property *> list;
-	theApp.m_marked_list->GetProperties(&list);
+	theApp->m_marked_list->GetProperties(&list);
 	boost::python::list return_list;
 	for (std::list<Property *>::iterator It = list.begin(); It != list.end(); It++)
 	{
@@ -2148,12 +1215,12 @@ boost::python::list GetSelectionProperties()
 
 unsigned int GetNumSelected()
 {
-	return theApp.m_marked_list->list().size();
+	return theApp->m_marked_list->list().size();
 }
 
 boost::python::list GetObjects() {
 	boost::python::list olist;
-	for (HeeksObj *object = theApp.GetFirstChild(); object; object = theApp.GetNextChild())
+	for (HeeksObj *object = theApp->GetFirstChild(); object; object = theApp->GetNextChild())
 	{
 		AddObjectToPythonList(object, olist);
 	}
@@ -2165,7 +1232,7 @@ boost::python::list GetClickedObjects(int x, int y) {
 	// for context menu, we want one object of each type, including child objects, if there are more than one the smae type, we want the one nearest to the camera
 
 	MarkedObjectOneOfEach marked_object;
-	theApp.FindMarkedObject(IPoint(x, y), &marked_object);
+	theApp->FindMarkedObject(IPoint(x, y), &marked_object);
 
 	std::list<MarkedObject*> stack;
 	stack.push_back(&marked_object);
@@ -2224,12 +1291,12 @@ boost::python::list GetClickedObjects(int x, int y) {
 
 bool ObjectMarked(HeeksObj* object)
 {
-	return theApp.m_marked_list->ObjectMarked(object);
+	return theApp->m_marked_list->ObjectMarked(object);
 }
 
 void Select(HeeksObj* object, bool call_OnChanged = true)
 {
-	theApp.m_marked_list->Add(object, call_OnChanged);
+	theApp->m_marked_list->Add(object, call_OnChanged);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(SelectOverloads, Select, 1, 2)
@@ -2237,77 +1304,77 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(SelectOverloads, Select, 1, 2)
 
 void Unselect(HeeksObj* object, bool call_OnChanged)
 {
-	theApp.m_marked_list->Remove(object, call_OnChanged);
+	theApp->m_marked_list->Remove(object, call_OnChanged);
 }
 
 void ClearSelection(bool call_OnChanged)
 {
-	theApp.m_marked_list->Clear(call_OnChanged);
+	theApp->m_marked_list->Clear(call_OnChanged);
 }
 
 int PickObjects(const std::wstring& str, long marking_filter, bool just_one)
 {
-	return theApp.PickObjects(str.c_str(), marking_filter, just_one);
+	return theApp->PickObjects(str.c_str(), marking_filter, just_one);
 }
 
 double GetViewUnits()
 {
-	return theApp.m_view_units;
+	return theApp->m_view_units;
 }
 
 void SetViewUnits(double units)
 {
-	theApp.m_view_units = units;
+	theApp->m_view_units = units;
 }
 
 void StartHistory()
 {
-	theApp.StartHistory();
+	theApp->StartHistory();
 }
 
 void EndHistory()
 {
-	theApp.EndHistory();
+	theApp->EndHistory();
 }
 
 void ClearHistory()
 {
-	theApp.ClearHistory();
+	theApp->ClearHistory();
 }
 
 bool IsModified()
 {
-	return theApp.IsModified();
+	return theApp->IsModified();
 }
 
 void SetLikeNewFile()
 {
-	theApp.SetLikeNewFile();
+	theApp->SetLikeNewFile();
 }
 
 void RollBack()
 {
-	theApp.RollBack();
+	theApp->RollBack();
 }
 
 void RollForward()
 {
-	theApp.RollForward();
+	theApp->RollForward();
 }
 
 void DeleteUndoably(HeeksObj *object)
 {
-	theApp.DeleteUndoably(object);
+	theApp->DeleteUndoably(object);
 }
 
 void CopyUndoably(HeeksObj* object, HeeksObj* copy_object)
 {
-	theApp.CopyUndoably(object, copy_object);
+	theApp->CopyUndoably(object, copy_object);
 }
 
 void AddUndoably(HeeksObj *object, HeeksObj* owner = NULL, HeeksObj* prev_object = NULL)
 {
-	theApp.AddUndoably(object, owner, prev_object);
+	theApp->AddUndoably(object, owner, prev_object);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(AddUndoablyOverloads, AddUndoably, 1, 3)
@@ -2316,7 +1383,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(AddUndoablyOverloads, AddUndoably, 1, 3)
 
 void DoUndoable(Undoable* undoable)
 {
-	theApp.DoUndoable(undoable);
+	theApp->DoUndoable(undoable);
 }
 
 bool ShiftSelect(HeeksObj *object, bool control_down)
@@ -2333,7 +1400,7 @@ bool ShiftSelect(HeeksObj *object, bool control_down)
 		sibling_list.push_back(sibling);
 	}
 	// find most recently marked sibling
-	std::list<HeeksObj*> &marked = theApp.m_marked_list->list();
+	std::list<HeeksObj*> &marked = theApp->m_marked_list->list();
 	HeeksObj* recently_marked_sibling = NULL;
 	bool recent_first = false;
 	for (std::list<HeeksObj*>::reverse_iterator It = marked.rbegin(); It != marked.rend(); It++)
@@ -2350,7 +1417,7 @@ bool ShiftSelect(HeeksObj *object, bool control_down)
 	{
 		if (!control_down)
 		{
-			theApp.m_marked_list->Clear(false);
+			theApp->m_marked_list->Clear(false);
 		}
 
 		bool marking = false;
@@ -2371,30 +1438,30 @@ bool ShiftSelect(HeeksObj *object, bool control_down)
 			}
 		}
 
-		theApp.m_marked_list->Add(list_to_mark, true);
+		theApp->m_marked_list->Add(list_to_mark, true);
 	}
 	else
 	{
 		if (control_down)
 		{
-			if (theApp.m_marked_list->ObjectMarked(object))
+			if (theApp->m_marked_list->ObjectMarked(object))
 			{
-				theApp.m_marked_list->Remove(object, true);
+				theApp->m_marked_list->Remove(object, true);
 			}
 			else{
-				theApp.m_marked_list->Add(object, true);
+				theApp->m_marked_list->Add(object, true);
 			}
 		}
 		else
 		{
-			if (theApp.m_marked_list->ObjectMarked(object))
+			if (theApp->m_marked_list->ObjectMarked(object))
 			{
 				waiting_until_left_up = true;
 			}
 			else
 			{
-				theApp.m_marked_list->Clear(false);
-				theApp.m_marked_list->Add(object, true);
+				theApp->m_marked_list->Clear(false);
+				theApp->m_marked_list->Add(object, true);
 			}
 		}
 	}
@@ -2404,52 +1471,52 @@ bool ShiftSelect(HeeksObj *object, bool control_down)
 
 void ChangePropertyString(const std::wstring& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeString(value, property));
+	theApp->DoUndoable(new PropertyChangeString(value, property));
 }
 
 void ChangePropertyDouble(const double& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeDouble(value, property));
+	theApp->DoUndoable(new PropertyChangeDouble(value, property));
 }
 
 void ChangePropertyLength(const double& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeLength(value, property));
+	theApp->DoUndoable(new PropertyChangeLength(value, property));
 }
 
 void ChangePropertyInt(const int& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeInt(value, property));
+	theApp->DoUndoable(new PropertyChangeInt(value, property));
 }
 
 void ChangePropertyChoice(const int& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeChoice(value, property));
+	theApp->DoUndoable(new PropertyChangeChoice(value, property));
 }
 
 void ChangePropertyColor(const HeeksColor& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeColor(value, property));
+	theApp->DoUndoable(new PropertyChangeColor(value, property));
 }
 
 void ChangePropertyCheck(const bool& value, Property* property)
 {
-	theApp.DoUndoable(new PropertyChangeCheck(value, property));
+	theApp->DoUndoable(new PropertyChangeCheck(value, property));
 }
 
 CApp* GetApp()
 {
-	return &theApp;
+	return theApp;
 }
 
 HeeksObj* GetFirstChild()
 {
-	return theApp.GetFirstChild();
+	return theApp->GetFirstChild();
 }
 
 HeeksObj* GetNextChild()
 {
-	return theApp.GetNextChild();
+	return theApp->GetNextChild();
 }
 
 HeeksObj* ObjectGetOwner(HeeksObj* object)
@@ -2464,7 +1531,7 @@ void ObjectSetOwner(HeeksObj* object, HeeksObj* new_owner)
 
 double GetUnits()
 {
-	return theApp.m_view_units;
+	return theApp->m_view_units;
 }
 
 void PyIncref(PyObject* object)
@@ -2474,7 +1541,7 @@ void PyIncref(PyObject* object)
 
 int GetNextID(int id_group_type)
 {
-	return theApp.GetNextID(id_group_type);
+	return theApp->GetNextID(id_group_type);
 }
 
 bool GetDrawSelect()
@@ -2501,8 +1568,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 
 
 	BOOST_PYTHON_MODULE(cad) {
-		bp::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
-			.def(bp::init<int>())
+		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
+			.def(boost::python::init<int>())
 			.def("GetIDGroupType", &BaseObject::GetIDGroupType)
 			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
 			.def("GetTitle", &BaseObjectGetTitle)
@@ -2513,10 +1580,10 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetColor", &BaseObjectGetColor)
 			.def("AutoExpand", &BaseObject::AutoExpand)
 			.def("GetNumChildren", &BaseObject::GetNumChildren)
-			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("SetOwner", &ObjectSetOwner)
-			.def("GetFirstChild", &BaseObject::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
-			.def("GetNextChild", &BaseObject::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetFirstChild", &BaseObject::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
+			.def("GetNextChild", &BaseObject::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("GetChildren", &BaseObjectGetChildren)			
 			.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
 			.def("CanAdd", &HeeksObj::CanAdd)
@@ -2530,8 +1597,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("Add", &ObjListAdd)
 			;
 
-		bp::class_<HeeksObj, boost::noncopyable>("Object")
-			.def(bp::init<HeeksObj>())
+		boost::python::class_<HeeksObj, boost::noncopyable>("Object")
+			.def(boost::python::init<HeeksObj>())
 			.def("GetType", &HeeksObj::GetType)
 			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
 			.def("GetTypeString", HeeksObjGetTypeString)
@@ -2545,10 +1612,10 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetTitle", &HeeksObjGetTitle)
 			.def("AutoExpand", &HeeksObj::AutoExpand)
 			.def("GetNumChildren", &HeeksObj::GetNumChildren)
-			.def("GetOwner", &ObjectGetOwner, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("SetOwner", &ObjectSetOwner)
-			.def("GetFirstChild", &HeeksObj::GetFirstChild, bp::return_value_policy<bp::reference_existing_object>())
-			.def("GetNextChild", &HeeksObj::GetNextChild, bp::return_value_policy<bp::reference_existing_object>())
+			.def("GetFirstChild", &HeeksObj::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
+			.def("GetNextChild", &HeeksObj::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
@@ -2561,13 +1628,13 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)
 			.def("GetStartPoint", &HeeksObjGetStartPoint)
 			.def("GetEndPoint", &HeeksObjGetEndPoint)
-			.def("MakeACopy", &HeeksObj::MakeACopy, bp::return_value_policy<bp::reference_existing_object>())
+			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			;
 
-		bp::class_<HeeksColor>("Color")
-			.def(bp::init<HeeksColor>())
-			.def(bp::init<unsigned char, unsigned char, unsigned char>())
-			.def(bp::init<long>())
+		boost::python::class_<HeeksColor>("Color")
+			.def(boost::python::init<HeeksColor>())
+			.def(boost::python::init<unsigned char, unsigned char, unsigned char>())
+			.def(boost::python::init<long>())
 			.def_readwrite("red", &HeeksColor::red)
 			.def_readwrite("green", &HeeksColor::green)
 			.def_readwrite("blue", &HeeksColor::blue)
@@ -2575,8 +1642,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("SetGlColor", &HeeksColor::glColor)
 			;
 
-		bp::class_<PropertyWrap, boost::noncopyable >("Property")
-			.def(bp::init<int, std::wstring, HeeksObj*>())
+		boost::python::class_<PropertyWrap, boost::noncopyable >("Property")
+			.def(boost::python::init<int, std::wstring, HeeksObj*>())
 			.def("GetType", &Property::get_property_type)
 			.def("GetTitle", &PropertyGetShortString)
 			.def("GetString", &PropertyGetString)
@@ -2590,8 +1657,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetProperties", &PropertyGetProperties)
 			;
 
-		bp::class_<ObjList, bp::bases<HeeksObj>, boost::noncopyable>("ObjList")
-			.def(bp::init<ObjList>())
+		boost::python::class_<ObjList, boost::python::bases<HeeksObj>, boost::noncopyable>("ObjList")
+			.def(boost::python::init<ObjList>())
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
 			.def("ReadXml", &ObjListReadFromXML)
@@ -2599,16 +1666,16 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("CopyFrom", &ObjListCopyFrom)
 			;
 
-		bp::class_<IdNamedObj, bp::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
-			.def(bp::init<IdNamedObj>())
+		boost::python::class_<IdNamedObj, boost::python::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
+			.def(boost::python::init<IdNamedObj>())
 			;
 
-		bp::class_<IdNamedObjList, bp::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
-			.def(bp::init<IdNamedObjList>())
+		boost::python::class_<IdNamedObjList, boost::python::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
+			.def(boost::python::init<IdNamedObjList>())
 			;
 
-		bp::class_<CSketch, bp::bases<IdNamedObjList>, boost::noncopyable>("Sketch")
-			.def(bp::init<CSketch>())
+		boost::python::class_<CSketch, boost::python::bases<IdNamedObjList>, boost::noncopyable>("Sketch")
+			.def(boost::python::init<CSketch>())
 			.def("GetStartPoint", &SketchGetStartPoint)
 			.def("GetEndPoint", &SketchGetEndPoint)
 			.def("IsCircle", &CSketch::IsCircle)
@@ -2624,56 +1691,56 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetArea", &SketchGetArea)
 			;
 
-		bp::class_<HPoint, bp::bases<IdNamedObj>>("Point", boost::python::no_init)
-			.def("__init__", bp::make_constructor(&initHPoint))
+		boost::python::class_<HPoint, boost::python::bases<IdNamedObj>>("Point", boost::python::no_init)
+			.def("__init__", boost::python::make_constructor(&initHPoint))
 //			.def_readwrite("p", &HPoint::m_p)
 			;
 
-		bp::class_<CStlSolid, bp::bases<HeeksObj>>("StlSolid")
-			.def(bp::init<CStlSolid>())
-			.def("__init__", bp::make_constructor(&initStlSolid))
-			.def(bp::init<const std::wstring&>())// load a stl solid from a filepath
+		boost::python::class_<CStlSolid, boost::python::bases<HeeksObj>>("StlSolid")
+			.def(boost::python::init<CStlSolid>())
+			.def("__init__", boost::python::make_constructor(&initStlSolid))
+			.def(boost::python::init<const std::wstring&>())// load a stl solid from a filepath
 			.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
 			;
 
-		bp::class_<PropertyCheck, boost::noncopyable, bp::bases<Property>>("PropertyCheck", boost::python::no_init);
-		bp::class_<PropertyChoice, bp::bases<Property>>("PropertyChoice", boost::python::no_init);
-		bp::class_<PropertyColor, bp::bases<Property>>("PropertyColor", boost::python::no_init);
-		bp::class_<PropertyDouble, bp::bases<Property>>("PropertyDouble", boost::python::no_init);
-		bp::class_<PropertyDoubleScaled, bp::bases<Property>>("PropertyDoubleScaled", boost::python::no_init);
-		bp::class_<PropertyLengthScaled, bp::bases<PropertyDoubleScaled>>("PropertyLengthScaled", boost::python::no_init);
-		bp::class_<PropertyDoubleLimited, bp::bases<PropertyDouble>>("PropertyDoubleLimited", boost::python::no_init);
-		bp::class_<PropertyString, bp::bases<Property>>("PropertyString", boost::python::no_init);
-		bp::class_<PropertyStringReadOnly, bp::bases<Property>>("PropertyStringReadOnly", boost::python::no_init)
-			.def("__init__", bp::make_constructor(&initPropertyStringReadOnly))
+		boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property>>("PropertyCheck", boost::python::no_init);
+		boost::python::class_<PropertyChoice, boost::python::bases<Property>>("PropertyChoice", boost::python::no_init);
+		boost::python::class_<PropertyColor, boost::python::bases<Property>>("PropertyColor", boost::python::no_init);
+		boost::python::class_<PropertyDouble, boost::python::bases<Property>>("PropertyDouble", boost::python::no_init);
+		boost::python::class_<PropertyDoubleScaled, boost::python::bases<Property>>("PropertyDoubleScaled", boost::python::no_init);
+		boost::python::class_<PropertyLengthScaled, boost::python::bases<PropertyDoubleScaled>>("PropertyLengthScaled", boost::python::no_init);
+		boost::python::class_<PropertyDoubleLimited, boost::python::bases<PropertyDouble>>("PropertyDoubleLimited", boost::python::no_init);
+		boost::python::class_<PropertyString, boost::python::bases<Property>>("PropertyString", boost::python::no_init);
+		boost::python::class_<PropertyStringReadOnly, boost::python::bases<Property>>("PropertyStringReadOnly", boost::python::no_init)
+			.def("__init__", boost::python::make_constructor(&initPropertyStringReadOnly))
 			;
-		bp::class_<PropertyFile, bp::bases<PropertyString>>("PropertyFile", boost::python::no_init);
-		bp::class_<PropertyInt, bp::bases<Property>>("PropertyInt", boost::python::no_init);
-		bp::class_<PropertyLength, bp::bases<PropertyDouble>>("PropertyLength", boost::python::no_init);
-		bp::class_<PropertyLengthWithKillGLLists, bp::bases<PropertyLength>>("PropertyLengthWithKillGLLists", boost::python::no_init);
-		bp::class_<PropertyList, bp::bases<Property>>("PropertyList", boost::python::no_init);
-		bp::class_<PropertyObjectTitle, bp::bases<Property>>("PropertyObjectTitle", boost::python::no_init);
-		bp::class_<PropertyObjectColor, bp::bases<Property>>("PropertyObjectColor", boost::python::no_init);
+		boost::python::class_<PropertyFile, boost::python::bases<PropertyString>>("PropertyFile", boost::python::no_init);
+		boost::python::class_<PropertyInt, boost::python::bases<Property>>("PropertyInt", boost::python::no_init);
+		boost::python::class_<PropertyLength, boost::python::bases<PropertyDouble>>("PropertyLength", boost::python::no_init);
+		boost::python::class_<PropertyLengthWithKillGLLists, boost::python::bases<PropertyLength>>("PropertyLengthWithKillGLLists", boost::python::no_init);
+		boost::python::class_<PropertyList, boost::python::bases<Property>>("PropertyList", boost::python::no_init);
+		boost::python::class_<PropertyObjectTitle, boost::python::bases<Property>>("PropertyObjectTitle", boost::python::no_init);
+		boost::python::class_<PropertyObjectColor, boost::python::bases<Property>>("PropertyObjectColor", boost::python::no_init);
 
-		bp::class_<Undoable, boost::noncopyable>("Undoable", boost::python::no_init);
-		bp::class_<PropertyChangeString, bp::bases<Undoable>>("PropertyChangeString", boost::python::no_init).def(bp::init<const std::wstring&, Property*>());
-		bp::class_<PropertyChangeDouble, bp::bases<Undoable>>("PropertyChangeDouble", boost::python::no_init).def(bp::init<const double&, Property*>());
-		bp::class_<PropertyChangeLength, bp::bases<Undoable>>("PropertyChangeLength", boost::python::no_init).def(bp::init<const double&, Property*>());
-		bp::class_<PropertyChangeInt, bp::bases<Undoable>>("PropertyChangeInt", boost::python::no_init).def(bp::init<const int&, Property*>());
-		bp::class_<PropertyChangeColor, bp::bases<Undoable>>("PropertyChangeColor", boost::python::no_init).def(bp::init<const HeeksColor&, Property*>());
-		bp::class_<PropertyChangeChoice, bp::bases<Undoable>>("PropertyChangeChoice", boost::python::no_init).def(bp::init<const int&, Property*>());
-		bp::class_<PropertyChangeCheck, bp::bases<Undoable>>("PropertyChangeCheck", boost::python::no_init).def(bp::init<const bool&, Property*>());
+		boost::python::class_<Undoable, boost::noncopyable>("Undoable", boost::python::no_init);
+		boost::python::class_<PropertyChangeString, boost::python::bases<Undoable>>("PropertyChangeString", boost::python::no_init).def(boost::python::init<const std::wstring&, Property*>());
+		boost::python::class_<PropertyChangeDouble, boost::python::bases<Undoable>>("PropertyChangeDouble", boost::python::no_init).def(boost::python::init<const double&, Property*>());
+		boost::python::class_<PropertyChangeLength, boost::python::bases<Undoable>>("PropertyChangeLength", boost::python::no_init).def(boost::python::init<const double&, Property*>());
+		boost::python::class_<PropertyChangeInt, boost::python::bases<Undoable>>("PropertyChangeInt", boost::python::no_init).def(boost::python::init<const int&, Property*>());
+		boost::python::class_<PropertyChangeColor, boost::python::bases<Undoable>>("PropertyChangeColor", boost::python::no_init).def(boost::python::init<const HeeksColor&, Property*>());
+		boost::python::class_<PropertyChangeChoice, boost::python::bases<Undoable>>("PropertyChangeChoice", boost::python::no_init).def(boost::python::init<const int&, Property*>());
+		boost::python::class_<PropertyChangeCheck, boost::python::bases<Undoable>>("PropertyChangeCheck", boost::python::no_init).def(boost::python::init<const bool&, Property*>());
 
-		bp::class_<CApp, bp::bases<ObjList>, boost::noncopyable>("App")
-			.def(bp::init<CApp>())
+		boost::python::class_<CApp, boost::python::bases<ObjList>, boost::noncopyable>("App")
+			.def(boost::python::init<CApp>())
 			;
 
-		bp::class_<CViewPoint>("ViewPoint", boost::python::no_init)
+		boost::python::class_<CViewPoint>("ViewPoint", boost::python::no_init)
 			.def("SetView", &CViewPoint::SetView)
 			;
 
-		bp::class_<CViewport>("Viewport")
-			.def(bp::init<int, int>())
+		boost::python::class_<CViewport>("Viewport")
+			.def(boost::python::init<int, int>())
 			.def("glCommands", &CViewport::glCommands)
 			.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
 			.def("OnMouseEvent", &CViewport::OnMouseEvent)
@@ -2687,8 +1754,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def_readwrite("m_view_point", &CViewport::m_view_point)
 			;
 
-		bp::class_<MouseEvent>("MouseEvent")
-			.def(bp::init<MouseEvent>())
+		boost::python::class_<MouseEvent>("MouseEvent")
+			.def(boost::python::init<MouseEvent>())
 			.def_readwrite("m_event_type", &MouseEvent::m_event_type)
 			.def_readwrite("m_x", &MouseEvent::m_x)
 			.def_readwrite("m_y", &MouseEvent::m_y)
@@ -2704,11 +1771,11 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def_readwrite("m_linesPerAction", &MouseEvent::m_linesPerAction)
 			;
 
-		bp::class_<ObserverWrap, boost::noncopyable >("Observer")
-			.def(bp::init<ObserverWrap>())
+		boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
+			.def(boost::python::init<ObserverWrap>())
 			;
 
-		bp::enum_<KeyCode>("KeyCode")
+		boost::python::enum_<KeyCode>("KeyCode")
 			.value("None", K_NONE)
 			.value("ControlA", K_CONTROL_A)
 			.value("ControlB", K_CONTROL_B)
@@ -2862,18 +1929,18 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.value("Special20", K_SPECIAL20)
 			;
 
-		bp::class_<KeyEvent>("KeyEvent")
-			.def(bp::init<KeyEvent>())
+		boost::python::class_<KeyEvent>("KeyEvent")
+			.def(boost::python::init<KeyEvent>())
 			.def_readwrite("m_key_code", &KeyEvent::m_key_code)
 			;
 
-		bp::class_<InputModeWrap, boost::noncopyable >("InputMode")
-			.def(bp::init<InputModeWrap>())
+		boost::python::class_<InputModeWrap, boost::noncopyable >("InputMode")
+			.def(boost::python::init<InputModeWrap>())
 			.def("OnKeyDown", &CInputMode::OnKeyDown)
 			.def("OnKeyUp", &CInputMode::OnKeyUp)
 			;
 
-		bp::enum_<DigitizeType>("DigitizeType")
+		boost::python::enum_<DigitizeType>("DigitizeType")
 			.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
 			.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
 			.value("DIGITIZE_INTER_TYPE", DigitizeIntersType)
@@ -2886,7 +1953,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
 			;
 
-		bp::enum_<SketchOrderType>("SketchOrderType")
+		boost::python::enum_<SketchOrderType>("SketchOrderType")
 			.value("SketchOrderTypeUnknown", SketchOrderTypeUnknown)
 			.value("SketchOrderTypeEmpty", SketchOrderTypeEmpty)
 			.value("SketchOrderTypeOpen", SketchOrderTypeOpen)
@@ -2900,135 +1967,134 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.value("MaxSketchOrderTypes", MaxSketchOrderTypes)
 			;
 
-		bp::class_<DigitizedPoint>("DigitizedPoint")
-			.def(bp::init<DigitizedPoint>())
+		boost::python::class_<DigitizedPoint>("DigitizedPoint")
+			.def(boost::python::init<DigitizedPoint>())
 			.def_readwrite("point", &DigitizedPoint::m_point)
 			.def_readwrite("type", &DigitizedPoint::m_type)
 			;
 
-		bp::class_<DrawingWrap, bp::bases<CInputMode>, boost::noncopyable >("Drawing")
-			.def(bp::init<DrawingWrap>())
+		boost::python::class_<DrawingWrap, boost::python::bases<CInputMode>, boost::noncopyable >("Drawing")
+			.def(boost::python::init<DrawingWrap>())
 			.def("AddPoint", &Drawing::AddPoint)
 			.def("CalculateItem", &DrawingWrap::calculate_item)
 			.def("IsAnAddLevel", &DrawingWrap::is_an_add_level)
 			.def("NumberOfSteps", &DrawingWrap::number_of_steps)
-			.def("TempObject", &DrawingWrap::TempObject, bp::return_value_policy<bp::reference_existing_object>())
+			.def("TempObject", &DrawingWrap::TempObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("ClearObjectsMade", &DrawingWrap::ClearObjectsMade)
 			.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
 			;
 
-		bp::def("OnExit", OnExit);
-		bp::def("Reset", CadReset);
-		bp::def("OpenFile", CadOpenFile);
-		bp::def("Import", CadImport);
-		bp::def("SaveFile", CadSaveFile);
-		bp::def("SaveObjects", SaveObjects);		
-		bp::def("DrawTriangle", &DrawTriangle);
-		bp::def("DrawLine", &DrawLine);
-		bp::def("DrawColor", &DrawColor);
-		bp::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
-		bp::def("BeginTriangles", &BeginTriangles);
-		bp::def("BeginLines", &BeginLines);
-		bp::def("EndLinesOrTriangles", &EndLinesOrTriangles);
-		bp::def("GlVertex", &glVertexPoint3d);
-		bp::def("GlLineWidth", &GlLineWidth);
-		bp::def("DrawNewList", &DrawNewList);
-		bp::def("DrawEndList", &DrawEndList);
-		bp::def("DrawCallList", &DrawCallList); 
-		bp::def("DrawDeleteList", &DrawDeleteList);
-		bp::def("AddProperty", AddProperty);
-		bp::def("GetObjectFromId", &GetObjectFromId);
-		bp::def("RegisterObjectType", RegisterObjectType);
-		bp::def("SetXmlValue", SetXmlValue);
-		bp::def("BeginXmlChild", BeginXmlChild);
-		bp::def("EndXmlChild", EndXmlChild);
-		bp::def("GetXmlObject", &GetXmlObject);
-		bp::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((bp::arg("name"), bp::arg("default_value") = std::wstring(L""))));
-		bp::def("GetXmlText", &GetXmlText);
-		bp::def("SetXmlText", &SetXmlText);		
-		bp::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((bp::arg("name"), bp::arg("default_value") = false)));
-		bp::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((bp::arg("name"), bp::arg("default_value") = 0)));
-		bp::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((bp::arg("name"), bp::arg("default_value") = 0.0)));
-		bp::def("ReturnFromXmlChild", ReturnFromXmlChild);
-		bp::def("GetFirstXmlChild", GetFirstXmlChild);
-		bp::def("GetNextXmlChild", GetNextXmlChild);
-		bp::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((bp::arg("filepath"), bp::arg("paste_into") = NULL, bp::arg("paste_before") = NULL)));
-		bp::def("RegisterObserver", RegisterObserver);
-		bp::def("RegisterOnRepaint", RegisterOnRepaint);
-		bp::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((bp::arg("soon") = false)));
-		bp::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
-		bp::def("SetContextMenuCallback", SetContextMenuCallback);
-		bp::def("GetResFolder", GetResFolder);
-		bp::def("SetResFolder", SetResFolder);
-		bp::def("MessageBox", CadMessageBox);
-		bp::def("GetSelectedObjects", GetSelectedObjects);
-		bp::def("GetNumSelected", GetNumSelected);
-		bp::def("GetObjects", GetObjects);
-		bp::def("GetClickedObjects", GetClickedObjects);
-		bp::def("ObjectMarked", ObjectMarked);
-		bp::def("Select", &Select, SelectOverloads(	(bp::arg("object"),	bp::arg("CallOnChanged") = NULL)));
-		bp::def("Unselect", Unselect);
-		bp::def("ClearSelection", ClearSelection);
-		bp::def("GetSelectionProperties", GetSelectionProperties);
-		bp::def("PickObjects", PickObjects);
-		bp::def("GetViewUnits", GetViewUnits);
-		bp::def("SetViewUnits", SetViewUnits);
-		bp::def("GetApp", GetApp, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("StartHistory", StartHistory);
-		bp::def("EndHistory", EndHistory);
-		bp::def("ClearHistory", ClearHistory);
-		bp::def("IsModified", IsModified);
-		bp::def("SetLikeNewFile", SetLikeNewFile);
-		bp::def("RollBack", RollBack);
-		bp::def("RollForward", RollForward);
-		bp::def("DeleteUndoably", DeleteUndoably);
-		bp::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((bp::arg("object"), bp::arg("owner") = NULL, bp::arg("prev_object") = NULL)));
-		bp::def("CopyUndoably", CopyUndoably);
-		bp::def("DoUndoable", DoUndoable);
-		bp::def("ShiftSelect", ShiftSelect);
-		bp::def("ChangePropertyString", ChangePropertyString);
-		bp::def("ChangePropertyDouble", ChangePropertyDouble);
-		bp::def("ChangePropertyLength", ChangePropertyLength);
-		bp::def("ChangePropertyInt", ChangePropertyInt);
-		bp::def("ChangePropertyChoice", ChangePropertyChoice);
-		bp::def("ChangePropertyColor", ChangePropertyColor);
-		bp::def("ChangePropertyCheck", ChangePropertyCheck);
-		bp::def("GetUnits", GetUnits);
-		bp::def("SetCallbackForGetLines", SetCallbackForGetLines);
-		bp::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
-		bp::def("GetSelectMode", GetSelectMode, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("GetMagnification", GetMagnification, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("GetViewRotating", GetViewRotating, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("GetViewZooming", GetViewZooming, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("GetViewPanning", GetViewPanning, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("SetInputMode", SetInputMode);
-		bp::def("GetInputMode", GetInputMode, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("SetLineArcDrawing", SetLineArcDrawing);
-		bp::def("SetCircles3pDrawing", SetCircles3pDrawing);
-		bp::def("SetCircles2pDrawing", SetCircles2pDrawing);
-		bp::def("SetCircle1pDrawing", SetCircle1pDrawing);
-		bp::def("SetEllipseDrawing", SetEllipseDrawing);
-		bp::def("SetILineDrawing", SetILineDrawing);
-		bp::def("NewPoint", NewPoint, bp::return_value_policy<bp::reference_existing_object>());
-		bp::def("PyIncref", PyIncref);
-		bp::def("GetNextID", GetNextID);
-		bp::def("GetDrawSelect", GetDrawSelect);
-		bp::def("GetDrawMarked", GetDrawMarked);
-		bp::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
-		bp::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
-		bp::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
-		bp::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
-		bp::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
-		bp::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
-		bp::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_DOUBLE") = (int)DoublePropertyType;
-		bp::scope().attr("PROPERTY_TYPE_LENGTH") = (int)LengthPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_INT") = (int)IntPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_CHOICE") = (int)ChoicePropertyType;
-		bp::scope().attr("PROPERTY_TYPE_COLOR") = (int)ColorPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
-		bp::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
-		bp::scope().attr("MARKING_FILTER_SKETCH_GROUP") = (int)MARKING_FILTER_SKETCH_GROUP;
+		boost::python::def("OnExit", OnExit);
+		boost::python::def("Reset", CadReset);
+		boost::python::def("OpenFile", CadOpenFile);
+		boost::python::def("Import", CadImport);
+		boost::python::def("SaveFile", CadSaveFile);
+		boost::python::def("SaveObjects", SaveObjects);		
+		boost::python::def("DrawTriangle", &DrawTriangle);
+		boost::python::def("DrawLine", &DrawLine);
+		boost::python::def("DrawColor", &DrawColor);
+		boost::python::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
+		boost::python::def("BeginTriangles", &BeginTriangles);
+		boost::python::def("BeginLines", &BeginLines);
+		boost::python::def("EndLinesOrTriangles", &EndLinesOrTriangles);
+		boost::python::def("GlVertex", &glVertexPoint3d);
+		boost::python::def("GlLineWidth", &GlLineWidth);
+		boost::python::def("DrawNewList", &DrawNewList);
+		boost::python::def("DrawEndList", &DrawEndList);
+		boost::python::def("DrawCallList", &DrawCallList); 
+		boost::python::def("DrawDeleteList", &DrawDeleteList);
+		boost::python::def("AddProperty", AddProperty);
+		boost::python::def("GetObjectFromId", &GetObjectFromId);
+		boost::python::def("RegisterObjectType", RegisterObjectType);
+		boost::python::def("SetXmlValue", SetXmlValue);
+		boost::python::def("BeginXmlChild", BeginXmlChild);
+		boost::python::def("EndXmlChild", EndXmlChild);
+		boost::python::def("GetXmlObject", &GetXmlObject);
+		boost::python::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((boost::python::arg("name"), boost::python::arg("default_value") = std::wstring(L""))));
+		boost::python::def("GetXmlText", &GetXmlText);
+		boost::python::def("SetXmlText", &SetXmlText);		
+		boost::python::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((boost::python::arg("name"), boost::python::arg("default_value") = false)));
+		boost::python::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0)));
+		boost::python::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0.0)));
+		boost::python::def("ReturnFromXmlChild", ReturnFromXmlChild);
+		boost::python::def("GetFirstXmlChild", GetFirstXmlChild);
+		boost::python::def("GetNextXmlChild", GetNextXmlChild);
+		boost::python::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL, boost::python::arg("paste_before") = NULL)));
+		boost::python::def("RegisterObserver", RegisterObserver);
+		boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
+		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
+		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
+		boost::python::def("SetContextMenuCallback", SetContextMenuCallback);
+		boost::python::def("GetResFolder", GetResFolder);
+		boost::python::def("SetResFolder", SetResFolder);
+		boost::python::def("MessageBox", CadMessageBox);
+		boost::python::def("GetSelectedObjects", GetSelectedObjects);
+		boost::python::def("GetNumSelected", GetNumSelected);
+		boost::python::def("GetObjects", GetObjects);
+		boost::python::def("GetClickedObjects", GetClickedObjects);
+		boost::python::def("ObjectMarked", ObjectMarked);
+		boost::python::def("Select", &Select, SelectOverloads(	(boost::python::arg("object"),	boost::python::arg("CallOnChanged") = NULL)));
+		boost::python::def("Unselect", Unselect);
+		boost::python::def("ClearSelection", ClearSelection);
+		boost::python::def("GetSelectionProperties", GetSelectionProperties);
+		boost::python::def("PickObjects", PickObjects);
+		boost::python::def("GetViewUnits", GetViewUnits);
+		boost::python::def("SetViewUnits", SetViewUnits);
+		boost::python::def("GetApp", GetApp, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("StartHistory", StartHistory);
+		boost::python::def("EndHistory", EndHistory);
+		boost::python::def("ClearHistory", ClearHistory);
+		boost::python::def("IsModified", IsModified);
+		boost::python::def("SetLikeNewFile", SetLikeNewFile);
+		boost::python::def("RollBack", RollBack);
+		boost::python::def("RollForward", RollForward);
+		boost::python::def("DeleteUndoably", DeleteUndoably);
+		boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
+		boost::python::def("CopyUndoably", CopyUndoably);
+		boost::python::def("DoUndoable", DoUndoable);
+		boost::python::def("ShiftSelect", ShiftSelect);
+		boost::python::def("ChangePropertyString", ChangePropertyString);
+		boost::python::def("ChangePropertyDouble", ChangePropertyDouble);
+		boost::python::def("ChangePropertyLength", ChangePropertyLength);
+		boost::python::def("ChangePropertyInt", ChangePropertyInt);
+		boost::python::def("ChangePropertyChoice", ChangePropertyChoice);
+		boost::python::def("ChangePropertyColor", ChangePropertyColor);
+		boost::python::def("ChangePropertyCheck", ChangePropertyCheck);
+		boost::python::def("GetUnits", GetUnits);
+		boost::python::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
+		boost::python::def("GetSelectMode", GetSelectMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("GetMagnification", GetMagnification, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("GetViewRotating", GetViewRotating, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("GetViewZooming", GetViewZooming, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("GetViewPanning", GetViewPanning, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("SetInputMode", SetInputMode);
+		boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
+		boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
+		boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
+		boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
+		boost::python::def("SetEllipseDrawing", SetEllipseDrawing);
+		boost::python::def("SetILineDrawing", SetILineDrawing);
+		boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("PyIncref", PyIncref);
+		boost::python::def("GetNextID", GetNextID);
+		boost::python::def("GetDrawSelect", GetDrawSelect);
+		boost::python::def("GetDrawMarked", GetDrawMarked);
+		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
+		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
+		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
+		boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
+		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
+		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
+		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_DOUBLE") = (int)DoublePropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_LENGTH") = (int)LengthPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_INT") = (int)IntPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_CHOICE") = (int)ChoicePropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_COLOR") = (int)ColorPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
+		boost::python::scope().attr("MARKING_FILTER_SKETCH_GROUP") = (int)MARKING_FILTER_SKETCH_GROUP;
 	}

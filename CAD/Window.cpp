@@ -19,11 +19,11 @@ void WindowDragging::reset(void){
 void WindowDragging::OnMouse( MouseEvent& event ){
 	if(event.LeftDown()){
 		window_box.x = event.GetX();
-		window_box.y = theApp.m_current_viewport->GetViewportSize().GetHeight() - event.GetY();
+		window_box.y = theApp->m_current_viewport->GetViewportSize().GetHeight() - event.GetY();
 	}
 	else if(event.LeftUp()){
 		window_box.width = event.GetX() - window_box.x;
-		window_box.height = (theApp.m_current_viewport->GetViewportSize().GetHeight() - window_box.y) - event.GetY();
+		window_box.height = (theApp->m_current_viewport->GetViewportSize().GetHeight() - window_box.y) - event.GetY();
 		if(abs(window_box.width)<4)box_found = false;
 		else if(abs(window_box.height)<4)box_found = false;
 		else box_found = true;
@@ -31,6 +31,6 @@ void WindowDragging::OnMouse( MouseEvent& event ){
 	}
 	else if(event.Moving()){
 		window_box.width = event.GetX() - window_box.x;
-		window_box.height = (theApp.m_current_viewport->GetViewportSize().GetHeight() - window_box.y) - event.GetY();
+		window_box.height = (theApp->m_current_viewport->GetViewportSize().GetHeight() - window_box.y) - event.GetY();
 	}
 }

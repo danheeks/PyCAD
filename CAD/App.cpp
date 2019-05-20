@@ -35,7 +35,7 @@
 #include "CoordinateSystem.h"
 #include "HCircle.h"
 
-CApp theApp;
+CApp *theApp = new CApp;
 
 
 static unsigned int DecimalPlaces(const double value)
@@ -456,7 +456,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	char oldlocale[1000];
 	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
 
-	CSvgRead svgread(filepath, true, theApp.m_svg_unite);
+	CSvgRead svgread(filepath, true, theApp->m_svg_unite);
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
@@ -467,7 +467,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 
 	HeeksColor c(128, 128, 128);
 	CStlSolid* new_object = new CStlSolid(filepath, &c);
-	theApp.AddUndoably(new_object, NULL, NULL);
+	theApp->AddUndoably(new_object, NULL, NULL);
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
@@ -981,7 +981,7 @@ public:
 		if (!ofs)
 		{
 			std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
-			theApp.MessageBox(str.c_str());
+			theApp->MessageBox(str.c_str());
 			return;
 		}
 		ofs.imbue(std::locale("C"));

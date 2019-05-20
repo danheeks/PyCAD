@@ -38,6 +38,9 @@ class Object(cad.BaseObject):
             cad.ObjList.ReadXml(self)
         else:
             cad.Object.ReadXml(self)
+            
+    def WriteDefaultValues(self):
+        pass # gets called on ok from dialog
     
 class PyChoiceProperty(cad.Property):
     def __init__(self, title, value_name, choices, object, alternative_values = None):

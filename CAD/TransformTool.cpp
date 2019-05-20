@@ -25,12 +25,12 @@ const wchar_t* TransformTool::GetTitle(){
 
 void TransformTool::Run(bool redo){
 	object->Transform(modify_matrix);
-	theApp.WasModified(object);
+	theApp->WasModified(object);
 }
 
 void TransformTool::RollBack(){
 	object->Transform(revert_matrix);
-	theApp.WasModified(object);
+	theApp->WasModified(object);
 }
 
 TransformObjectsTool::TransformObjectsTool(const std::list<HeeksObj*> &list, const Matrix &t, const Matrix &i){
@@ -53,7 +53,7 @@ void TransformObjectsTool::Run(bool redo){
 		HeeksObj* object = *It;
 		object->Transform(modify_matrix);
 	}
-	theApp.WereModified(m_list);
+	theApp->WereModified(m_list);
 }
 
 void TransformObjectsTool::RollBack(){
@@ -62,5 +62,5 @@ void TransformObjectsTool::RollBack(){
 		HeeksObj* object = *It;
 		object->Transform(revert_matrix);
 	}
-	theApp.WereModified(m_list);
+	theApp->WereModified(m_list);
 }

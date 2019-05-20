@@ -34,19 +34,19 @@ CStlSolid::CStlSolid(const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge
 	m_title.assign(GetTypeString());
 }
 
-CStlSolid::CStlSolid() : m_color(theApp.current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
+CStlSolid::CStlSolid() : m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
 	m_title.assign(GetTypeString());
 }
 
 #ifdef UNICODE
 // constructor for the Boost Python interface
-CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp.current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
+CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
 	m_title.assign(GetTypeString());
 	read_from_file(filepath.c_str());
 
-	if(theApp.m_in_OpenFile && theApp.m_file_open_matrix)
+	if(theApp->m_in_OpenFile && theApp->m_file_open_matrix)
 	{
-		Transform(*theApp.m_file_open_matrix);
+		Transform(*theApp->m_file_open_matrix);
 	}
 }
 #endif
@@ -55,9 +55,9 @@ CStlSolid::CStlSolid(const wchar_t* filepath, const HeeksColor* col) :m_color(*c
 	m_title.assign(GetTypeString());
 	read_from_file(filepath);
 
-	if(theApp.m_in_OpenFile && theApp.m_file_open_matrix)
+	if(theApp->m_in_OpenFile && theApp->m_file_open_matrix)
 	{
-		Transform(*theApp.m_file_open_matrix);
+		Transform(*theApp->m_file_open_matrix);
 	}
 }
 
@@ -254,7 +254,7 @@ void CStlSolid::KillGLLists()
 
 const wchar_t* CStlSolid::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/stlsolid.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/stlsolid.png";
 	return iconpath.c_str();
 }
 
@@ -267,8 +267,8 @@ void CStlSolid::GetProperties(std::list<Property *> *list)
 }
 
 void CStlSolid::glCommands(bool select, bool marked, bool no_color){
-	bool draw_faces = (theApp.m_solid_view_mode == SolidViewFacesAndEdges || theApp.m_solid_view_mode == SolidViewFacesOnly);
-	bool draw_edges = (theApp.m_solid_view_mode == SolidViewFacesAndEdges || theApp.m_solid_view_mode == SolidViewEdgesOnly);
+	bool draw_faces = (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewFacesOnly);
+	bool draw_edges = (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewEdgesOnly);
 
 	if (draw_faces)
 	{
@@ -294,7 +294,7 @@ void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 			{
 				CStlTri &t = *It;
 				//SetPickingColor(i);
-				if (theApp.m_stl_solid_random_colors)
+				if (theApp->m_stl_solid_random_colors)
 				{
 					HeeksColor col(rand() >> 7, rand() >> 7, rand() >> 7);
 					Material(col).glMaterial(1.0);
@@ -361,7 +361,7 @@ void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 
 void CStlSolid::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
-	if (just_for_endof && theApp.m_stl_solid_random_colors)
+	if (just_for_endof && theApp->m_stl_solid_random_colors)
 	{
 		for (std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
 		{
@@ -531,11 +531,12 @@ void CStlSolid::AddTriangle(float* t)
 }
 
 
-void CStlSolid::SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction)
+bool CStlSolid::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)
 {
 	// set picked triangle
 	if (marked_object->GetNumCustomNames() > 0)
 	{
  		m_clicked_triangle = marked_object->GetCustomNames()[0];
 	}
+	return true; // click was handled by this object
 }

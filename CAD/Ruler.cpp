@@ -17,7 +17,7 @@ void RulerMark::glCommands(double units)
 		dpos *= 2.54; // position of the tenth of an inch, in mm
 	}
 
-	if(theApp.GetPixelScale() < 10)
+	if(theApp->GetPixelScale() < 10)
 	{
 		// draw a line
 		glBegin(GL_LINES);
@@ -57,7 +57,7 @@ void RulerMark::glCommands(double units)
 		glPushMatrix();
 		glTranslated(dpos + half_width, -length + 2.05, 0.0);
 		glColor4ub(0, 0, 0, 255);
-		theApp.render_text(str.c_str(), false);
+		theApp->render_text(str.c_str(), false);
 		glPopMatrix();
 	}
 	else if(pos % 10 == 0)
@@ -66,10 +66,10 @@ void RulerMark::glCommands(double units)
 		to do
 		float text_width, text_height;
 		std::wstring str = std::wstring::Format(L"%d", pos/10);
-		if(!theApp.get_text_size(str, &text_width, &text_height))return;
+		if(!theApp->get_text_size(str, &text_width, &text_height))return;
 		glPushMatrix();
 		glTranslated(dpos - half_width - text_width, -length + 2.05, 0.0);
-		theApp.render_text(str, false);
+		theApp->render_text(str, false);
 		glPopMatrix();
 #endif
 	}
@@ -95,7 +95,7 @@ void HRuler::GetFourCorners(Point3d *point)
 
 double HRuler::GetUnits()
 {
-	if(m_use_view_units)return theApp.m_view_units;
+	if(m_use_view_units)return theApp->m_view_units;
 	return m_units;
 }
 
@@ -186,7 +186,7 @@ void HRuler::glCommands(bool select, bool marked, bool no_color)
 		glDisable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.0, 0.0);
 		if(!no_color)glColor4ub(255, 255, 255, 120); // white
-		if (!select)theApp.EnableBlend();
+		if (!select)theApp->EnableBlend();
 		glDepthMask(0);
 		Point3d point[4];
 		GetFourCorners(point);
@@ -198,7 +198,7 @@ void HRuler::glCommands(bool select, bool marked, bool no_color)
 		glVertex3d(point[2].x, point[2].y, point[2].z);
 		glVertex3d(point[3].x, point[3].y, point[3].z);
 		glEnd();
-		if(select)theApp.DisableBlend();
+		if(select)theApp->DisableBlend();
 		glDepthMask(1);
 
 		if (!no_color)

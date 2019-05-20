@@ -114,7 +114,7 @@ public:
 	virtual void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof);
 	virtual bool Stretch(const Point3d &p, const Point3d &shift, void* data){ return false; } // return true, if undo stretch is done with Add and Delete
 	virtual bool StretchTemporary(const Point3d &p, const Point3d &shift, void* data){ Stretch(p, shift, data); return true; } // returns true, because Stretch was done.  If not done, then override and return false;
-	virtual void SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction){}
+	virtual bool SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction){ return false; }
 	virtual bool CanAdd(HeeksObj* object){return false;}
 	virtual bool CanAddTo(HeeksObj* owner){return true;}
 	virtual HeeksObj* PreferredPasteTarget(){return NULL;}

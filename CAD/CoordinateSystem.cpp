@@ -46,7 +46,7 @@ CoordinateSystem::~CoordinateSystem(void)
 
 const wchar_t* CoordinateSystem::GetIconFilePath()
 {
-	static std::wstring iconpath = theApp.GetResFolder() + L"/icons/coordsys.png";
+	static std::wstring iconpath = theApp->GetResFolder() + L"/icons/coordsys.png";
 	return iconpath.c_str();
 }
 
@@ -1101,7 +1101,7 @@ void CoordinateSystem::RenderArrow()
 void CoordinateSystem::RenderDatum(bool bright, bool solid)
 {
 	double s = size;
-	if(size_is_pixels)s /= theApp.GetPixelScale();
+	if(size_is_pixels)s /= theApp->GetPixelScale();
 
 	if(solid)
 	{
@@ -1148,7 +1148,7 @@ void CoordinateSystem::RenderDatum(bool bright, bool solid)
 	{
 		// render X, Y, Z text
 		double extra_pixels_out = 10.0;
-		double s2 = s + extra_pixels_out /theApp.GetPixelScale();
+		double s2 = s + extra_pixels_out /theApp->GetPixelScale();
 		glColor3ub(255, 0, 0);
 		glRasterPos3d(s2, 0, 0);
 		glBitmap(8, 11, 3, 5, 0.0, 0.0, bitmapX);
@@ -1170,7 +1170,7 @@ void CoordinateSystem::ApplyMatrix()
 
 void CoordinateSystem::glCommands(bool select, bool marked, bool no_color)
 {
-	if(!select && !rendering_current && this == theApp.m_current_coordinate_system)return; // will get rendered in HeeksCADapp::glCommandsAll
+	if(!select && !rendering_current && this == theApp->m_current_coordinate_system)return; // will get rendered in HeeksCADapp::glCommandsAll
 	if(marked)glLineWidth(2);
 	glPushMatrix();
 	double m[16];
@@ -1179,7 +1179,7 @@ void CoordinateSystem::glCommands(bool select, bool marked, bool no_color)
 
 	bool bright = rendering_current;
 
-	RenderDatum(bright, theApp.m_datum_coords_system_solid_arrows);
+	RenderDatum(bright, theApp->m_datum_coords_system_solid_arrows);
 
 	glPopMatrix();
 	glLineWidth(1);
@@ -1220,7 +1220,7 @@ void CoordinateSystem::GetGripperPositions(std::list<GripData> *list, bool just_
 {
 	Matrix mat = GetMatrix();
 	double s = size;
-	if(size_is_pixels)s /= theApp.GetPixelScale();
+	if(size_is_pixels)s /= theApp->GetPixelScale();
 
 	Point3d px(m_o + m_x * s);
 	Point3d py(m_o + m_y * s);
@@ -1362,24 +1362,24 @@ bool CoordinateSystem::PickFrom3Points()
 	y_for_PickFrom3Points = m_y;
 	z_for_PickFrom3Points = m_x ^ m_y;
 	m_visible = false;
-	theApp.RegisterOnGLCommands(OnGlCommandsForPickFrom3Points);
+	theApp->RegisterOnGLCommands(OnGlCommandsForPickFrom3Points);
 
 	double pos[3];
 
 	bool result = false;
 
-	if(theApp.PickPosition(_("Pick the location"), pos, on_set_origin))
+	if(theApp->PickPosition(_("Pick the location"), pos, on_set_origin))
 	{
-		if(theApp.PickPosition(_("Pick a point on the x-axis"), pos, on_set_x))
+		if(theApp->PickPosition(_("Pick a point on the x-axis"), pos, on_set_x))
 		{
-			result = theApp.PickPosition(_("Pick a point where y > 0"), pos, on_set_y);
+			result = theApp->PickPosition(_("Pick a point where y > 0"), pos, on_set_y);
 		}
 	}
 
 	*this = temp;
-	theApp.RemoveOnGLCommands(OnGlCommandsForPickFrom3Points);
+	theApp->RemoveOnGLCommands(OnGlCommandsForPickFrom3Points);
 
-	theApp.Repaint();
+	theApp->Repaint();
 
 	return result;
 #endif
@@ -1394,16 +1394,16 @@ bool CoordinateSystem::PickFrom1Point()
 	y_for_PickFrom3Points = m_y;
 	z_for_PickFrom3Points = m_x ^ m_y;
 	m_visible = false;
-	theApp.RegisterOnGLCommands(OnGlCommandsForPickFrom3Points);
+	theApp->RegisterOnGLCommands(OnGlCommandsForPickFrom3Points);
 
 	double pos[3];
 
-	bool result = theApp.PickPosition(_("Pick the location"), pos, on_set_origin);
+	bool result = theApp->PickPosition(_("Pick the location"), pos, on_set_origin);
 	
 	*this = temp;
-	theApp.RemoveOnGLCommands(OnGlCommandsForPickFrom3Points);
+	theApp->RemoveOnGLCommands(OnGlCommandsForPickFrom3Points);
 
-	theApp.Repaint();
+	theApp->Repaint();
 
 	return result;
 #endif

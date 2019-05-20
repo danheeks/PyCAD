@@ -108,7 +108,7 @@ void CSvgRead::Read(const wchar_t* filepath)
 	}
 
 	// add the sketches
-	if (theApp.m_svg_unite)
+	if (theApp->m_svg_unite)
 	{
 #if 0
 		to do
@@ -119,13 +119,13 @@ void CSvgRead::Read(const wchar_t* filepath)
 		area.Reorder(); // unite outsides which overlap and remove insides
 
 		CSketch* new_object = MakeNewSketchFromArea(area);
-		theApp.AddUndoably(new_object, NULL, NULL);
-		theApp.DeleteUndoably(objects_to_delete);
+		theApp->AddUndoably(new_object, NULL, NULL);
+		theApp->DeleteUndoably(objects_to_delete);
 #endif
 	}
 	else
 	{
-		theApp.AddUndoably(m_sketches_to_add, NULL);
+		theApp->AddUndoably(m_sketches_to_add, NULL);
 	}
 
 }
@@ -158,7 +158,7 @@ void CSvgRead::ProcessArea()
 			Span& span = *It2;
 			if (span.m_v.m_type == 0)
 			{
-				HLine *line = new HLine(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), &theApp.current_color);
+				HLine *line = new HLine(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), &theApp->current_color);
 				ModifyByMatrix(line);
 				AddSketchIfNeeded();
 				m_sketch->Add(line, NULL);
@@ -166,7 +166,7 @@ void CSvgRead::ProcessArea()
 			else
 			{
 				// add an arc
-				HArc *arc = new HArc(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(Point3d(Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp.current_color);
+				HArc *arc = new HArc(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(Point3d(Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp->current_color);
 				ModifyByMatrix(arc);
 				AddSketchIfNeeded();
 				m_sketch->Add(arc, NULL);
@@ -721,10 +721,10 @@ Point3d CSvgRead::ReadEllipse(const char *text,Point3d ppnt,bool isupper)
 	mid.Rotate(gp_Ax1(zp,up),-xrot);
 	
 	double error = mid.x * mid.x/(rx*rx) + mid.y*mid.y/(ry*ry);
-		if(error > 1-theApp.m_geom_tol)
+		if(error > 1-theApp->m_geom_tol)
 	{
-		rx *= sqrt(error) + theApp.m_geom_tol;
-		ry *= sqrt(error) + theApp.m_geom_tol;
+		rx *= sqrt(error) + theApp->m_geom_tol;
+		ry *= sqrt(error) + theApp->m_geom_tol;
 	}
 
 	double root = sqrt((rx*rx*ry*ry-rx*rx*mid.y*mid.y-ry*ry*mid.x*mid.x)/(rx*rx*mid.y*mid.y+ry*ry*mid.x*mid.x));
@@ -925,7 +925,7 @@ void CSvgRead::OnReadCubic(Point3d s, Point3d c1, Point3d c2, Point3d e)
 
 	Handle_Geom_BSplineCurve spline = convert.BSplineCurve();
 //	Geom_BSplineCurve pspline = *((Geom_BSplineCurve*)spline.Access());
-	HSpline* new_object = new HSpline(spline, &theApp.current_color);
+	HSpline* new_object = new HSpline(spline, &theApp->current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();
 	m_sketch->Add(new_object, NULL);
@@ -948,7 +948,7 @@ void CSvgRead::OnReadQuadratic(Point3d s, Point3d c, Point3d e)
 
 	Handle_Geom_BSplineCurve spline = convert.BSplineCurve();
 	//	Geom_BSplineCurve pspline = *((Geom_BSplineCurve*)spline.Access());
-	HSpline* new_object = new HSpline(spline, &theApp.current_color);
+	HSpline* new_object = new HSpline(spline, &theApp->current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();
 	m_sketch->Add(new_object, NULL);
@@ -976,7 +976,7 @@ void CSvgRead::OnReadLine(Point3d p1, Point3d p2)
 	}
 	else
 	{
-		HLine *line = new HLine(p1, p2, &theApp.current_color);
+		HLine *line = new HLine(p1, p2, &theApp->current_color);
 		ModifyByMatrix(line);
 		AddSketchIfNeeded();
 		m_sketch->Add(line, NULL);
@@ -990,7 +990,7 @@ void CSvgRead::OnReadEllipse(Point3d c, double maj_r, double min_r, double rot, 
 	Point3d up(0,0,1);
 	gp_Elips elip(Point3d(c,Point3d(0,0,1)),maj_r,min_r);
 	elip.Rotate(gp_Ax1(c,up),rot);
-	HEllipse *new_object = new HEllipse(elip,start,end,&theApp.current_color);
+	HEllipse *new_object = new HEllipse(elip,start,end,&theApp->current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();
 	m_sketch->Add(new_object, NULL);
@@ -1002,7 +1002,7 @@ void CSvgRead::OnReadCircle(Point3d c, double r)
 #if 0
 	Point3d up(0,0,1);
 	gp_Circ cir(Point3d(c,up),r);
-	HCircle *new_object = new HCircle(cir,&theApp.current_color);
+	HCircle *new_object = new HCircle(cir,&theApp->current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();
 	m_sketch->Add(new_object, NULL);

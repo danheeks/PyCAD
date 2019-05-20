@@ -21,20 +21,20 @@ bool GripperSelTransform::OnGripperGrabbed(const std::list<HeeksObj*>& list, boo
 
 	memcpy(m_from, from, 3*sizeof(double));
 	memcpy(m_last_from, from, 3*sizeof(double));
-	theApp.m_marked_list->gripping = true;
+	theApp->m_marked_list->gripping = true;
 	m_items_marked_at_grab.clear();
 	std::list<HeeksObj *>::const_iterator It;
 	for(It = list.begin(); It != list.end(); It++){
 		m_items_marked_at_grab.push_back(*It);
-		theApp.m_marked_list->set_ignore_onoff(*It, true);
+		theApp->m_marked_list->set_ignore_onoff(*It, true);
 	}
 	if ( m_data.m_type <= GripperTypeObjectScaleXY )
 	{
-		theApp.CreateTransformGLList(list, show_grippers_on_drag);
-		theApp.m_drag_matrix = Matrix();
+		theApp->CreateTransformGLList(list, show_grippers_on_drag);
+		theApp->m_drag_matrix = Matrix();
 		for(It = list.begin(); It != list.end(); It++){
 			HeeksObj* object = *It;
-			if(object->m_visible)theApp.m_hidden_for_drag.push_back(object);
+			if(object->m_visible)theApp->m_hidden_for_drag.push_back(object);
 			object->m_visible = false;
 		}
 	}
@@ -85,7 +85,7 @@ void GripperSelTransform::OnGripperMoved( double* from, const double* to ){
 			m_initial_grip_pos[2] += shift[2];
 		}
 
-		theApp.Repaint(true);
+		theApp->Repaint(true);
 		return;
 	}
 
@@ -93,16 +93,16 @@ void GripperSelTransform::OnGripperMoved( double* from, const double* to ){
 
 	if(m_items_marked_at_grab.size() > 0)m_items_marked_at_grab.front()->GetScaleAboutMatrix(object_m);
 
-	MakeMatrix ( from, to, object_m, theApp.m_drag_matrix );
+	MakeMatrix ( from, to, object_m, theApp->m_drag_matrix );
 
-	theApp.Repaint();
+	theApp->Repaint();
 }
 
 void GripperSelTransform::OnGripperReleased ( const double* from, const double* to )
 {
-	theApp.DestroyTransformGLList();
+	theApp->DestroyTransformGLList();
 
-	theApp.StartHistory();
+	theApp->StartHistory();
 
 	for ( std::list<HeeksObj *>::iterator It = m_items_marked_at_grab.begin(); It != m_items_marked_at_grab.end(); It++ )
 	{
@@ -124,7 +124,7 @@ void GripperSelTransform::OnGripperReleased ( const double* from, const double* 
 			{
 #if 0
 				to do
-				if(object)theApp.DoUndoable(new StretchTool(object, m_initial_grip_pos, shift, m_data.m_data));
+				if(object)theApp->DoUndoable(new StretchTool(object, m_initial_grip_pos, shift, m_data.m_data));
 #endif
 			}
 			m_data.m_x += shift[0];
@@ -137,7 +137,7 @@ void GripperSelTransform::OnGripperReleased ( const double* from, const double* 
 			Matrix object_m;
 			if(m_items_marked_at_grab.size() > 0)m_items_marked_at_grab.front()->GetScaleAboutMatrix(object_m);
 			MakeMatrix ( from, to, object_m, mat );
-			theApp.TransformUndoably(object, mat);
+			theApp->TransformUndoably(object, mat);
 		}
 	}
 
@@ -145,23 +145,23 @@ void GripperSelTransform::OnGripperReleased ( const double* from, const double* 
 
 	if ( m_data.m_type <= GripperTypeObjectScaleXY )
 	{
-		for(std::list<HeeksObj*>::iterator It = theApp.m_hidden_for_drag.begin(); It != theApp.m_hidden_for_drag.end(); It++)
+		for(std::list<HeeksObj*>::iterator It = theApp->m_hidden_for_drag.begin(); It != theApp->m_hidden_for_drag.end(); It++)
 		{
 			HeeksObj* object = *It;
 			object->m_visible = true;
 		}
-		theApp.m_hidden_for_drag.clear();
+		theApp->m_hidden_for_drag.clear();
 	}
 
 	{
 		std::list<HeeksObj *>::iterator It;
 		for ( It = m_items_marked_at_grab.begin(); It != m_items_marked_at_grab.end(); It++ )
 		{
-			theApp.m_marked_list->set_ignore_onoff ( *It, false );
+			theApp->m_marked_list->set_ignore_onoff ( *It, false );
 		}
 	}
-	theApp.m_marked_list->gripping = false;
-	theApp.EndHistory();
+	theApp->m_marked_list->gripping = false;
+	theApp->EndHistory();
 }
 
 void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, const Matrix& object_m, Matrix& mat)
@@ -258,7 +258,7 @@ void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, con
 			mat.Translate(-rotate_centre_point);
 
 			Point3d vx, vy;
-			theApp.m_current_viewport->m_view_point.GetTwoAxes(vx, vy, false, 0);			
+			theApp->m_current_viewport->m_view_point.GetTwoAxes(vx, vy, false, 0);			
 			Point3d rot_dir = vx ^ vy;
 			rot_dir.Normalize();
 
