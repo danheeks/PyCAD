@@ -38,15 +38,34 @@ class App(wx.App):
         
         self.printData = wx.PrintData()
         self.pageSetupData = wx.PageSetupDialogData(self.printData)
-        
-        size = wx.Size()
-        pos = wx.Point()
+            
         config = HeeksConfig()
-        size.x = config.ReadInt('MainFrameWidth', -1);
-        size.y = config.ReadInt('MainFrameHeight', -1);
-        pos.x = config.ReadInt('MainFramePosX', -1);
-        pos.y = config.ReadInt('MainFramePosY', -1);
-        self.frame = self.NewFrame(pos, size)
+        
+        width = config.ReadInt('MainFrameWidth', -1);
+        height = config.ReadInt('MainFrameHeight', -1);
+        x = config.ReadInt('MainFramePosX', -1);
+        y = config.ReadInt('MainFramePosY', -1);
+        
+        if width < 0:
+            width = -1
+            height = -1
+            x = -1
+            y = -1
+        else:
+            stored_rect = wx.Rect(x, y, width, height)
+            in_display = False
+            for idx in range(wx.Display.GetCount()):
+                d = wx.Display(idx)
+                rect = d.GetGeometry()
+                if rect.Contains(wx.Point(x, y)):
+                    in_display = True
+            if in_display == False:
+                width = -1
+                height = -1
+                x = -1
+                y = -1
+        
+        self.frame = self.NewFrame(wx.Point(x, y), wx.Size(width, height))
         self.frame.Show()
         self.LoadConfig()
         self.OnNewOrOpen(False)
@@ -115,6 +134,11 @@ class App(wx.App):
         for sketch in new_sketches:
             cad.AddUndoably(sketch, self.object.GetOwner(), None)
         cad.EndHistory()
+        
+    def CopyUndoably(self, object, copy_with_new_data):
+        copy_undoable = CopyObjectUndoable(object, copy_with_new_data)
+        cad.PyIncref(copy_undoable)
+        cad.DoUndoable(copy_undoable)
 
     def EditUndoably(self, object):
         if object.HasEdit() == False:
@@ -124,7 +148,8 @@ class App(wx.App):
         
         if copy_object:
             if copy_object.Edit():
-                cad.CopyUndoably(object, copy_object)
+                self.CopyUndoably(object, copy_object)
+                #cad.CopyUndoably(object, copy_object)
 
     def GetObjectTools(self, object, from_tree_canvas = False):
         tools = []
@@ -212,4 +237,23 @@ class App(wx.App):
         config = HeeksConfig()
         config.DeleteAll()
         self.settings_restored = True
+        
+class CopyObjectUndoable(cad.BaseUndoable):
+    def __init__(self, object, copy_object):
+        cad.BaseUndoable.__init__(self)
+        self.object = object
+        self.new_copy = copy_object
+        self.old_copy = object.MakeACopy()
+        self.old_copy.Clear()
+        self.new_copy.Clear()
+        
+    def Run(self, redo):
+        self.object.CopyFrom(self.new_copy)
+        cad.WasModified(self.object)
+        
+    def RollBack(self):
+        self.object.CopyFrom(self.old_copy)
+        cad.WasModified(self.object)
+        
+        
         

@@ -107,8 +107,8 @@ class Frame(wx.Frame):
         self.EndMenu()
         
         self.AddMenu('&Edit')
-        self.AddMenuItem('&Undo', self.OnUndo, None, 'undo')
-        self.AddMenuItem('&Redo', self.OnRedo, None, 'redo')
+        self.AddMenuItem('&Undo', self.OnUndo, self.OnUpdateUndo, 'undo')
+        self.AddMenuItem('&Redo', self.OnRedo, self.OnUpdateRedo, 'redo')
         self.AddSeparator()
         self.AddMenuItem('Cut', self.OnCut, self.OnUpdateCut, 'cut')
         self.AddMenuItem('Copy', self.OnCopy, self.OnUpdateCopy, 'copy')
@@ -259,7 +259,7 @@ class Frame(wx.Frame):
         # returns wxCANCEL if not OK to continue opening file
         if cad.IsModified():
             str = 'Save changes to file ' + (wx.GetApp().filepath if wx.GetApp().filepath else 'Untitled')
-            res = wx.MessageBox(str, wx.MessageBoxCaptionStr, wx.CANCEL | wx.YES_NO | wx.CENTER | wx.ICON_QUESTION)
+            res = wx.MessageBox(str, wx.MessageBoxCaptionStr, wx.CANCEL | wx.YES_NO | wx.CENTER | wx.ICON_WARNING)
             if res == wx.CANCEL or res == wx.NO: return res
             if res == wx.YES:
                 return self.OnSave(None)
@@ -472,7 +472,7 @@ class Frame(wx.Frame):
             wx.TheClipboard.Close()
             
         f.close()
-                
+        
     def OnCut(self, e):
         self.CopySelectedItems()
         cad.StartHistory()
@@ -482,6 +482,12 @@ class Frame(wx.Frame):
         
     def OnUpdateCut(self, e):
         e.Enable(cad.GetNumSelected() > 0)            
+                
+    def OnUpdateUndo(self, e):
+        e.Enable(cad.CanUndo())         
+        
+    def OnUpdateRedo(self, e):
+        e.Enable(cad.CanRedo())         
         
     def OnCopy(self, e):
         self.CopySelectedItems()

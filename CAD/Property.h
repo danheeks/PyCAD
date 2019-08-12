@@ -10,6 +10,7 @@
 enum{
 	InvalidPropertyType,
 	StringPropertyType,
+	LongStringPropertyType,
 	DoublePropertyType,
 	LengthPropertyType,
 	IntPropertyType,

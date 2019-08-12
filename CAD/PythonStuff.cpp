@@ -271,10 +271,12 @@ bool CadOpenFile(std::wstring fp)
 	return theApp->OpenFile(fp.c_str(), false);
 }
 
-void CadImport(std::wstring fp)
+void CadImport(const std::wstring &filepath, HeeksObj* paste_into = NULL)
 {
-	theApp->OpenFile(fp.c_str(), true);
+	theApp->OpenFile(filepath.c_str(), true, paste_into);
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(CadImportOverloads, CadImport, 1, 2)
 
 bool CadSaveFile(std::wstring fp)
 {
@@ -421,10 +423,20 @@ std::wstring HeeksObjGetIconFilePath(HeeksObj& object)
 
 void HeeksObjReadFromXML(HeeksObj& object)
 {
+	object.ReadFromXML(BaseObject::m_cur_element);
+}
+
+void HeeksObjReadObjectXml(HeeksObj& object)
+{
 	object.HeeksObj::ReadFromXML(BaseObject::m_cur_element);
 }
 
 void HeeksObjWriteToXML(HeeksObj& object)
+{
+	object.WriteToXML(BaseObject::m_cur_element);
+}
+
+void HeeksObjWriteObjectToXML(HeeksObj& object)
 {
 	object.HeeksObj::WriteToXML(BaseObject::m_cur_element);
 }
@@ -1165,6 +1177,27 @@ int PropertyWrapGetInt(PropertyWrap& property)
 }
 
 
+class UndoableWrap : public Undoable, public cad_wrapper<Undoable>
+{
+public:
+	void Run(bool redo) override
+	{
+		CallVoidReturn("Run", redo);
+	}
+	const wchar_t* GetTitle() override
+	{
+		std::pair<bool, std::wstring> result = CallReturnWString("GetTitle");
+		if (result.first)
+			return result.second.c_str();
+		return L"";
+	}
+	void RollBack() override
+	{
+		CallVoidReturn("RollBack");
+	}
+};
+
+
 
 void StlSolidWriteSTL(CStlSolid& solid, double tolerance, std::wstring filepath)
 {
@@ -1386,6 +1419,11 @@ void DoUndoable(Undoable* undoable)
 	theApp->DoUndoable(undoable);
 }
 
+void WasModified(HeeksObj *object)
+{
+	theApp->WasModified(object);
+}
+
 bool ShiftSelect(HeeksObj *object, bool control_down)
 {
 	// mark a list of siblings
@@ -1554,6 +1592,16 @@ bool GetDrawMarked()
 	return BaseObject::m_marked;
 }
 
+bool CanUndo()
+{
+	return theApp->CanUndo();
+}
+
+bool CanRedo()
+{
+	return theApp->CanRedo();
+}
+
 int BaseObjectGetIndex(BaseObject& object)
 {
 	return object.GetIndex();
@@ -1593,8 +1641,10 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("CopyFrom", &ObjListCopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
+			.def("ReadObjectXml", &HeeksObjReadObjectXml)
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
+			.def("GetCopyFromObject", &BaseObject::GetCopyFromObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			;
 
 		boost::python::class_<HeeksObj, boost::noncopyable>("Object")
@@ -1610,6 +1660,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetColor", &HeeksObjGetColor)
 			.def("HasEdit", &HeeksObjHasEdit)
 			.def("GetTitle", &HeeksObjGetTitle)
+			.def("GetBox", &HeeksObj::GetBox)
+			.def("OnGlCommands", &HeeksObj::glCommands)
 			.def("AutoExpand", &HeeksObj::AutoExpand)
 			.def("GetNumChildren", &HeeksObj::GetNumChildren)
 			.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
@@ -1622,7 +1674,9 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("ReadXml", &HeeksObjReadFromXML)
+			.def("ReadObjectXml", &HeeksObjReadObjectXml)
 			.def("WriteXml", &HeeksObjWriteToXML)
+			.def("WriteObjectXml", &HeeksObjWriteObjectToXML)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetLines", &HeeksObjGetLines)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)
@@ -1723,6 +1777,9 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::class_<PropertyObjectColor, boost::python::bases<Property>>("PropertyObjectColor", boost::python::no_init);
 
 		boost::python::class_<Undoable, boost::noncopyable>("Undoable", boost::python::no_init);
+
+		boost::python::class_<UndoableWrap, boost::noncopyable >("BaseUndoable");
+
 		boost::python::class_<PropertyChangeString, boost::python::bases<Undoable>>("PropertyChangeString", boost::python::no_init).def(boost::python::init<const std::wstring&, Property*>());
 		boost::python::class_<PropertyChangeDouble, boost::python::bases<Undoable>>("PropertyChangeDouble", boost::python::no_init).def(boost::python::init<const double&, Property*>());
 		boost::python::class_<PropertyChangeLength, boost::python::bases<Undoable>>("PropertyChangeLength", boost::python::no_init).def(boost::python::init<const double&, Property*>());
@@ -1987,7 +2044,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("OnExit", OnExit);
 		boost::python::def("Reset", CadReset);
 		boost::python::def("OpenFile", CadOpenFile);
-		boost::python::def("Import", CadImport);
+		boost::python::def("Import", &CadImport, CadImportOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL)));
 		boost::python::def("SaveFile", CadSaveFile);
 		boost::python::def("SaveObjects", SaveObjects);		
 		boost::python::def("DrawTriangle", &DrawTriangle);
@@ -2052,6 +2109,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
 		boost::python::def("CopyUndoably", CopyUndoably);
 		boost::python::def("DoUndoable", DoUndoable);
+		boost::python::def("WasModified", WasModified);		
 		boost::python::def("ShiftSelect", ShiftSelect);
 		boost::python::def("ChangePropertyString", ChangePropertyString);
 		boost::python::def("ChangePropertyDouble", ChangePropertyDouble);
@@ -2080,6 +2138,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("GetNextID", GetNextID);
 		boost::python::def("GetDrawSelect", GetDrawSelect);
 		boost::python::def("GetDrawMarked", GetDrawMarked);
+		boost::python::def("CanUndo", CanUndo);
+		boost::python::def("CanRedo", CanRedo);
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
@@ -2088,6 +2148,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
 		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
+		boost::python::scope().attr("PROPERTY_TYPE_LONG_STRING") = (int)LongStringPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_DOUBLE") = (int)DoublePropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_LENGTH") = (int)LengthPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_INT") = (int)IntPropertyType;

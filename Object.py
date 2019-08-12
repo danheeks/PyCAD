@@ -37,7 +37,7 @@ class Object(cad.BaseObject):
         if self.CallsObjListReadXml():
             cad.ObjList.ReadXml(self)
         else:
-            cad.Object.ReadXml(self)
+            self.ReadObjectXml()
             
     def WriteDefaultValues(self):
         pass # gets called on ok from dialog

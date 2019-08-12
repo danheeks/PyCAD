@@ -10,6 +10,7 @@ public:
 	static bool m_no_colour; // from glCommands
 	static bool m_marked; // from glCommands
 	static bool m_select; // from glCommands
+	static const HeeksObj* copy_from_object;
 
 	BaseObject() :ObjList(){}
 	BaseObject(int type) :ObjList(){}
@@ -33,7 +34,10 @@ public:
 	bool OneOfAKind_default();
 	void OnAdd();
 	void OnRemove();
+	bool SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction);
 	boost::python::override get_override(char const* name) const;
+
+	const HeeksObj* GetCopyFromObject(){ return copy_from_object; }
 };
 
 

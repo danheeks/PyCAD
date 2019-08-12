@@ -109,6 +109,7 @@ bool HeeksObj::Add(HeeksObj* object, HeeksObj* prev_object)
 {
 	object->m_owner = this;
 	object->OnAdd();
+	OnAdded(object);
 	return true;
 }
 

@@ -146,6 +146,37 @@ public:
 		return false;
 	}
 
+	bool CallVoidReturn(const char* func, HeeksObj* object)const
+	{
+		bool success = false;
+		if (boost::python::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					boost::python::detail::method_result result = f(object);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const boost::python::error_already_set&){
+					if (PyErr_Occurred())
+					{
+						HandlePythonCallError();
+					}
+				}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
+	}
+
 	bool CallVoidReturn(const char* func, bool value)const
 	{
 		bool success = false;
@@ -161,6 +192,32 @@ public:
 				try{
 
 					boost::python::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const boost::python::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
+	}
+	
+	bool CallVoidReturn(const char* func, bool b1, bool b2, bool b3)const
+	{
+		bool success = false;
+		if (boost::python::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					boost::python::detail::method_result result = f(b1, b2, b3);
 					success = AfterPythonCall(main_module);
 					return success;
 				}
@@ -320,6 +377,37 @@ public:
 				try
 				{
 					boost::python::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (bool)result);
+				}
+				catch (const boost::python::error_already_set&)
+				{
+				}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return std::make_pair(false, false);
+	}
+
+	std::pair<bool, bool> CallReturnBool(const char* func, MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)const
+	{
+		bool success = false;
+		if (boost::python::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					boost::python::detail::method_result result = f(marked_object, ray_start, ray_direction);
 					success = AfterPythonCall(main_module);
 					return std::make_pair(success, (bool)result);
 				}

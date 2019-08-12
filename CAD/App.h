@@ -162,7 +162,6 @@ public:
 	GraphicsTextMode m_graphics_text_mode;
 	bool m_print_scaled_to_page;
 	FileOpenOrImportType m_file_open_or_import_type;
-	bool m_inPaste;
 	Matrix* m_file_open_matrix;
 	double m_view_units; // units to display to the user ( but everything is stored as mm ), 1.0 for mm, 25.4 for inches
 	bool m_dragging_moves_objects;
@@ -237,7 +236,7 @@ public:
 	virtual void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element);
 	virtual void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element);
 	void InitializeCreateFunctions();
-	void OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool call_was_added = false, bool show_error = true);
+	void OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into = NULL, HeeksObj* paste_before = NULL, bool call_was_added = false, bool show_error = true, bool undoable = false);
 	static void OpenSVGFile(const wchar_t *filepath);
 	static void OpenSTLFile(const wchar_t *filepath);
 	static void OpenDXFFile(const wchar_t *filepath);

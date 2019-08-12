@@ -88,7 +88,7 @@ void BaseObject::glCommands(bool select, bool marked, bool no_color)
 	m_marked = marked;
 	m_select = select;
 
-	if (!CallVoidReturn("OnGlCommands"))
+	if (!CallVoidReturn("OnGlCommands", select, marked, no_color))
 		ObjList::glCommands(select, marked, no_color);
 }
 
@@ -135,6 +135,7 @@ HeeksObj* BaseObject::MakeACopy()const
 
 void BaseObject::CopyFrom(const HeeksObj* object)
 {
+	copy_from_object = object;
 	CallVoidReturn("CopyFrom", object);
 }
 
@@ -166,6 +167,14 @@ void BaseObject::OnRemove()
 	CallVoidReturn("OnRemove");
 }
 
+bool BaseObject::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)
+{
+	std::pair<bool, bool> result = CallReturnBool("SetClickMarkPoint", marked_object, ray_start, ray_direction);
+	if (result.first)
+		return result.second;
+	return ObjList::SetClickMarkPoint(marked_object, ray_start, ray_direction);
+}
+
 boost::python::override BaseObject::get_override(char const* name) const
 {
 	boost::python::override result = boost::python::wrapper<ObjList>::get_override(name);
@@ -184,6 +193,7 @@ TiXmlElement* BaseObject::m_cur_element = NULL;
 bool BaseObject::m_no_colour = false;
 bool BaseObject::m_marked = false;
 bool BaseObject::m_select = false;
+const HeeksObj* BaseObject::copy_from_object = NULL;
 
 
 void AddProperty(Property* property)

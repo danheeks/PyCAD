@@ -18,7 +18,7 @@ RemoveOrAddTool::RemoveOrAddTool(HeeksObj *object, HeeksObj *owner, HeeksObj *pr
 RemoveOrAddTool::~RemoveOrAddTool()
 {
 	if(m_owner == NULL)return;
-	if(!m_belongs_to_owner)delete m_object;
+	if(!m_belongs_to_owner)if(!(m_object->NeverDelete()))delete m_object;
 }
 
 static std::wstring string_for_GetTitle;

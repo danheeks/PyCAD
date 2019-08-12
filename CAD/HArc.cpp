@@ -586,6 +586,8 @@ void HArc::ReadFromXML(TiXmlElement *element)
 	element->Attribute("ay", &m_axis.y);
 	element->Attribute("az", &m_axis.z);
 	EndedObject::ReadFromXML(element);
+	// set radius
+	m_radius = A.Dist(C);
 }
 
 void HArc::Reverse()

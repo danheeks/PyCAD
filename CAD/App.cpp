@@ -111,7 +111,6 @@ CApp::CApp()
 	m_font_tex_number[1] = 0;
 	m_graphics_text_mode = GraphicsTextModeNone;
 	m_file_open_or_import_type = FileOpenOrImportTypeOther;
-	m_inPaste = false;
 	m_file_open_matrix = NULL;
 	m_min_correlation_factor = 0.75;
 	m_max_scale_threshold = 1.5;
@@ -308,26 +307,6 @@ HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
 	object->ReadFromXML(pElem);
 	object->ReloadPointers();
 
-	// Check to see if we already have an object for this type/id pair.  If so, use the existing one instead.
-	//
-	// NOTE: This would be better if another ObjList pointer was passed in and we checked the objects in that
-	// ObjList for pre-existing elements rather than going to the global one.  This would allow imported data
-	// (i.e. data read from another file and used to augment the current data) to work as well as the scenario
-	// where we are reading into an empty memory block. (new data)
-
-	HeeksObj *existing = NULL;
-
-	existing = GetIDObject(object->GetIDGroupType(), object->m_id);
-
-	if ((existing != NULL) && (existing != object))
-	{
-		// There was a pre-existing version of this type/id pair.  Don't replace it with another one.
-		if (!object->NeverDelete())
-			delete object;
-		return(existing);
-	}
-
-	// It's new.  Keep this new copy.
 	return object;
 }
 
@@ -343,13 +322,13 @@ void CApp::ObjectReadFromXML(HeeksObj *object, TiXmlElement* element)
 	for (TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
 	{
 		std::string name(a->Name());
-		if (!this->m_inPaste && object->UsesID() && name == "id"){ object->SetID(a->IntValue()); }
+		if (object->UsesID() && name == "id"){ object->SetID(a->IntValue()); }
 		if (name == "vis"){ object->m_visible = (a->IntValue() != 0); }
 	}
 }
 
 
-static bool ImportObjectInto(HeeksObj* object, HeeksObj* add_to, HeeksObj* paste_before)
+static bool ImportObjectInto(HeeksObj* object, HeeksObj* add_to, HeeksObj* paste_before, bool undoable)
 {
 	if (object->OneOfAKind())
 	{
@@ -357,26 +336,36 @@ static bool ImportObjectInto(HeeksObj* object, HeeksObj* add_to, HeeksObj* paste
 		{
 			if (child->GetType() == object->GetType())
 			{
-				child->CopyFrom(object);
-				//// import all of the object's children into add_to's child
-				//for (HeeksObj* child2 = object->GetFirstChild(); child2; child2 = object->GetNextChild())
-				//{
-				//	ImportObjectInto(child2, child, NULL);
-				//}
+				// there is already a child of the same type, so remove that one and add this one
+				HeeksObj* next_child = add_to->GetNextChild();
+				if (undoable)
+				{
+					theApp->DeleteUndoably(child);
+					theApp->AddUndoably(object, add_to, next_child);
+				}
+				else
+				{
+					add_to->Remove(child);
+					add_to->Add(object, next_child);
+				}
 
 				return false;
 			}
 		}
-
-		add_to->Add(object, paste_before);
-		return true;
 	}
 
-	add_to->Add(object, paste_before);
+	if (undoable)
+	{
+		theApp->AddUndoably(object, add_to, paste_before);
+	}
+	else
+	{
+		add_to->Add(object, paste_before);
+	}
 	return true;
 }
 
-void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* paste_before, bool call_was_added, bool show_error)
+void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* paste_before, bool call_was_added, bool show_error, bool undoable)
 {
 	TiXmlDocument doc(Ttc(filepath));
 	if (!doc.LoadFile())
@@ -431,7 +420,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 			{
 				if (add_to->CanAdd(object) && object->CanAddTo(add_to))
 				{
-					if (ImportObjectInto(object, add_to, paste_before))
+					if (ImportObjectInto(object, add_to, paste_before, undoable))
 						if (call_was_added)WasAdded(object);
 					break;
 				}
@@ -573,7 +562,7 @@ void CApp::OnOpenButton()
 bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* paste_into, HeeksObj* paste_before, bool retain_filename /* = true */)
 {
 	bool history_started = false;
-	if (import_not_open && paste_into == NULL)
+	if (import_not_open)
 	{
 		StartHistory();
 		history_started = true;
@@ -604,7 +593,7 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 		m_file_open_or_import_type = FileOpenTypeHeeks;
 		if (import_not_open)
 			m_file_open_or_import_type = FileImportTypeHeeks;
-		OpenXMLFile(filepath, paste_into, paste_before, m_inPaste);
+		OpenXMLFile(filepath, paste_into, paste_before, import_not_open, false, import_not_open);
 	}
 	else if (m_fileopen_handlers.find(extension) != m_fileopen_handlers.end())
 	{

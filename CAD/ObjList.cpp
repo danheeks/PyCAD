@@ -192,7 +192,7 @@ bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)
 	m_index_list_valid = false;
 	HeeksObj::Add(object, prev_object);
 
-	if(((!theApp->m_in_OpenFile || theApp->m_file_open_or_import_type != FileOpenTypeHeeks || theApp->m_inPaste) && object->UsesID() && (object->m_id == 0 || (theApp->m_file_open_or_import_type == FileImportTypeHeeks && theApp->m_in_OpenFile))))
+	if(((!theApp->m_in_OpenFile || theApp->m_file_open_or_import_type != FileOpenTypeHeeks) && object->UsesID() && (object->m_id == 0 || (theApp->m_file_open_or_import_type == FileImportTypeHeeks && theApp->m_in_OpenFile))))
 	{
 		object->SetID(theApp->GetNextID(object->GetIDGroupType()));
 	}

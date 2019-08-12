@@ -124,6 +124,7 @@ public:
 	virtual bool IsDifferent(HeeksObj* other){return false;}
 	virtual void Remove(HeeksObj* object){object->OnRemove();}
 	virtual void OnAdd(){}
+	virtual void OnAdded(HeeksObj* object){}
 	virtual void OnRemove();
 	virtual bool CanBeRemoved(){return true;}
 	virtual bool CanBeDragged(){return true;}
