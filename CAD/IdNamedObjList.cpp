@@ -27,7 +27,7 @@ const wchar_t* IdNamedObjList::GetShortString(void)const
 	if(m_title_made_from_id)
 	{
 		wchar_t str[128];
-		swprintf(str, L"%s %d", GetTypeString(), m_id);
+		swprintf(str, 128, L"%s %d", GetTypeString(), m_id);
 		temp_pattern_string = str;
 		return temp_pattern_string.c_str();
 	}

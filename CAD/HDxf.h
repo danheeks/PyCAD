@@ -25,7 +25,7 @@ public:
 		memcpy(m_insert_point, insert_point, 3*sizeof(double));
 		m_rotation_angle = rotation_angle;
 
-		swprintf(title, L"Insert of %s at x%lf y%lf %lf rot%lf", Ctt(block_name), insert_point[0], insert_point[1], insert_point[2], rotation_angle);
+		swprintf(title, 1024, L"Insert of %s at x%lf y%lf %lf rot%lf", Ctt(block_name), insert_point[0], insert_point[1], insert_point[2], rotation_angle);
 	}
 
 	HeeksObj *MakeACopy(void)const{ return new HInsert(*this);}
