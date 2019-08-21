@@ -77,40 +77,62 @@ include_directories(OPENGL_INCLUDE_DIR)
 
 # this defines the source-files for library
 set(CAD_SRC
-    App.cpp
+    ../Geom/Arc.cpp
+    ../Geom/Area.cpp
+    ../Geom/AreaClipper.cpp
+    ../Geom/AreaOrderer.cpp
+    ../Geom/AreaPocket.cpp
+    ../Geom/Circle.cpp
+    ../Geom/clipper.cpp
     ../Geom/Construction.cpp
+    ../Geom/Curve.cpp
+    ../Geom/Finite.cpp
+    ../Geom/Matrix.cpp
+    ../Geom/Offset.cpp
+    App.cpp
+    ConversionTools.cpp
     CoordinateSystem.cpp
     DigitizedPoint.cpp
     DigitizeMode.cpp
     Drawing.cpp
     dxf.cpp
-    ../Geom/Finite.cpp
+    EndedObject.cpp
+    ExtrudedObj.cpp
     glfont2.cpp
     Grid.cpp
     Gripper.cpp
     GripperSelTransform.cpp
     Group.cpp
+    HArc.cpp
+    HCircle.cpp
     HDxf.cpp
     HeeksColor.cpp
-    HeeksConfig.cpp
     HeeksObj.cpp
+    HILine.cpp
     History.cpp
+    HLine.cpp
+    HPoint.cpp
     HXml.cpp
+    IdNamedObj.cpp
+    IdNamedObjList.cpp
+    LeftAndRight.cpp
     LineArcDrawing.cpp
     MagDragWindow.cpp
     MarkedList.cpp
     MarkedObject.cpp
-    ../Geom/Matrix.cpp
     ObjList.cpp
     Picking.cpp
     PointOrWindow.cpp
     Property.cpp
     PropertyChange.cpp
+    PyBaseObject.cpp
     PythonStuff.cpp
+    PyWrapper.cpp
     RegularShapesDrawing.cpp
     RemoveOrAddTool.cpp
     Ruler.cpp
     SelectMode.cpp
+    Sketch.cpp
     StlSolid.cpp
     strconv.cpp
     svg.cpp
