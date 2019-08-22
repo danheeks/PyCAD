@@ -26,8 +26,6 @@ std::list<Property *> *property_list = NULL;
 HeeksObj* object_for_get_properties = NULL;
 
 
-void HandlePythonCallError();
-
 bool BaseObject::NeverDelete(){ return true; }
 
 int BaseObject::GetType()const{

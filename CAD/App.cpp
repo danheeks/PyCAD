@@ -630,7 +630,9 @@ static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wst
 
 	if (parent_layer_name.size() == 0)
 	{
-		layer_name.append(to_wstring(object->m_id));
+		wchar_t ln[1024];
+		swprintf(ln,1024, L"%d", object->m_id);
+		layer_name.append(ln);
 	}
 	else
 	{
@@ -690,7 +692,9 @@ static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wst
 			}
 			else
 			{
-				layer_name.append(to_wstring(object->m_id));   // Use the ID as a layer name so that it's unique.
+				wchar_t ln[1024];
+				swprintf(ln,1024, L"%d", object->m_id);
+				layer_name.append(ln);  // Use the ID as a layer name so that it's unique.
 			}
 		}
 		else

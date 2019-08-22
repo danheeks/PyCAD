@@ -2,6 +2,8 @@
 
 #include <boost/python/wrapper.hpp>
 
+void HandlePythonCallError();
+
 
 /*
 This RAII structure ensures that threads created on the native C side
@@ -115,7 +117,7 @@ public:
 		return false;
 	}
 
-	bool CallVoidReturn(const char* func, const HeeksObj& object)const
+	bool CallVoidReturn(const char* func, const HeeksObj* object)const
 	{
 		bool success = false;
 		if (boost::python::override f = this->get_override(func)){
@@ -129,7 +131,7 @@ public:
 				PyLockGIL lock;
 				try{
 
-					boost::python::detail::method_result result = f(*object);
+					boost::python::detail::method_result result = f(object);
 					success = AfterPythonCall(main_module);
 					return success;
 				}

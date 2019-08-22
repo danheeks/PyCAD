@@ -171,9 +171,9 @@ void Drawing::OnMouse( MouseEvent& event )
 void Drawing::OnKeyDown(KeyEvent& event)
 {
 	switch (event.m_key_code){
-	case KeyCode::K_F1:
-	case KeyCode::K_RETURN:
-	case KeyCode::K_ESCAPE:
+	case K_F1:
+	case K_RETURN:
+	case K_ESCAPE:
 		// end drawing mode
 		ClearObjectsMade();
 		theApp->SetInputMode(theApp->m_select_mode);
