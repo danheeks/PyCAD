@@ -142,20 +142,12 @@ class TrivialPropertyEditor(wxpg.PGEditor):
             w, h = sz
             h = 100
 
-            # Make room for button
-            bw = propgrid.GetRowHeight()
-            w -= bw
-
             s = property.GetDisplayedString();
 
             self.tc = CustomTextCtrl(propgrid.GetPanel(), wxpg.PG_SUBID1, s,
-                             (x,y), (w,h),
+                             (x,y), (w ,h),
                              wx.TE_MULTILINE | wx.TE_PROCESS_ENTER)
-            #self.tc.Bind(wx.EVT_TEXT_ENTER, self.Txt_Ent)
 
-            #btn = wx.Button(propgrid.GetPanel(), wxpg.PG_SUBID2, '...',
-            #                (x+w, y),
-            #                (bw, h), wx.WANTS_CHARS)
             return wxpg.PGWindowList(self.tc)#, btn)
         except:
             import traceback
