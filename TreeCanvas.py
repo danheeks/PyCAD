@@ -61,6 +61,7 @@ class TreeCanvas(wx.ScrolledWindow):
         self.max_xpos = 0
         self.tree_buttons = []
         self.clicked_object = None
+        self.rendered_objects = []
         
         self.bmp_branch_plus = wx.Bitmap(pycad_dir + "/icons/branch_plus.png", wx.BITMAP_TYPE_ANY)
         self.bmp_branch_minus = wx.Bitmap(pycad_dir + "/icons/branch_minus.png", wx.BITMAP_TYPE_ANY)
@@ -81,6 +82,36 @@ class TreeCanvas(wx.ScrolledWindow):
         
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
+        
+    def ObjectRenderedIndex(self, object):
+        # returns index number; 0 for first item, if object is in rendered objects
+        # else -1
+        i = 0
+        for o in self.rendered_objects:
+            if o == object:
+                return i
+            i += 1
+        return -1
+        
+    def OnKeyDown(self, e):
+        k = e.GetKeyCode()
+        if k == wx.WXK_UP:
+            sel = cad.GetSelectedObjects()
+            index = -1
+            if len(sel) > 0:
+                index = self.ObjectRenderedIndex(sel[-1])
+            if (index == -1) and (len(self.rendered_objects) > 0):
+                index = len(self.rendered_objects) - 1
+            
+            cad.ClearSelection(True)
+            
+            if len(self.rendered_objects):
+                cad.Select(self.rendered_objects[-1])
+        
+    def OnKeyUp(self, e):
+        print(str(e.GetKeyCode()))
         
     def OnRemoved(self, removed):
         self.Refresh()
@@ -338,6 +369,7 @@ class TreeCanvas(wx.ScrolledWindow):
         # find icon info
         if not self.render_just_for_calculation:
             self.dc.DrawBitmap(wx.Bitmap(object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, self.ypos)
+            self.rendered_objects.append(object)
 
         self.xpos += 16
 
@@ -410,6 +442,7 @@ class TreeCanvas(wx.ScrolledWindow):
             self.dc.Clear()
 
             self.tree_buttons = []
+            self.rendered_objects = []
 
         self.xpos = 0 # start at the left
         self.ypos = 0 # -scroll_y_pos; // start at the top
