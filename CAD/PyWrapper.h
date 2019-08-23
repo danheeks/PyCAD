@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/python/wrapper.hpp>
+#include "MarkedObject.h"
 
 void HandlePythonCallError();
 
@@ -504,7 +505,7 @@ public:
 				{
 					boost::python::detail::method_result result = f();
 					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (std::string)result);
+					return std::make_pair(success, (std::string)(const char*)result);
 				}
 				catch (const boost::python::error_already_set&)
 				{
@@ -597,7 +598,7 @@ public:
 				{
 					boost::python::detail::method_result result = f();
 					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (HeeksColor)result);
+					return std::make_pair(success, (HeeksColor)(long)result);
 				}
 				catch (const boost::python::error_already_set&)
 				{
