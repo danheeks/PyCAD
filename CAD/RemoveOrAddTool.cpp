@@ -40,7 +40,7 @@ void RemoveOrAddTool::Add()
 
 	if (m_owner == NULL)
 	{
-		theApp->MessageBox(L"Can't Have NULL owner!");
+		theApp->DoMessageBox(L"Can't Have NULL owner!");
 		return;
 	}
 
@@ -109,7 +109,7 @@ void ManyRemoveOrAddTool::Add()
 {
 	if (m_owner == NULL)
 	{
-		theApp->MessageBox(L"Can't have NULL owner!");
+		theApp->DoMessageBox(L"Can't have NULL owner!");
 		return;
 	}
 

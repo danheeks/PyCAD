@@ -331,7 +331,7 @@ public:
 	void RegisterOnBuildTexture(void(*callbackfunc)());
 	void RegisterOnBeforeNewOrOpen(void(*callbackfunc)(int, int));
 	void RegisterOnBeforeFrameDelete(void(*callbackfunc)());
-	void MessageBox(const wchar_t* message);
+	void DoMessageBox(const wchar_t* message);
 
 	typedef int ObjectType_t;
 	typedef int ObjectId_t;

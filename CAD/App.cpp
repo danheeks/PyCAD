@@ -375,7 +375,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 			std::wstring msg(filepath);
 			msg.append(L": ");
 			msg.append(Ctt(doc.ErrorDesc()));
-			MessageBox(msg.c_str());
+			DoMessageBox(msg.c_str());
 		}
 		return;
 	}
@@ -612,7 +612,7 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 	{
 		// error
 		std::wstring str = std::wstring(L"Invalid file type chosen");
-		MessageBox(str.c_str());
+		DoMessageBox(str.c_str());
 		open_succeeded = false;
 	}
 
@@ -718,7 +718,7 @@ void CApp::SaveDXFFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 	if (dxf_file.Failed())
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + filepath;
-		MessageBox(str.c_str());
+		DoMessageBox(str.c_str());
 		return;
 	}
 
@@ -855,7 +855,7 @@ void CApp::SaveSTLFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *
 	if (!ofs)
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
-		MessageBox(str.c_str());
+		DoMessageBox(str.c_str());
 		return;
 	}
 	ofs.imbue(std::locale("C"));
@@ -974,7 +974,7 @@ public:
 		if (!ofs)
 		{
 			std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
-			theApp->MessageBox(str.c_str());
+			theApp->DoMessageBox(str.c_str());
 			return;
 		}
 		ofs.imbue(std::locale("C"));
@@ -1033,7 +1033,7 @@ void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 	if (!ofs)
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
-		MessageBox(str.c_str());
+		DoMessageBox(str.c_str());
 		return;
 	}
 	ofs.imbue(std::locale("C"));
@@ -1061,7 +1061,7 @@ void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepa
 	if (!ofs)
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
-		MessageBox(str.c_str());
+		DoMessageBox(str.c_str());
 		return;
 	}
 	ofs.imbue(std::locale("C"));
@@ -1148,7 +1148,7 @@ bool CApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects
 	else
 	{
 		std::wstring str = std::wstring(L"Invalid file type chosen ") + filepath;
-		MessageBox(str.c_str());
+		DoMessageBox(str.c_str());
 		return false;
 	}
 
@@ -1695,7 +1695,7 @@ Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 
 extern void PythonOnMessageBox(const wchar_t* message);
 
-void CApp::MessageBox(const wchar_t* message)
+void CApp::DoMessageBox(const wchar_t* message)
 {
 #ifdef WIN32
 	::MessageBox(NULL, message, L"Message", MB_OK);

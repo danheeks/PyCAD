@@ -137,7 +137,7 @@ bool AfterPythonCall(PyObject *main_module)
 
 	if (BeforePythonCall_level < 0)
 	{
-		theApp->MessageBoxW(L"too many internal calls to AfterPythonCall");
+		theApp->DoMessageBox(L"too many internal calls to AfterPythonCall");
 		return false;
 	}
 

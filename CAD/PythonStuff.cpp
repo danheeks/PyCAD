@@ -374,7 +374,7 @@ void SetResFolder(std::wstring str)
 
 void CadMessageBox(std::wstring str)
 {
-	theApp->MessageBox(str.c_str());
+	theApp->DoMessageBox(str.c_str());
 }
 
 std::wstring BaseObjectGetIconFilePath(BaseObject& object)
@@ -1191,7 +1191,7 @@ public:
 			return result.second.c_str();
 		return L"";
 	}
-	void RollBack() override
+	void RollBack()
 	{
 		CallVoidReturn("RollBack");
 	}
