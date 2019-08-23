@@ -1310,12 +1310,12 @@ boost::python::list GetClickedObjects(int x, int y) {
 		for (std::map<int, MarkedObject*>::iterator It = types.begin(); It != types.end(); It++)
 		{
 			MarkedObject* object = It->second;
-			AddObjectToPythonList(object->GetObjectW(), olist);
+			AddObjectToPythonList(object->GetHeeksObj(), olist);
 		}
 	}
 	else
 	{
-		HeeksObj* object = marked_object.GetObjectW();
+		HeeksObj* object = marked_object.GetHeeksObj();
 		if (object)AddObjectToPythonList(object, olist);
 	}
 
@@ -1745,48 +1745,48 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetArea", &SketchGetArea)
 			;
 
-		boost::python::class_<HPoint, boost::python::bases<IdNamedObj>>("Point", boost::python::no_init)
+		boost::python::class_<HPoint, boost::python::bases<IdNamedObj> >("Point", boost::python::no_init)
 			.def("__init__", boost::python::make_constructor(&initHPoint))
 //			.def_readwrite("p", &HPoint::m_p)
 			;
 
-		boost::python::class_<CStlSolid, boost::python::bases<HeeksObj>>("StlSolid")
+		boost::python::class_<CStlSolid, boost::python::bases<HeeksObj> >("StlSolid")
 			.def(boost::python::init<CStlSolid>())
 			.def("__init__", boost::python::make_constructor(&initStlSolid))
 			.def(boost::python::init<const std::wstring&>())// load a stl solid from a filepath
 			.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
 			;
 
-		boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property>>("PropertyCheck", boost::python::no_init);
-		boost::python::class_<PropertyChoice, boost::python::bases<Property>>("PropertyChoice", boost::python::no_init);
-		boost::python::class_<PropertyColor, boost::python::bases<Property>>("PropertyColor", boost::python::no_init);
-		boost::python::class_<PropertyDouble, boost::python::bases<Property>>("PropertyDouble", boost::python::no_init);
-		boost::python::class_<PropertyDoubleScaled, boost::python::bases<Property>>("PropertyDoubleScaled", boost::python::no_init);
-		boost::python::class_<PropertyLengthScaled, boost::python::bases<PropertyDoubleScaled>>("PropertyLengthScaled", boost::python::no_init);
-		boost::python::class_<PropertyDoubleLimited, boost::python::bases<PropertyDouble>>("PropertyDoubleLimited", boost::python::no_init);
-		boost::python::class_<PropertyString, boost::python::bases<Property>>("PropertyString", boost::python::no_init);
-		boost::python::class_<PropertyStringReadOnly, boost::python::bases<Property>>("PropertyStringReadOnly", boost::python::no_init)
+		boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property> >("PropertyCheck", boost::python::no_init);
+		boost::python::class_<PropertyChoice, boost::python::bases<Property> >("PropertyChoice", boost::python::no_init);
+		boost::python::class_<PropertyColor, boost::python::bases<Property> >("PropertyColor", boost::python::no_init);
+		boost::python::class_<PropertyDouble, boost::python::bases<Property> >("PropertyDouble", boost::python::no_init);
+		boost::python::class_<PropertyDoubleScaled, boost::python::bases<Property> >("PropertyDoubleScaled", boost::python::no_init);
+		boost::python::class_<PropertyLengthScaled, boost::python::bases<PropertyDoubleScaled> >("PropertyLengthScaled", boost::python::no_init);
+		boost::python::class_<PropertyDoubleLimited, boost::python::bases<PropertyDouble> >("PropertyDoubleLimited", boost::python::no_init);
+		boost::python::class_<PropertyString, boost::python::bases<Property> >("PropertyString", boost::python::no_init);
+		boost::python::class_<PropertyStringReadOnly, boost::python::bases<Property> >("PropertyStringReadOnly", boost::python::no_init)
 			.def("__init__", boost::python::make_constructor(&initPropertyStringReadOnly))
 			;
-		boost::python::class_<PropertyFile, boost::python::bases<PropertyString>>("PropertyFile", boost::python::no_init);
-		boost::python::class_<PropertyInt, boost::python::bases<Property>>("PropertyInt", boost::python::no_init);
-		boost::python::class_<PropertyLength, boost::python::bases<PropertyDouble>>("PropertyLength", boost::python::no_init);
-		boost::python::class_<PropertyLengthWithKillGLLists, boost::python::bases<PropertyLength>>("PropertyLengthWithKillGLLists", boost::python::no_init);
-		boost::python::class_<PropertyList, boost::python::bases<Property>>("PropertyList", boost::python::no_init);
-		boost::python::class_<PropertyObjectTitle, boost::python::bases<Property>>("PropertyObjectTitle", boost::python::no_init);
-		boost::python::class_<PropertyObjectColor, boost::python::bases<Property>>("PropertyObjectColor", boost::python::no_init);
+		boost::python::class_<PropertyFile, boost::python::bases<PropertyString> >("PropertyFile", boost::python::no_init);
+		boost::python::class_<PropertyInt, boost::python::bases<Property> >("PropertyInt", boost::python::no_init);
+		boost::python::class_<PropertyLength, boost::python::bases<PropertyDouble> >("PropertyLength", boost::python::no_init);
+		boost::python::class_<PropertyLengthWithKillGLLists, boost::python::bases<PropertyLength> >("PropertyLengthWithKillGLLists", boost::python::no_init);
+		boost::python::class_<PropertyList, boost::python::bases<Property> >("PropertyList", boost::python::no_init);
+		boost::python::class_<PropertyObjectTitle, boost::python::bases<Property> >("PropertyObjectTitle", boost::python::no_init);
+		boost::python::class_<PropertyObjectColor, boost::python::bases<Property> >("PropertyObjectColor", boost::python::no_init);
 
 		boost::python::class_<Undoable, boost::noncopyable>("Undoable", boost::python::no_init);
 
 		boost::python::class_<UndoableWrap, boost::noncopyable >("BaseUndoable");
 
-		boost::python::class_<PropertyChangeString, boost::python::bases<Undoable>>("PropertyChangeString", boost::python::no_init).def(boost::python::init<const std::wstring&, Property*>());
-		boost::python::class_<PropertyChangeDouble, boost::python::bases<Undoable>>("PropertyChangeDouble", boost::python::no_init).def(boost::python::init<const double&, Property*>());
-		boost::python::class_<PropertyChangeLength, boost::python::bases<Undoable>>("PropertyChangeLength", boost::python::no_init).def(boost::python::init<const double&, Property*>());
-		boost::python::class_<PropertyChangeInt, boost::python::bases<Undoable>>("PropertyChangeInt", boost::python::no_init).def(boost::python::init<const int&, Property*>());
-		boost::python::class_<PropertyChangeColor, boost::python::bases<Undoable>>("PropertyChangeColor", boost::python::no_init).def(boost::python::init<const HeeksColor&, Property*>());
-		boost::python::class_<PropertyChangeChoice, boost::python::bases<Undoable>>("PropertyChangeChoice", boost::python::no_init).def(boost::python::init<const int&, Property*>());
-		boost::python::class_<PropertyChangeCheck, boost::python::bases<Undoable>>("PropertyChangeCheck", boost::python::no_init).def(boost::python::init<const bool&, Property*>());
+		boost::python::class_<PropertyChangeString, boost::python::bases<Undoable> >("PropertyChangeString", boost::python::no_init).def(boost::python::init<const std::wstring&, Property*>());
+		boost::python::class_<PropertyChangeDouble, boost::python::bases<Undoable> >("PropertyChangeDouble", boost::python::no_init).def(boost::python::init<const double&, Property*>());
+		boost::python::class_<PropertyChangeLength, boost::python::bases<Undoable> >("PropertyChangeLength", boost::python::no_init).def(boost::python::init<const double&, Property*>());
+		boost::python::class_<PropertyChangeInt, boost::python::bases<Undoable> >("PropertyChangeInt", boost::python::no_init).def(boost::python::init<const int&, Property*>());
+		boost::python::class_<PropertyChangeColor, boost::python::bases<Undoable> >("PropertyChangeColor", boost::python::no_init).def(boost::python::init<const HeeksColor&, Property*>());
+		boost::python::class_<PropertyChangeChoice, boost::python::bases<Undoable> >("PropertyChangeChoice", boost::python::no_init).def(boost::python::init<const int&, Property*>());
+		boost::python::class_<PropertyChangeCheck, boost::python::bases<Undoable> >("PropertyChangeCheck", boost::python::no_init).def(boost::python::init<const bool&, Property*>());
 
 		boost::python::class_<CApp, boost::python::bases<ObjList>, boost::noncopyable>("App")
 			.def(boost::python::init<CApp>())

@@ -41,7 +41,7 @@ public:
 	unsigned int GetNumCustomNames();
 	unsigned int* GetCustomNames();
 	int GetWindowSize(){return m_window_size;}
-	HeeksObj* GetObject(){return m_object;}
+	HeeksObj* GetHeeksObj(){ return m_object; }
 	MarkedObject* GetCurrent();
 	void Clear();
 	MarkedObject* Add(HeeksObj* object, unsigned long z_depth, int window_size, unsigned int num_custom_names, unsigned int *custom_names);

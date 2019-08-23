@@ -104,7 +104,7 @@ MarkedObject* MarkedObject::Add(HeeksObj* object, unsigned long depth, int windo
 				if(depth < so->GetDepth() && window_size<= so->GetWindowSize())
 				{
 					m_types.erase(FindIt2);
-					m_map.erase(so->GetObject());
+					m_map.erase(so->GetHeeksObj());
 					so->Clear();
 					delete so;
 				}
