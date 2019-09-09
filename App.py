@@ -31,6 +31,10 @@ class App(wx.App):
         sys.stdout = save_out
         sys.stderr = save_err
         
+#    def GetAppName(self):
+#        # override this in your derived App class, if you don't want to use the executable's name as the app's name
+#        return 'Power CAD'
+            
     def OnInit(self):
         self.RegisterMessageBoxCallback()
         self.InitCad()
@@ -87,6 +91,15 @@ class App(wx.App):
     def LoadConfig(self):
         config = HeeksConfig(self.settings_restored)
         self.LoadRecentFiles(config)
+
+    def GetDefaultDir(self):
+        default_directory = os.getcwd()
+        
+        if len(self.recent_files) > 0:
+            default_directory = self.recent_files[0]
+            default_directory = os.path.dirname(os.path.realpath(default_directory))
+            
+        return default_directory
         
     def LoadRecentFiles(self, config):
         for i in range(0, self.MAX_RECENT_FILES):

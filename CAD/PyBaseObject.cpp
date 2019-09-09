@@ -173,6 +173,60 @@ bool BaseObject::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &r
 	return ObjList::SetClickMarkPoint(marked_object, ray_start, ray_direction);
 }
 
+static void(*callback_for_GetTriangles)(const double*, const double*) = NULL;
+static double cusp_for_GetTriangles = 0.0;
+static bool just_one_average_normal_for_GetTriangles = false;
+
+void BaseObject::GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal)
+{
+	callback_for_GetTriangles = callbackfunc;
+	cusp_for_GetTriangles = cusp;
+	just_one_average_normal_for_GetTriangles = just_one_average_normal;
+	CallVoidReturn("GetTriangles");
+}
+
+void BaseObject::AddTriangle(double x0, double y0, double z0, double x1, double y1, double z1, double x2, double y2, double z2)
+{
+	static double x[9];
+	static double n[9];
+
+	x[0] = x0;
+	x[1] = y0;
+	x[2] = z0;
+	x[3] = x1;
+	x[4] = y1;
+	x[5] = z1;
+	x[6] = x2;
+	x[7] = y2;
+	x[8] = z2;
+	Point3d p0(&x[0]);
+	Point3d p1(&x[1]);
+	Point3d p2(&x[2]);
+	Point3d v1(p0, p1);
+	Point3d v2(p0, p2);
+	try
+	{
+		Point3d norm = (v1 ^ v2).Normalized();
+		n[0] = norm.x;
+		n[1] = norm.y;
+		n[2] = norm.z;
+		if (!just_one_average_normal_for_GetTriangles)
+		{
+			n[3] = n[0];
+			n[4] = n[1];
+			n[5] = n[2];
+			n[6] = n[0];
+			n[7] = n[1];
+			n[8] = n[2];
+		}
+		(*callback_for_GetTriangles)(x, n);
+	}
+	catch (...)
+	{
+	}
+}
+
+
 boost::python::override BaseObject::get_override(char const* name) const
 {
 	boost::python::override result = boost::python::wrapper<ObjList>::get_override(name);

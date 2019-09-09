@@ -1250,7 +1250,7 @@ void CoordinateSystem::WriteToXML(TiXmlElement *element)
 	element->SetDoubleAttribute("yx", m_y.x);
 	element->SetDoubleAttribute("yy", m_y.y);
 	element->SetDoubleAttribute("yz", m_y.z);
-	WriteToXML(element);
+	HeeksObj::WriteToXML(element);
 }
 
 Matrix CoordinateSystem::GetMatrix()

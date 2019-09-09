@@ -791,7 +791,7 @@ static void write_binary_triangle(const double* x, const double* n)
 
 void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
-#if 0
+#if 1
 	// to do
 #ifdef __WXMSW__
 	ofstream ofs(filepath, ios::binary);

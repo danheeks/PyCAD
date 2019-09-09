@@ -35,9 +35,12 @@ public:
 	void OnAdd();
 	void OnRemove();
 	bool SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction);
+	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
 	boost::python::override get_override(char const* name) const;
 
 	const HeeksObj* GetCopyFromObject(){ return copy_from_object; }
+
+	void AddTriangle(double x0, double y0, double z0, double x1, double y1, double z1, double x2, double y2, double z2);
 };
 
 

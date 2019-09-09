@@ -90,7 +90,7 @@ class TreeCanvas(wx.ScrolledWindow):
         # else -1
         i = 0
         for o in self.rendered_objects:
-            if o == object:
+            if o.GetIndex() == object.GetIndex():
                 return i
             i += 1
         return -1
@@ -102,16 +102,32 @@ class TreeCanvas(wx.ScrolledWindow):
             index = -1
             if len(sel) > 0:
                 index = self.ObjectRenderedIndex(sel[-1])
+                if index > 0:
+                    index -= 1
             if (index == -1) and (len(self.rendered_objects) > 0):
                 index = len(self.rendered_objects) - 1
             
             cad.ClearSelection(True)
             
             if len(self.rendered_objects):
-                cad.Select(self.rendered_objects[-1])
+                cad.Select(self.rendered_objects[index])
+        if k == wx.WXK_DOWN:
+            sel = cad.GetSelectedObjects()
+            index = -1
+            if len(sel) > 0:
+                index = self.ObjectRenderedIndex(sel[-1])
+                if index < len(self.rendered_objects)-1:
+                    index += 1
+            if (index == -1) and (len(self.rendered_objects) > 0):
+                index = 0
+            
+            cad.ClearSelection(True)
+            
+            if len(self.rendered_objects):
+                cad.Select(self.rendered_objects[index])
         
     def OnKeyUp(self, e):
-        print(str(e.GetKeyCode()))
+        pass
         
     def OnRemoved(self, removed):
         self.Refresh()

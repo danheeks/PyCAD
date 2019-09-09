@@ -17,8 +17,8 @@ pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
 
 class Frame(wx.Frame):
-    def __init__(self, parent, id=-1, title='', pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
-        wx.Frame.__init__(self, parent, id, title, pos, size, style, name)
+    def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
+        wx.Frame.__init__(self, parent, id, '', pos, size, style, name)
 
         config = HeeksConfig()
         self.ID_RECENT_FIRST = wx.ID_HIGHEST + 1
@@ -243,13 +243,13 @@ class Frame(wx.Frame):
             self.SetFrameTitle()
             
     def SetFrameTitle(self):
-        #str = wx.GetApp().GetAppName() + ' - '
-        str = self.GetTitle() + ' - '
+        s = wx.GetApp().GetAppName() + ' - '
+        #s = self.GetTitle() + ' - '
         if wx.GetApp().filepath:
-            str += wx.GetApp().filepath
+            s += wx.GetApp().filepath
         else:
-            str += 'Untitled'
-        self.SetTitle(str)
+            s += 'Untitled'
+        self.SetTitle(s)
         
     def SaveProject(self, force_dialog = False):
         if self.GetProjectFileName().IsOk():
@@ -290,18 +290,9 @@ class Frame(wx.Frame):
             else:
                 wx.MessageBox('Invalid file type chosen expecting .heeks')
         return True
-                
-    def GetDefaultDir(self):
-        default_directory = os.getcwd()
-        
-        if len(wx.GetApp().recent_files) > 0:
-            default_directory = wx.GetApp().recent_files[0]
-            default_directory = os.path.dirname(os.path.realpath(default_directory))
-            
-        return default_directory
 
     def OnOpen(self, e):
-        dialog = wx.FileDialog(self, 'Open File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
+        dialog = wx.FileDialog(self, 'Open File', wx.GetApp().GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
@@ -338,7 +329,7 @@ class Frame(wx.Frame):
         if wx.GetApp().filepath:
             return self.OnSaveFilepath(wx.GetApp().filepath)
 
-        dialog = wx.FileDialog(self, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self, 'Save File', wx.GetApp().GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.SetFilterIndex(1)
         dialog.CenterOnParent()
         if dialog.ShowModal() == wx.ID_CANCEL:
@@ -353,7 +344,7 @@ class Frame(wx.Frame):
             default_directory = ''
             default_filepath = wx.GetApp().filepath
         else:
-            default_directory = self.GetDefaultDir()
+            default_directory = wx.GetApp().GetDefaultDir()
             default_filepath = ''            
         
         dialog = wx.FileDialog(self, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -366,14 +357,14 @@ class Frame(wx.Frame):
         imageExtStr = '' # to do, get image extensions from wx
         imageExtStr2 = '' # to do, get image extensions from wx
         registeredExtensions = '' # to do, this will be extensions added by child apps
-        return 'Known Files' + ' |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF' + imageExtStr + registeredExtensions + '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|Picture files (' + imageExtStr2 + ')|' + imageExtStr
+        return 'Known Files' + ' |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF;*.stl' + imageExtStr + registeredExtensions + '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|Picture files (' + imageExtStr2 + ')|' + imageExtStr
 
     def GetExportWildcardString(self):
         return 'Known Files |*.stl;*.dxf;*.cpp;*.py;*.obj|STL files (*.stl)|*.stl|DXF files (*.dxf)|*.dxf|CPP files (*.cpp)|*.cpp|OpenCAMLib python files (*.py)|*.py|Wavefront .obj files (*.obj)|*.obj'
                                          
     def OnImport(self, e):
         config = HeeksConfig()
-        default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
+        default_directory = config.Read('ImportDirectory', wx.GetApp().GetDefaultDir())
         dialog = wx.FileDialog(self, 'Import File', default_directory, '', self.GetImportWildcardString())
         dialog.CenterOnParent()
         
@@ -396,7 +387,8 @@ class Frame(wx.Frame):
         
     def OnExport(self, e):
         config = HeeksConfig()
-        default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
+        default_directory = config.Read('ExportDirectory', wx.GetApp().GetDefaultDir())
+        print('self.GetExportWildcardString() = ' + str(self.GetExportWildcardString()))
         dialog = wx.FileDialog(self, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.CenterOnParent()
         

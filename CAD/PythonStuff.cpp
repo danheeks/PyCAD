@@ -838,6 +838,16 @@ void DrawTriangle(double x0, double x1, double x2, double x3, double x4, double 
 
 }
 
+void DrawEnableLighting()
+{
+	glEnable(GL_LIGHTING);
+}
+
+void DrawDisableLighting()
+{
+	glDisable(GL_LIGHTING);
+}
+
 void DrawLine(double x0, double x1, double x2, double x3, double x4, double x5)
 {
 	BeginLines();
@@ -877,7 +887,7 @@ void GlLineWidth(int width)
 	glLineWidth(width);
 }
 
-static unsigned int current_display_list_started = false;
+static unsigned int current_display_list_started = 0;
 
 unsigned int DrawNewList()
 {
@@ -1204,6 +1214,11 @@ void StlSolidWriteSTL(CStlSolid& solid, double tolerance, std::wstring filepath)
 	std::list<HeeksObj*> list;
 	list.push_back(&solid);
 	theApp->SaveSTLFileAscii(list, filepath.c_str(), tolerance);
+}
+
+int StlSolidNumTriangles(CStlSolid& solid)
+{
+	return solid.m_list.size();
 }
 
 static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, const HeeksColor* color)
@@ -1645,6 +1660,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
 			.def("GetCopyFromObject", &BaseObject::GetCopyFromObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
+			.def("AddTriangle", &BaseObject::AddTriangle)
 			;
 
 		boost::python::class_<HeeksObj, boost::noncopyable>("Object")
@@ -1694,6 +1710,12 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def_readwrite("blue", &HeeksColor::blue)
 			.def("ref", &HeeksColor::COLORREF_color)
 			.def("SetGlColor", &HeeksColor::glColor)
+			;
+
+		boost::python::class_<Material>("Material")
+			.def(boost::python::init<Material>())
+			.def(boost::python::init<const HeeksColor&>())
+			.def("glMaterial", &Material::glMaterial)
 			;
 
 		boost::python::class_<PropertyWrap, boost::noncopyable >("Property")
@@ -1755,6 +1777,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("__init__", boost::python::make_constructor(&initStlSolid))
 			.def(boost::python::init<const std::wstring&>())// load a stl solid from a filepath
 			.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
+			.def("NumTriangles", StlSolidNumTriangles)
 			;
 
 		boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property> >("PropertyCheck", boost::python::no_init);
@@ -2048,6 +2071,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("SaveFile", CadSaveFile);
 		boost::python::def("SaveObjects", SaveObjects);		
 		boost::python::def("DrawTriangle", &DrawTriangle);
+		boost::python::def("DrawEnableLighting", &DrawEnableLighting);
+		boost::python::def("DrawDisableLighting", &DrawDisableLighting);
 		boost::python::def("DrawLine", &DrawLine);
 		boost::python::def("DrawColor", &DrawColor);
 		boost::python::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
@@ -2060,6 +2085,9 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("DrawEndList", &DrawEndList);
 		boost::python::def("DrawCallList", &DrawCallList); 
 		boost::python::def("DrawDeleteList", &DrawDeleteList);
+		boost::python::def("DrawEnableLights", &DrawDeleteList);
+		boost::python::def("DrawDisableLights", &DrawDeleteList);
+
 		boost::python::def("AddProperty", AddProperty);
 		boost::python::def("GetObjectFromId", &GetObjectFromId);
 		boost::python::def("RegisterObjectType", RegisterObjectType);

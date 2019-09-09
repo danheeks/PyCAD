@@ -686,12 +686,15 @@ BOOST_PYTHON_MODULE(geom) {
 	/// a 2D box used for returning the extents of a Span or Curve
 	bp::class_<CBox2D>("Box") 
         .def(bp::init<CBox2D>())
+		.def(bp::init<const Point&, const Point&>())
 		.def("MinX", &CBox2D::MinX)///function MinX///return float///returns the minimum x value
 		.def("MaxX", &CBox2D::MaxX)///function MaxX///return float///returns the maximum x value
 		.def("MinY", &CBox2D::MinY)///function MinY///return float///returns the minimum y value
 		.def("MaxY", &CBox2D::MaxY)///function MaxY///return float///returns the maximum y value
 		.def("Width", &CBox2D::Width)
 		.def("Height", &CBox2D::Height)
+		.def_readwrite("minxy", &CBox2D::m_minxy)
+		.def_readwrite("maxxy", &CBox2D::m_maxxy)
 		;
 
 	/// class Box3D
