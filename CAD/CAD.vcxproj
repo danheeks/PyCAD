@@ -150,6 +150,7 @@
     </ClCompile>
     <ClCompile Include="StlSolid.cpp" />
     <ClCompile Include="strconv.cpp" />
+    <ClCompile Include="StretchTool.cpp" />
     <ClCompile Include="svg.cpp" />
     <ClCompile Include="tinystr.cpp" />
     <ClCompile Include="tinyxml.cpp" />
@@ -228,6 +229,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StlSolid.h" />
     <ClInclude Include="strconv.h" />
+    <ClInclude Include="StretchTool.h" />
     <ClInclude Include="svg.h" />
     <ClInclude Include="tinystr.h" />
     <ClInclude Include="tinyxml.h" />

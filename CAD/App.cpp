@@ -172,6 +172,8 @@ void CApp::OnExit(){
 	history = NULL;
 }
 
+extern void PythonOnSetInputMode();
+
 void CApp::SetInputMode(CInputMode *new_mode){
 	if(!new_mode)return;
 	//if(m_frame)m_current_viewport->EndDrawFront();
@@ -181,6 +183,9 @@ void CApp::SetInputMode(CInputMode *new_mode){
 	else{
 		input_mode_object = m_select_mode;
 	}
+
+	PythonOnSetInputMode();
+
 	//if(m_frame && m_frame->m_input_canvas)m_frame->RefreshInputCanvas();
 	//if(m_frame && m_frame->m_options)m_frame->RefreshOptions();
 	//if(m_graphics_text_mode != GraphicsTextModeNone)Repaint();
@@ -734,7 +739,7 @@ void CApp::SaveDXFFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 	// when dxf_file goes out of scope it writes the file, see ~CDxfWrite
 }
 
-static ofstream* ofs_for_write_stl_triangle = NULL;
+static wofstream* ofs_for_write_stl_triangle = NULL;
 static double* scale_for_write_triangle = NULL;
 
 static void write_stl_triangle(const double* x, const double* n)
@@ -791,13 +796,7 @@ static void write_binary_triangle(const double* x, const double* n)
 
 void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
-#if 1
-	// to do
-#ifdef __WXMSW__
 	ofstream ofs(filepath, ios::binary);
-#else
-	ofstream ofs(Ttc(filepath), ios::binary);
-#endif
 
 	// write 80 characters ( could be anything )
 	char header[80] = "Binary STL file made with HeeksCAD                                     ";
@@ -842,16 +841,12 @@ void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t 
 	}
 
 	binary_triangles.clear();
-#endif
 }
 
 void CApp::SaveSTLFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
-#ifdef __WXMSW__
-	ofstream ofs(filepath);
-#else
-	ofstream ofs(Ttc(filepath));
-#endif
+	wofstream ofs(filepath);
+
 	if (!ofs)
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
@@ -966,11 +961,8 @@ public:
 
 	void WriteObjFile(const std::wstring& filepath)
 	{
-#ifdef __WXMSW__
-		ofstream ofs(filepath);
-#else
-		ofstream ofs(Ttc(filepath.c_str()));
-#endif
+		wofstream ofs(filepath);
+
 		if (!ofs)
 		{
 			std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
@@ -1025,11 +1017,8 @@ void CApp::SaveSTLFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 
 void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
 {
-#ifdef __WXMSW__
-	ofstream ofs(filepath);
-#else
-	ofstream ofs(Ttc(filepath));
-#endif
+	wofstream ofs(filepath);
+
 	if (!ofs)
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;
@@ -1053,11 +1042,8 @@ void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 
 void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
 {
-#ifdef __WXMSW__
-	ofstream ofs(filepath);
-#else
-	ofstream ofs(Ttc(filepath));
-#endif
+	wofstream ofs(filepath);
+
 	if (!ofs)
 	{
 		std::wstring str = std::wstring(L"couldn't open file") + L" - " + filepath;

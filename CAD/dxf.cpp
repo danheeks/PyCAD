@@ -11,11 +11,9 @@ CDxfWrite::CDxfWrite(const char* filepath)
 {
 	// start the file
 	m_fail = false;
-#ifdef __WXMSW__
-	m_ofs = new ofstream(filepath, ios::out);
-#else
-	m_ofs = new ofstream(filepath, ios::out);
-#endif
+
+	m_ofs = new wofstream(filepath, ios::out);
+
 	if(!(*m_ofs)){
 		m_fail = true;
 		return;

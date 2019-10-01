@@ -53,15 +53,12 @@ void EndedObject::Transform(const Matrix& m){
 	B = B.Transformed(m);
 }
 
-bool EndedObject::Stretch(const double *p, const double* shift, void* data){
-	Point3d vp(p);
-	Point3d vshift(shift);
-
+bool EndedObject::Stretch(const Point3d &p, const Point3d &shift, void* data){
 	if(data == &A){
-		A = vp + vshift;
+		A = p + shift;
 	}
 	else if(data == &B){
-		B = vp + vshift;
+		B = p + shift;
 	}
 	return false;
 }

@@ -8,6 +8,7 @@
 #include "MarkedList.h"
 #include "DigitizeMode.h"
 #include "Viewport.h"
+#include "StretchTool.h"
 //#include "Sketch.h"
 //#include "EndedObject.h"
 
@@ -122,10 +123,7 @@ void GripperSelTransform::OnGripperReleased ( const double* from, const double* 
 			}
 
 			{
-#if 0
-				to do
 				if(object)theApp->DoUndoable(new StretchTool(object, m_initial_grip_pos, shift, m_data.m_data));
-#endif
 			}
 			m_data.m_x += shift[0];
 			m_data.m_y += shift[1];

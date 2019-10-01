@@ -154,8 +154,9 @@ public:
 };
 
 static std::wstring str_for_input_mode;
+std::list<Property *> *property_list = NULL;
 
-class InputModeWrap : public CInputMode, public boost::python::wrapper<CInputMode>
+class InputModeWrap : public CInputMode, public cad_wrapper<CInputMode>
 {
 public:
 	InputModeWrap() :CInputMode(){}
@@ -189,6 +190,12 @@ public:
 		}
 		else
 			CInputMode::OnKeyUp(e);
+	}
+
+	void GetProperties(std::list<Property *> *list)
+	{
+		property_list = list;
+		CallVoidReturn("GetProperties");
 	}
 
 };
@@ -362,6 +369,24 @@ void SetContextMenuCallback(PyObject *callback)
 	context_menu_callback = callback;
 }
 
+PyObject* set_input_mode_callback = NULL;
+
+void PythonOnSetInputMode()
+{
+	if (set_input_mode_callback)
+		CallPythonCallback(set_input_mode_callback);
+}
+
+void SetInputModeCallback(PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	set_input_mode_callback = callback;
+}
+
 std::wstring GetResFolder()
 {
 	return theApp->m_res_folder;
@@ -387,6 +412,27 @@ std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 	const wchar_t* s = object->GetShortStringOrTypeString();
 	if (s == NULL)return L"";
 	return std::wstring(s);
+}
+
+std::wstring InputModeGetTitle(CInputMode* input_mode)
+{
+	const wchar_t* s = input_mode->GetTitle();
+	if (s == NULL)return L"";
+	return std::wstring(s);
+}
+
+boost::python::list InputModeGetProperties(CInputMode* input_mode)
+{
+	boost::python::list return_list;
+	std::list<Property*> p_list;
+	input_mode->GetProperties(&p_list);
+	for (std::list<Property*>::iterator It = p_list.begin(); It != p_list.end(); It++)
+	{
+		Property* property = *It;
+		//AddPropertyToPythonList(property, return_list);
+		return_list.append(boost::python::ptr<Property*>(property));
+	}
+	return return_list;
 }
 
 std::wstring BaseObjectGetTitle(const BaseObject& object)
@@ -915,6 +961,12 @@ void DrawCallList(unsigned int display_list)
 void DrawDeleteList(unsigned int display_list)
 {
 	glDeleteLists(display_list, 1);
+}
+
+void AddProperty(Property* property)
+{
+	if (property_list)
+		property_list->push_back(property);
 }
 
 boost::python::object GetObjectFromId(int type, int id) {
@@ -2016,6 +2068,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 
 		boost::python::class_<InputModeWrap, boost::noncopyable >("InputMode")
 			.def(boost::python::init<InputModeWrap>())
+			.def("GetTitle", &InputModeGetTitle)
+			.def("GetProperties", &InputModeGetProperties)
 			.def("OnKeyDown", &CInputMode::OnKeyDown)
 			.def("OnKeyUp", &CInputMode::OnKeyUp)
 			;
@@ -2110,7 +2164,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
 		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
 		boost::python::def("SetContextMenuCallback", SetContextMenuCallback);
-		boost::python::def("GetResFolder", GetResFolder);
+		boost::python::def("SetInputModeCallback", SetInputModeCallback);
+		boost::python::def("GetResFolder", GetResFolder); 
 		boost::python::def("SetResFolder", SetResFolder);
 		boost::python::def("MessageBox", CadMessageBox);
 		boost::python::def("GetSelectedObjects", GetSelectedObjects);

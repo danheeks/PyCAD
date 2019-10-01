@@ -269,6 +269,7 @@ class PropertiesCanvas( wx.Panel ):
         self.trivialPropertyEditor = TrivialPropertyEditor()
         self.pg.RegisterEditor(self.trivialPropertyEditor)
         
+        self.EXTRA_TOOLBAR_HEIGHT = 7 # todo set to 14 for Linux
 
     def FindMapItem(self, p):
         if p in self.pmap:

@@ -489,6 +489,7 @@ public:
 	std::pair<bool, std::string> CallReturnString(const char* func)const
 	{
 		bool success = false;
+		bool after_called = false;
 		if (boost::python::override f = this->get_override(func))
 		{
 			if (PyErr_Occurred())
@@ -505,12 +506,13 @@ public:
 				{
 					boost::python::detail::method_result result = f();
 					success = AfterPythonCall(main_module);
+					after_called = true;
 					return std::make_pair(success, (std::string)(const char*)result);
 				}
 				catch (const boost::python::error_already_set&)
 				{
 				}
-				AfterPythonCall(main_module);
+				if(!after_called)AfterPythonCall(main_module);
 			}
 		}
 		PyErr_Clear();

@@ -53,17 +53,21 @@ class ObjectToolList(ContextToolList):
         return 16
     
 class SelectTool(ContextTool):
-    def __init__(self, object):
+    def __init__(self, object, control_pressed):
         ContextTool.__init__(self)
         self.object = object
+        self.control_pressed = control_pressed
     
     def GetTitle(self):
+        if self.control_pressed: return "Add To Selection"
         return "Select"
 
     def BitmapName(self):
         return "select"
 
     def Run(self, event):
+        if not self.control_pressed:
+            cad.ClearSelection(False)
         cad.Select(self.object)
          
 class EditTool(ContextTool):

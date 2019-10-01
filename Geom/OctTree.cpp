@@ -186,6 +186,8 @@ bool COctEle::AddTri(const CTri* tri)
 {
 	bool added = false;
 
+		if (tri->m_box.Intersects(m_box))
+		{
 	if (m_children[0])
 	{
 		for (int i = 0; i < 8; i++)
@@ -195,13 +197,11 @@ bool COctEle::AddTri(const CTri* tri)
 	}
 	else
 	{
-		if (tri->m_box.Intersects(m_box))
-		{
 			m_tris.push_back(tri);
 			SplitIfNecessary();
 			added = true;
-		}
 	}
+		}
 
 	return added;
 }

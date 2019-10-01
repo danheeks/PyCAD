@@ -27,6 +27,72 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 
 	if (theApp->m_dragging_moves_objects)
 	{
+		if (select)
+		{
+			double s = 5.0 / theApp->GetPixelScale();
+			double p[8][3] = {
+				{ -s, -s, -s },
+				{ s, -s, -s },
+				{ s, s, -s },
+				{ -s, s, -s },
+				{ -s, -s, s },
+				{ s, -s, s },
+				{ s, s, s },
+				{ -s, s, s }
+			};
+
+			for (int i = 0; i<8; i++){
+				p[i][0] += m_data.m_x;
+				p[i][1] += m_data.m_y;
+				p[i][2] += m_data.m_z;
+			}
+
+			glBegin(GL_TRIANGLES);
+			glVertex3dv(p[0]);
+			glVertex3dv(p[2]);
+			glVertex3dv(p[1]);
+			glVertex3dv(p[0]);
+			glVertex3dv(p[3]);
+			glVertex3dv(p[2]);
+
+			glVertex3dv(p[0]);
+			glVertex3dv(p[1]);
+			glVertex3dv(p[5]);
+			glVertex3dv(p[0]);
+			glVertex3dv(p[5]);
+			glVertex3dv(p[4]);
+
+			glVertex3dv(p[3]);
+			glVertex3dv(p[0]);
+			glVertex3dv(p[4]);
+			glVertex3dv(p[3]);
+			glVertex3dv(p[4]);
+			glVertex3dv(p[7]);
+
+			glVertex3dv(p[4]);
+			glVertex3dv(p[5]);
+			glVertex3dv(p[6]);
+			glVertex3dv(p[4]);
+			glVertex3dv(p[6]);
+			glVertex3dv(p[7]);
+
+			glVertex3dv(p[3]);
+			glVertex3dv(p[7]);
+			glVertex3dv(p[6]);
+			glVertex3dv(p[3]);
+			glVertex3dv(p[6]);
+			glVertex3dv(p[2]);
+
+			glVertex3dv(p[2]);
+			glVertex3dv(p[6]);
+			glVertex3dv(p[5]);
+			glVertex3dv(p[2]);
+			glVertex3dv(p[5]);
+			glVertex3dv(p[1]);
+
+			glEnd();
+		}
+		else
 		{
 			glRasterPos3d(m_data.m_x, m_data.m_y, m_data.m_z);
 			switch(m_data.m_type){

@@ -74,7 +74,7 @@ struct SplineData
 
 class CDxfWrite{
 private:
-	std::ofstream* m_ofs;
+	std::wofstream* m_ofs;
 	bool m_fail;
 
 	void WriteExtrusion(double thickness, const double* extru);

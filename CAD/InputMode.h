@@ -25,5 +25,5 @@ public:
 	virtual bool OnModeChange(void){return true;}
 	virtual void OnFrontRender(){}
 	virtual void OnRender(){}
-	//virtual void GetProperties(std::list<Property *> *list){}
+	virtual void GetProperties(std::list<Property *> *list){}
 };

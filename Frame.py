@@ -2,6 +2,7 @@ import wx
 import wx.aui
 from GraphicsCanvas import GraphicsCanvas
 from TreeCanvas import TreeCanvas
+from InputModeCanvas import InputModeCanvas
 from PropertiesCanvas import PropertiesCanvas
 from ObjPropsCanvas import ObjPropsCanvas
 import cad
@@ -37,10 +38,15 @@ class Frame(wx.Frame):
         self.aui_manager.AddPane(self.graphics_canvas, wx.aui.AuiPaneInfo().Name('graphics').CentrePane().BestSize(wx.Size(800,800)))
         self.tree_canvas = TreeCanvas(self)
         self.aui_manager.AddPane(self.tree_canvas, wx.aui.AuiPaneInfo().Name('Objects').Caption('Objects').Left().BestSize(wx.Size(300,400)).Position(0))
+        
+        self.input_mode_canvas = InputModeCanvas(self)
+        self.aui_manager.AddPane(self.input_mode_canvas, wx.aui.AuiPaneInfo().Name('Input').Caption('Input').Left().BestSize(wx.Size(300,200)).Position(0))
+        
         self.properties_canvas = ObjPropsCanvas(self)
-        self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,400)).Position(1))
+        self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(1))
         
         wx.GetApp().RegisterHideableWindow(self.tree_canvas)
+        wx.GetApp().RegisterHideableWindow(self.input_mode_canvas)
         wx.GetApp().RegisterHideableWindow(self.properties_canvas)
         
         self.AddExtraWindows()
@@ -173,6 +179,7 @@ class Frame(wx.Frame):
 
         self.window_menu = self.AddMenu('&Window')
         self.AddMenuItem('Objects', self.OnViewObjects, self.OnUpdateViewObjects, check_item = True)
+        self.AddMenuItem('Input', self.OnViewInput, self.OnUpdateViewInput, check_item = True)
         self.AddMenuItem('Properties', self.OnViewProperties, self.OnUpdateViewProperties, check_item = True)
         self.EndMenu()
 
@@ -680,6 +687,15 @@ class Frame(wx.Frame):
     
     def OnUpdateViewObjects(self, e):
         e.Check(self.aui_manager.GetPane(self.tree_canvas).IsShown())
+
+    def OnViewInput(self, e):
+        pane_info = self.aui_manager.GetPane(self.input_mode_canvas)
+        if pane_info.IsOk():
+            pane_info.Show(e.IsChecked())
+            self.aui_manager.Update()
+    
+    def OnUpdateViewInput(self, e):
+        e.Check(self.aui_manager.GetPane(self.input_mode_canvas).IsShown())
 
     def OnViewProperties(self, e):
         pane_info = self.aui_manager.GetPane(self.properties_canvas)

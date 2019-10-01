@@ -14,6 +14,9 @@ def OnMessageBox(error_message):
 def OnContextMenu():
     wx.MessageBox('In OnContextMenu')
     
+def OnInputMode():
+    wx.GetApp().OnInputMode()
+    
 tools = []
 
 class App(wx.App):
@@ -139,6 +142,10 @@ class App(wx.App):
         cad.SetInputMode(cad.GetSelectMode());
         cad.SetResFolder(pycad_dir)
         cad.SetContextMenuCallback(OnContextMenu)
+        cad.SetInputModeCallback(OnInputMode)
+        
+    def OnInputMode(self):
+        self.frame.input_mode_canvas.RemoveAndAddAll()
         
     def SplitSketch(self):
         new_sketches = self.object.Split()
@@ -164,7 +171,7 @@ class App(wx.App):
                 self.CopyUndoably(object, copy_object)
                 #cad.CopyUndoably(object, copy_object)
 
-    def GetObjectTools(self, object, from_tree_canvas = False):
+    def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = []
         self.object = object
         type = self.object.GetType()
@@ -176,7 +183,7 @@ class App(wx.App):
             tools.append(None) # a separator
             
         if not from_tree_canvas: # tree window doesn't need a "Select" menu item, because right clicking will have selected the object anyway
-            tools.append(ContextTool.SelectTool(object))
+            tools.append(ContextTool.SelectTool(object, control_pressed))
         if object.HasEdit():
             tools.append(ContextTool.EditTool(object))
         if object.CanBeDeleted():
@@ -191,10 +198,10 @@ class App(wx.App):
         for object in objects:
             if make_container:
                 tool_list = ContextTool.ObjectToolList(object)
-                tool_list.tools += self.GetObjectTools(object)
+                tool_list.tools += self.GetObjectTools(object, control_pressed)
                 tools.append(tool_list)
             else:
-                tools += self.GetObjectTools(object)
+                tools += self.GetObjectTools(object, control_pressed)
             
         return tools
     

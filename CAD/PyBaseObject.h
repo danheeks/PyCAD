@@ -12,8 +12,10 @@ public:
 	static bool m_select; // from glCommands
 	static const HeeksObj* copy_from_object;
 
-	BaseObject() :ObjList(){}
-	BaseObject(int type) :ObjList(){}
+	int m_type;
+
+	BaseObject() :ObjList(), m_type(0){}
+	BaseObject(int type) :ObjList(), m_type(type){}
 	bool NeverDelete();
 	int GetType()const;
 	const wchar_t* GetIconFilePath();

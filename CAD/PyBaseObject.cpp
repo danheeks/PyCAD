@@ -22,17 +22,16 @@
 
 std::wstring str_for_base_object;
 HeeksColor color_for_base_object;
-std::list<Property *> *property_list = NULL;
-HeeksObj* object_for_get_properties = NULL;
 
 
 bool BaseObject::NeverDelete(){ return true; }
 
 int BaseObject::GetType()const{
-	std::pair<bool, int> result = CallReturnInt("GetType");
-	if (result.first)
-		return result.second;
-	return 0;
+	return m_type;
+	//std::pair<bool, int> result = CallReturnInt("GetType");
+	//if (result.first)
+	//	return result.second;
+	//return 0;
 }
 
 const wchar_t* BaseObject::GetIconFilePath()
@@ -90,10 +89,11 @@ void BaseObject::glCommands(bool select, bool marked, bool no_color)
 		ObjList::glCommands(select, marked, no_color);
 }
 
+extern std::list<Property *> *property_list;
+
 void BaseObject::GetProperties(std::list<Property *> *list)
 {
 	property_list = list;
-	object_for_get_properties = this;
 	if (!CallVoidReturn("GetProperties"))
 		ObjList::GetProperties(list);
 }
@@ -247,9 +247,3 @@ bool BaseObject::m_marked = false;
 bool BaseObject::m_select = false;
 const HeeksObj* BaseObject::copy_from_object = NULL;
 
-
-void AddProperty(Property* property)
-{
-	if (property_list)
-		property_list->push_back(property);
-}

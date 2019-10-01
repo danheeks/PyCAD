@@ -21,7 +21,7 @@ public:
 	const EndedObject& operator=(const EndedObject &b);
 
 	// HeeksObj's virtual functions
-	bool Stretch(const double *p, const double* shift, void* data);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void Transform(const Matrix& m);
 	bool GetStartPoint(double* pos);
 	bool GetEndPoint(double* pos);
