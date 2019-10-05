@@ -2,6 +2,9 @@ from PropertiesCanvas import PropertiesCanvas
 from PropertiesCanvas import PropertiesObserver
 import cad
 import ToolImage
+import wx
+
+EXTRA_TOOLBAR_HEIGHT = 7
 
 class InputModeObserver(PropertiesObserver):
     def __init__(self, window):
@@ -21,16 +24,20 @@ class InputModeObserver(PropertiesObserver):
 class InputModeCanvas(PropertiesCanvas):
     def __init__(self, parent):
         PropertiesCanvas.__init__(self, parent)
+        self.toolBar = None
+        self.previous_tools = []
         self.inRemoveAndAddAll = False
         self.objects = []     
         #self.make_initial_properties_in_refresh = False
         self.observer = InputModeObserver(self)
         cad.RegisterObserver(self.observer)
+        self.AddToolBar()
+        self.Bind(wx.EVT_SIZE, self.OnSize)
         
     def AddToolBar(self):
-        self.toolBar = wx.ToolBar(self, style=wx.TB_NODIVIDER | wx.TB_FLAT)
+        self.toolBar = wx.ToolBar(self.panel, style=wx.TB_NODIVIDER | wx.TB_FLAT)
         self.previous_tools = []
-        self.toolBar.SetToolBitmapSize(wx.Size(ToolImage.GetBitmapsSize(), ToolImage.GetBitmapsSize()))
+        self.toolBar.SetToolBitmapSize(wx.Size(ToolImage.GetBitmapSize(), ToolImage.GetBitmapSize()))
         self.toolBar.Realize()
         
     def RemoveAndAddAll(self):
@@ -55,21 +62,52 @@ class InputModeCanvas(PropertiesCanvas):
         for property in properties:
             self.AddProperty(property)
             
-        # to do // compare to previous_list
-        
-        # to do if(tools_changed){// remake tool bar
+        # add toolbar buttons
+        tools = wx.GetApp().GetInputModeTools()
+
+        # compare to previous_list
+#         tools_changed = False
+#         if len(tools) != len(self.previous_tools):
+#             tools_changed = True
+#         else:
+#             for pt, t in zip(self.previous_tools, tools):
+#                 if t != pt:
+#                     tools_changes = True
+#                     break
+                
+#        if tools_changed:
+        if True:
+            
+            self.toolBar.ClearTools()
+            for tool in tools:
+                image = wx.Image(tool.BitmapPath())
+                image.Rescale(24, 24)
+                button = self.toolBar.AddTool(wx.ID_ANY, tool.GetTitle(), wx.Bitmap(image))
+                self.Bind(wx.EVT_TOOL, tool.Run, button)
+                
+            self.toolBar.Realize()
+            
+            self.SizeCode()
+                
+            self.previous_tools = tools
             
         self.inRemoveAndAddAll = False
-    
-    def OnSize(self, event):
+        
+    def SizeCode(self):
         size = self.GetClientSize()
+        self.panel.SetSize(0,0,size.x, size.y)
         if self.toolBar.GetToolsCount() > 0:
             toolbar_size = self.toolBar.GetClientSize()
-            toolbar_height = ToolImage.GetBitmapSize() + self.EXTRA_TOOLBAR_HEIGHT
-            self.toolBar.SetSize(0,0,size.x, size.y - toolbar_height)
+            toolbar_height = ToolImage.GetBitmapSize() + EXTRA_TOOLBAR_HEIGHT
+            self.pg.SetSize(0, 0, size.x, size.y - toolbar_height)
+            self.toolBar.SetSize(0, size.y - toolbar_height , size.x, toolbar_height )
+            self.toolBar.Show()
+        else:
+            self.pg.SetSize(0,0, size.x, size.y)
             self.toolBar.Show(False)
-            
-        event.Skip()
+    
+    def OnSize(self, event):
+        self.SizeCode()
     
         
        

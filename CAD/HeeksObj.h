@@ -10,7 +10,6 @@
 
 class HeeksColor;
 class Property;
-class Tool;
 class MarkedObject;
 class TiXmlNode;
 class TiXmlElement;
@@ -105,7 +104,6 @@ public:
 	virtual bool GetScaleAboutMatrix(Matrix &m);
 	virtual void GetProperties(std::list<Property *> *list);
 	virtual void GetOnEdit(bool(**callback)(HeeksObj*)){ *callback = NULL; } // returns a function for doing edit with a dialog
-	virtual void OnApplyProperties(){}
 	virtual bool ValidateProperties(){return true;}
 	virtual const wchar_t* GetIconFilePath();  
 	virtual int Intersects(const HeeksObj *object, std::list< double > *rl)const{return 0;}

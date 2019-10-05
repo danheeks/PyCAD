@@ -242,11 +242,7 @@ void CApp::DestroyLights(void)
 void CApp::Reset(){
 	m_marked_list->Clear(true);
 	m_marked_list->Reset();
-	std::set<Observer*>::iterator It;
-	for(It = observers.begin(); It != observers.end(); It++){
-		Observer *ov = *It;
-		ov->Clear();
-	}
+	ObserversClear();
 	Clear();
 	EndHistory();
 	delete history;
@@ -1457,6 +1453,15 @@ void CApp::ObserversThaw()
 	for (It = observers.begin(); It != observers.end(); It++){
 		Observer *ov = *It;
 		ov->Thaw();
+	}
+}
+
+void CApp::ObserversClear()
+{
+	std::set<Observer*>::iterator It;
+	for (It = observers.begin(); It != observers.end(); It++){
+		Observer *ov = *It;
+		ov->Clear();
 	}
 }
 

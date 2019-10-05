@@ -67,7 +67,7 @@ public:
 	// Property's virtual functions
 	int get_property_type(){ return CheckPropertyType; }
 	Property *MakeACopy(void)const;
-	void Set(bool value){ *m_pvar = value; if(m_object)m_object->OnApplyProperties(); }
+	void Set(bool value){ *m_pvar = value; }
 	bool GetBool(void)const{ return *m_pvar; }
 };
 
@@ -94,7 +94,7 @@ public:
 	// Property's virtual functions
 	int get_property_type(){ return ColorPropertyType; }
 	Property *MakeACopy(void)const;
-	void Set(const HeeksColor& value){ *m_pvar = value; if (m_object)m_object->OnApplyProperties(); }
+	void Set(const HeeksColor& value){ *m_pvar = value; }
 	const HeeksColor &GetColor()const{ return *m_pvar; }
 };
 
@@ -108,7 +108,7 @@ public:
 	// Property's virtual functions
 	int get_property_type(){ return DoublePropertyType; }
 	Property *MakeACopy(void)const;
-	void Set(double value){ *m_pvar = value; if (m_object)m_object->OnApplyProperties(); }
+	void Set(double value){ *m_pvar = value; }
 	double GetDouble(void)const{ return *m_pvar; }
 };
 
@@ -121,7 +121,7 @@ public:
 	// Property's virtual functions
 	int get_property_type(){ return DoublePropertyType; }
 	Property *MakeACopy(void)const{ return new PropertyDoubleScaled(*this); }
-	void Set(double value){ *m_pvar = value / m_scale; if (m_object)m_object->OnApplyProperties(); }
+	void Set(double value){ *m_pvar = value / m_scale; }
 	double GetDouble(void)const{ return *m_pvar * m_scale; }
 };
 
@@ -184,7 +184,7 @@ public:
 	// Property's virtual functions
 	int get_property_type(){ return IntPropertyType; }
 	Property *MakeACopy(void)const;
-	void Set(int value){ *m_pvar = value; if (m_object)m_object->OnApplyProperties(); }
+	void Set(int value){ *m_pvar = value; }
 	int GetInt(void)const{ return *m_pvar; }
 };
 

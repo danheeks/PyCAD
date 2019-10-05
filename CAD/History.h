@@ -13,7 +13,7 @@ protected:
 	std::list<Undoable *>::iterator m_curpos;
 	std::list<Undoable *> m_undoables;
 
-private:
+protected:
 	History *sub_history;
 	int level;
 
@@ -61,4 +61,8 @@ public:
 	void SetLikeNewFile(void);
 	void DoUndoable(Undoable *);
 	void SetAsModified();
+
+	void StartHistory();
+	bool EndHistory(void);
+
 };

@@ -115,7 +115,7 @@ public:
 	PropertyPntX(HeeksObj* object, Point3d *pnt) :PropertyPntCoord(object, L"x", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ m_pnt->x = (value); m_object->OnApplyProperties(); }
+	void Set(double value){ m_pnt->x = (value); }
 	double GetDouble(void)const{ return m_pnt->x; }
 	Property* MakeACopy()const{ return new PropertyPntX(*this); }
 };
@@ -126,7 +126,7 @@ public:
 	PropertyPntY(HeeksObj* object, Point3d *pnt) :PropertyPntCoord(object, L"y", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ m_pnt->y = (value); m_object->OnApplyProperties(); }
+	void Set(double value){ m_pnt->y = (value); }
 	double GetDouble(void)const{ return m_pnt->y; }
 	Property* MakeACopy()const{ return new PropertyPntY(*this); }
 };
@@ -137,7 +137,7 @@ public:
 	PropertyPntZ(HeeksObj* object, Point3d *pnt) :PropertyPntCoord(object, L"z", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ m_pnt->z = (value); m_object->OnApplyProperties(); }
+	void Set(double value){ m_pnt->z = (value); }
 	double GetDouble(void)const{ return m_pnt->z; }
 	Property* MakeACopy()const{ return new PropertyPntZ(*this); }
 };
@@ -174,7 +174,7 @@ public:
 	PropertyLengthTrsfPosX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetX(t.x + value); m_trsf->SetTranslationPart(t); m_object->OnApplyProperties(); }
+	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetX(t.x + value); m_trsf->SetTranslationPart(t); }
 	double GetDouble(void)const{ return  m_trsf->TranslationPart().x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfPosX(*this); }
 };
@@ -185,7 +185,7 @@ public:
 	PropertyLengthTrsfPosY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetY(t.y + value); m_trsf->SetTranslationPart(t); m_object->OnApplyProperties(); }
+	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetY(t.y + value); m_trsf->SetTranslationPart(t); }
 	double GetDouble(void)const{ return  m_trsf->TranslationPart().y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfPosY(*this); }
 };
@@ -196,7 +196,7 @@ public:
 	PropertyLengthTrsfPosZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetZ(t.z + value); m_trsf->SetTranslationPart(t); m_object->OnApplyProperties(); }
+	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetZ(t.z + value); m_trsf->SetTranslationPart(t); }
 	double GetDouble(void)const{ return  m_trsf->TranslationPart().z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfPosZ(*this); }
 };
@@ -207,7 +207,7 @@ public:
 	PropertyLengthTrsfXDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetX(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetX(value); *m_trsf = Matrix(d, x, y);  }
 	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirX(*this); }
 };
@@ -218,7 +218,7 @@ public:
 	PropertyLengthTrsfXDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetY(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetY(value); *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirY(*this); }
 };
@@ -229,7 +229,7 @@ public:
 	PropertyLengthTrsfXDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetZ(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetZ(value); *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirZ(*this); }
 };
@@ -240,7 +240,7 @@ public:
 	PropertyLengthTrsfYDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetX(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetX(value); *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d y(0,1,0);  y.Transform(*m_trsf); return y.x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirX(*this); }
 };
@@ -251,7 +251,7 @@ public:
 	PropertyLengthTrsfYDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetY(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetY(value); *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirY(*this); }
 };
@@ -262,7 +262,7 @@ public:
 	PropertyLengthTrsfYDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetZ(value); *m_trsf = Matrix(d, x, y);  m_object->OnApplyProperties(); }
+	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetZ(value); *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirZ(*this); }
 };
@@ -301,7 +301,6 @@ public:
 		Point3d dx, dy;
 		CoordinateSystem::AnglesToAxes(vertical_angle, horizontal_angle, twist_angle, dx, dy);
 		*m_trsf = Matrix(d, dx, dy);
-		m_object->OnApplyProperties();
 	}
 	double GetDouble(void)const{
 		double vertical_angle, horizontal_angle, twist_angle;

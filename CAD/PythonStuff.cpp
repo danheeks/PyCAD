@@ -51,6 +51,7 @@
 #include "ConversionTools.h"
 #include "PyWrapper.h"
 #include "PyBaseObject.h"
+#include "DigitizeMode.h"
 
 void OnExit()
 {
@@ -435,6 +436,7 @@ boost::python::list InputModeGetProperties(CInputMode* input_mode)
 	return return_list;
 }
 
+
 std::wstring BaseObjectGetTitle(const BaseObject& object)
 {
 	return object.ObjList::GetShortString();
@@ -579,6 +581,23 @@ void SetLineArcDrawing()
 {
 	line_strip.drawing_mode = LineDrawingMode;
 	theApp->SetInputMode(&line_strip);
+}
+
+LineArcDrawing* GetLineArcDrawing()
+{
+	return &line_strip;
+}
+
+bool IsInputModeLineArc()
+{
+	return theApp->input_mode_object == &line_strip;
+}
+
+void AddDrawingPoint()
+{
+	theApp->m_digitizing->digitized_point.m_type = DigitizeInputType;
+	((Drawing*)(theApp->input_mode_object))->AddPoint();
+
 }
 
 void SetCircles3pDrawing()
@@ -2117,6 +2136,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("ClearObjectsMade", &DrawingWrap::ClearObjectsMade)
 			.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
 			;
+		boost::python::class_<LineArcDrawing, boost::python::bases<Drawing> >("LineArcDrawing", boost::python::no_init);
 
 		boost::python::def("OnExit", OnExit);
 		boost::python::def("Reset", CadReset);
@@ -2211,6 +2231,9 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("SetInputMode", SetInputMode);
 		boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
+		boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
+		boost::python::def("AddDrawingPoint", AddDrawingPoint);
 		boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
 		boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
 		boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
@@ -2222,7 +2245,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("GetDrawSelect", GetDrawSelect);
 		boost::python::def("GetDrawMarked", GetDrawMarked);
 		boost::python::def("CanUndo", CanUndo);
-		boost::python::def("CanRedo", CanRedo);
+		boost::python::def("CanRedo", CanRedo); 
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;

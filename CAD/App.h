@@ -51,7 +51,6 @@ class CSelectMode;
 class CoordinateSystem;
 class HRuler;
 class Property;
-class Tool;
 class Observer;
 class MainHistory;
 class MagDragWindow;
@@ -151,7 +150,6 @@ public:
 	std::list< void(*)() > m_on_build_texture_callbacks;
 	std::list< void(*)(int, int) > m_beforeneworopen_callbacks;
 	std::list< void(*)() > m_beforeframedelete_callbacks;
-	std::list< void(*)(std::list<Tool*>&) > m_markedlisttools_callbacks;
 	int m_transform_gl_list;
 	Matrix m_drag_matrix;
 	bool m_extrude_removes_sketches;
@@ -216,8 +214,6 @@ public:
 	void ClearHistory(void);
 	void glCommandsAll(const CViewPoint &view_point);
 	double GetPixelScale(void);
-	void GetDropDownTools(std::list<Tool*> &f_list, const IPoint &point, MarkedObject* marked_object, bool dont_use_point_for_functions, bool control_pressed);
-	void GenerateIntersectionMenuOptions(std::list<Tool*> &f_list);
 	void DoUndoable(Undoable *);
 	bool RollBack(void);
 	bool RollForward(void);
@@ -279,6 +275,7 @@ public:
 	void ObserversMarkedListChanged(bool selection_cleared, const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed);
 	void ObserversFreeze();
 	void ObserversThaw();
+	void ObserversClear();
 	std::wstring GetExeFolder()const;
 	virtual std::wstring GetResFolder()const;
 	void get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy));
@@ -342,8 +339,6 @@ public:
 	virtual unsigned int GetIndex(HeeksObj *object);
 	virtual void ReleaseIndex(unsigned int index);
 
-	void GetExternalMarkedListTools(std::list<Tool*>& t_list);
-	void RegisterMarkeListTools(void(*callbackfunc)(std::list<Tool*>& t_list));
 	void RegisterOnRestoreDefaults(void(*callbackfunc)());
 	void RestoreDefaults();
 

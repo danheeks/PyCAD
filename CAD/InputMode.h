@@ -2,13 +2,10 @@
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-//#include "HeeksObj.h"
-//#include "Tool.h"
 
 #pragma once
 
 //class HeeksObj;
-//class Tool;
 class MouseEvent;
 class KeyEvent;
 

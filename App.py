@@ -5,6 +5,7 @@ from Frame import Frame
 import os
 from HeeksConfig import HeeksConfig
 import ContextTool
+import ToolBarTool
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -203,6 +204,28 @@ class App(wx.App):
             else:
                 tools += self.GetObjectTools(object, control_pressed)
             
+        return tools
+    
+    def AddPointToDrawing(self):
+        cad.AddDrawingPoint()
+    
+    def AddPointToDrawing2(self):
+        import geom
+        import math
+        rad = 30.0
+        cad.StartHistory()
+        for i in range(0,360):
+            x = rad * math.cos(math.pi / 180 * i)
+            y = rad * math.sin(math.pi / 180 * i)
+            cad.AddUndoably(cad.NewPoint(geom.Point3D(x,y,0)), None)
+        cad.EndHistory()
+    
+    def GetInputModeTools(self):
+        tools = []
+        if cad.IsInputModeLineArc():
+            tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
+            tools.append(ToolBarTool.CadToolBarTool('Add Point', 'circ2p', self.AddPointToDrawing2))
+        
         return tools
     
     def SetMenuItemBitmap(self, item, tool):

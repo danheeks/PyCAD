@@ -207,3 +207,17 @@ void MainHistory::SetAsModified()
 	as_new_pos_exists = false;
 }
 
+void MainHistory::StartHistory()
+{
+	if (level == 0)
+		theApp->ObserversFreeze();
+	History::StartHistory();
+}
+
+bool MainHistory::EndHistory(void)
+{
+	bool value = History::EndHistory();
+	if (level == 0)
+		theApp->ObserversThaw();
+	return value;
+}
