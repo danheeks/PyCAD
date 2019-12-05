@@ -9,10 +9,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: configure
-      run: ./configure
-    - name: make
+    - name: change directory
       run: cd CAD
+    - name: make
       run: make
     - name: make check
       run: make check
