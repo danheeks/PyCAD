@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: dependencies
-      run: sudo apt-get install libboost-python-dev python-dev
+      run: sudo apt-get install libboost-python-dev python-dev freeglut3-dev
     - name: configure
       run: cd CAD && mkdir build && cd build && cmake ..
     - name: build
