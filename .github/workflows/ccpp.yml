@@ -9,8 +9,14 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: change directory
+    - name: change to CAD directory
       run: cd CAD
+    - name: create build directory
+      run: mkdir build
+    - name: change to build directory
+      run: cd build
+    - name: cmake
+      run: cmake ..
     - name: make
       run: make
     - name: make check
