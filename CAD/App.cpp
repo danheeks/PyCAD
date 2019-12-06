@@ -847,7 +847,8 @@ void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t 
 
 void CApp::SaveSTLFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
-	wofstream ofs(filepath);
+	std::wstring wf(filepath);
+	wofstream ofs(wf);
 
 	if (!ofs)
 	{
