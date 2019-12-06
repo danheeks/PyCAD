@@ -1034,7 +1034,7 @@ void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 #ifdef WIN32
 	wofstream ofs(filepath);
 #else
-	wofstream ofs(Ttc(filepath.c_str()));
+	wofstream ofs(Ttc(filepath));
 #endif
 
 	if (!ofs)
@@ -1063,7 +1063,7 @@ void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepa
 #ifdef WIN32
 	wofstream ofs(filepath);
 #else
-	wofstream ofs(Ttc(filepath.c_str()));
+	wofstream ofs(Ttc(filepath));
 #endif
 
 	if (!ofs)
