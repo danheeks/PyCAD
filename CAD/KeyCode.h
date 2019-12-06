@@ -1,5 +1,7 @@
 // KeyCode.h
 
+#pragma once
+
 // copied straight from wx
 enum KeyCode
 {

@@ -5,9 +5,9 @@
 
 #pragma once
 
-//class HeeksObj;
+#include "KeyCode.h"
+
 class MouseEvent;
-enum KeyCode;
 
 class CInputMode{
 public:
