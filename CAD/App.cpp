@@ -798,7 +798,11 @@ static void write_binary_triangle(const double* x, const double* n)
 
 void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
+#ifdef WIN32
+	ofstream ofs(filepath, ios::binary);
+#else
 	ofstream ofs(Ttc(filepath), ios::binary);
+#endif
 
 	// write 80 characters ( could be anything )
 	char header[80] = "Binary STL file made with HeeksCAD                                     ";
@@ -847,8 +851,11 @@ void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t 
 
 void CApp::SaveSTLFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
-	std::wstring wf(filepath);
-	wofstream ofs(wf);
+#ifdef WIN32
+	wofstream ofs(filepath);
+#else
+	wofstream ofs(Ttc(filepath));
+#endif
 
 	if (!ofs)
 	{
@@ -964,7 +971,11 @@ public:
 
 	void WriteObjFile(const std::wstring& filepath)
 	{
+#ifdef WIN32
 		wofstream ofs(filepath);
+#else
+		wofstream ofs(Ttc(filepath.c_str()));
+#endif
 
 		if (!ofs)
 		{
@@ -1020,7 +1031,11 @@ void CApp::SaveSTLFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 
 void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
 {
+#ifdef WIN32
 	wofstream ofs(filepath);
+#else
+	wofstream ofs(Ttc(filepath.c_str()));
+#endif
 
 	if (!ofs)
 	{
@@ -1045,7 +1060,11 @@ void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 
 void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
 {
+#ifdef WIN32
 	wofstream ofs(filepath);
+#else
+	wofstream ofs(Ttc(filepath.c_str()));
+#endif
 
 	if (!ofs)
 	{
