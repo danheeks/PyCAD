@@ -798,7 +798,7 @@ static void write_binary_triangle(const double* x, const double* n)
 
 void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
-	ofstream ofs(filepath, ios::binary);
+	ofstream ofs(Ttc(filepath), ios::binary);
 
 	// write 80 characters ( could be anything )
 	char header[80] = "Binary STL file made with HeeksCAD                                     ";
