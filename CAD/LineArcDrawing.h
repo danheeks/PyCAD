@@ -62,14 +62,16 @@ public:
 
 	// InputMode's virtual functions
 	const wchar_t* GetTitle();
-//	void OnKeyDown(wxKeyEvent& event);
-//	void OnKeyUp(wxKeyEvent& event);
+	void OnKeyDown(KeyCode key_code);
+	void OnKeyUp(KeyCode key_code);
 	void set_cursor(void);
 	void GetProperties(std::list<Property *> *list);
 	bool OnModeChange(void);
 
 	// Drawing's virtual functions
 	void set_draw_step_not_undoable(int s);
+
+	void EndDrawing(); // won't stay here;  just a test
 };
 
 extern LineArcDrawing line_strip;

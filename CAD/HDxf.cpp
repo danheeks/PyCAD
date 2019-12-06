@@ -146,7 +146,7 @@ void HeeksDxfRead::OnReadCircle(const double* s, const double* c, bool dir, bool
 	Point3d up(0, 0, 1);
 	if(!dir)up = -up;
 	Point3d pc = make_point(c);
-	gp_Circ circle(Point3d(pc, up), p0.Distance(pc));
+	Circle circle(Point3d(pc, up), p0.Distance(pc));
 	HCircle* new_object = new HCircle(circle, hidden ? (&hidden_color) : ActiveColorPtr(m_aci));
 	if (m_thickness != 0.0)
 	{

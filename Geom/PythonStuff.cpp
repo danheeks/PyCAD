@@ -479,11 +479,11 @@ void CTrisProject(const CTris& solid, const CArea& area, const std::string& dxf_
 
 #ifdef OPEN_CASCADE_INCLUDED
 
-static Standard_Boolean TriangleIsValid(const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3)
+static Standard_Boolean TriangleIsValid(const Point3d& P1, const Point3d& P2, const Point3d& P3)
 {
-	gp_Vec V1(P1, P2);								// V1=(P1,P2)
-	gp_Vec V2(P2, P3);								// V2=(P2,P3)
-	gp_Vec V3(P3, P1);								// V3=(P3,P1)
+	Point3d V1(P1, P2);								// V1=(P1,P2)
+	Point3d V2(P2, P3);								// V2=(P2,P3)
+	Point3d V3(P3, P1);								// V3=(P3,P1)
 
 	if ((V1.SquareMagnitude() > 1.e-10) && (V2.SquareMagnitude() > 1.e-10) && (V3.SquareMagnitude() > 1.e-10))
 	{
@@ -514,7 +514,7 @@ CTris* CSolidMakeStl(const CSolid& solid, double deviation)
 		// Get triangulation
 		TopLoc_Location L;
 		Handle_Poly_Triangulation facing = BRep_Tool::Triangulation(face, L);
-		gp_Trsf tr = L;
+		Matrix tr = L;
 
 		if (facing.IsNull()){
 		}
@@ -536,9 +536,9 @@ CTris* CSolidMakeStl(const CSolid& solid, double deviation)
 
 					if (TriangleIsValid(Nodes(n1), Nodes(n2), Nodes(n3)))
 					{
-						gp_Pnt v1 = Nodes(n1).Transformed(tr);
-						gp_Pnt v2 = Nodes(n2).Transformed(tr);
-						gp_Pnt v3 = Nodes(n3).Transformed(tr);
+						Point3d v1 = Nodes(n1).Transformed(tr);
+						Point3d v2 = Nodes(n2).Transformed(tr);
+						Point3d v3 = Nodes(n3).Transformed(tr);
 
 						float x[9] = { v1.X(), v1.Y(), v1.Z(), v2.X(), v2.Y(), v2.Z(), v3.X(), v3.Y(), v3.Z() };
 						new_tris->AddTri(x);

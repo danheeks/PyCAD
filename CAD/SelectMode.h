@@ -55,8 +55,8 @@ public:
 	bool TitleHighlighted(){return m_doing_a_main_loop;}
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
-	//void OnKeyDown(wxKeyEvent& event);
-	//void OnKeyUp(wxKeyEvent& event);
+	//void OnKeyDown(KeyCode key_code);
+	//void OnKeyUp(KeyCode key_code);
 	bool OnStart();
 	void OnFrontRender();
 	void GetProperties(std::list<Property *> *list);

@@ -185,3 +185,7 @@ bool HILine::GetEndPoint(Point3d &pos)
 	pos = B;
 	return true;
 }
+
+Line HILine::GetLine()const{
+	return Line(A, B);
+}

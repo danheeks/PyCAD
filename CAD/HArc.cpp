@@ -616,3 +616,11 @@ double HArc::IncludedAngle()const
 	}
 	return dir * inc_ang;
 }
+
+Circle HArc::GetCircle()const
+{
+	Circle c;
+	c.radius = m_radius;
+	c.pc = Point(C.x, C.y);
+	return c;
+}

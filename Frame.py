@@ -554,9 +554,11 @@ class Frame(wx.Frame):
         
     def OnMagExtents(self, e):
         self.graphics_canvas.viewport.OnMagExtents(True, 6)
+        self.graphics_canvas.Refresh()
         
     def OnMagNoRot(self, e):
         self.graphics_canvas.viewport.OnMagExtents(False, 6)
+        self.graphics_canvas.Refresh()
         
     def OnMagAxes(self, unitY, unitZ):
         self.graphics_canvas.viewport.ClearViewpoints()

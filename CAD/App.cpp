@@ -149,6 +149,8 @@ CApp::CApp()
 
 	m_current_viewport = NULL;
 	m_gl_font_initialized = false;
+	m_observers_frozen = 0;
+	frozen_selection_cleared = false;
 }
 
 CApp::~CApp()
@@ -184,11 +186,15 @@ void CApp::SetInputMode(CInputMode *new_mode){
 		input_mode_object = m_select_mode;
 	}
 
-	PythonOnSetInputMode();
+	RefreshInputCanvas();
 
-	//if(m_frame && m_frame->m_input_canvas)m_frame->RefreshInputCanvas();
 	//if(m_frame && m_frame->m_options)m_frame->RefreshOptions();
 	//if(m_graphics_text_mode != GraphicsTextModeNone)Repaint();
+}
+
+void CApp::RefreshInputCanvas()
+{
+	PythonOnSetInputMode();
 }
 
 void CApp::FindMarkedObject(const IPoint &point, MarkedObject* marked_object){
@@ -1372,9 +1378,11 @@ void CApp::DoUndoable(Undoable *u)
 
 bool CApp::RollBack(void)
 {
+	ObserversFreeze();
 	m_doing_rollback = true;
 	bool result = history->InternalRollBack();
 	m_doing_rollback = false;
+	ObserversThaw();
 	return result;
 }
 
@@ -1390,9 +1398,11 @@ bool CApp::CanRedo(void)
 
 bool CApp::RollForward(void)
 {
+	ObserversFreeze();
 	m_doing_rollback = true;
 	bool result = history->InternalRollForward();
 	m_doing_rollback = false;
+	ObserversThaw();
 	return result;
 }
 
@@ -1423,36 +1433,74 @@ void CApp::RemoveObserver(Observer* observer){
 }
 
 void CApp::ObserversOnChange(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified){
-	std::set<Observer*>::iterator It;
-	for (It = observers.begin(); It != observers.end(); It++){
-		Observer *ov = *It;
-		ov->OnChanged(added, removed, modified);
+	if (m_observers_frozen > 0)
+	{
+		if (added)for (std::list<HeeksObj*>::const_iterator It = added->begin(); It != added->end(); It++)frozen_added.push_back(*It);
+		if (removed)for (std::list<HeeksObj*>::const_iterator It = removed->begin(); It != removed->end(); It++)frozen_removed.push_back(*It);
+		if (modified)for (std::list<HeeksObj*>::const_iterator It = modified->begin(); It != modified->end(); It++)frozen_modified.push_back(*It);
+	}
+	else
+	{
+		std::set<Observer*>::iterator It;
+		for (It = observers.begin(); It != observers.end(); It++){
+			Observer *ov = *It;
+			ov->OnChanged(added, removed, modified);
+		}
 	}
 }
 
 void CApp::ObserversMarkedListChanged(bool selection_cleared, const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed){
-	std::set<Observer*>::iterator It;
-	for (It = observers.begin(); It != observers.end(); It++){
-		Observer *ov = *It;
-		ov->WhenMarkedListChanges(selection_cleared, added, removed);
+	if (m_observers_frozen > 0)
+	{
+		if (selection_cleared)
+		{
+			frozen_selection_cleared = true;
+			frozen_selection_added.clear();
+			frozen_selection_removed.clear();
+		}
+		if (added)for (std::list<HeeksObj*>::const_iterator It = added->begin(); It != added->end(); It++)frozen_selection_added.push_back(*It);
+		if (removed)for (std::list<HeeksObj*>::const_iterator It = removed->begin(); It != removed->end(); It++)frozen_selection_removed.push_back(*It);
+	}
+	else
+	{
+		std::set<Observer*>::iterator It;
+		for (It = observers.begin(); It != observers.end(); It++){
+			Observer *ov = *It;
+			ov->WhenMarkedListChanges(selection_cleared, added, removed);
+		}
 	}
 }
 
 void CApp::ObserversFreeze()
 {
-	std::set<Observer*>::iterator It;
-	for (It = observers.begin(); It != observers.end(); It++){
-		Observer *ov = *It;
-		ov->Freeze();
-	}
+	m_observers_frozen++;
 }
 
 void CApp::ObserversThaw()
 {
-	std::set<Observer*>::iterator It;
-	for (It = observers.begin(); It != observers.end(); It++){
-		Observer *ov = *It;
-		ov->Thaw();
+	m_observers_frozen--;
+	if (m_observers_frozen == 0)
+	{
+		// call observers with any stored changes
+		if ((frozen_added.size() > 0) || (frozen_removed.size() > 0) || (frozen_modified.size() > 0))
+		{
+			ObserversOnChange(&frozen_added, &frozen_removed, &frozen_modified);
+		}
+		frozen_added.clear();
+		frozen_removed.clear();
+		frozen_modified.clear();
+		if (frozen_selection_cleared || (frozen_selection_added.size() > 0) || (frozen_selection_removed.size() > 0))
+		{
+			ObserversMarkedListChanged(frozen_selection_cleared, &frozen_selection_added, &frozen_selection_removed);
+		}
+		frozen_selection_cleared = false;
+		frozen_selection_added.clear();
+		frozen_selection_removed.clear();
+	}
+	else if (m_observers_frozen < 0)
+	{
+		// this shouldn't happen
+		m_observers_frozen = 0;
 	}
 }
 
@@ -1463,6 +1511,13 @@ void CApp::ObserversClear()
 		Observer *ov = *It;
 		ov->Clear();
 	}
+	frozen_added.clear();
+	frozen_removed.clear();
+	frozen_modified.clear();
+	frozen_selection_cleared = false;
+	frozen_selection_added.clear();
+	frozen_selection_removed.clear();
+	m_observers_frozen = 0;
 }
 
 bool CApp::Add(HeeksObj *object, HeeksObj* prev_object)

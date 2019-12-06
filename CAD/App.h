@@ -77,6 +77,13 @@ private:
 	UsedIds_t	used_ids;
 	std::map< int, int > next_id_map;
 	std::map< std::string, HeeksObj*(*)() > object_create_fn_map;
+	int m_observers_frozen;
+	std::list<HeeksObj*> frozen_added;
+	std::list<HeeksObj*> frozen_removed;
+	std::list<HeeksObj*> frozen_modified;
+	bool frozen_selection_cleared;
+	std::list<HeeksObj*> frozen_selection_added;
+	std::list<HeeksObj*> frozen_selection_removed;
 
 	void render_screen_text2(const wchar_t* str, bool select);
 	float get_text_scale();
@@ -319,6 +326,7 @@ public:
 	void render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta, bool select);
 	void OnInputModeTitleChanged();
 	void OnInputModeHelpTextChanged();
+	void RefreshInputCanvas();
 	void PlotSetColor(const HeeksColor &c);
 	void PlotLine(const double* s, const double* e);
 	void PlotArc(const double* s, const double* e, const double* c);

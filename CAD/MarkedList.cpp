@@ -381,6 +381,7 @@ void MarkedList::CopySelectedItems()
 void MarkedList::Reset()
 {
 	delete_move_grips(true);
+	m_name_index.clear();
 }
 
 unsigned int MarkedList::GetIndex(HeeksObj *object) {

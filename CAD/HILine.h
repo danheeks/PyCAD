@@ -30,4 +30,7 @@ public:
 	void CopyFrom(const HeeksObj* object){operator=(*((HILine*)object));}
 	bool GetEndPoint(Point3d &pos);
 	bool GetStartPoint(Point3d &pos);
+
+	Line GetLine()const;
+
 };

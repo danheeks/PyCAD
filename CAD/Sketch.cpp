@@ -181,7 +181,7 @@ public:
 			m_done = true;
 		}
 	}
-	int GetInt()
+	int GetInt()const
 	{
 		return m_initial_index;
 	}
@@ -1055,7 +1055,7 @@ bool CSketch::IsCircle()const
 		if (m_objects.front()->GetType() != ArcType)
 			return false;
 		HArc* reference_arc = (HArc*)(m_objects.front());
-		gp_Circ reference_circle = reference_arc->GetCircle();
+		Circle reference_circle = reference_arc->GetCircle();
 
 		for (std::list<HeeksObj*>::const_iterator It = m_objects.begin(); It != m_objects.end(); It++)
 		{
@@ -1064,7 +1064,7 @@ bool CSketch::IsCircle()const
 				return false;
 
 			HArc* arc = (HArc*)span;
-			gp_Circ circle = arc->GetCircle();
+			Circle circle = arc->GetCircle();
 
 			if (fabs(circle.Radius() - reference_circle.Radius()) > theApp->m_geom_tol)
 				return false;

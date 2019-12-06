@@ -150,13 +150,13 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			{
 				for(int i = 0; i<2; i++)
 				{
-					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
+					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), Circle(), &(theApp->current_color));
 					TempObject()->Add(arcs[i], NULL);
 				}
 			}
 			arcs[0]->A = p0 + xdir * m_rect_radius;
 			arcs[0]->B = p3 + xdir * m_rect_radius;
-			arcs[0]->SetCircle(gp_Circ(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
+			arcs[0]->SetCircle(Circle(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 			arcs[1]->A = arcs[0]->B;
 			arcs[1]->B = arcs[0]->A;
 			arcs[1]->SetCircle(arcs[0]->GetCircle());
@@ -181,7 +181,7 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			{
 				for(int i = 0; i<2; i++)
 				{
-					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
+					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), Circle(), &(theApp->current_color));
 					TempObject()->Add(arcs[i], NULL);
 					lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 					TempObject()->Add(lines[i], NULL);
@@ -191,24 +191,24 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			if(x_lines_disappear){
 				arcs[0]->A = p2 - ydir * m_rect_radius;
 				arcs[0]->B = p3 - ydir * m_rect_radius;
-				arcs[0]->SetCircle(gp_Circ(Point3d(Point3d(p3 + xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
+				arcs[0]->SetCircle(Circle(Point3d(Point3d(p3 + xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[0]->A = arcs[0]->B;
 				lines[0]->B = p0 + ydir * m_rect_radius;
 				arcs[1]->A = lines[0]->B;
 				arcs[1]->B = p1 + ydir * m_rect_radius;
-				arcs[1]->SetCircle(gp_Circ(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
+				arcs[1]->SetCircle(Circle(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[1]->A = arcs[1]->B;
 				lines[1]->B = arcs[0]->A;
 			}
 			else{
 				arcs[0]->A = p1 - xdir * m_rect_radius;
 				arcs[0]->B = p2 - xdir * m_rect_radius;
-				arcs[0]->SetCircle(gp_Circ(Point3d(Point3d(p1 - xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
+				arcs[0]->SetCircle(Circle(Point3d(Point3d(p1 - xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[0]->A = arcs[0]->B;
 				lines[0]->B = p3 + xdir * m_rect_radius;
 				arcs[1]->A = lines[0]->B;
 				arcs[1]->B = p0 + xdir * m_rect_radius;
-				arcs[1]->SetCircle(gp_Circ(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
+				arcs[1]->SetCircle(Circle(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 				lines[1]->A = arcs[1]->B;
 				lines[1]->B = arcs[0]->A;
 			}
@@ -232,7 +232,7 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 			{
 				for(int i = 0; i<4; i++)
 				{
-					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
+					arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), Circle(), &(theApp->current_color));
 					TempObject()->Add(arcs[i], NULL);
 					lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 					TempObject()->Add(lines[i], NULL);
@@ -241,22 +241,22 @@ void RegularShapesDrawing::CalculateRectangle(double x, double y, const Point3d&
 
 			arcs[0]->A = p1 - xdir * m_rect_radius;
 			arcs[0]->B = p1 + ydir * m_rect_radius;
-			arcs[0]->SetCircle(gp_Circ(Point3d(Point3d(p1 - xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
+			arcs[0]->SetCircle(Circle(Point3d(Point3d(p1 - xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[0]->A = arcs[0]->B;
 			lines[0]->B = p2 - ydir * m_rect_radius;
 			arcs[1]->A = lines[0]->B;
 			arcs[1]->B = p2 - xdir * m_rect_radius;
-			arcs[1]->SetCircle(gp_Circ(Point3d(Point3d(p2 - xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
+			arcs[1]->SetCircle(Circle(Point3d(Point3d(p2 - xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[1]->A = arcs[1]->B;
 			lines[1]->B = p3 + xdir * m_rect_radius;
 			arcs[2]->A = lines[1]->B;
 			arcs[2]->B = p3 - ydir * m_rect_radius;
-			arcs[2]->SetCircle(gp_Circ(Point3d(Point3d(p3 + xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
+			arcs[2]->SetCircle(Circle(Point3d(Point3d(p3 + xdir * m_rect_radius - ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[2]->A = arcs[2]->B;
 			lines[2]->B = p0 + ydir * m_rect_radius;
 			arcs[3]->A = lines[2]->B;
 			arcs[3]->B = p0 + xdir * m_rect_radius;
-			arcs[3]->SetCircle(gp_Circ(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
+			arcs[3]->SetCircle(Circle(Point3d(Point3d(p0 + xdir * m_rect_radius + ydir * m_rect_radius), zdir), m_rect_radius));
 			lines[3]->A = arcs[3]->B;
 			lines[3]->B = arcs[0]->A;
 		}
@@ -398,13 +398,13 @@ void RegularShapesDrawing::CalculateObround(const Point3d& p0, const Point3d& p1
 		{
 			for(int i = 0; i<2; i++)
 			{
-				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
+				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), Circle(), &(theApp->current_color));
 				TempObject()->Add(arcs[i], NULL);
 			}
 		}
 		arcs[0]->A = p0 + xdir * m_obround_radius;
 		arcs[0]->B = p0 - xdir * m_obround_radius;
-		arcs[0]->SetCircle(gp_Circ(Point3d(p0, zdir), m_obround_radius));
+		arcs[0]->SetCircle(Circle(Point3d(p0, zdir), m_obround_radius));
 		arcs[1]->A = arcs[0]->B;
 		arcs[1]->B = arcs[0]->A;
 		arcs[1]->C = arcs[0]->C;
@@ -430,7 +430,7 @@ void RegularShapesDrawing::CalculateObround(const Point3d& p0, const Point3d& p1
 		{
 			for(int i = 0; i<2; i++)
 			{
-				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), gp_Circ(), &(theApp->current_color));
+				arcs[i] = new HArc(Point3d(0, 0, 0), Point3d(0, 0, 0), Circle(), &(theApp->current_color));
 				TempObject()->Add(arcs[i], NULL);
 				lines[i] = new HLine(Point3d(0, 0, 0), Point3d(0, 0, 0), &(theApp->current_color));
 				TempObject()->Add(lines[i], NULL);
@@ -442,12 +442,12 @@ void RegularShapesDrawing::CalculateObround(const Point3d& p0, const Point3d& p1
 
 		arcs[0]->A = p1 + right_dir * m_obround_radius;
 		arcs[0]->B = p1 - right_dir * m_obround_radius;
-		arcs[0]->SetCircle(gp_Circ(Point3d(p1, zdir), m_obround_radius));
+		arcs[0]->SetCircle(Circle(Point3d(p1, zdir), m_obround_radius));
 		lines[0]->A = arcs[0]->B;
 		lines[0]->B = p0 - right_dir * m_obround_radius;
 		arcs[1]->A = lines[0]->B;
 		arcs[1]->B = p0 + right_dir * m_obround_radius;
-		arcs[1]->SetCircle(gp_Circ(Point3d(p0, zdir), m_obround_radius));
+		arcs[1]->SetCircle(Circle(Point3d(p0, zdir), m_obround_radius));
 		lines[1]->A = arcs[1]->B;
 		lines[1]->B = arcs[0]->A;
 	}
@@ -488,7 +488,7 @@ public:
 		RegularShapesDrawing_for_GetProperties->m_mode = (RegularShapeMode)value;
 		RegularShapesDrawing_for_GetProperties->ClearSketch();
 	}
-	int GetInt()
+	int GetInt()const
 	{
 		return (int)RegularShapesDrawing_for_GetProperties->m_mode;
 	}

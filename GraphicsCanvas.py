@@ -54,12 +54,12 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         if event.GetKeyCode() == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
             wx.GetApp().frame.ShowFullScreen(False)
         else:
-            key_event = Key.KeyEventFromWx(event)
-            cad.GetInputMode().OnKeyDown(key_event)
+            key_code = Key.KeyCodeFromWx(event)
+            cad.GetInputMode().OnKeyDown(key_code)
             
     def OnKeyUp(self, event):
-        key_event = Key.KeyEventFromWx(event)
-        cad.GetInputMode().OnKeyUp(key_event)
+        key_code = Key.KeyCodeFromWx(event)
+        cad.GetInputMode().OnKeyUp(key_code)
     
     def AppendToolsToMenu(self, menu, tools):
       for tool in tools:

@@ -12,7 +12,7 @@
 #include "SelectMode.h"
 #include "DigitizeMode.h"
 #include "Viewport.h"
-#include "KeyEvent.h"
+#include "KeyCode.h"
 
 Drawing::Drawing(void): m_getting_position(false), m_inhibit_coordinate_change(false){
 	null_view = new ViewSpecific(0);
@@ -161,16 +161,16 @@ void Drawing::OnMouse( MouseEvent& event )
 			else if(event.Moving()){
 				if(!m_inhibit_coordinate_change){
 					RecalculateAndRedraw(IPoint(event.GetX(), event.GetY()));
-//					theApp->m_frame->RefreshInputCanvas();
+					theApp->RefreshInputCanvas();
 				}
 			}
 		}
 	}
 }
 
-void Drawing::OnKeyDown(KeyEvent& event)
+void Drawing::OnKeyDown(KeyCode key_code)
 {
-	switch (event.m_key_code){
+	switch (key_code){
 	case K_F1:
 	case K_RETURN:
 	case K_ESCAPE:

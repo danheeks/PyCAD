@@ -45,13 +45,13 @@
 #include "ViewRotating.h"
 #include "ViewZooming.h"
 #include "ViewPanning.h"
-#include "KeyEvent.h"
 #include "LineArcDrawing.h"
 #include "MarkedObject.h"
 #include "ConversionTools.h"
 #include "PyWrapper.h"
 #include "PyBaseObject.h"
 #include "DigitizeMode.h"
+#include "KeyCode.h"
 
 void OnExit()
 {
@@ -173,24 +173,24 @@ public:
 		return NULL;
 	}
 
-	void OnKeyDown(KeyEvent& e)override
+	void OnKeyDown(KeyCode key_code)override
 	{
 		if (boost::python::override f = this->get_override("OnKeyDown"))
 		{
-			f(e);
+			f(key_code);
 		}
 		else
-			CInputMode::OnKeyDown(e);
+			CInputMode::OnKeyDown(key_code);
 	}
 
-	void OnKeyUp(KeyEvent& e)override
+	void OnKeyUp(KeyCode key_code)override
 	{
 		if (boost::python::override f = this->get_override("OnKeyUp"))
 		{
-			f(e);
+			f(key_code);
 		}
 		else
-			CInputMode::OnKeyUp(e);
+			CInputMode::OnKeyUp(key_code);
 	}
 
 	void GetProperties(std::list<Property *> *list)
@@ -1688,6 +1688,16 @@ bool CanRedo()
 	return theApp->CanRedo();
 }
 
+void EndDrawing()
+{
+	if(((Drawing*)(theApp->input_mode_object))->DragDoneWithXOR())
+		theApp->m_current_viewport->EndDrawFront();
+
+	((Drawing*)(theApp->input_mode_object))->ClearObjectsMade();
+
+	theApp->SetInputMode(theApp->m_select_mode);
+}
+
 int BaseObjectGetIndex(BaseObject& object)
 {
 	return object.GetIndex();
@@ -2080,11 +2090,6 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.value("Special20", K_SPECIAL20)
 			;
 
-		boost::python::class_<KeyEvent>("KeyEvent")
-			.def(boost::python::init<KeyEvent>())
-			.def_readwrite("m_key_code", &KeyEvent::m_key_code)
-			;
-
 		boost::python::class_<InputModeWrap, boost::noncopyable >("InputMode")
 			.def(boost::python::init<InputModeWrap>())
 			.def("GetTitle", &InputModeGetTitle)
@@ -2245,13 +2250,16 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("GetDrawSelect", GetDrawSelect);
 		boost::python::def("GetDrawMarked", GetDrawMarked);
 		boost::python::def("CanUndo", CanUndo);
-		boost::python::def("CanRedo", CanRedo); 
+		boost::python::def("CanRedo", CanRedo);
+		boost::python::def("EndDrawing", EndDrawing);
+		
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
 		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
 		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
+		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
 		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_LONG_STRING") = (int)LongStringPropertyType;

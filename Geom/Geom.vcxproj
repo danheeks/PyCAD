@@ -88,6 +88,7 @@
     <ClCompile Include="Curve3D.cpp" />
     <ClCompile Include="dxf.cpp" />
     <ClCompile Include="Finite.cpp" />
+    <ClCompile Include="Geom.cpp" />
     <ClCompile Include="HeeksGeomDxf.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="Curve.h" />
     <ClInclude Include="Curve3D.h" />
     <ClInclude Include="dxf.h" />
+    <ClInclude Include="Geom.h" />
     <ClInclude Include="geometry.h" />
     <ClInclude Include="HeeksGeomDxf.h" />
     <ClInclude Include="MachiningArea.h" />

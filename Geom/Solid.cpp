@@ -90,10 +90,10 @@ bool ConvertCurveToEdges(const CCurve& curve, std::vector<TopoDS_Edge> &edges)
 					BRep_Builder aBuilder;
 					TopoDS_Vertex start, end;
 
-					aBuilder.MakeVertex(start, gp_Pnt(span.m_p.x, span.m_p.y, 0.0), TOLERANCE);
+					aBuilder.MakeVertex(start, Point3d(span.m_p.x, span.m_p.y, 0.0), TOLERANCE);
 					start.Orientation(TopAbs_REVERSED);
 
-					aBuilder.MakeVertex(end, gp_Pnt(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), TOLERANCE);
+					aBuilder.MakeVertex(end, Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), TOLERANCE);
 					end.Orientation(TopAbs_FORWARD);
 
 					if (vertex.m_type == 0)
@@ -107,7 +107,7 @@ bool ConvertCurveToEdges(const CCurve& curve, std::vector<TopoDS_Edge> &edges)
 					}
 					else
 					{
-						gp_Circ circ(gp_Ax2(gp_Pnt(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), (span.m_v.m_type > 0) ? gp_Dir(0, 0, 1):gp_Dir(0, 0, -1)), span.m_v.m_c.dist(span.m_p));
+						Circle circ(gp_Ax2(Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), (span.m_v.m_type > 0) ? Point3d(0, 0, 1):Point3d(0, 0, -1)), span.m_v.m_c.dist(span.m_p));
 						BRepBuilderAPI_MakeEdge edge(circ, start, end);
 						if (edge.IsDone())
 						{
@@ -173,23 +173,23 @@ bool ConvertEdgesToFaceOrWire(const std::vector<TopoDS_Edge> &edges, TopoDS_Shap
 	return true;
 }
 
-static gp_Pnt GetStart(const TopoDS_Edge &edge)
+static Point3d GetStart(const TopoDS_Edge &edge)
 {
 	BRepAdaptor_Curve curve(edge);
 	double uStart = curve.FirstParameter();
-	gp_Pnt PS;
-	gp_Vec VS;
+	Point3d PS;
+	Point3d VS;
 	curve.D1(uStart, PS, VS);
 
 	return(PS);
 }
 
-static gp_Pnt GetEnd(const TopoDS_Edge &edge)
+static Point3d GetEnd(const TopoDS_Edge &edge)
 {
 	BRepAdaptor_Curve curve(edge);
 	double uEnd = curve.LastParameter();
-	gp_Pnt PE;
-	gp_Vec VE;
+	Point3d PE;
+	Point3d VE;
 	curve.D1(uEnd, PE, VE);
 
 	return(PE);
@@ -312,7 +312,7 @@ bool CreateRuledSurface(const std::list<TopoDS_Wire> &wire_list, TopoDS_Shape& s
 	return false;
 }
 
-void CreateExtrusions(const std::list<ShapeAndSign> &faces_or_wires, std::list<ShapeAndSign>& new_shapes, const gp_Vec& extrude_vector, double taper_angle, bool solid_if_possible)
+void CreateExtrusions(const std::list<ShapeAndSign> &faces_or_wires, std::list<ShapeAndSign>& new_shapes, const Point3d& extrude_vector, double taper_angle, bool solid_if_possible)
 {
 	try{
 		for (std::list<ShapeAndSign>::const_iterator It = faces_or_wires.begin(); It != faces_or_wires.end(); It++)
@@ -335,7 +335,7 @@ void CreateExtrusions(const std::list<ShapeAndSign> &faces_or_wires, std::list<S
 				wire_list.push_back(TopoDS::Wire(face_or_wire));
 				wire_list.push_back(TopoDS::Wire(offset.Shape()));
 
-				gp_Trsf mat;
+				Matrix mat;
 				mat.SetTranslation(extrude_vector);
 				BRepBuilderAPI_Transform myBRepTransformation(wire_list.back(), mat);
 				wire_list.back() = TopoDS::Wire(myBRepTransformation.Shape());
@@ -374,7 +374,7 @@ CSolid::CSolid(const CArea& area, double thickness)
 	ConvertToFaceOrWire(area, faces_or_wires, true);
 
 	std::list<ShapeAndSign> new_shapes;
-	CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(0, 0, thickness)/*.Transformed(trsf)*/, 0.0, true);
+	CreateExtrusions(faces_or_wires, new_shapes, Point3d(0, 0, thickness)/*.Transformed(trsf)*/, 0.0, true);
 
 	bool made = false;
 
@@ -419,7 +419,7 @@ CSolid::CSolid(const CCurve& curve, double thickness)
 	faces_or_wires.push_back(ShapeAndSign(face_or_wire, true));
 
 	std::list<ShapeAndSign> new_shapes;
-	CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(0, 0, thickness)/*.Transformed(trsf)*/, 0.0, true);
+	CreateExtrusions(faces_or_wires, new_shapes, Point3d(0, 0, thickness)/*.Transformed(trsf)*/, 0.0, true);
 
 	if (new_shapes.size() > 0)
 	{
@@ -435,15 +435,15 @@ CSolid::CSolid(const CCurve& curve, double thickness)
 
 void CSolid::Translate(const Point3d& v)
 {
-	gp_Trsf mat;
-	mat.SetTranslationPart(gp_Vec(v.x, v.y, v.z));
+	Matrix mat;
+	mat.SetTranslationPart(Point3d(v.x, v.y, v.z));
 	BRepBuilderAPI_Transform myBRepTransformation(m_shape, mat);
 	m_shape = myBRepTransformation.Shape();
 }
 
 void CSolid::Transform(const Matrix& tm)
 {
-	gp_Trsf mat;
+	Matrix mat;
 	const double* m = tm.e;
 #if OCC_VERSION_HEX >= 0x060600
 	mat.SetValues(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11]);
@@ -458,23 +458,23 @@ void CSolid::Transform(const Matrix& tm)
 
 bool CSolid::GetExtents(double* extents, const double* orig, const double* xdir, const double* ydir, const double* zdir)const
 {
-	gp_Pnt p_orig(0, 0, 0);
-	if (orig)p_orig = gp_Pnt(orig[0], orig[1], orig[2]);
-	gp_Vec v_x(1, 0, 0);
-	if (xdir)v_x = gp_Vec(xdir[0], xdir[1], xdir[2]);
-	gp_Vec v_y(0, 1, 0);
-	if (ydir)v_y = gp_Vec(ydir[0], ydir[1], ydir[2]);
-	gp_Vec v_z(0, 0, 1);
-	if (zdir)v_z = gp_Vec(zdir[0], zdir[1], zdir[2]);
+	Point3d p_orig(0, 0, 0);
+	if (orig)p_orig = Point3d(orig[0], orig[1], orig[2]);
+	Point3d v_x(1, 0, 0);
+	if (xdir)v_x = Point3d(xdir[0], xdir[1], xdir[2]);
+	Point3d v_y(0, 1, 0);
+	if (ydir)v_y = Point3d(ydir[0], ydir[1], ydir[2]);
+	Point3d v_z(0, 0, 1);
+	if (zdir)v_z = Point3d(zdir[0], zdir[1], zdir[2]);
 
-	BRepPrimAPI_MakeBox cuboid_plus_x(gp_Ax2(gp_Pnt(p_orig.XYZ() + 2000000 * v_x.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_y.XYZ()), v_x, v_y), 1000000, 1000000, 1000000);
-	BRepPrimAPI_MakeBox cuboid_minus_x(gp_Ax2(gp_Pnt(p_orig.XYZ() + (-2000000) * v_x.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_y.XYZ()), -v_x, v_z), 1000000, 1000000, 1000000);
-	BRepPrimAPI_MakeBox cuboid_plus_y(gp_Ax2(gp_Pnt(p_orig.XYZ() + 2000000 * v_y.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_x.XYZ()), v_y, v_z), 1000000, 1000000, 1000000);
-	BRepPrimAPI_MakeBox cuboid_minus_y(gp_Ax2(gp_Pnt(p_orig.XYZ() + (-2000000) * v_y.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_x.XYZ()), -v_y, v_x), 1000000, 1000000, 1000000);
-	BRepPrimAPI_MakeBox cuboid_plus_z(gp_Ax2(gp_Pnt(p_orig.XYZ() + 2000000 * v_z.XYZ() + (-1000000) * v_x.XYZ() + (-1000000) * v_y.XYZ()), v_z, v_x), 1000000, 1000000, 1000000);
-	BRepPrimAPI_MakeBox cuboid_minus_z(gp_Ax2(gp_Pnt(p_orig.XYZ() + (-2000000) * v_z.XYZ() + (-1000000) * v_x.XYZ() + (-1000000) * v_y.XYZ()), -v_z, v_y), 1000000, 1000000, 1000000);
+	BRepPrimAPI_MakeBox cuboid_plus_x(gp_Ax2(Point3d(p_orig.XYZ() + 2000000 * v_x.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_y.XYZ()), v_x, v_y), 1000000, 1000000, 1000000);
+	BRepPrimAPI_MakeBox cuboid_minus_x(gp_Ax2(Point3d(p_orig.XYZ() + (-2000000) * v_x.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_y.XYZ()), -v_x, v_z), 1000000, 1000000, 1000000);
+	BRepPrimAPI_MakeBox cuboid_plus_y(gp_Ax2(Point3d(p_orig.XYZ() + 2000000 * v_y.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_x.XYZ()), v_y, v_z), 1000000, 1000000, 1000000);
+	BRepPrimAPI_MakeBox cuboid_minus_y(gp_Ax2(Point3d(p_orig.XYZ() + (-2000000) * v_y.XYZ() + (-1000000) * v_z.XYZ() + (-1000000) * v_x.XYZ()), -v_y, v_x), 1000000, 1000000, 1000000);
+	BRepPrimAPI_MakeBox cuboid_plus_z(gp_Ax2(Point3d(p_orig.XYZ() + 2000000 * v_z.XYZ() + (-1000000) * v_x.XYZ() + (-1000000) * v_y.XYZ()), v_z, v_x), 1000000, 1000000, 1000000);
+	BRepPrimAPI_MakeBox cuboid_minus_z(gp_Ax2(Point3d(p_orig.XYZ() + (-2000000) * v_z.XYZ() + (-1000000) * v_x.XYZ() + (-1000000) * v_y.XYZ()), -v_z, v_y), 1000000, 1000000, 1000000);
 
-	gp_Vec v_orig(p_orig.XYZ());
+	Point3d v_orig(p_orig.XYZ());
 
 	TopoDS_Solid shape[6] =
 	{
@@ -486,7 +486,7 @@ bool CSolid::GetExtents(double* extents, const double* orig, const double* xdir,
 		cuboid_plus_z
 	};
 
-	gp_Vec vector[6] =
+	Point3d vector[6] =
 	{
 		v_x,
 		v_y,
@@ -499,8 +499,8 @@ bool CSolid::GetExtents(double* extents, const double* orig, const double* xdir,
 	for (int i = 0; i<6; i++){
 		BRepExtrema_DistShapeShape extrema(m_shape, shape[i]);
 		extrema.Perform();
-		gp_Pnt p = extrema.PointOnShape1(1);
-		gp_Vec v(p.XYZ());
+		Point3d p = extrema.PointOnShape1(1);
+		Point3d v(p.XYZ());
 		double dp = v * vector[i];
 		double dp_o = v_orig * vector[i];
 		extents[i] = dp - dp_o;
@@ -525,7 +525,7 @@ CSolid* CSolid::Extrusion(const Point3d& v)const
 	faces_or_wires.push_back(m_shape);
 
 	std::list<TopoDS_Shape> new_shapes;
-	CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(v.x, v.y, v.z), 0.0, true);
+	CreateExtrusions(faces_or_wires, new_shapes, Point3d(v.x, v.y, v.z), 0.0, true);
 
 	if (new_shapes.size() > 0)
 	{

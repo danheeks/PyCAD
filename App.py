@@ -179,6 +179,10 @@ class App(wx.App):
         if type == cad.OBJECT_TYPE_SKETCH:
             if self.object.GetNumChildren() > 1:
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
+
+        if type == cad.OBJECT_TYPE_SKETCH:
+            if self.object.GetNumChildren() > 1:
+                tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
                 
         if len(tools)>0:
             tools.append(None) # a separator
@@ -208,23 +212,16 @@ class App(wx.App):
     
     def AddPointToDrawing(self):
         cad.AddDrawingPoint()
-    
-    def AddPointToDrawing2(self):
-        import geom
-        import math
-        rad = 30.0
-        cad.StartHistory()
-        for i in range(0,360):
-            x = rad * math.cos(math.pi / 180 * i)
-            y = rad * math.sin(math.pi / 180 * i)
-            cad.AddUndoably(cad.NewPoint(geom.Point3D(x,y,0)), None)
-        cad.EndHistory()
+        
+    def EndDrawing(self):
+        cad.EndDrawing()
     
     def GetInputModeTools(self):
         tools = []
-        if cad.IsInputModeLineArc():
+        input_mode_class = cad.GetInputMode().__class__
+        if input_mode_class == cad.LineArcDrawing:
             tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
-            tools.append(ToolBarTool.CadToolBarTool('Add Point', 'circ2p', self.AddPointToDrawing2))
+            tools.append(ToolBarTool.CadToolBarTool('Stop Drawing', 'enddraw', self.EndDrawing))
         
         return tools
     

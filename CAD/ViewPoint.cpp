@@ -387,8 +387,7 @@ Line CViewPoint::SightLine(const IPoint &point){
 	Point3d s = glUnproject(screen_point);
 	screen_point.z = 1;
 	Point3d e = glUnproject(screen_point);
-	Point3d dir(s, e);
-	return Line(s, dir);
+	return Line(s, e);
 }
 
 int CViewPoint::ChooseBestPlane(int plane)const{

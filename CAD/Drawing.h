@@ -64,7 +64,7 @@ public:
 
 	// InputMode's virtual functions
 	void OnMouse( MouseEvent& event );
-	void OnKeyDown(KeyEvent& event);
+	void OnKeyDown(KeyCode key_code);
 	bool OnModeChange(void);
 	void GetProperties(std::list<Property *> *list);
 	void OnFrontRender();

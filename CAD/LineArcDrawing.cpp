@@ -19,7 +19,6 @@
 #include "DigitizeMode.h"
 #include "Property.h"
 
-
 LineArcDrawing line_strip;
 
 LineArcDrawing::LineArcDrawing(void){
@@ -605,6 +604,41 @@ const wchar_t* LineArcDrawing::GetTitle()
 	}
 }
 
+
+void LineArcDrawing::OnKeyDown(KeyCode key_code)
+{
+	switch (key_code){
+	case 'A':
+		// switch to arc drawing mode until a is released
+		if (!m_A_down){
+			m_A_down = true;
+			m_save_drawing_mode.push_back(drawing_mode);
+			drawing_mode = ArcDrawingMode;
+			theApp->RefreshInputCanvas();
+		}
+		return;
+	}
+
+	Drawing::OnKeyDown(key_code);
+}
+
+void LineArcDrawing::OnKeyUp(KeyCode key_code)
+{
+	switch (key_code){
+	case 'A':
+		// switch back to previous drawing mode
+		if (m_save_drawing_mode.size()>0){
+			drawing_mode = m_save_drawing_mode.back();
+			m_save_drawing_mode.pop_back();
+		}
+		theApp->RefreshInputCanvas();
+		m_A_down = false;
+		return;
+	}
+
+	Drawing::OnKeyUp(key_code);
+}
+
 void LineArcDrawing::set_cursor(void){
 }
 
@@ -621,14 +655,15 @@ public:
 		line_drawing_for_GetProperties->drawing_mode = (EnumDrawingMode)value;
 		line_drawing_for_GetProperties->m_save_drawing_mode.clear();
 	}
-	int GetInt()
+	int GetInt()const
 	{
 		return (int)line_drawing_for_GetProperties->drawing_mode;
 	}
 	void GetChoices(std::list< std::wstring > &choices)const
 	{
-		choices.push_back ( std::wstring ( L"draw tangential arcs" ) );
-		choices.push_back ( std::wstring ( L"infinite line" ) );
+		choices.push_back(std::wstring(L"draw lines"));
+		choices.push_back(std::wstring(L"draw tangential arcs"));
+		choices.push_back(std::wstring(L"infinite line"));
 		choices.push_back ( std::wstring ( L"draw circles" ) );
 
 	}
@@ -644,7 +679,7 @@ public:
 	{
 		line_drawing_for_GetProperties->circle_mode = (EnumCircleDrawingMode)value;
 	}
-	int GetInt()
+	int GetInt()const
 	{
 		return (int)line_drawing_for_GetProperties->circle_mode;
 	}

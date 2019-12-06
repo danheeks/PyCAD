@@ -205,18 +205,18 @@ bool HCircle::Stretch(const double *p, const double* shift, void* data){
 
 	gp_Ax2 axis(m_axis.Location(), m_axis.Direction());
 	Point3d x_axis = axis.XDirection();
-	Point3d c = m_axis.Location().XYZ();
+	Point3d c = m_axis.Location();
 	double r = m_radius;
-	Point3d s(c.XYZ() + x_axis.XYZ() * r);
+	Point3d s(c + x_axis * r);
 
 	if (data == &C_for_gripper_posns){
-		C_for_gripper_posns = vp.XYZ() + vshift.XYZ();
+		C_for_gripper_posns = vp + vshift;
 		m_axis.SetLocation(C_for_gripper_posns);
 
 	}
 	else if (data == &m_radius)
 	{
-		s = Point3d(vp.XYZ() + vshift.XYZ());
+		s = Point3d(vp + vshift);
 		m_radius = c.Distance(s);
 	}
 #endif
@@ -325,13 +325,13 @@ int HCircle::Intersects(const HeeksObj *object, std::list< double > *rl)const
 #if 0 // to do
 
 //static
-bool HCircle::GetLineTangentPoints(const gp_Circ& c1, const gp_Circ& c2, const Point3d& a, const Point3d& b, Point3d& p1, Point3d& p2)
+bool HCircle::GetLineTangentPoints(const Circle& c1, const Circle& c2, const Point3d& a, const Point3d& b, Point3d& p1, Point3d& p2)
 {
 	// find the tangent points for a line between two circles
 
 	// they need to be flat ( compared with each other )
 	if (fabs(fabs(c1.Axis().Direction() * c2.Axis().Direction()) - 1.0) > 0.00000001)return false;
-	if (fabs(gp_Vec(c1.Location().XYZ()) * c1.Axis().Direction() - gp_Vec(c2.Location().XYZ()) * c1.Axis().Direction()) > 0.00000001)return false;
+	if (fabs(gp_Vec(c1.Location()) * c1.Axis().Direction() - gp_Vec(c2.Location()) * c1.Axis().Direction()) > 0.00000001)return false;
 
 	// not concentric
 	if (c1.Location().IsEqual(c2.Location(), theApp->m_geom_tol))return false;
@@ -375,14 +375,14 @@ bool HCircle::GetLineTangentPoints(const gp_Circ& c1, const gp_Circ& c2, const P
 		f2 = -1.0;
 	}
 
-	p1 = c1.Location().XYZ() + forward.XYZ() * (f1 * r1 * sinang) + left1.XYZ() * (l1 * r1 * cosang);
-	p2 = c2.Location().XYZ() + forward.XYZ() * (f2 * r2 * sinang) + left2.XYZ() * (l2 * r2 * cosang);
+	p1 = c1.Location() + forward * (f1 * r1 * sinang) + left1 * (l1 * r1 * cosang);
+	p2 = c2.Location() + forward * (f2 * r2 * sinang) + left2 * (l2 * r2 * cosang);
 
 	return true;
 }
 
 // static
-bool HCircle::GetLineTangentPoint(const gp_Circ& c, const Point3d& a, const Point3d& b, Point3d& p)
+bool HCircle::GetLineTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, Point3d& p)
 {
 	// find the tangent point for a line from near point "a" on the circle to point "b"
 
@@ -402,31 +402,31 @@ bool HCircle::GetLineTangentPoint(const gp_Circ& c, const Point3d& a, const Poin
 	double cosang = A / H;
 
 	double l = is_left ? 1.0 : -1.0;
-	p = c.Location().XYZ() + forward.XYZ() * (r * sinang) + left.XYZ() * (l * r * cosang);
+	p = c.Location() + forward * (r * sinang) + left * (l * r * cosang);
 
 	return true;
 }
 
 // static
-bool HCircle::GetArcTangentPoints(const gp_Circ& c, const gp_Lin &line, const Point3d& p, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis)
+bool HCircle::GetArcTangentPoints(const Circle& c, const gp_Lin &line, const Point3d& p, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis)
 {
 	// find the arc that fits tangentially from the line to the circle
 	// returns p1 - on the line, p2 - on the circle, centre - the centre point of the arc
 
 	// they need to be flat ( compared with each other )
 	if (fabs(gp_Vec(c.Axis().Direction()) * gp_Vec(line.Direction())) > 0.00000001)return false;
-	if (fabs(gp_Vec(c.Location().XYZ()) * c.Axis().Direction() - gp_Vec(line.Location().XYZ()) * c.Axis().Direction()) > 0.00000001)return false;
+	if (fabs(gp_Vec(c.Location()) * c.Axis().Direction() - gp_Vec(line.Location()) * c.Axis().Direction()) > 0.00000001)return false;
 
 	// make a concentric circle
-	bool p_infront_of_centre = gp_Vec(p.XYZ()) * gp_Vec(line.Direction()) > gp_Vec(c.Location().XYZ()) * gp_Vec(line.Direction());
+	bool p_infront_of_centre = gp_Vec(p) * gp_Vec(line.Direction()) > gp_Vec(c.Location()) * gp_Vec(line.Direction());
 	double R = p_infront_of_centre ? (c.Radius() - radius) : (c.Radius() + radius);
 	if (R < 0.000000000000001)return false;
-	gp_Circ concentric_circle(gp_Ax2(c.Axis().Location(), c.Axis().Direction()), R);
+	Circle concentric_circle(gp_Ax2(c.Axis().Location(), c.Axis().Direction()), R);
 
 	// make an offset line
 	gp_Vec left = c.Axis().Direction() ^ line.Direction();
-	bool p_on_left_of_line = gp_Vec(p.XYZ()) * left > gp_Vec(line.Location().XYZ()) * left;
-	gp_Lin offset_line(Point3d(line.Location().XYZ() + left.XYZ() * (p_on_left_of_line ? radius : -radius)), line.Direction());
+	bool p_on_left_of_line = gp_Vec(p) * left > gp_Vec(line.Location()) * left;
+	gp_Lin offset_line(Point3d(line.Location() + left * (p_on_left_of_line ? radius : -radius)), line.Direction());
 
 	// find intersection between concentric circle and offset line
 	{
@@ -437,7 +437,7 @@ bool HCircle::GetArcTangentPoints(const gp_Circ& c, const gp_Lin &line, const Po
 		for (std::list<Point3d>::iterator It = rl.begin(); It != rl.end(); It++)
 		{
 			Point3d& pnt = *It;
-			double dp = gp_Vec(pnt.XYZ()) * gp_Vec(line.Direction());
+			double dp = gp_Vec(pnt) * gp_Vec(line.Direction());
 			if (best_pnt == NULL || (p_infront_of_centre && dp > best_dp) || (!p_infront_of_centre && dp < best_dp))
 			{
 				best_pnt = &pnt;
@@ -452,7 +452,7 @@ bool HCircle::GetArcTangentPoints(const gp_Circ& c, const gp_Lin &line, const Po
 	}
 
 	// make a circle at this point
-	gp_Circ circle_for_arc(gp_Ax2(centre, c.Axis().Direction()), radius);
+	Circle circle_for_arc(gp_Ax2(centre, c.Axis().Direction()), radius);
 
 	// intersect with original line
 	{
@@ -481,10 +481,10 @@ bool HCircle::GetArcTangentPoints(const gp_Circ& c, const gp_Lin &line, const Po
 
 class two_circles{
 public:
-	gp_Circ m_c1;
-	gp_Circ m_c2;
+	Circle m_c1;
+	Circle m_c2;
 
-	two_circles(const gp_Circ& c1, const gp_Circ& c2)
+	two_circles(const Circle& c1, const Circle& c2)
 	{
 		m_c1 = c1;
 		m_c2 = c2;
@@ -526,14 +526,14 @@ static const two_points* find_best_points_pair(const std::list<two_points>& poin
 }
 
 // static
-bool HCircle::GetArcTangentPoints(const gp_Circ& c1, const gp_Circ &c2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis)
+bool HCircle::GetArcTangentPoints(const Circle& c1, const Circle &c2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis)
 {
 	// find the arc that fits tangentially from the circle to the circle
 	// returns p1 - on c1, p2 - on c2, centre - the centre point of the arc
 
 	// theApp need to be flat ( compared with each other )
 	if (fabs(fabs(c1.Axis().Direction() * c2.Axis().Direction()) - 1.0) > 0.00000001)return false;
-	if (fabs(gp_Vec(c1.Location().XYZ()) * c1.Axis().Direction() - gp_Vec(c2.Location().XYZ()) * c1.Axis().Direction()) > 0.00000001)return false;
+	if (fabs(gp_Vec(c1.Location()) * c1.Axis().Direction() - gp_Vec(c2.Location()) * c1.Axis().Direction()) > 0.00000001)return false;
 
 	// not concentric
 	if (c1.Location().IsEqual(c2.Location(), theApp->m_geom_tol))return false;
@@ -550,16 +550,16 @@ bool HCircle::GetArcTangentPoints(const gp_Circ& c1, const gp_Circ &c2, const Po
 	double r1 = c1.Radius();
 	double r2 = c2.Radius();
 
-	std::list<gp_Circ> c1_list, c2_list;
-	c1_list.push_back(gp_Circ(gp_Ax2(c1.Location(), c1.Axis().Direction()), r1 + radius));
-	if (radius > r1)c1_list.push_back(gp_Circ(gp_Ax2(c1.Location(), c1.Axis().Direction()), radius - r1));
-	c2_list.push_back(gp_Circ(gp_Ax2(c2.Location(), c2.Axis().Direction()), r2 + radius));
-	if (radius > r2)c2_list.push_back(gp_Circ(gp_Ax2(c2.Location(), c2.Axis().Direction()), radius - r2));
+	std::list<Circle> c1_list, c2_list;
+	c1_list.push_back(Circle(gp_Ax2(c1.Location(), c1.Axis().Direction()), r1 + radius));
+	if (radius > r1)c1_list.push_back(Circle(gp_Ax2(c1.Location(), c1.Axis().Direction()), radius - r1));
+	c2_list.push_back(Circle(gp_Ax2(c2.Location(), c2.Axis().Direction()), r2 + radius));
+	if (radius > r2)c2_list.push_back(Circle(gp_Ax2(c2.Location(), c2.Axis().Direction()), radius - r2));
 
 	std::list<two_circles> combinations;
-	for (std::list<gp_Circ>::iterator It1 = c1_list.begin(); It1 != c1_list.end(); It1++)
+	for (std::list<Circle>::iterator It1 = c1_list.begin(); It1 != c1_list.end(); It1++)
 	{
-		for (std::list<gp_Circ>::iterator It2 = c2_list.begin(); It2 != c2_list.end(); It2++)
+		for (std::list<Circle>::iterator It2 = c2_list.begin(); It2 != c2_list.end(); It2++)
 		{
 			combinations.push_back(two_circles(*It1, *It2));
 		}
@@ -576,7 +576,7 @@ bool HCircle::GetArcTangentPoints(const gp_Circ& c1, const gp_Circ &c2, const Po
 	for (std::list<Point3d>::iterator It = intersections.begin(); It != intersections.end(); It++)
 	{
 		Point3d& pnt = *It;
-		gp_Circ arc_circle(gp_Ax2(pnt, c1.Axis().Direction()), radius);
+		Circle arc_circle(gp_Ax2(pnt, c1.Axis().Direction()), radius);
 		std::list<Point3d> rl1, rl2;
 		intersect(arc_circle, c1, rl1);
 		intersect(arc_circle, c2, rl2);
@@ -611,28 +611,28 @@ bool HCircle::GetArcTangentPoints(const gp_Lin& l1, const gp_Lin &l2, const Poin
 	gp_Vec left1 = axis ^ l1.Direction();
 	gp_Vec left2 = axis ^ l2.Direction();
 
-	gp_Lin offset_l1_left(l1.Location().XYZ() + left1.XYZ() * radius, l1.Direction());
-	gp_Lin offset_l1_right(l1.Location().XYZ() - left1.XYZ() * radius, l1.Direction());
-	gp_Lin offset_l2_left(l2.Location().XYZ() + left2.XYZ() * radius, l2.Direction());
-	gp_Lin offset_l2_right(l2.Location().XYZ() - left2.XYZ() * radius, l2.Direction());
+	gp_Lin offset_l1_left(l1.Location() + left1 * radius, l1.Direction());
+	gp_Lin offset_l1_right(l1.Location() - left1 * radius, l1.Direction());
+	gp_Lin offset_l2_left(l2.Location() + left2 * radius, l2.Direction());
+	gp_Lin offset_l2_right(l2.Location() - left2 * radius, l2.Direction());
 
-	std::list<gp_Circ> circles;
+	std::list<Circle> circles;
 
 	Point3d pnt;
 	if (intersect(offset_l1_left, offset_l2_left, pnt))
-		circles.push_back(gp_Circ(gp_Ax2(pnt, axis), radius));
+		circles.push_back(Circle(gp_Ax2(pnt, axis), radius));
 	if (intersect(offset_l1_left, offset_l2_right, pnt))
-		circles.push_back(gp_Circ(gp_Ax2(pnt, axis), radius));
+		circles.push_back(Circle(gp_Ax2(pnt, axis), radius));
 	if (intersect(offset_l1_right, offset_l2_left, pnt))
-		circles.push_back(gp_Circ(gp_Ax2(pnt, axis), radius));
+		circles.push_back(Circle(gp_Ax2(pnt, axis), radius));
 	if (intersect(offset_l1_right, offset_l2_right, pnt))
-		circles.push_back(gp_Circ(gp_Ax2(pnt, axis), radius));
+		circles.push_back(Circle(gp_Ax2(pnt, axis), radius));
 
 	std::list<two_points> point_pairs;
 
-	for (std::list<gp_Circ>::iterator It = circles.begin(); It != circles.end(); It++)
+	for (std::list<Circle>::iterator It = circles.begin(); It != circles.end(); It++)
 	{
-		gp_Circ& c = *It;
+		Circle& c = *It;
 		std::list<Point3d> rl1, rl2;
 		intersect(l1, c, rl1);
 		intersect(l2, c, rl2);
@@ -666,7 +666,7 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 
 	if (final_direction)
 	{
-		if ((*final_direction) * gp_Vec(sideways.XYZ()) >= 0)// b on correct side compared with final direction
+		if ((*final_direction) * gp_Vec(sideways) >= 0)// b on correct side compared with final direction
 		{
 			gp_Lin final_dir_line(b, Point3d(final_direction->XYZ()));
 			if (!l.Direction().IsEqual(Point3d(final_direction->XYZ()), 0.00000001) && !l.Direction().IsEqual(-Point3d(final_direction->XYZ()), 0.00000001))
@@ -675,8 +675,8 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 				Point3d perp = axis ^ (*final_direction);
 				gp_Lin perp_line(gp_Ax1(b, perp));
 				Point3d half_angle_dir[2];
-				half_angle_dir[0] = Point3d(perp.XYZ() + sideways.XYZ());
-				half_angle_dir[1] = Point3d(sideways.XYZ() - perp.XYZ());
+				half_angle_dir[0] = Point3d(perp + sideways);
+				half_angle_dir[1] = Point3d(sideways - perp);
 
 
 				std::list<Point3d> maybe_p;
@@ -690,7 +690,7 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 						{
 							double R = b.Distance(centre);
 							std::list<Point3d> plist;
-							intersect(l, gp_Circ(gp_Ax2(centre, axis), R), plist);
+							intersect(l, Circle(gp_Ax2(centre, axis), R), plist);
 							if (plist.size() == 1)
 							{
 								maybe_p.push_back(plist.front());
@@ -733,8 +733,8 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 			radius_to_use = c.Distance(b);
 		}
 		axis = l.Direction() ^ sideways;
-		gp_Circ offset_circle(gp_Ax2(b, axis), radius_to_use);
-		gp_Lin offset_line(l.Location().XYZ() + sideways.XYZ() * radius_to_use, l.Direction());
+		Circle offset_circle(gp_Ax2(b, axis), radius_to_use);
+		gp_Lin offset_line(l.Location() + sideways * radius_to_use, l.Direction());
 		std::list<Point3d> plist;
 		intersect(offset_line, offset_circle, plist);
 		Point3d* best_pnt = NULL;
@@ -753,7 +753,7 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 		{
 			centre = *best_pnt;
 			std::list<Point3d> rl;
-			intersect(l, gp_Circ(gp_Ax2(centre, axis), radius_to_use), rl);
+			intersect(l, Circle(gp_Ax2(centre, axis), radius_to_use), rl);
 			if (rl.size() == 1)
 			{
 				p = rl.front();
@@ -766,23 +766,23 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 }
 
 // static
-bool HCircle::GetArcTangentPoint(const gp_Circ& c, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis)
+bool HCircle::GetArcTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis)
 {
 	// find the tangent point on the circle c, for an arc from near point "a" on the circle to exact given point "b"
 	if (final_direction)
 	{
 		// get tangent circles
 		gp_Lin final_dir_line(b, Point3d(final_direction->XYZ()));
-		std::list<gp_Circ> c_list;
+		std::list<Circle> c_list;
 		TangentCircles(c, final_dir_line, b, c_list);
 
-		gp_Circ* best_pnt_circle = NULL;
+		Circle* best_pnt_circle = NULL;
 		Point3d best_pnt;
 		double best_dist = 0.0;
 
-		for (std::list<gp_Circ>::iterator It = c_list.begin(); It != c_list.end(); It++)
+		for (std::list<Circle>::iterator It = c_list.begin(); It != c_list.end(); It++)
 		{
-			gp_Circ& circle = *It;
+			Circle& circle = *It;
 			std::list<Point3d> p_list;
 			intersect(circle, c, p_list);
 			if (p_list.size() == 1)

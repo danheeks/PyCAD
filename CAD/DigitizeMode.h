@@ -32,7 +32,7 @@ public:
 	const wchar_t* GetTitle();
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
-//	void OnKeyDown(wxKeyEvent& event);
+//	void OnKeyDown(KeyCode key_code);
 	bool OnModeChange(void);
 	void OnFrontRender();
 	void GetProperties(std::list<Property *> *list);

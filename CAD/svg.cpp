@@ -166,7 +166,7 @@ void CSvgRead::ProcessArea()
 			else
 			{
 				// add an arc
-				HArc *arc = new HArc(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), gp_Circ(Point3d(Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp->current_color);
+				HArc *arc = new HArc(Point3d(span.m_p.x, span.m_p.y, 0.0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0.0), Circle(Point3d(Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0.0), Point3d(0.0, 0.0, (span.m_v.m_type > 0)?1.0: -1.0)), span.m_p.dist(span.m_v.m_c)), &theApp->current_color);
 				ModifyByMatrix(arc);
 				AddSketchIfNeeded();
 				m_sketch->Add(arc, NULL);
@@ -1001,7 +1001,7 @@ void CSvgRead::OnReadCircle(Point3d c, double r)
 {
 #if 0
 	Point3d up(0,0,1);
-	gp_Circ cir(Point3d(c,up),r);
+	Circle cir(Point3d(c,up),r);
 	HCircle *new_object = new HCircle(cir,&theApp->current_color);
 	ModifyByMatrix(new_object);
 	AddSketchIfNeeded();

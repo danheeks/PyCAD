@@ -114,7 +114,7 @@ void DigitizeMode::OnMouse( MouseEvent& event ){
 		point_or_window->OnMouse(event);
 		if(m_doing_a_main_loop)
 		{
-//			theApp->m_frame->RefreshInputCanvas();
+			theApp->RefreshInputCanvas();
 			theApp->OnInputModeTitleChanged();
 		}
 		if(m_callback)
@@ -127,7 +127,7 @@ void DigitizeMode::OnMouse( MouseEvent& event ){
 }
 
 #if 0
-void DigitizeMode::OnKeyDown(wxKeyEvent& event)
+void DigitizeMode::OnKeyDown(KeyCode key_code)
 {
 	switch(event.GetKeyCode())
 	{

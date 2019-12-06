@@ -97,6 +97,7 @@
     </ClCompile>
     <ClCompile Include="..\Geom\Curve.cpp" />
     <ClCompile Include="..\Geom\Finite.cpp" />
+    <ClCompile Include="..\Geom\Geom.cpp" />
     <ClCompile Include="..\Geom\Matrix.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -171,6 +172,7 @@
     <ClInclude Include="..\Geom\Circle.h" />
     <ClInclude Include="..\Geom\clipper.hpp" />
     <ClInclude Include="..\Geom\Curve.h" />
+    <ClInclude Include="..\Geom\Geom.h" />
     <ClInclude Include="..\Geom\geometry.h" />
     <ClInclude Include="..\Geom\Point.h" />
     <ClInclude Include="App.h" />
@@ -204,7 +206,6 @@
     <ClInclude Include="InputMode.h" />
     <ClInclude Include="IPoint.h" />
     <ClInclude Include="KeyCode.h" />
-    <ClInclude Include="KeyEvent.h" />
     <ClInclude Include="LeftAndRight.h" />
     <ClInclude Include="LineArcDrawing.h" />
     <ClInclude Include="MagDragWindow.h" />

@@ -52,4 +52,5 @@ public:
 	bool UsesID(){return true;} 
 	void Reverse();
 	double IncludedAngle()const;
+	Circle GetCircle()const;
 };
