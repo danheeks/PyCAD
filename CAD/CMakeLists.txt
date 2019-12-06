@@ -180,6 +180,7 @@ endif(DEFINED INCLUDE_INSTALL_DIR)
 
 target_link_libraries(cad ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
 set_target_properties(cad PROPERTIES PREFIX "") 
+set (CMAKE_CXX_STANDARD 14)
 
 # this figures out where to install the Python modules
 execute_process(
