@@ -124,7 +124,11 @@ bool IsAsciiStlFile(ifstream *ifs)
 void CStlSolid::read_from_file(const wchar_t* filepath)
 {
 	// read the stl file
+#ifdef WIN32
 	ifstream ifs(filepath, ios::binary);
+#else
+	ifstream ifs(Ttc(filepath), ios::binary);
+#endif
 	if(!ifs)return;
 
 
