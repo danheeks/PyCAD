@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   build:
+    if: <false>
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -21,5 +22,5 @@ jobs:
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: build
-      run: cd CAD\\build && make
+      run: cd CAD/build && make makefile.txt
       shell: bash
