@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    if: 2+2==5
+    if: 4==5
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
