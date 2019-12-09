@@ -19,5 +19,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: configure
       run: cd CAD && mkdir build && cd build && cmake ..
+      shell: bash
     - name: build
       run: cd CAD/build && make
+      shell: bash
