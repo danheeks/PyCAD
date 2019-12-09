@@ -70,11 +70,11 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 if (NOT WIN32)
     find_package( OpenGL REQUIRED )
 
-message("opengl directory is")
-message(${OPENGL_INCLUDE_DIR})
+    message("opengl directory is")
+    message(${OPENGL_INCLUDE_DIR})
 
-
-include_directories(OPENGL_INCLUDE_DIR)
+    include_directories(OPENGL_INCLUDE_DIR)
+endif (NOT WIN32)
 
 # this defines the source-files for library
 set(CAD_SRC
