@@ -25,6 +25,6 @@ jobs:
       run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/IDE" && dir
       shell: bash
     - name: try devenv sln
-      run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/devenv.exe" /build Release cad.sln
+      run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/IDE/devenv.exe" /build Release cad.sln
       shell: bash
 
