@@ -25,6 +25,6 @@ jobs:
       run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/" && dir
       shell: bash
     - name: try cl project
-      run: cd build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/cl.exe" PyCAD.vcxproj
+      run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/cl.exe" PyCAD.vcxproj
       shell: bash
 
