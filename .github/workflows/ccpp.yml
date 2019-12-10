@@ -28,10 +28,6 @@ jobs:
       run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/IDE/devenv" /build "Release|Win32" cad.sln
       shell: bash
     - name: look
-      if: (false)
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Current" && dir
-      shell: bash
-    - name: look2
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise" && dir
+      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild" && dir
       shell: bash
 
