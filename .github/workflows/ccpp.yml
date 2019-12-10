@@ -18,16 +18,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
-      if: (false)
     - name: configure
-      if: (false)
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: try devenv sln
-      if: (false)
-      run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/IDE/devenv" /build "Release|Win32" cad.sln
+      run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln
       shell: bash
-    - name: look
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin" && dir
-      shell: bash
-
