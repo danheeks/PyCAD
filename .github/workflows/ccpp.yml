@@ -22,7 +22,7 @@ jobs:
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: look for dev
-      run: cd d:/a && dir
+      run: cd d:/ && dir
       shell: bash
     - name: build
       run: cd CAD && cd build && make
