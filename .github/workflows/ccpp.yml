@@ -22,7 +22,10 @@ jobs:
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: look for dev
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/" && dir
+      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise" && dir
+      shell: bash
+    - name: look for devenv
+      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7" && dir
       shell: bash
     - name: try cl project
       run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64/cl.exe" PyCAD.vcxproj
