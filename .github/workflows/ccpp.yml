@@ -28,15 +28,9 @@ jobs:
       run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/IDE/devenv" /build "Release|Win32" cad.sln
       shell: bash
     - name: look
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64/x64" && dir
+      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Current" && dir
       shell: bash
     - name: look2
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin/Hostx64" && dir
-      shell: bash
-    - name: look3
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105/bin" && dir
-      shell: bash
-    - name: look4
-      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.23.28105" && dir
+      run: cd "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise" && dir
       shell: bash
 
