@@ -22,5 +22,5 @@ jobs:
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: build
-      run: dir && cd CAD && cd build && make
+      run: cd CAD && cd build && dir && make
       shell: bash
