@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: configure
-      run: cd CAD && mkdir build && cd build && cmake ..
+      run: cd CAD && mkdir build && cd build && cmake -G "Unix Makefiles" ..
       shell: bash
     - name: build
       run: cd CAD && cd build && cd CMakeFiles && dir && make
