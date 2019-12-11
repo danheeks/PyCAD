@@ -43,7 +43,7 @@ public:
 	void Remove(HeeksObj *object, bool call_OnChanged);
 	bool ObjectMarked(HeeksObj *object);
 	void Clear(bool call_OnChanged);
-	int size(void){return m_list.size();}
+	unsigned int size(void){return m_list.size();}
 	std::list<HeeksObj *> &list(void){return m_list;}
 	void FindMarkedObject(const IPoint &point, MarkedObject* marked_object);
 	void ObjectsInWindow( IRect box, MarkedObject* marked_object, bool single_picking = true);

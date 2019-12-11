@@ -9,6 +9,7 @@
 #include "strconv.h"
 #include "GripData.h"
 #include "Property.h"
+#include <iterator>
 
 using namespace std;
 

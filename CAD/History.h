@@ -37,7 +37,7 @@ public:
 	void Add(Undoable *);
 	void StartHistory();
 	bool EndHistory(void);
-	int size(void){return m_undoables.size();}
+	unsigned int size(void){return m_undoables.size();}
 	void Clear(std::list<Undoable *>::iterator FromIt);
 	void ClearFromFront(void);
 	void ClearFromCurPos(void);
