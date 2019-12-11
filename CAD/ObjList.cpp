@@ -7,7 +7,7 @@
 #include "tinyxml.h"
 #include "Picking.h"
 #include <algorithm>
-
+#include <iterator>
 
 ObjList::ObjList(const ObjList& objlist): HeeksObj(objlist), m_index_list_valid(true) {operator=(objlist);}
 
