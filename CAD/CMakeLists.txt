@@ -88,6 +88,7 @@ set(CAD_SRC
     ../Geom/Construction.cpp
     ../Geom/Curve.cpp
     ../Geom/Finite.cpp
+    ../Geom/Geom.cpp
     ../Geom/Matrix.cpp
     ../Geom/Offset.cpp
     App.cpp
