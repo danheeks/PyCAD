@@ -21,6 +21,9 @@ jobs:
     - name: configure
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
-    - name: try devenv sln
-      run: cd CAD/build && dir && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln //p:Configuration=Release //p:Platform="x64"
+    - name: build using MSBuild
+      run: cd CAD/build && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln //p:Configuration=Release //p:Platform="x64"
+      shell: bash
+    - name: ls to see if the .dll was made
+      run: cd CAD/build && ls
       shell: bash
