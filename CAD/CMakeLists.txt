@@ -67,9 +67,9 @@ endif(NOT BUILD_TYPE)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-if (NOT WIN32)
-    find_package( OpenGL REQUIRED )
+find_package( OpenGL REQUIRED )
 
+if (NOT WIN32)
     message("opengl directory is")
     message(${OPENGL_INCLUDE_DIR})
 
@@ -136,6 +136,7 @@ set(CAD_SRC
     Sketch.cpp
     StlSolid.cpp
     strconv.cpp
+    StretchTool.cpp
     svg.cpp
     tinystr.cpp
     tinyxml.cpp
