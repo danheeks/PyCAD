@@ -18,22 +18,15 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
-      if: (false)
     - name: configure
-      if: (false)
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: build using MSBuild
-      if: (false)
       run: cd CAD/build && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln //p:Configuration=Release //p:Platform="x64"
       shell: bash
     - name: ls to see if the .dll was made
-      if: (false)
       run: cd CAD/build/Release && ls
       shell: bash
-    - name: Build project # This would actually build your project, using zip for an example artifact
-      run: |
-        zip --junk-paths my-artifact README.md
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
@@ -51,6 +44,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./my-artifact.zip
-        asset_name: my-artifact.zip
-        asset_content_type: application/zip
+        asset_path: ./cad.dll
+        asset_name: cad.dll
+        asset_content_type: application/dll
