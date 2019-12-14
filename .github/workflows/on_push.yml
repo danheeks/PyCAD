@@ -10,16 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-      if: ( false)
     - name: dependencies
-      if: ( false)
       run: sudo apt-get install libboost-python-dev python-dev freeglut3-dev
     - name: configure
-      if: ( false)
       run: cd CAD && mkdir build && cd build && cmake ..
     - name: build
-      if: ( false)
       run: cd CAD/build && make
+    - name: ls to see if the .so was made
+      run: cd CAD/build && ls
   windows_build:
     runs-on: windows-latest
     steps:
@@ -37,5 +35,3 @@ jobs:
       if: ( false)
       run: cd CAD/build/Release && ls
       shell: bash
-    - name: display ref
-      run: echo ${{ github.ref }}
