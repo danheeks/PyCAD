@@ -1,8 +1,9 @@
 name: Build When Repository Changed
 
-on: release
-  types:
-  - created
+on:
+  release
+    types:
+      - created
 jobs:
   build:
     if: (false)
