@@ -4,8 +4,7 @@ on:
   release:
     types: [created]
 jobs:
-  build:
-    if: (false)
+  ubuntu_build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -15,29 +14,29 @@ jobs:
       run: cd CAD && mkdir build && cd build && cmake ..
     - name: build
       run: cd CAD/build && make
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: cd CAD/build/cad.so
+        asset_name: cad.so
+        tag: ${{ github.ref }}
+        overwrite: true
   windows_build:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
     - name: configure
-      if: (false)
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: build using MSBuild
-      if: (false)
       run: cd CAD/build && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln //p:Configuration=Release //p:Platform="x64"
       shell: bash
-    - name: ls to see if the .dll was made
-      if: (false)
-      run: cd CAD/build/Release && ls
-      shell: bash
-    - name: create a test file
-      run: echo hello > ./world.txt
     - name: Upload binaries to release
       uses: svenstaro/upload-release-action@v1-release
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./world.txt
-        asset_name: world.txt
+        file: cd CAD/build/Release/cad.dll
+        asset_name: cad.dll
         tag: ${{ github.ref }}
         overwrite: true
