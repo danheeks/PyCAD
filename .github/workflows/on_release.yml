@@ -1,6 +1,6 @@
 name: Build When Repository Changed
 
-on: [push]
+on: [release]
 
 jobs:
   build:
@@ -27,23 +27,9 @@ jobs:
     - name: ls to see if the .dll was made
       run: cd CAD/build/Release && ls
       shell: bash
-    - name: Create  Release
-      id: create_release
-      uses: actions/create-release@v1.0.0
+    - name: Upload to release
+      uses: JasonEtco/upload-to-release@master
+      with:
+        args: CAD/build/Release/cad.dll
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: PyCAD
-        release_name: Release v0.0.1
-        draft: true
-        prerelease: true
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: CAD/build/Release/cad.dll
-        asset_name: cad.dll
-        asset_content_type: application/dll
