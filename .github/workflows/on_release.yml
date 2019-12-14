@@ -18,7 +18,7 @@ jobs:
       uses: svenstaro/upload-release-action@v1-release
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: cd CAD/build/cad.so
+        file: CAD/build/cad.so
         asset_name: cad.so
         tag: ${{ github.ref }}
         overwrite: true
@@ -36,7 +36,7 @@ jobs:
       uses: svenstaro/upload-release-action@v1-release
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: cd CAD/build/Release/cad.dll
+        file: CAD/build/Release/cad.dll
         asset_name: cad.dll
         tag: ${{ github.ref }}
         overwrite: true
