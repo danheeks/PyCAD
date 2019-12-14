@@ -34,3 +34,5 @@ jobs:
       if: ( false)
       run: cd CAD/build/Release && ls
       shell: bash
+    - name: display ref
+      run: echo ${{ github.ref }}
