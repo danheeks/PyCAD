@@ -1,6 +1,8 @@
 name: Build When Repository Changed
 
 on: [push]
+  branches:    
+    - master
 
 jobs:
   ubuntu_build:
