@@ -19,17 +19,24 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: configure
+      if: (false)
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: build using MSBuild
+      if: (false)
       run: cd CAD/build && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln //p:Configuration=Release //p:Platform="x64"
       shell: bash
     - name: ls to see if the .dll was made
+      if: (false)
       run: cd CAD/build/Release && ls
       shell: bash
-    - name: Upload to release
-      uses: JasonEtco/upload-to-release@master
+    - name: create a test file
+      run: echo hello > ./world.txt
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v1-release
       with:
-        args: CAD/build/Release/cad.dll
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./world.txt
+        asset_name: world.txt
+        tag: ${{ github.ref }}
+        overwrite: true
