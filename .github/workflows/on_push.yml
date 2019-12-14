@@ -4,27 +4,33 @@ on: [push]
 
 jobs:
   ubuntu_build:
-    if: (false)
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
+      if: ( false)
     - name: dependencies
+      if: ( false)
       run: sudo apt-get install libboost-python-dev python-dev freeglut3-dev
     - name: configure
+      if: ( false)
       run: cd CAD && mkdir build && cd build && cmake ..
     - name: build
+      if: ( false)
       run: cd CAD/build && make
   windows_build:
-    if: (false)
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
+      if: ( false)
     - name: configure
+      if: ( false)
       run: cd CAD && mkdir build && cd build && cmake ..
       shell: bash
     - name: build using MSBuild
+      if: ( false)
       run: cd CAD/build && "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin/MSBuild.exe" cad.sln //p:Configuration=Release //p:Platform="x64"
       shell: bash
     - name: ls to see if the .dll was made
+      if: ( false)
       run: cd CAD/build/Release && ls
       shell: bash
