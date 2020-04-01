@@ -83,7 +83,6 @@ bool LineToBigCircles(const Line& lin, const Point3d& z_axis, Circle& c1, Circle
 //int convert_pnts_to_doubles(const std::list<Point3d> &plist, std::list<double> &dlist);
 //bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::const_iterator &It, Point3d& pnt, bool four_doubles = false);
 //int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<Point3d> &plist, bool four_doubles = false);
-//int convert_gripdata_to_pnts(const std::list<GripData> &dlist, std::list<Point3d> &plist);
 
 //bool IsEqual(gp_Ax2 ax1, gp_Ax2 ax2);
 //bool IsEqual(gp_Ax1 ax1, gp_Ax1 ax2);

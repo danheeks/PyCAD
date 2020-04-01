@@ -5,8 +5,6 @@
 #pragma once
 
 #include "ViewPoint.h"
-#include "Index.h"
-
 
 class Gripper;
 class PointOrWindow;
@@ -16,7 +14,6 @@ private:
 	std::list<HeeksObj*> m_list;
 	std::set<HeeksObj*> m_set;
 	std::set<HeeksObj*> m_ignore_set;
-	Index<unsigned, HeeksObj*> m_name_index;
 
 	void delete_move_grips(bool check_app_grippers = false);
 	void create_move_grips();
@@ -31,7 +28,6 @@ public:
 	std::list<Gripper*> move_grips;
 	bool gripper_marked_list_changed;
 	bool ignore_coords_only;
-	long m_filter;
 
 	MarkedList();
 	virtual ~MarkedList(void);
@@ -45,8 +41,6 @@ public:
 	void Clear(bool call_OnChanged);
 	unsigned int size(void){return m_list.size();}
 	std::list<HeeksObj *> &list(void){return m_list;}
-	void FindMarkedObject(const IPoint &point, MarkedObject* marked_object);
-	void ObjectsInWindow( IRect box, MarkedObject* marked_object, bool single_picking = true);
 	void GrippersGLCommands(bool select, bool no_color);
 	void OnChanged(bool selection_cleared, const std::list<HeeksObj *>* added, const std::list<HeeksObj *>* removed);
 	void set_ignore_onoff(HeeksObj* object, bool b);
@@ -55,6 +49,4 @@ public:
 	void CutSelectedItems();
 	void CopySelectedItems();
 	void Reset();
-	unsigned int GetIndex(HeeksObj *object);
-	void ReleaseIndex(unsigned int index);
 };

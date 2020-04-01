@@ -3,6 +3,7 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 
+#if 0
 #include "SelectMode.h"
 #include "InputMode.h"
 #include "MarkedObject.h"
@@ -161,7 +162,7 @@ void CSelectMode::OnMiddleDown( MouseEvent& event )
 	button_down_point = IPoint(event.GetX(), event.GetY());
 	CurrentPoint = button_down_point;
 	theApp->m_current_viewport->StoreViewPoint();
-	theApp->m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
+//	theApp->m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
 }
 
 void CSelectMode::GetObjectsInWindow(MouseEvent& event, std::list<HeeksObj*> &objects)
@@ -625,3 +626,5 @@ bool CSelectMode::OnStart(){
 
 void CSelectMode::GetProperties(std::list<Property *> *list){
 }
+
+#endif

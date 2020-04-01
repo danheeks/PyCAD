@@ -112,6 +112,18 @@ public:
 	double GetDouble(void)const{ return *m_pvar; }
 };
 
+class PropertyDoubleReadOnly : public Property{
+protected:
+	double m_value;
+public:
+	PropertyDoubleReadOnly(HeeksObj* object) :Property(object, NULL), m_value(0.0){}
+	PropertyDoubleReadOnly(HeeksObj* object, const wchar_t* title, double value) :Property(object, title), m_value(value){ m_editable = false; }
+	// Property's virtual functions
+	int get_property_type(){ return DoublePropertyType; }
+	Property *MakeACopy(void)const{ return new PropertyDoubleReadOnly(*this); }
+	double GetDouble(void)const{ return m_value; }
+
+};
 class PropertyDoubleScaled :public Property{
 	double* m_pvar;
 	double m_scale;
@@ -193,12 +205,21 @@ public:
 	PropertyLength(HeeksObj* object) :PropertyDouble(object){}
 
 	PropertyLength(HeeksObj* object, const wchar_t* title, double* pvar) :PropertyDouble(object, title, pvar){}
-	PropertyLength(HeeksObj* object, const wchar_t* title, const double* pvar) :PropertyDouble(object, title, pvar){}
+	PropertyLength(HeeksObj* object, const wchar_t* title, const double* pvar) :PropertyDouble(object, title, pvar){} // to do, replace with PropertyLengthReadOnly
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
 	Property *MakeACopy(void)const;
 };
 
+class PropertyLengthReadOnly : public PropertyDoubleReadOnly{
+public:
+	PropertyLengthReadOnly(HeeksObj* object) :PropertyDoubleReadOnly(object){}
+
+	PropertyLengthReadOnly(HeeksObj* object, const wchar_t* title, double value) :PropertyDoubleReadOnly(object, title, value){}
+	// Property's virtual functions
+	int get_property_type(){ return LengthPropertyType; }
+	Property *MakeACopy(void)const{ return new PropertyLengthReadOnly(*this); }
+};
 
 class PropertyLengthWithKillGLLists : public PropertyLength
 {

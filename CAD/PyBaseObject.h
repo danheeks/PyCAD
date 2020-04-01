@@ -36,7 +36,7 @@ public:
 	bool OneOfAKind_default();
 	void OnAdd();
 	void OnRemove();
-	bool SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction);
+	bool SetClickMarkPoint(const Point3d &ray_start, const Point3d &ray_direction);
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
 	boost::python::override get_override(char const* name) const;
 

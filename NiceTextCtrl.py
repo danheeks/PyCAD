@@ -41,7 +41,6 @@ class ObjectIdsCtrl(wx.TextCtrl):
         return id_list
     
     def SetFromIdList(self, id_list):
-        print('id_list = ' + str(id_list))
         first = True
         s = ""
         for id in id_list:

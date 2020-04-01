@@ -14,5 +14,4 @@ public:
 	const wchar_t* GetTitle(){return L"View Pan";}
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
-	bool OnModeChange(void);
 };

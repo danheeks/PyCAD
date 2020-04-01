@@ -253,11 +253,6 @@ void CViewport::OnMouseEvent(MouseEvent& event)
 	theApp->m_current_viewport = this;
 	this->m_need_refresh = false;
 	this->m_need_update = false;
-	if (event.m_leftDown)
-	{
-		int a = 0;
-		a = 3;
-	}
 	if (theApp->input_mode_object)theApp->input_mode_object->OnMouse(event);
 
 	for (std::list< void(*)(MouseEvent&) >::iterator It = theApp->m_lbutton_up_callbacks.begin(); It != theApp->m_lbutton_up_callbacks.end(); It++)
@@ -367,10 +362,6 @@ void CViewport::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_dep
 	glFlush();
 }
 
-void CViewport::FindMarkedObject(const IPoint &point, MarkedObject* marked_object){
-	theApp->m_marked_list->FindMarkedObject(point, marked_object);
-}
-
 void CViewport::DrawWindow(IRect &rect, bool allow_extra_bits){
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -431,4 +422,54 @@ void CViewport::WindowMag(IRect &window_box){
 	StoreViewPoint();
 	m_view_point.WindowMag(window_box);
 	theApp->Repaint();
+}
+
+void CViewport::OnWheelRotation(int wheelRotation, int event_x, int event_y)
+{
+	double wheel_value = (double)(wheelRotation);
+	double multiplier = wheel_value / 1000.0, multiplier2;
+
+	// make sure these are actually inverses, so if you
+	// zoom in and out the same number of steps, you'll be
+	// at the same zoom level again
+
+	if (multiplier > 0) {
+		multiplier2 = 1 + multiplier;
+	}
+	else {
+		multiplier2 = 1 / (1 - multiplier);
+	}
+
+	double pixelscale_before = m_view_point.m_pixel_scale;
+	m_view_point.Scale(multiplier2);
+	double pixelscale_after = m_view_point.m_pixel_scale;
+
+	double center_x = m_w / 2.;
+	double center_y = m_h / 2.;
+
+	// how many pixels are we from the center (the center
+	// is the point that doesn't move when you zoom)?
+	double px = event_x - center_x;
+	double py = event_y - center_y;
+
+	// that number of pixels represented how many mm
+	// before and after the zoom ...
+	double xbefore = px / pixelscale_before;
+	double ybefore = py / pixelscale_before;
+	double xafter = px / pixelscale_after;
+	double yafter = py / pixelscale_after;
+
+	// which caused a change in how many mm at that point
+	// on the screen?
+	double xchange = xafter - xbefore;
+	double ychange = yafter - ybefore;
+
+	// and how many pixels worth of motion is that?
+	double x_moved_by = xchange * pixelscale_after;
+	double y_moved_by = ychange * pixelscale_after;
+
+	// so move that many pixels to keep the coordinate
+	// under the cursor approximately the same
+	m_view_point.ShiftI(IPoint((int)x_moved_by, (int)y_moved_by));
+	m_need_refresh = true;
 }

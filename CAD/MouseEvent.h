@@ -1,20 +1,24 @@
 
 #pragma once
 
+enum MouseEventType
+{
+	MouseEventNull,
+	MouseEventLeftDown,
+	MouseEventLeftUp,
+	MouseEventLeftDClick,
+	MouseEventRightDown,
+	MouseEventRightUp,
+	MouseEventMiddleDown,
+	MouseEventMiddleUp,
+	MouseEventMovingOrDragging,
+	MouseEventWheelRotation,
+};
 
 class MouseEvent
 {
 public:
-	int m_event_type;
-	// 1 LeftDown
-	// 2 LeftUp
-	// 3 LeftDClick
-	// 4 RightDown
-	// 5 RightUp
-	// 6 MiddleDown
-	// 7 MiddleUp
-	// 8 Moving or Dragging
-	// 9 WheelRotation
+	MouseEventType m_event_type;
 
 	int m_x, m_y;
 
@@ -33,13 +37,13 @@ public:
 
 	int GetX(){ return m_x; }
 	int GetY(){ return m_y; }
-	bool LeftDown(){ return m_event_type == 1; }
-	bool LeftUp(){ return m_event_type == 2; }
-	bool LeftDClick(){ return m_event_type == 3; }
-	bool RightDown(){ return m_event_type == 4; }
-	bool RightUp(){ return m_event_type == 5; }
-	bool MiddleDown(){ return m_event_type == 6; }
-	bool MiddleUp(){ return m_event_type == 7; }
-	bool Moving(){ return m_event_type == 8; }
-	bool GetWheelRotation(){ return m_event_type == 9; }
+	bool LeftDown(){ return m_event_type == MouseEventLeftDown; }
+	bool LeftUp(){ return m_event_type == MouseEventLeftUp; }
+	bool LeftDClick(){ return m_event_type == MouseEventLeftDClick; }
+	bool RightDown(){ return m_event_type == MouseEventRightDown; }
+	bool RightUp(){ return m_event_type == MouseEventRightUp; }
+	bool MiddleDown(){ return m_event_type == MouseEventMiddleDown; }
+	bool MiddleUp(){ return m_event_type == MouseEventMiddleUp; }
+	bool Moving(){ return m_event_type == MouseEventMovingOrDragging; }
+	bool GetWheelRotation(){ return m_event_type == MouseEventWheelRotation; }
 };

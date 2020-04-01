@@ -14,6 +14,7 @@ public:
 	GripData m_data;
 	HeeksObj* m_gripper_parent;
 
+	Gripper();
 	Gripper(const GripData& data, HeeksObj* parent);
 	virtual ~Gripper(){}
 
@@ -27,9 +28,9 @@ public:
 //	virtual wxCursor* get_gripper_cursor(){return NULL;}
 	virtual void OnFrontRender(){}
 	virtual void OnRender(){}
-	virtual bool OnGripperGrabbed(const std::list<HeeksObj*>& list, bool show_grippers_on_drag, double* from){return false;}
-	virtual void OnGripperMoved(double* from, const double* to){}
-	virtual void OnGripperReleased(const double* from, const double* to){}
+	virtual bool OnGripperGrabbed(bool show_grippers_on_drag, Point3d &from){return false;}
+	virtual void OnGripperMoved(Point3d & from, const Point3d & to){}
+	virtual void OnGripperReleased(const Point3d & from, const Point3d & to){}
 };
 
 #endif

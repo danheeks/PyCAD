@@ -721,15 +721,13 @@ void LineArcDrawing::GetProperties(std::list<Property *> *list){
 	Drawing::GetProperties(list);
 }
 
-bool LineArcDrawing::OnModeChange(void){
+void LineArcDrawing::OnModeChange(void){
 	// on start of drawing mode
-	if(!Drawing::OnModeChange())return false;
+	Drawing::OnModeChange();
 	if(m_container)m_container = NULL;
 
 	ClearPrevObject();
 	m_previous_direction_set = false;
-
-	return true;
 }
 
 void LineArcDrawing::set_draw_step_not_undoable(int s)

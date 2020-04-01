@@ -19,7 +19,7 @@ public:
 	virtual void OnMouse( MouseEvent& event ){}
 	virtual void OnKeyDown( KeyCode key_code ){}
 	virtual void OnKeyUp( KeyCode key_code ){}
-	virtual bool OnModeChange(void){return true;}
+	virtual void OnModeChange(void){ }
 	virtual void OnFrontRender(){}
 	virtual void OnRender(){}
 	virtual void GetProperties(std::list<Property *> *list){}

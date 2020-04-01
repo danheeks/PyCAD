@@ -170,6 +170,7 @@ public:
 	//	void	Transform(Point& p);
 	void	Transform(double p0[3]) const;							// Transform p0 thro' this matrix
 	void	Transform(double p0[3], double p1[3]) const;				// Transform p0 to p1 thro' this matrix
+	void	TransformOnlyRotation(double p0[3], double p1[3]) const;
 	void	Transform2d(double p0[2], double p1[2]) const;			// Transform p0 to p1 thro' this matrix
 
 	int		IsMirrored();										// true if matrix has a mirror transformation
@@ -290,7 +291,9 @@ public:
 	void	ToPeps(int id, bool draw = true);									// copy Point to Peps
 #endif
 	Point3d Transformed(const Matrix& m);
+	Point3d TransformedOnlyRotation(const Matrix& m);
 	double Dist(const Point3d& p)const;													// distance between 2 points
+	double Dist2D(const Point3d& p)const;
 	double DistSq(const Point3d& p)const;													// distance squared between 2 points
 	Point3d	Mid(const Point3d& p, double factor = 0.5)const;									// midpoint
 	void get(double xyz[3]) {xyz[0] = x; xyz[1] = y; xyz[2] = z;}

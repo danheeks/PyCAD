@@ -165,12 +165,12 @@ void BaseObject::OnRemove()
 	CallVoidReturn("OnRemove");
 }
 
-bool BaseObject::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)
+bool BaseObject::SetClickMarkPoint(const Point3d &ray_start, const Point3d &ray_direction)
 {
-	std::pair<bool, bool> result = CallReturnBool("SetClickMarkPoint", marked_object, ray_start, ray_direction);
+	std::pair<bool, bool> result = CallReturnBool("SetClickMarkPoint", ray_start, ray_direction);
 	if (result.first)
 		return result.second;
-	return ObjList::SetClickMarkPoint(marked_object, ray_start, ray_direction);
+	return ObjList::SetClickMarkPoint(ray_start, ray_direction);
 }
 
 static void(*callback_for_GetTriangles)(const double*, const double*) = NULL;

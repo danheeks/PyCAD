@@ -14,5 +14,4 @@ public:
 	// virtual functions for InputMode
 	const wchar_t* GetTitle(){return L"View Rotate";}
 	void OnMouse( MouseEvent& event );
-	bool OnModeChange(void);
 };

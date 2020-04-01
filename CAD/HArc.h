@@ -8,9 +8,8 @@
 
 class HArc: public EndedObject{
 public:
-	Point3d m_axis;
+	Point3d m_axis; // keep as unit vector
 	Point3d C;
-	double m_radius;
 
 	~HArc(void);
 	HArc(const Point3d &a, const Point3d &b, const Point3d &axis, const Point3d &c, const HeeksColor* col);
@@ -34,7 +33,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	bool FindNearPoint(const Line &ray, double *point);
 	bool FindPossTangentPoint(const Line &ray, double *point);
-	bool Stretch(const double *p, const double* shift, void* data);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	bool GetCentrePoint(Point3d &pos);
 	void WriteToXML(TiXmlElement *element);

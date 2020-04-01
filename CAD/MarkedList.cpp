@@ -5,7 +5,6 @@
 
 #include "MarkedList.h"
 #include "HeeksObj.h"
-#include "MarkedObject.h"
 #include "DigitizeMode.h"
 #include "SelectMode.h"
 #include "PointOrWindow.h"
@@ -20,7 +19,6 @@ MarkedList::MarkedList(){
 	point_or_window = new PointOrWindow(true);
 	gripper_marked_list_changed = false;
 	ignore_coords_only = false;
-	m_filter = -1;
 }
 
 MarkedList::~MarkedList(void){
@@ -107,130 +105,6 @@ void MarkedList::GrippersGLCommands(bool select, bool no_color){
 	}
 }
 
-void MarkedList::ObjectsInWindow( IRect window, MarkedObject* marked_object, bool single_picking){
-	// render everything with unique colors
-
-	//theApp->m_current_viewport->SetCurrent();
-
-	glDrawBuffer(GL_BACK);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glDisable(GL_BLEND);
-	glDisable(GL_LINE_SMOOTH);
-
-	theApp->m_current_viewport->SetViewport();
-	theApp->m_current_viewport->m_view_point.SetProjection(true);
-	theApp->m_current_viewport->m_view_point.SetModelview();
-
-	glClearColor(0, 0, 0, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_DEPTH_TEST);
-	glLineWidth(1);
-	glDepthMask(1);
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glShadeModel(GL_FLAT);
-	theApp->m_current_viewport->m_view_point.SetPolygonOffset();
-
-	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-	glEnable(GL_COLOR_MATERIAL);
-
-	theApp->glCommands(true, false, true);
-
-	GrippersGLCommands(true, true);
-
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glDisable(GL_COLOR_MATERIAL);
-
-	if (window.width < 0)
-	{
-		window.x += window.width;
-		window.width = abs(window.width);
-	}
-	if (window.height < 0)
-	{
-		window.y += window.height;
-		window.height = abs(window.height);
-	}
-
-	unsigned int pixel_size = 4 * window.width * window.height;
-	unsigned char* pixels = (unsigned char*)malloc(pixel_size);
-	memset((void*)pixels, 0, pixel_size);
-	glReadPixels(window.x, window.y, window.width, window.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-	int half_window_width = 0;
-	IPoint window_centre;
-	if (single_picking){
-		half_window_width = (window.width) / 2;
-		window_centre.x = window.x + window.width / 2;
-		window_centre.y = window.y + window.height / 2;
-	}
-	int window_mode = 0;
-	while (1){
-		if (single_picking){
-			int window_size = half_window_width-1;
-			if (window_mode == 0)window_size = 0;
-			if (window_mode == 1)window_size = half_window_width / 2;
-			window.x = window_centre.x - window_size;
-			window.y = window_centre.y - window_size;
-			window.width = 1 + window_size * 2;
-			window.height = 1 + window_size * 2;
-		}
-
-		std::set<unsigned int> color_list;
-
-		for (unsigned int i = 0; i < pixel_size; i += 4)
-		{
-			unsigned int color = pixels[i] | (pixels[i + 1] << 8) | (pixels[i + 2] << 16);
-			if (color != 0)
-				color_list.insert(color);
-		}
-
-		bool added = false;
-		for (std::set<unsigned int>::iterator It = color_list.begin(); It != color_list.end(); It++)
-		{
-			unsigned int name = *It;
-			MarkedObject* current_found_object = marked_object;
-			bool ignore_coords_only_found = false;
-				HeeksObj *object = m_name_index.find(name);
-
-				std::list<HeeksObj*> owner_list;
-				while (object && (object != theApp))
-				{
-					owner_list.push_front(object);
-					object = object->m_owner;
-				}
-
-				for (std::list<HeeksObj*>::iterator It = owner_list.begin(); It != owner_list.end(); It++)
-				{
-					object = *It;
-
-					//bool custom_names = object->UsesCustomSubNames();
-					if (!ignore_coords_only_found && current_found_object != NULL){
-						if (ignore_coords_only && theApp->m_digitizing->OnlyCoords(object)){
-							ignore_coords_only_found = true;
-						}
-						else{
-							if ((object->GetType() == GripperType) || ((object->GetMarkingMask() & m_filter) && (object->GetMarkingMask() != 0))){
-								int window_size = window.width;
-								current_found_object = current_found_object->Add(object, 0, window_size, 0, NULL);
-								added = true;
-							}
-						}
-					}
-				}
-		//	}
-		}
-		window_mode++;
-		if (!single_picking)break;
-		if (window_mode > 2)break;
-	}
-
-	free(pixels);
-}
-
 void MarkedList::Add(std::list<HeeksObj *> &list, bool call_OnChanged){
 	std::list<HeeksObj *>::iterator It;
 	for(It = list.begin(); It != list.end(); It++){
@@ -274,12 +148,6 @@ void MarkedList::Clear(bool call_OnChanged){
 	m_list.clear();
 	m_set.clear();
 	if(call_OnChanged)OnChanged(true, NULL, NULL);
-}
-
-void MarkedList::FindMarkedObject(const IPoint &point, MarkedObject* marked_object){
-	if(marked_object == NULL)return;
-	point_or_window->SetWithPoint(point);
-	ObjectsInWindow(point_or_window->box_chosen, marked_object);
 }
 
 bool MarkedList::ObjectMarked(HeeksObj *object){
@@ -381,13 +249,4 @@ void MarkedList::CopySelectedItems()
 void MarkedList::Reset()
 {
 	delete_move_grips(true);
-	m_name_index.clear();
-}
-
-unsigned int MarkedList::GetIndex(HeeksObj *object) {
-	return m_name_index.insert(object);
-}
-
-void MarkedList::ReleaseIndex(unsigned int index) {
-	return m_name_index.erase(index);
 }

@@ -66,7 +66,7 @@ public:
 	void OnKeyUp(KeyCode key_code);
 	void set_cursor(void);
 	void GetProperties(std::list<Property *> *list);
-	bool OnModeChange(void);
+	void OnModeChange(void);
 
 	// Drawing's virtual functions
 	void set_draw_step_not_undoable(int s);

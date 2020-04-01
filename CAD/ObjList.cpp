@@ -366,11 +366,11 @@ void ObjList::OnChangeViewUnits(const double units)
 	HeeksObj::OnChangeViewUnits(units);
 }
 
-bool ObjList::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)
+bool ObjList::SetClickMarkPoint(const Point3d &ray_start, const Point3d &ray_direction)
 {
 	for (std::list<HeeksObj*>::iterator itObject = m_objects.begin(); itObject != m_objects.end(); itObject++)
 	{
-		if ((*itObject)->SetClickMarkPoint(marked_object, ray_start, ray_direction))
+		if ((*itObject)->SetClickMarkPoint(ray_start, ray_direction))
 			return true;
 	}
 	return false;

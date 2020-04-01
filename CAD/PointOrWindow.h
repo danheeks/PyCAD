@@ -25,7 +25,7 @@ public:
 	// virtual functions for InputMode
 	const wchar_t* GetTitle(){return L"Dragging a window or picking a point";}
 	void OnMouse( MouseEvent& event );
-	bool OnModeChange(void);
+	void OnModeChange(void);
 	void OnFrontRender();
 
 	void reset(void);

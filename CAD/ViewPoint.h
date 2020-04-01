@@ -10,7 +10,6 @@ class CViewport;
 
 class CViewPoint{
 private:
-	IPoint m_initial_point;
 	double m_initial_pixel_scale;
 	bool m_perspective;
 	CViewport* m_viewport;
@@ -42,13 +41,13 @@ public:
 	const Point3d rightwards_vector(void)const{return Point3d(m_lens_point, m_target_point) ^ m_vertical;}
 	const Point3d forwards_vector(void)const{return Point3d(m_lens_point, m_target_point);}
 	void Turn(double ang_x, double ang_y);
-	void Turn(IPoint point_diff);
+	void TurnI(IPoint point_diff);
 	void TurnVertical(double ang_x, double ang_y);
 	void TurnVertical(IPoint point_diff);
 	void Shift(const Point3d &tv);
-	void Shift(const IPoint &point_diff, const IPoint &point);
+	void ShiftI(const IPoint &point_diff);
 	void Scale(double multiplier, bool use_initial_pixel_scale = false);
-	void Scale(const IPoint &point, bool reversed = false);
+	void Scale(const IPoint &diff, bool reversed = false);
 	void Twist(double angle);
 	void Twist(IPoint start, IPoint point_diff);
 	void SetViewport()const;
@@ -61,7 +60,6 @@ public:
 	void SetPolygonOffset(void)const;
 	void WindowMag(IRect &window_box);
 	void SetViewAroundAllObjects(int margin);
-	void SetStartMousePoint(const IPoint &point){m_initial_pixel_scale = m_pixel_scale; m_initial_point = point;}
 	Line SightLine(const IPoint &point);
 	int GetTwoAxes(Point3d& vx, Point3d& vy, bool flattened_onto_screen, int plane)const;
 	void Set90PlaneDrawMatrix(Matrix &mat)const;

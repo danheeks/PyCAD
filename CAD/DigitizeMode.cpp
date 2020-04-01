@@ -3,7 +3,6 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 #include "DigitizeMode.h"
-#include "MarkedObject.h"
 #include "SelectMode.h"
 #include "MarkedList.h"
 #include "CoordinateSystem.h"
@@ -93,7 +92,7 @@ const wchar_t* DigitizeMode::GetHelpText()
 void DigitizeMode::OnMouse( MouseEvent& event ){
 	if(event.m_middleDown || event.GetWheelRotation() != 0)
 	{
-		theApp->m_select_mode->OnMouse(event);
+//		theApp->m_select_mode->OnMouse(event);
 		return;
 	}
 
@@ -162,11 +161,10 @@ static const Matrix& digitizing_matrix(bool calculate = false){
 	return global_matrix_relative_to_screen;
 }
 
-bool DigitizeMode::OnModeChange(void){
+void DigitizeMode::OnModeChange(void){
 	point_or_window->reset();
-	if(!point_or_window->OnModeChange())return false;
+	point_or_window->OnModeChange();
 	digitize(theApp->cur_mouse_pos);
-	return true;
 }
 
 bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::const_iterator &It, Point3d& pnt, bool four_doubles = false)
@@ -195,78 +193,48 @@ int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<Point3d> &
 	return nump;
 }
 
-int convert_gripdata_to_pnts(const std::list<GripData> &dlist, std::list<Point3d> &plist)
-{
-	int nump = 0;
-	for (std::list<GripData>::const_iterator It = dlist.begin(); It != dlist.end(); ++It)
-	{
-		Point3d pnt;
-		pnt.x = ((*It).m_x);
-		pnt.y = ((*It).m_y);
-		pnt.z = ((*It).m_z);
-		plist.push_back(pnt);
-		nump++;
-	}
-	return nump;
-}
-
-
 DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	Line ray = theApp->m_current_viewport->m_view_point.SightLine(input_point);
 	std::list<DigitizedPoint> compare_list;
-	MarkedObjectManyOfSame marked_object;
+	std::list<HeeksObj*> objects;
 	if(theApp->digitize_end || theApp->digitize_inters || theApp->digitize_centre || theApp->digitize_midpoint || theApp->digitize_nearest || theApp->digitize_tangent){
 		point_or_window->SetWithPoint(input_point);
 		theApp->m_marked_list->ignore_coords_only = true;
-		theApp->m_marked_list->ObjectsInWindow(point_or_window->box_chosen, &marked_object);
+		theApp->ColorPickLowestObjects(point_or_window->box_chosen, false, objects);
 		theApp->m_marked_list->ignore_coords_only = false;
 	}
 	if(theApp->digitize_end){
-		if(marked_object.m_map.size()>0){
-			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
-			while(object){
-				std::list<GripData> vl;
-				object->GetGripperPositionsTransformed(&vl, true);
-				std::list<Point3d> plist;
-				convert_gripdata_to_pnts(vl, plist);
-				for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
-				{
-					Point3d& pnt = *It;
-					compare_list.push_back(DigitizedPoint(pnt, DigitizeEndofType));
-				}
-				object = marked_object.Increment();
+		for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++){
+			HeeksObj* object = *It;
+			std::list<GripData> vl;
+			object->GetGripperPositionsTransformed(&vl, true);
+			for (std::list<GripData>::iterator It = vl.begin(); It != vl.end(); It++)
+			{
+				Point3d& pnt = (*It).m_p;
+				compare_list.push_back(DigitizedPoint(pnt, DigitizeEndofType));
 			}
 		}
 	}
 	if(theApp->digitize_inters){
-		if(marked_object.m_map.size()>0){
-			std::list<HeeksObj*> object_list;
-			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
-			while(object){
-				object_list.push_back(object);
-				object = marked_object.Increment();
-			}
-
-			if(object_list.size() > 1)
+		if (objects.size() > 1)
+		{
+			for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
 			{
-				for(std::list<HeeksObj*>::iterator It = object_list.begin(); It != object_list.end(); It++)
+				HeeksObj* object = *It;
+				std::list<HeeksObj*>::iterator It2 = It;
+				It2++;
+				for (; It2 != objects.end(); It2++)
 				{
-					HeeksObj* object = *It;
-					std::list<HeeksObj*>::iterator It2 = It;
-					It2++;
-					for(; It2 != object_list.end(); It2++)
+					HeeksObj* object2 = *It2;
+					std::list<double> rl;
+					if(object->Intersects(object2, &rl))
 					{
-						HeeksObj* object2 = *It2;
-						std::list<double> rl;
-						if(object->Intersects(object2, &rl))
+						std::list<Point3d> plist;
+						convert_doubles_to_pnts(rl, plist);
+						for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 						{
-							std::list<Point3d> plist;
-							convert_doubles_to_pnts(rl, plist);
-							for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
-							{
-								Point3d& pnt = *It;
-								compare_list.push_back(DigitizedPoint(pnt, DigitizeIntersType));
-							}
+							Point3d& pnt = *It;
+							compare_list.push_back(DigitizedPoint(pnt, DigitizeIntersType));
 						}
 					}
 				}
@@ -274,40 +242,34 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		}
 	}
 	if(theApp->digitize_midpoint){
-		if(marked_object.m_map.size()>0){
-			HeeksObj* object = marked_object.GetFirstOfBottomOnly();
-			while(object){
-				Point3d p;
-				if(object->GetMidPoint(p)){
-					compare_list.push_back(DigitizedPoint(p, DigitizeMidpointType));
-				}
-				object = marked_object.Increment();
+		for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
+		{
+			HeeksObj* object = *It;
+			Point3d p;
+			if(object->GetMidPoint(p)){
+				compare_list.push_back(DigitizedPoint(p, DigitizeMidpointType));
 			}
 		}
 	}
 	if(theApp->digitize_nearest){
-		if(marked_object.m_map.size()>0){
-			HeeksObj* object = marked_object.GetFirstOfEverything();
-			while(object){
-				Line ray;
-				Point3d p;
-				if(object->FindNearPoint(ray, p)){
-					compare_list.push_back(DigitizedPoint(p, DigitizeNearestType));
-				}
-				object = marked_object.Increment();
+		for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
+		{
+			HeeksObj* object = *It;
+			Line ray;
+			Point3d p;
+			if(object->FindNearPoint(ray, p)){
+				compare_list.push_back(DigitizedPoint(p, DigitizeNearestType));
 			}
 		}
 	}
 	if(theApp->digitize_tangent){
-		if(marked_object.m_map.size()>0){
-			HeeksObj* object = marked_object.GetFirstOfEverything();
-			while(object){
-				Line ray;
-				Point3d p;
-				if (object->FindPossTangentPoint(ray, p)){
-					compare_list.push_back(DigitizedPoint(Point3d(p), DigitizeTangentType, object));
-				}
-				object = marked_object.Increment();
+		for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
+		{
+			HeeksObj* object = *It;
+			Line ray;
+			Point3d p;
+			if (object->FindPossTangentPoint(ray, p)){
+				compare_list.push_back(DigitizedPoint(Point3d(p), DigitizeTangentType, object));
 			}
 		}
 	}
@@ -338,7 +300,9 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	}
 	if(theApp->digitize_centre && (min_dist == -1 || min_dist * theApp->GetPixelScale()>5)){
 		Point3d pos;
-		for(HeeksObj* object = marked_object.GetFirstOfEverything(); object != NULL; object = marked_object.Increment()){
+		for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
+		{
+			HeeksObj* object = *It;
 			Point3d p, p2;
 			int num = object->GetCentrePoints(p, p2);
 			if(num == 1)
@@ -419,14 +383,4 @@ void DigitizeMode::OnFrontRender(){
 
 void DigitizeMode::GetProperties(std::list<Property *> *list){
 	PropertyPnt(list, NULL, &digitized_point.m_point);
-}
-
-void DigitizeMode::SetOnlyCoords(HeeksObj* object, bool onoff){
-	if(onoff)m_only_coords_set.insert(object);
-	else m_only_coords_set.erase(object);
-}
-
-bool DigitizeMode::OnlyCoords(HeeksObj* object){
-	if(m_only_coords_set.find(object) != m_only_coords_set.end())return true;
-	return false;
 }

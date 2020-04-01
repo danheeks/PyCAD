@@ -139,18 +139,18 @@ void CGroup::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 			m_gripper_datum_set = true;
 		}
 
-		list->push_back(GripData(GripperTypeTranslate, m_o.x, m_o.y, m_o.z, NULL));
+		list->push_back(GripData(GripperTypeTranslate, m_o, NULL));
 		if(m_custom_grippers_just_one_axis)
 		{
-			list->push_back(GripData(GripperTypeStretch, m_px.x, m_px.y, m_px.z, NULL));
-			list->push_back(GripData(GripperTypeRotateObjectYZ, m_py.x, m_py.y, m_py.z, NULL));
-			list->push_back(GripData(GripperTypeRotateObjectYZ, m_pz.x, m_pz.y, m_pz.z, NULL));
+			list->push_back(GripData(GripperTypeStretch, m_px, NULL));
+			list->push_back(GripData(GripperTypeRotateObjectYZ, m_py, NULL));
+			list->push_back(GripData(GripperTypeRotateObjectYZ, m_pz, NULL));
 		}
 		else
 		{
-			list->push_back(GripData(GripperTypeRotateObjectXY, m_px.x, m_px.y, m_px.z, NULL));
-			list->push_back(GripData(GripperTypeRotateObjectYZ, m_py.x, m_py.y, m_py.z, NULL));
-			list->push_back(GripData(GripperTypeRotateObjectXZ, m_pz.x, m_pz.y, m_pz.z, NULL));
+			list->push_back(GripData(GripperTypeRotateObjectXY, m_px, NULL));
+			list->push_back(GripData(GripperTypeRotateObjectYZ, m_py, NULL));
+			list->push_back(GripData(GripperTypeRotateObjectXZ, m_pz, NULL));
 		}
 	}
 	else

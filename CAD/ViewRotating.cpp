@@ -15,7 +15,7 @@ void ViewRotating::OnMouse( MouseEvent& event )
 		button_down_point = IPoint(event.GetX(), event.GetY());
 		CurrentPoint = button_down_point;
 		theApp->m_current_viewport->StoreViewPoint();
-		theApp->m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
+//		theApp->m_current_viewport->m_view_point.SetStartMousePoint(button_down_point);
 	}
 	else if(event.Moving())
 	{
@@ -27,7 +27,7 @@ void ViewRotating::OnMouse( MouseEvent& event )
 		{
 			if(theApp->m_rotate_mode)
 			{
-				theApp->m_current_viewport->m_view_point.Turn(dm);
+				theApp->m_current_viewport->m_view_point.TurnI(dm);
 			}
 			else
 			{
@@ -36,7 +36,7 @@ void ViewRotating::OnMouse( MouseEvent& event )
 		}
 		else if(event.m_middleDown)
 		{
-			theApp->m_current_viewport->m_view_point.Shift(dm, IPoint(event.GetX(), event.GetY()));
+			theApp->m_current_viewport->m_view_point.ShiftI(dm);
 		}
 
 		theApp->Repaint();
@@ -44,13 +44,8 @@ void ViewRotating::OnMouse( MouseEvent& event )
 	}
 	else if(event.RightUp()){
 		// do context menu same as select mode
-		theApp->m_select_mode->OnMouse(event);
+//		theApp->m_select_mode->OnMouse(event);
 	}
-	if(event.GetWheelRotation() != 0)theApp->m_select_mode->OnMouse(event);
+//	if(event.GetWheelRotation() != 0)theApp->m_select_mode->OnMouse(event);
 
-}
-
-bool ViewRotating::OnModeChange(void)
-{
-	return true;
 }

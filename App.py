@@ -6,19 +6,20 @@ import os
 from HeeksConfig import HeeksConfig
 import ContextTool
 import ToolBarTool
+import SelectMode
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
 def OnMessageBox(error_message):
     wx.MessageBox(error_message)
-        
-def OnContextMenu():
-    wx.MessageBox('In OnContextMenu')
     
 def OnInputMode():
     wx.GetApp().OnInputMode()
     
 tools = []
+save_filter_for_StartPickObjects = 0
+save_just_one_for_EndPickObjects = False
+save_mode_for_EndPickObjects = None
 
 class App(wx.App):
     def __init__(self):
@@ -28,6 +29,8 @@ class App(wx.App):
         self.filepath = None
         self.hideable_windows = []
         self.cad_dir = pycad_dir
+        self.inMainLoop = False
+        self.select_mode = SelectMode.SelectMode()
         
         save_out = sys.stdout
         save_err = sys.stderr
@@ -140,9 +143,8 @@ class App(wx.App):
         self.hideable_windows.remove(w)
         
     def InitCad(self):
-        cad.SetInputMode(cad.GetSelectMode());
+        cad.SetInputMode(wx.GetApp().select_mode);
         cad.SetResFolder(pycad_dir)
-        cad.SetContextMenuCallback(OnContextMenu)
         cad.SetInputModeCallback(OnInputMode)
         
     def OnInputMode(self):
@@ -196,7 +198,7 @@ class App(wx.App):
         return tools
         
     def GetTools(self, x, y, control_pressed):
-        objects = cad.GetClickedObjects(x, y)
+        objects = cad.ObjectsUnderWindow(cad.IRect(x, y), False, True, self.select_mode.filter)
         global tools
         tools = []
         make_container = len(objects)>1
@@ -277,6 +279,45 @@ class App(wx.App):
         config = HeeksConfig()
         config.DeleteAll()
         self.settings_restored = True
+        
+    def StartPickObjects(self, str, filter, just_one):
+        global save_filter_for_StartPickObjects
+        global save_just_one_for_EndPickObjects
+        global save_mode_for_EndPickObjects
+        save_mode_for_EndPickObjects = cad.GetInputMode()
+        self.select_mode.doing_a_main_loop = True
+        save_just_one_for_EndPickObjects = self.select_mode.just_one
+        self.select_mode.just_one = just_one
+        
+        cad.SetInputMode(self.select_mode)
+        
+        
+        save_filter_for_StartPickObjects = self.select_mode.filter
+        self.select_mode.filter = filter
+        
+    def EndPickObjects(self):
+        global save_filter_for_StartPickObjects
+        global save_just_one_for_EndPickObjects
+        global save_mode_for_EndPickObjects
+        self.select_mode.filter = save_filter_for_StartPickObjects
+        self.select_mode.just_one = save_just_one_for_EndPickObjects
+        cad.SetInputMode(save_mode_for_EndPickObjects)
+        
+    def PickObjects(self, str, filter, just_one):
+        if self.inMainLoop:
+            wx.MessageBox('recursive call to PickObjects')
+            return
+        
+        self.StartPickObjects(str, filter, just_one)
+        
+        self.inMainLoop = True
+        self.OnRun()
+        self.inMainLoop = False
+        
+        return self.EndPickObjects()
+        
+    def GetViewport(self):
+        return self.frame.graphics_canvas.viewport
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

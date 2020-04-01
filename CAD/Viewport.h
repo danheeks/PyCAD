@@ -34,7 +34,6 @@ public:
 	void StoreViewPoint(void);
 	void RestorePreviousViewPoint(void);
 	void DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing = false);
-	void FindMarkedObject(const IPoint &point, MarkedObject* marked_object);
 	void DrawFront(void);
 	void EndDrawFront(void);
 	void FrontRender(void);
@@ -48,4 +47,5 @@ public:
 	void OnMouseEvent(MouseEvent& event);
 	void OnMagExtents(bool rotate, int margin);
 	void WindowMag(IRect &window_box);
+	void OnWheelRotation(int wheelRotation, int x, int y);
 };

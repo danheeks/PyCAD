@@ -4,6 +4,7 @@
 
 #pragma once
 
+#if 0
 #include "InputMode.h"
 #include "MouseEvent.h"
 //#include "LeftAndRight.h"
@@ -62,3 +63,5 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void OnRender();
 };
+
+#endif

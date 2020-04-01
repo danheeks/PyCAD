@@ -4,6 +4,7 @@
 #include "HeeksColor.h"
 #include "ObjList.h"
 #include "glfont2.h"
+#include "Index.h"
 #include <map>
 
 #define HEEKSCAD_VERSION_MAIN L"2"
@@ -84,6 +85,7 @@ private:
 	bool frozen_selection_cleared;
 	std::list<HeeksObj*> frozen_selection_added;
 	std::list<HeeksObj*> frozen_selection_removed;
+	Index<unsigned, HeeksObj*> m_name_index;
 
 	void render_screen_text2(const wchar_t* str, bool select);
 	float get_text_scale();
@@ -113,8 +115,6 @@ public:
 	bool draw_to_grid;
 	bool useOldFuse;
 	double digitizing_grid;
-	bool mouse_wheel_forward_away; // true for forwards/backwards = zoom out / zoom in, false for reverse
-	bool ctrl_does_rotate; // true - rotate on Ctrl, pan when not Ctrl      false - rotate when not Ctrl, pan when Ctrl
 	bool m_allow_opengl_stippling;
 	SolidViewMode m_solid_view_mode;
 	bool m_stl_save_as_binary;
@@ -129,7 +129,7 @@ public:
 	ViewRotating *viewrotating;
 	ViewZooming *viewzooming;
 	ViewPanning *viewpanning;
-	CSelectMode *m_select_mode;
+	//CSelectMode *m_select_mode;
 	DigitizeMode *m_digitizing;
 	GripperMode* gripper_mode;
 	int grid_mode;
@@ -184,6 +184,8 @@ public:
 	double m_revolve_angle;
 	bool m_fit_arcs_on_solid_outline;
 
+	CInputMode* m_previous_input_mode;
+
 	typedef void(*FileOpenHandler_t)(const wchar_t *path);
 	typedef std::map<std::wstring, FileOpenHandler_t> FileOpenHandlers_t;
 
@@ -211,8 +213,8 @@ public:
 	void OnExit();
 	void CreateLights(void);
 	void DestroyLights(void);
-	void FindMarkedObject(const IPoint &point, MarkedObject* marked_object);
 	void SetInputMode(CInputMode *i);
+	void RestoreInputMode();
 	void Repaint(bool soon = false);
 	void RecalculateGLLists();
 	void SetLikeNewFile(void);
@@ -286,9 +288,9 @@ public:
 	std::wstring GetExeFolder()const;
 	virtual std::wstring GetResFolder()const;
 	void get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy));
-	int PickObjects(const wchar_t* str, long marking_filter = -1, bool just_one = false);
-	void StartPickObjects(const wchar_t* str, long marking_filter = -1, bool just_one = false);
-	int EndPickObjects();
+	IRect PointToPickBox(const IPoint& point);
+	void GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, unsigned int filter, std::list<HeeksObj*> &objects);
+	void ColorPickLowestObjects(IRect window, bool single_picking, std::list<HeeksObj*> &objects);
 	bool PickPosition(const wchar_t* str, double* pos, void(*callback)(const double*) = NULL);
 	void glSphere(double radius, const double* pos = NULL);
 	void OnNewOrOpen(bool open, int res);

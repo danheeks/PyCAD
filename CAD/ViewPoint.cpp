@@ -43,7 +43,7 @@ const CViewPoint& CViewPoint::operator=(const CViewPoint &c){
 	return *this;
 }
 
-void CViewPoint::Turn(IPoint point_diff){
+void CViewPoint::TurnI(IPoint point_diff){
 	if(point_diff.x > 100)point_diff.x = 100;
 	else if(point_diff.x < -100)point_diff.x = -100;
 	if(point_diff.y > 100)point_diff.y = 100;
@@ -127,7 +127,7 @@ void CViewPoint::Shift(const Point3d &tv){
 	m_target_point = m_target_point + new_vector;
 }
 
-void CViewPoint::Shift(const IPoint &point_diff, const IPoint &point){
+void CViewPoint::ShiftI(const IPoint &point_diff){
 	double div_x = (double)(point_diff.x)/m_pixel_scale;
 	double div_y = (double)(point_diff.y)/m_pixel_scale;
 	Point3d f = m_target_point - m_lens_point;
@@ -180,8 +180,8 @@ void CViewPoint::Scale(double multiplier, bool use_initial_pixel_scale){
 	}
 }
 
-void CViewPoint::Scale(const IPoint &point, bool reversed){
-	double mouse_ydiff = point.y - m_initial_point.y;
+void CViewPoint::Scale(const IPoint &diff, bool reversed){
+	double mouse_ydiff = diff.y;
 	if(reversed)mouse_ydiff = -mouse_ydiff;
 	IPoint size = m_viewport->GetViewportSize();
 	double fraction=(mouse_ydiff)/((double)(size.GetHeight()));

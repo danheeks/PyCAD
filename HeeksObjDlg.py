@@ -78,7 +78,7 @@ class HeeksObjDlg(HDialog):
             self.picture.SetPicture(wx.GetApp().cad_dir + '/bitmaps/' + folder + '/' + name + '.png')
             
     def SetPictureByWindow(self, w):
-        self.SetPicture('general')
+        self.SetPictureByName('general')
         
     def SetPicture(self):
         w = self.FindFocus()

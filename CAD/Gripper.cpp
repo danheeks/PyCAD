@@ -16,6 +16,11 @@ static unsigned char square[18] = {0xff, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x8
 static unsigned char cross[18] = {0x80, 0x80, 0x41, 0x00, 0x22, 0x00, 0x14, 0x00, 0x08, 0x00, 0x14, 0x00, 0x22, 0x00, 0x41, 0x00, 0x80, 0x80};
 static unsigned char flower[18] = {0x1c, 0x00, 0x22, 0x00, 0x63, 0x00, 0x94, 0x80, 0x88, 0x80, 0x94, 0x80, 0x63, 0x00, 0x22, 0x00, 0x1c, 0x00};
 
+Gripper::Gripper() :m_gripper_parent(NULL), m_data(GripperTypeTranslate, Point3d(0.0, 0.0, 0.0))
+{
+
+}
+
 Gripper::Gripper(const GripData& data, HeeksObj* parent):m_data(data){
     m_gripper_parent = parent;
 }
@@ -42,9 +47,9 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 			};
 
 			for (int i = 0; i<8; i++){
-				p[i][0] += m_data.m_x;
-				p[i][1] += m_data.m_y;
-				p[i][2] += m_data.m_z;
+				p[i][0] += m_data.m_p.x;
+				p[i][1] += m_data.m_p.y;
+				p[i][2] += m_data.m_p.z;
 			}
 
 			glBegin(GL_TRIANGLES);
@@ -94,7 +99,7 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 		}
 		else
 		{
-			glRasterPos3d(m_data.m_x, m_data.m_y, m_data.m_z);
+			glRasterPos3d(m_data.m_p.x, m_data.m_p.y, m_data.m_p.z);
 			switch(m_data.m_type){
 		case GripperTypeTranslate:
 			glBitmap(16, 15, 8, 7, 10.0, 0.0, translation_circle);
@@ -145,15 +150,11 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 	}
 	else
 	{
-		glRasterPos3d(m_data.m_x, m_data.m_y, m_data.m_z);
+		glRasterPos3d(m_data.m_p.x, m_data.m_p.y, m_data.m_p.z);
 		glBitmap(9, 9, 4, 4, 10.0, 0.0, circle);
 	}
 }
 
 void Gripper::Transform(const Matrix &m){
-	Point3d position(m_data.m_x, m_data.m_y, m_data.m_z);
-	position = position.Transformed(m);
-	m_data.m_x = position.x;
-	m_data.m_y = position.y;
-	m_data.m_z = position.z;
+	m_data.m_p = m_data.m_p.Transformed(m);
 }

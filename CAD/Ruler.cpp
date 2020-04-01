@@ -271,8 +271,8 @@ void HRuler::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 
 	for(int i = 0; i<4; i++)point[i] = point[i].Transformed(m_trsf);
 
-	list->push_back(GripData(GripperTypeRotateObject,point[0].x,point[0].y,point[0].z,NULL));
-	list->push_back(GripData(GripperTypeRotateObject,point[2].x,point[2].y,point[2].z,NULL));
+	list->push_back(GripData(GripperTypeRotateObject,point[0],NULL));
+	list->push_back(GripData(GripperTypeRotateObject,point[2],NULL));
 }
 
 class PropertyUseViewUnits :public PropertyCheck

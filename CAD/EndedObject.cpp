@@ -65,19 +65,19 @@ bool EndedObject::Stretch(const Point3d &p, const Point3d &shift, void* data){
 
 void EndedObject::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
-	list->push_back(GripData(GripperTypeStretch,A.x,A.y,A.z,&A));
-	list->push_back(GripData(GripperTypeStretch,B.x,B.y,B.z,&B));
+	list->push_back(GripData(GripperTypeStretch,A,&A));
+	list->push_back(GripData(GripperTypeStretch,B,&B));
 }
 
-bool EndedObject::GetStartPoint(double* pos)
+bool EndedObject::GetStartPoint(Point3d &pos)
 {
-	A.get(pos);
+	pos = A;
 	return true;
 }
 
-bool EndedObject::GetEndPoint(double* pos)
+bool EndedObject::GetEndPoint(Point3d &pos)
 {
-	B.get(pos);
+	pos = B;
 	return true;
 }
 

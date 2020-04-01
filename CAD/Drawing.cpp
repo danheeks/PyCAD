@@ -123,13 +123,13 @@ void Drawing::OnMouse( MouseEvent& event )
 	{
 		if(DragDoneWithXOR())theApp->m_current_viewport->EndDrawFront();
 		ClearObjectsMade();
-		theApp->SetInputMode(theApp->m_select_mode);
+		theApp->RestoreInputMode();
 	}
 
 	if(!event_used){
 		if(event.m_middleDown || event.GetWheelRotation() != 0)
 		{
-			theApp->m_select_mode->OnMouse(event);
+//			theApp->m_select_mode->OnMouse(event);
 		}
 		else{
 			if(event.LeftDown()){
@@ -156,7 +156,7 @@ void Drawing::OnMouse( MouseEvent& event )
 			}
 			else if(event.RightUp()){
 				// do context menu same as select mode
-				theApp->m_select_mode->OnMouse(event);
+//				theApp->m_select_mode->OnMouse(event);
 			}
 			else if(event.Moving()){
 				if(!m_inhibit_coordinate_change){
@@ -176,7 +176,7 @@ void Drawing::OnKeyDown(KeyCode key_code)
 	case K_ESCAPE:
 		// end drawing mode
 		ClearObjectsMade();
-		theApp->SetInputMode(theApp->m_select_mode);
+		theApp->RestoreInputMode();
 	}
 }
 
@@ -187,13 +187,12 @@ bool Drawing::IsDrawing(CInputMode* i){
 	return false;
 }
 
-bool Drawing::OnModeChange(void){
+void Drawing::OnModeChange(void){
 	view_map.clear();
 	*null_view = ViewSpecific(0);
 	current_view_stuff = null_view;
 
 	if(!IsDrawing(theApp->input_mode_object))SetDrawStepUndoable(0);
-	return true;
 }
 
 HeeksObj* Drawing::GetOwnerForDrawingObjects()

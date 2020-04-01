@@ -792,7 +792,7 @@ double CSketch::GetArea()const
 		case ArcType:
 			{
 				double angle = ((HArc*)object)->IncludedAngle();
-				double radius = ((HArc*)object)->m_radius;
+				double radius = ((HArc*)object)->A.Dist2D(((HArc*)object)->C);
 				double p0x = ((HArc*)object)->A.x;
 				double p0y = ((HArc*)object)->A.y;
 				double p1x = ((HArc*)object)->B.x;

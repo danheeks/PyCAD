@@ -14,7 +14,6 @@ class DigitizeMode:public CInputMode{
 private:
 	PointOrWindow *point_or_window;
 	DigitizedPoint lbutton_point;
-	std::set<HeeksObj*> m_only_coords_set;
 
 	DigitizedPoint digitize1(const IPoint &input_point);
 
@@ -33,7 +32,7 @@ public:
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
 //	void OnKeyDown(KeyCode key_code);
-	bool OnModeChange(void);
+	void OnModeChange(void);
 	void OnFrontRender();
 	void GetProperties(std::list<Property *> *list);
 

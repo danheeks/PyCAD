@@ -543,7 +543,7 @@ class Frame(wx.Frame):
         e.Enable(cad.GetNumSelected() > 0)            
     
     def OnSelectMode(self, e):
-        cad.SetInputMode(cad.GetSelectMode())
+        cad.SetInputMode(wx.GetApp().select_mode)
         
     def OnMagPrevious(self, e):
         self.graphics_canvas.viewport.RestorePreviousViewPoint()

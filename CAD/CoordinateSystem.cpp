@@ -1226,10 +1226,10 @@ void CoordinateSystem::GetGripperPositions(std::list<GripData> *list, bool just_
 	Point3d py(m_o + m_y * s);
 	Point3d vz = Point3d(0, 0, 1).Transformed(mat);
 	Point3d pz(m_o + vz * s);
-	list->push_back(GripData(GripperTypeTranslate,m_o.x,m_o.y,m_o.z,NULL));
-	list->push_back(GripData(GripperTypeRotateObject,px.x,px.y,px.z,NULL));
-	list->push_back(GripData(GripperTypeRotateObject,py.x,py.y,py.z,NULL));
-	list->push_back(GripData(GripperTypeRotateObject,pz.x,pz.y,pz.z,NULL));
+	list->push_back(GripData(GripperTypeTranslate,m_o,NULL));
+	list->push_back(GripData(GripperTypeRotateObject,px,NULL));
+	list->push_back(GripData(GripperTypeRotateObject,py,NULL));
+	list->push_back(GripData(GripperTypeRotateObject,pz,NULL));
 }
 
 bool CoordinateSystem::GetScaleAboutMatrix(Matrix &m)

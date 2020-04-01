@@ -132,7 +132,6 @@
     <ClCompile Include="LineArcDrawing.cpp" />
     <ClCompile Include="MagDragWindow.cpp" />
     <ClCompile Include="MarkedList.cpp" />
-    <ClCompile Include="MarkedObject.cpp" />
     <ClCompile Include="ObjList.cpp" />
     <ClCompile Include="Picking.cpp" />
     <ClCompile Include="PointOrWindow.cpp" />
@@ -210,7 +209,6 @@
     <ClInclude Include="LineArcDrawing.h" />
     <ClInclude Include="MagDragWindow.h" />
     <ClInclude Include="MarkedList.h" />
-    <ClInclude Include="MarkedObject.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MouseEvent.h" />
     <ClInclude Include="ObjList.h" />

@@ -5,10 +5,10 @@
 #include "StretchTool.h"
 #include "HeeksObj.h"
 
-StretchTool::StretchTool(HeeksObj *object, const double *p, const double* shift, void* data){
+StretchTool::StretchTool(HeeksObj *object, const Point3d& p, const Point3d& shift, void* data){
 	m_object = object;
-	memcpy(m_pos, p, 3*sizeof(double));
-	memcpy(m_shift, shift, 3*sizeof(double));
+	m_pos = p;
+	m_shift = shift;
 	m_undo_uses_add = false;
 	m_data = data;
 }
@@ -27,15 +27,12 @@ const wchar_t* StretchTool::GetTitle(){
 
 void StretchTool::Run(bool redo){
 	m_undo_uses_add = m_object->Stretch(m_pos, m_shift, m_data);
-	for(int i = 0; i<3; i++)m_new_pos[i]= m_pos[i] + m_shift[i];
+	m_new_pos= m_pos + m_shift;
 }
 
 void StretchTool::RollBack(){
 	if(!m_undo_uses_add){
-		double unshift[3];
-		for(int i = 0; i<3; i++){
-			unshift[i] = -m_shift[i];
-		}
+		Point3d unshift = -m_shift;
 		m_object->Stretch(m_new_pos, unshift, m_data);
 	}
 }

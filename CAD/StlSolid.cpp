@@ -3,7 +3,6 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 #include "StlSolid.h"
-#include "MarkedObject.h"
 #include "Picking.h"
 #include "Material.h"
 #include "strconv.h"
@@ -371,9 +370,9 @@ void CStlSolid::GetGripperPositions(std::list<GripData> *list, bool just_for_end
 		for (std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
 		{
 			CStlTri &t = *It;
-			list->push_back(GripData(GripperTypeTranslate, t.x[0][0], t.x[0][1], t.x[0][2]));
-			list->push_back(GripData(GripperTypeTranslate, t.x[1][0], t.x[1][1], t.x[1][2]));
-			list->push_back(GripData(GripperTypeTranslate, t.x[2][0], t.x[2][1], t.x[2][2]));
+			list->push_back(GripData(GripperTypeTranslate, Point3d(t.x[0][0], t.x[0][1], t.x[0][2])));
+			list->push_back(GripData(GripperTypeTranslate, Point3d(t.x[1][0], t.x[1][1], t.x[1][2])));
+			list->push_back(GripData(GripperTypeTranslate, Point3d(t.x[2][0], t.x[2][1], t.x[2][2])));
 		}
 	}
 	else
@@ -533,15 +532,4 @@ void CStlSolid::AddTriangle(float* t)
 {
 	CStlTri tri(t);
 	m_list.push_back(tri);
-}
-
-
-bool CStlSolid::SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)
-{
-	// set picked triangle
-	if (marked_object->GetNumCustomNames() > 0)
-	{
- 		m_clicked_triangle = marked_object->GetCustomNames()[0];
-	}
-	return true; // click was handled by this object
 }

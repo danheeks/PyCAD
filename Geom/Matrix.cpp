@@ -242,6 +242,19 @@
 			p1[2] = p0[0] * e[8] + p0[1] * e[9] + p0[2] * e[10] + e[11];
 		}
 	}
+
+	void	Matrix::TransformOnlyRotation(double p0[3], double p1[3]) const
+	{
+		// transform p0 thro' this matrix
+		if (m_unit)
+			memcpy(p1, p0, 3 * sizeof(double));
+		else {
+			p1[0] = p0[0] * e[0] + p0[1] * e[1] + p0[2] * e[2];
+			p1[1] = p0[0] * e[4] + p0[1] * e[5] + p0[2] * e[6];
+			p1[2] = p0[0] * e[8] + p0[1] * e[9] + p0[2] * e[10];
+		}
+	}
+
 	void	Matrix::Transform2d(double p0[2], double p1[2]) const
 	{
 		// transform p0 thro' this matrix (2d only)
@@ -569,8 +582,9 @@
 			x = Y_VECTOR ^ *this;
 		else
 			x = Z_VECTOR ^ *this;
-
+		x.normalise();
 		y = *this ^ x;
+		y.normalise();
 	}
 
 	 void Plane::Mirrored(Matrix* tmMirrored) {

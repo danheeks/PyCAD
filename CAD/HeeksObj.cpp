@@ -73,16 +73,11 @@ void HeeksObj::GetProperties(std::list<Property *> *list)
 
 bool HeeksObj::GetScaleAboutMatrix(Matrix &m)
 {
-#if 0
-	to do
 	// return the bottom left corner of the box
 	CBox box;
 	GetBox(box);
 	if(!box.m_valid)return false;
-	Matrix mat;
-	mat.SetTranslationPart(Point3d(box.m_x[0], box.m_x[1], box.m_x[2]));
-	extract(mat, m);
-#endif
+	m.Translate(box.m_x[0], box.m_x[1], box.m_x[2]);
 	return true;
 }
 
@@ -99,10 +94,10 @@ void HeeksObj::GetGripperPositions(std::list<GripData> *list, bool just_for_endo
 
 	//TODO: This is a tab bit of a strange thing to do. Especially for planar objects like faces
 	//ones that are on a plane like y-z or x-z will have all gripper merged togeather.
-	list->push_back(GripData(GripperTypeTranslate,box.m_x[0],box.m_x[1],box.m_x[2],NULL));
-	list->push_back(GripData(GripperTypeRotateObject,box.m_x[3],box.m_x[1],box.m_x[2],NULL));
-	list->push_back(GripData(GripperTypeRotateObject,box.m_x[0],box.m_x[4],box.m_x[2],NULL));
-	list->push_back(GripData(GripperTypeScale,box.m_x[3],box.m_x[4],box.m_x[2],NULL));
+	list->push_back(GripData(GripperTypeTranslate,Point3d(box.m_x[0],box.m_x[1],box.m_x[2]),NULL));
+	list->push_back(GripData(GripperTypeRotateObject, Point3d(box.m_x[3], box.m_x[1], box.m_x[2]), NULL));
+	list->push_back(GripData(GripperTypeRotateObject, Point3d(box.m_x[0], box.m_x[4], box.m_x[2]), NULL));
+	list->push_back(GripData(GripperTypeScale, Point3d(box.m_x[3], box.m_x[4], box.m_x[2]), NULL));
 }
 
 bool HeeksObj::Add(HeeksObj* object, HeeksObj* prev_object)

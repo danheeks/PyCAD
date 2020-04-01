@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/python/wrapper.hpp>
-#include "MarkedObject.h"
 
 void HandlePythonCallError();
 
@@ -336,6 +335,32 @@ public:
 		return false;
 	}
 
+	bool CallVoidReturn(const char* func, MouseEvent& value)const
+	{
+		bool success = false;
+		if (boost::python::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					boost::python::detail::method_result result = f(value);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const boost::python::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
+	}
+
 	bool CallVoidReturn(const char* func, boost::python::list &value1, boost::python::list &value2)const
 	{
 		bool success = false;
@@ -393,7 +418,7 @@ public:
 		return std::make_pair(false, false);
 	}
 
-	std::pair<bool, bool> CallReturnBool(const char* func, MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction)const
+	std::pair<bool, bool> CallReturnBool(const char* func, const Point3d &ray_start, const Point3d &ray_direction)const
 	{
 		bool success = false;
 		if (boost::python::override f = this->get_override(func))
@@ -410,7 +435,7 @@ public:
 				PyLockGIL lock;
 				try
 				{
-					boost::python::detail::method_result result = f(marked_object, ray_start, ray_direction);
+					boost::python::detail::method_result result = f(ray_start, ray_direction);
 					success = AfterPythonCall(main_module);
 					return std::make_pair(success, (bool)result);
 				}

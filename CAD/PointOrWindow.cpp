@@ -48,11 +48,9 @@ void PointOrWindow::OnMouse( MouseEvent& event ){
 	}
 }
 
-bool PointOrWindow::OnModeChange(void){
+void PointOrWindow::OnModeChange(void){
 	SetWithPoint(theApp->cur_mouse_pos);
 	visible = true;
-
-	return true;
 }
 
 void PointOrWindow::SetWithPoint(const IPoint &point){

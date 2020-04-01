@@ -63,7 +63,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	void ReloadPointers();
 	void OnChangeViewUnits(const double units);
-	bool SetClickMarkPoint(MarkedObject* marked_object, const Point3d &ray_start, const Point3d &ray_direction);
+	bool SetClickMarkPoint(const Point3d &ray_start, const Point3d &ray_direction);
 
 	HeeksObj *Find( const int type, const unsigned int id );	// Search for an object by type/id from this or any child objects.
 };

@@ -46,12 +46,12 @@
 #include "ViewZooming.h"
 #include "ViewPanning.h"
 #include "LineArcDrawing.h"
-#include "MarkedObject.h"
 #include "ConversionTools.h"
 #include "PyWrapper.h"
 #include "PyBaseObject.h"
 #include "DigitizeMode.h"
 #include "KeyCode.h"
+#include "Gripper.h"
 
 void OnExit()
 {
@@ -197,6 +197,11 @@ public:
 	{
 		property_list = list;
 		CallVoidReturn("GetProperties");
+	}
+
+	void OnMouse(MouseEvent& event)
+	{
+		CallVoidReturn("OnMouse", event);
 	}
 
 };
@@ -350,24 +355,6 @@ void RegisterMessageBoxCallback(PyObject *callback)
 		return;
 	}
 	message_box_callback = callback;
-}
-
-PyObject* context_menu_callback = NULL;
-
-void PythonOnContextMenu()
-{
-	if (context_menu_callback)
-		CallPythonCallback(context_menu_callback);
-}
-
-void SetContextMenuCallback(PyObject *callback)
-{
-	if (!PyCallable_Check(callback))
-	{
-		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-		return;
-	}
-	context_menu_callback = callback;
 }
 
 PyObject* set_input_mode_callback = NULL;
@@ -542,11 +529,6 @@ void SetGetLinesPixelsPerMm(double pixels_per_mm)
 	GetLines_pixels_per_mm = pixels_per_mm;
 }
 
-CInputMode* GetSelectMode()
-{
-	return theApp->m_select_mode;
-}
-
 CInputMode* GetMagnification()
 {
 	return theApp->magnification;
@@ -575,6 +557,11 @@ void SetInputMode(CInputMode* input_mode)
 CInputMode* GetInputMode()
 {
 	return theApp->input_mode_object;
+}
+
+void RestoreInputMode()
+{
+	return theApp->RestoreInputMode();
 }
 
 void SetLineArcDrawing()
@@ -781,7 +768,7 @@ double SketchGetCircleDiameter(CSketch& sketch)
 	if (span->GetType() == ArcType)
 	{
 		HArc* arc = (HArc*)span;
-		return arc->m_radius * 2;
+		return arc->A.Dist2D(arc->C) * 2;
 	}
 	else if (span->GetType() == CircleType)
 	{
@@ -1292,6 +1279,16 @@ int StlSolidNumTriangles(CStlSolid& solid)
 	return solid.m_list.size();
 }
 
+int ViewportGetHeight(CViewport& viewport)
+{
+	return viewport.GetViewportSize().GetHeight();
+}
+
+int ViewportGetWidth(CViewport& viewport)
+{
+	return viewport.GetViewportSize().GetWidth();
+}
+
 static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, const HeeksColor* color)
 {
 	return boost::shared_ptr<CStlSolid>(new CStlSolid(title.c_str(), color));
@@ -1346,68 +1343,6 @@ boost::python::list GetObjects() {
 	return olist;
 }
 
-
-boost::python::list GetClickedObjects(int x, int y) {
-	// for context menu, we want one object of each type, including child objects, if there are more than one the smae type, we want the one nearest to the camera
-
-	MarkedObjectOneOfEach marked_object;
-	theApp->FindMarkedObject(IPoint(x, y), &marked_object);
-
-	std::list<MarkedObject*> stack;
-	stack.push_back(&marked_object);
-	std::map<int, MarkedObject*> types;
-
-	while (stack.size() > 0)
-	{
-		MarkedObject* m = stack.front();
-		stack.pop_front();
-
-		for (std::map<HeeksObj*, MarkedObject*>::iterator It = m->m_map.begin(); It != m->m_map.end(); It++)
-		{
-			stack.push_back(It->second);
-		}
-
-		for (std::map<int, MarkedObject*>::iterator It = m->m_types.begin(); It != m->m_types.end(); It++)
-		{
-			int type = It->first;
-			MarkedObject* object = It->second;
-			std::map<int, MarkedObject*>::iterator FindIt = types.find(type);
-
-			if (FindIt == types.end())
-			{
-				types.insert(std::make_pair(type, object));
-			}
-			else
-			{
-				MarkedObject* existing_object = FindIt->second;
-				if (object->GetDepth() < existing_object->GetDepth())
-				{
-					types.erase(type);
-					types.insert(std::make_pair(type, object));
-				}
-			}
-		}
-	}
-
-	boost::python::list olist;
-
-	if (types.size() > 0)
-	{
-		for (std::map<int, MarkedObject*>::iterator It = types.begin(); It != types.end(); It++)
-		{
-			MarkedObject* object = It->second;
-			AddObjectToPythonList(object->GetHeeksObj(), olist);
-		}
-	}
-	else
-	{
-		HeeksObj* object = marked_object.GetHeeksObj();
-		if (object)AddObjectToPythonList(object, olist);
-	}
-
-	return olist;
-}
-
 bool ObjectMarked(HeeksObj* object)
 {
 	return theApp->m_marked_list->ObjectMarked(object);
@@ -1429,11 +1364,6 @@ void Unselect(HeeksObj* object, bool call_OnChanged)
 void ClearSelection(bool call_OnChanged)
 {
 	theApp->m_marked_list->Clear(call_OnChanged);
-}
-
-int PickObjects(const std::wstring& str, long marking_filter, bool just_one)
-{
-	return theApp->PickObjects(str.c_str(), marking_filter, just_one);
 }
 
 double GetViewUnits()
@@ -1695,7 +1625,27 @@ void EndDrawing()
 
 	((Drawing*)(theApp->input_mode_object))->ClearObjectsMade();
 
-	theApp->SetInputMode(theApp->m_select_mode);
+	theApp->RestoreInputMode();
+}
+
+boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool one_of_each, int filter)
+{
+	window.MakePositive();
+
+	boost::python::list olist;
+	std::list<HeeksObj*> objects;
+	theApp->GetObjectsInWindow(window, only_if_fully_in, one_of_each, filter, objects);
+	for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
+	{
+		HeeksObj* object = *It;
+		AddObjectToPythonList(object, olist);
+	}
+	return olist;
+}
+
+Point3d Digitize(IPoint point)
+{
+	return theApp->m_digitizing->digitize(point).m_point;
 }
 
 int BaseObjectGetIndex(BaseObject& object)
@@ -1780,6 +1730,13 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetStartPoint", &HeeksObjGetStartPoint)
 			.def("GetEndPoint", &HeeksObjGetEndPoint)
 			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
+			;
+
+		boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")
+			.def(boost::python::init<Gripper>())
+			.def("OnGripperGrabbed", &Gripper::OnGripperGrabbed)
+			.def("OnGripperMoved", &Gripper::OnGripperMoved)
+			.def("OnGripperReleased", &Gripper::OnGripperReleased)
 			;
 
 		boost::python::class_<HeeksColor>("Color")
@@ -1898,6 +1855,9 @@ int HeeksObjGetIndex(HeeksObj& object)
 
 		boost::python::class_<CViewPoint>("ViewPoint", boost::python::no_init)
 			.def("SetView", &CViewPoint::SetView)
+			.def("Unproject", &CViewPoint::glUnproject)
+			.def("ShiftI", &CViewPoint::ShiftI)
+			.def("TurnI", &CViewPoint::TurnI)
 			;
 
 		boost::python::class_<CViewport>("Viewport")
@@ -1909,27 +1869,71 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("RestorePreviousViewPoint", &CViewport::RestorePreviousViewPoint)
 			.def("ClearViewpoints", &CViewport::ClearViewpoints)
 			.def("StoreViewPoint", &CViewport::StoreViewPoint)
-			.def_readwrite("m_need_update", &CViewport::m_need_update)
-			.def_readwrite("m_need_refresh", &CViewport::m_need_refresh)
-			.def_readwrite("m_orthogonal", &CViewport::m_orthogonal)
-			.def_readwrite("m_view_point", &CViewport::m_view_point)
+			.def("GetHeight", &ViewportGetHeight)
+			.def("GetWidth", &ViewportGetWidth)
+			.def("SetXOR", &CViewport::SetXOR)
+			.def("EndXOR", &CViewport::EndXOR)
+			.def("DrawFront", &CViewport::DrawFront)
+			.def("EndDrawFront", &CViewport::EndDrawFront)
+			.def("DrawWindow", &CViewport::DrawWindow)
+			.def("OnWheelRotation", &CViewport::OnWheelRotation)
+			.def_readwrite("need_update", &CViewport::m_need_update)
+			.def_readwrite("need_refresh", &CViewport::m_need_refresh)
+			.def_readwrite("orthogonal", &CViewport::m_orthogonal)
+			.def_readwrite("view_point", &CViewport::m_view_point)
+			;
+
+		boost::python::enum_<MouseEventType>("MouseEventType")
+		.value("MouseEventNull", MouseEventNull)
+		.value("MouseEventLeftDown", MouseEventLeftDown)
+		.value("MouseEventLeftUp", MouseEventLeftUp)
+		.value("MouseEventLeftDClick", MouseEventLeftDClick)
+		.value("MouseEventRightDown", MouseEventRightDown)
+		.value("MouseEventRightUp", MouseEventRightUp)
+		.value("MouseEventMiddleDown", MouseEventMiddleDown)
+		.value("MouseEventMiddleUp", MouseEventMiddleUp)
+		.value("MouseEventMovingOrDragging", MouseEventMovingOrDragging)
+		.value("MouseEventWheelRotation", MouseEventWheelRotation)
 			;
 
 		boost::python::class_<MouseEvent>("MouseEvent")
 			.def(boost::python::init<MouseEvent>())
-			.def_readwrite("m_event_type", &MouseEvent::m_event_type)
-			.def_readwrite("m_x", &MouseEvent::m_x)
-			.def_readwrite("m_y", &MouseEvent::m_y)
-			.def_readwrite("m_leftDown", &MouseEvent::m_leftDown)
-			.def_readwrite("m_middleDown", &MouseEvent::m_middleDown)
-			.def_readwrite("m_rightDown", &MouseEvent::m_rightDown)
-			.def_readwrite("m_controlDown", &MouseEvent::m_controlDown)
-			.def_readwrite("m_shiftDown", &MouseEvent::m_shiftDown)
-			.def_readwrite("m_altDown", &MouseEvent::m_altDown)
-			.def_readwrite("m_metaDown", &MouseEvent::m_metaDown)
-			.def_readwrite("m_wheelRotation", &MouseEvent::m_wheelRotation)
-			.def_readwrite("m_wheelDelta", &MouseEvent::m_wheelDelta)
-			.def_readwrite("m_linesPerAction", &MouseEvent::m_linesPerAction)
+			.def("LeftDown", &MouseEvent::LeftDown)
+			.def("LeftUp", &MouseEvent::LeftUp)
+			.def("LeftDClick", &MouseEvent::LeftDClick)
+			.def("RightDown", &MouseEvent::RightDown)
+			.def("RightUp", &MouseEvent::RightUp)
+			.def("MiddleDown", &MouseEvent::MiddleDown)
+			.def("MiddleUp", &MouseEvent::MiddleUp)
+			.def("Moving", &MouseEvent::Moving)
+			.def("GetWheelRotation", &MouseEvent::GetWheelRotation)
+			.def_readwrite("event_type", &MouseEvent::m_event_type)
+			.def_readwrite("x", &MouseEvent::m_x)
+			.def_readwrite("y", &MouseEvent::m_y)
+			.def_readwrite("leftDown", &MouseEvent::m_leftDown)
+			.def_readwrite("middleDown", &MouseEvent::m_middleDown)
+			.def_readwrite("rightDown", &MouseEvent::m_rightDown)
+			.def_readwrite("controlDown", &MouseEvent::m_controlDown)
+			.def_readwrite("shiftDown", &MouseEvent::m_shiftDown)
+			.def_readwrite("altDown", &MouseEvent::m_altDown)
+			.def_readwrite("metaDown", &MouseEvent::m_metaDown)
+			.def_readwrite("wheelRotation", &MouseEvent::m_wheelRotation)
+			.def_readwrite("wheelDelta", &MouseEvent::m_wheelDelta)
+			.def_readwrite("linesPerAction", &MouseEvent::m_linesPerAction)
+			;
+
+		boost::python::class_<IPoint>("IPoint")
+			.def(boost::python::init<int, int>())
+			.def_readwrite("x", &IPoint::x)
+			.def_readwrite("y", &IPoint::y)
+			;
+		boost::python::class_<IRect>("IRect")
+			.def(boost::python::init<int, int, int, int>())
+			.def(boost::python::init<int, int>())
+			.def_readwrite("x", &IRect::x)
+			.def_readwrite("y", &IRect::y)
+			.def_readwrite("width", &IRect::width)
+			.def_readwrite("height", &IRect::height)
 			;
 
 		boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
@@ -2188,7 +2192,6 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
 		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
 		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
-		boost::python::def("SetContextMenuCallback", SetContextMenuCallback);
 		boost::python::def("SetInputModeCallback", SetInputModeCallback);
 		boost::python::def("GetResFolder", GetResFolder); 
 		boost::python::def("SetResFolder", SetResFolder);
@@ -2196,13 +2199,11 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("GetSelectedObjects", GetSelectedObjects);
 		boost::python::def("GetNumSelected", GetNumSelected);
 		boost::python::def("GetObjects", GetObjects);
-		boost::python::def("GetClickedObjects", GetClickedObjects);
 		boost::python::def("ObjectMarked", ObjectMarked);
 		boost::python::def("Select", &Select, SelectOverloads(	(boost::python::arg("object"),	boost::python::arg("CallOnChanged") = NULL)));
 		boost::python::def("Unselect", Unselect);
 		boost::python::def("ClearSelection", ClearSelection);
 		boost::python::def("GetSelectionProperties", GetSelectionProperties);
-		boost::python::def("PickObjects", PickObjects);
 		boost::python::def("GetViewUnits", GetViewUnits);
 		boost::python::def("SetViewUnits", SetViewUnits);
 		boost::python::def("GetApp", GetApp, boost::python::return_value_policy<boost::python::reference_existing_object>());
@@ -2228,13 +2229,13 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("ChangePropertyCheck", ChangePropertyCheck);
 		boost::python::def("GetUnits", GetUnits);
 		boost::python::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
-		boost::python::def("GetSelectMode", GetSelectMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetMagnification", GetMagnification, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetViewRotating", GetViewRotating, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetViewZooming", GetViewZooming, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetViewPanning", GetViewPanning, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("SetInputMode", SetInputMode);
 		boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("RestoreInputMode", RestoreInputMode);
 		boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
 		boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
@@ -2252,12 +2253,15 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("CanUndo", CanUndo);
 		boost::python::def("CanRedo", CanRedo);
 		boost::python::def("EndDrawing", EndDrawing);
-		
+		boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
+		boost::python::def("Digitize", Digitize);
+
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
-		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
+		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType; 
+		boost::python::scope().attr("OBJECT_TYPE_GRIPPER") = (int)GripperType;
 		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
 		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
 		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
@@ -2272,4 +2276,6 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
 		boost::python::scope().attr("MARKING_FILTER_SKETCH_GROUP") = (int)MARKING_FILTER_SKETCH_GROUP;
+		boost::python::scope().attr("MARKING_FILTER_STL_SOLID") = (int)MARKING_FILTER_STL_SOLID;
+		
 	}

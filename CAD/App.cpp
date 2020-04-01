@@ -11,7 +11,6 @@
 #include "ViewZooming.h"
 #include "ViewPanning.h"
 #include "DigitizeMode.h"
-#include "MarkedObject.h"
 #include "MarkedList.h"
 #include "StlSolid.h"
 #include "CoordinateSystem.h"
@@ -73,7 +72,7 @@ CApp::CApp()
 	viewrotating = new ViewRotating;
 	viewzooming = new ViewZooming;
 	viewpanning = new ViewPanning;
-	m_select_mode = new CSelectMode();
+	//m_select_mode = new CSelectMode();
 	m_digitizing = new DigitizeMode();
 	digitize_end = false;
 	digitize_inters = false;
@@ -93,9 +92,6 @@ CApp::CApp()
 	m_marked_list = new MarkedList;
 	history = new MainHistory;
 	m_doing_rollback = false;
-	mouse_wheel_forward_away = false;
-	m_mouse_move_highlighting = true;
-	ctrl_does_rotate = false;
 	m_ruler = new HRuler();
 	m_show_ruler = false;
 	m_show_datum_coords_system = true;
@@ -151,6 +147,7 @@ CApp::CApp()
 	m_gl_font_initialized = false;
 	m_observers_frozen = 0;
 	frozen_selection_cleared = false;
+	m_previous_input_mode = NULL;
 }
 
 CApp::~CApp()
@@ -160,7 +157,6 @@ CApp::~CApp()
 	observers.clear();
 	delete history;
 	delete magnification;
-	delete m_select_mode;
 	delete m_digitizing;
 	delete viewrotating;
 	delete viewzooming;
@@ -178,27 +174,28 @@ extern void PythonOnSetInputMode();
 
 void CApp::SetInputMode(CInputMode *new_mode){
 	if(!new_mode)return;
-	//if(m_frame)m_current_viewport->EndDrawFront();
-	if(new_mode->OnModeChange()){
-		input_mode_object = new_mode;
-	}
-	else{
-		input_mode_object = m_select_mode;
-	}
+
+	m_previous_input_mode = input_mode_object;
+	new_mode->OnModeChange();
+	input_mode_object = new_mode;
 
 	RefreshInputCanvas();
+}
 
-	//if(m_frame && m_frame->m_options)m_frame->RefreshOptions();
-	//if(m_graphics_text_mode != GraphicsTextModeNone)Repaint();
+void CApp::RestoreInputMode()
+{
+	if (m_previous_input_mode)
+	{
+		m_previous_input_mode->OnModeChange();
+		input_mode_object = m_previous_input_mode;
+		RefreshInputCanvas();
+		m_previous_input_mode = NULL;
+	}
 }
 
 void CApp::RefreshInputCanvas()
 {
 	PythonOnSetInputMode();
-}
-
-void CApp::FindMarkedObject(const IPoint &point, MarkedObject* marked_object){
-	m_current_viewport->FindMarkedObject(point, marked_object);
 }
 
 void CApp::CreateLights(void)
@@ -248,6 +245,7 @@ void CApp::DestroyLights(void)
 void CApp::Reset(){
 	m_marked_list->Clear(true);
 	m_marked_list->Reset();
+	m_name_index.clear();
 	ObserversClear();
 	Clear();
 	EndHistory();
@@ -260,7 +258,7 @@ void CApp::Reset(){
 	m_hidden_for_drag.clear();
 	m_show_grippers_on_drag = true;
 	*m_ruler = HRuler();
-	SetInputMode(m_select_mode);
+	RestoreInputMode();
 
 	ResetIDs();
 }
@@ -1740,23 +1738,20 @@ void CApp::WereRemoved(const std::list<HeeksObj*>& list)
 
 Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 {
-#if 0
 	if (get_the_appropriate_orthogonal){
 		// choose from the three orthoganal possibilities, the one where it's z-axis closest to the camera direction
 		Point3d vx, vy;
 		m_current_viewport->m_view_point.GetTwoAxes(vx, vy, false, 0);
 		{
 			Point3d o(0, 0, 0);
-			if (m_current_coordinate_system)o.Transform(m_current_coordinate_system->GetMatrix());
-			return make_matrix(o, vx, vy);
+			if (m_current_coordinate_system)o = o.Transformed(m_current_coordinate_system->GetMatrix());
+			return Matrix(o, vx, vy);
 		}
 	}
 
 	Matrix mat;
 	if (m_current_coordinate_system)mat = m_current_coordinate_system->GetMatrix();
 	return mat;
-#endif
-	return Matrix();
 }
 
 extern void PythonOnMessageBox(const wchar_t* message);
@@ -1860,48 +1855,6 @@ void CApp::get_2d_arc_segments(double xs, double ys, double xe, double ye, doubl
 		x += rx * radial_factor;
 		y += ry * radial_factor;
 	}
-}
-
-static long save_filter_for_StartPickObjects = 0;
-static bool save_just_one_for_EndPickObjects = false;
-static CInputMode* save_mode_for_EndPickObjects = NULL;
-
-void CApp::StartPickObjects(const wchar_t* str, long marking_filter, bool just_one)
-{
-	save_mode_for_EndPickObjects = input_mode_object;
-//	m_select_mode->m_prompt_when_doing_a_main_loop.assign(str);
-	m_select_mode->m_doing_a_main_loop = true;
-	save_just_one_for_EndPickObjects = m_select_mode->m_just_one;
-	m_select_mode->m_just_one = just_one;
-	SetInputMode(m_select_mode);
-
-	// set marking filter
-	save_filter_for_StartPickObjects = m_marked_list->m_filter;
-	m_marked_list->m_filter = marking_filter;
-}
-
-int CApp::EndPickObjects()
-{
-	// restore marking filter
-	m_marked_list->m_filter = save_filter_for_StartPickObjects;
-
-	m_select_mode->m_just_one = save_just_one_for_EndPickObjects;
-	m_select_mode->m_doing_a_main_loop = false;
-	SetInputMode(save_mode_for_EndPickObjects); // update tool bar
-
-	return 1;
-}
-
-int CApp::PickObjects(const wchar_t* str, long marking_filter, bool just_one)
-{
-	StartPickObjects(str, marking_filter, just_one);
-
-	// stay in an input loop until finished picking
-#if 0
-	OnRun();
-#endif
-
-	return EndPickObjects();
 }
 
 bool CApp::PickPosition(const wchar_t* str, double* pos, void(*callback)(const double*))
@@ -2427,14 +2380,186 @@ void CApp::UnregisterUnitsChangeHandler(void(*units_changed_handler)(const doubl
 	}
 }
 
-
-unsigned int CApp::GetIndex(HeeksObj *object)
+IRect CApp::PointToPickBox(const IPoint& point)
 {
-	return m_marked_list->GetIndex(object);
+	return IRect(point.x - 5, theApp->m_current_viewport->GetViewportSize().GetHeight() - point.y - 5, 10, 10);
 }
 
-
-void CApp::ReleaseIndex(unsigned int index)
+void CApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, unsigned int filter, std::list<HeeksObj*> &objects)
 {
-	if (m_marked_list)m_marked_list->ReleaseIndex(index);
+	if (only_if_fully_in){
+		// only select objects which are completely within the window
+		std::list<HeeksObj*> objects_in_window;
+		GetObjectsInWindow(window, false, one_of_each, filter, objects_in_window);
+		std::set<HeeksObj*> obj_set;
+		for (std::list<HeeksObj*>::iterator It = objects_in_window.begin(); It != objects_in_window.end(); It++)
+			obj_set.insert(*It);
+
+		int bottom = window.y;
+		int top = window.y + window.height;
+		int height = abs(window.height);
+		if (top < bottom)
+		{
+			int temp = bottom;
+			bottom = top;
+			top = temp;
+		}
+
+		IRect strip_boxes[4];
+		// top
+		strip_boxes[0] = IRect(window.x - 1, top, window.width + 2, 1);
+		// bottom
+		strip_boxes[1] = IRect(window.x - 1, bottom - 1, window.width + 2, 1);
+		// left
+		strip_boxes[2] = IRect(window.x - 1, bottom, 1, height);
+		// right
+		strip_boxes[3] = IRect(window.x + window.width, bottom, 1, height);
+
+		for (int i = 0; i < 4; i++)
+		{
+			std::list<HeeksObj*> objects_in_strip;
+			GetObjectsInWindow(strip_boxes[i], false, one_of_each, filter, objects_in_strip);
+			for (std::list<HeeksObj*>::iterator It = objects_in_strip.begin(); It != objects_in_strip.end(); It++)
+				obj_set.erase(*It);
+		}
+
+		for (std::set<HeeksObj*>::iterator It = obj_set.begin(); It != obj_set.end(); It++)
+		{
+			objects.push_back(*It);
+		}
+	}
+	else{
+		// select all the objects in the window, even if only partly in the window
+		std::list<HeeksObj*> lowest_objects;
+		ColorPickLowestObjects(window, false, lowest_objects);
+
+		std::set<int> types_already_added;
+
+		for (std::list<HeeksObj*>::iterator It = lowest_objects.begin(); It != lowest_objects.end(); It++)
+		{
+			HeeksObj* object = *It;
+			HeeksObj* object_to_use = NULL;
+			while (object && (object != theApp))
+			{
+				if ((object->GetMarkingMask() & filter) && (object->GetMarkingMask() != 0)){
+					object_to_use = object;
+				}
+				object = object->m_owner;
+			}
+			if (object_to_use)
+			{
+				if (one_of_each)
+				{
+					int t = object_to_use->GetType();
+					if (types_already_added.find(t) == types_already_added.end())
+					{
+						objects.push_back(object_to_use);
+						types_already_added.insert(t);
+					}
+				}
+				else
+				{
+					objects.push_back(object_to_use);
+				}
+			}
+		}
+	}
+}
+
+void CApp::ColorPickLowestObjects(IRect window, bool single_picking, std::list<HeeksObj*> &objects)
+{
+	// render everything with unique colors
+	// window, width and height must be positive
+	// single picking means we only want one object in the list; the best object
+
+	//IRect is in window coordinates, so y = 0 is a the top of the screen
+	window.y = m_current_viewport->GetViewportSize().y - (window.y + window.height);
+
+	glDrawBuffer(GL_BACK);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
+
+	m_current_viewport->SetViewport();
+	m_current_viewport->m_view_point.SetProjection(true);
+	m_current_viewport->m_view_point.SetModelview();
+
+	glClearColor(0, 0, 0, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+	glLineWidth(1);
+	glDepthMask(1);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glShadeModel(GL_FLAT);
+	m_current_viewport->m_view_point.SetPolygonOffset();
+
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable(GL_COLOR_MATERIAL);
+
+	theApp->glCommands(true, false, true);
+
+	m_marked_list->GrippersGLCommands(true, true);
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDisable(GL_COLOR_MATERIAL);
+
+	unsigned int pixel_size = 4 * window.width * window.height;
+	unsigned char* pixels = (unsigned char*)malloc(pixel_size);
+	memset((void*)pixels, 0, pixel_size);
+	glReadPixels(window.x, window.y, window.width, window.height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+	int half_window_width = 0;
+	IPoint window_centre;
+	if (single_picking){
+		half_window_width = (window.width) / 2;
+		window_centre.x = window.x + window.width / 2;
+		window_centre.y = window.y + window.height / 2;
+	}
+	int window_mode = 0;
+	while (1){
+		if (single_picking){
+			int window_size = half_window_width - 1;
+			if (window_mode == 0)window_size = 0;
+			if (window_mode == 1)window_size = half_window_width / 2;
+			window.x = window_centre.x - window_size;
+			window.y = window_centre.y - window_size;
+			window.width = 1 + window_size * 2;
+			window.height = 1 + window_size * 2;
+		}
+
+		std::set<unsigned int> color_list;
+
+		for (unsigned int i = 0; i < pixel_size; i += 4)
+		{
+			unsigned int color = pixels[i] | (pixels[i + 1] << 8) | (pixels[i + 2] << 16);
+			if (color != 0)
+				color_list.insert(color);
+		}
+
+		bool added = false;
+		for (std::set<unsigned int>::iterator It = color_list.begin(); It != color_list.end(); It++)
+		{
+			unsigned int name = *It;
+			HeeksObj *object = m_name_index.find(name);
+			objects.push_back(object);
+		}
+
+		window_mode++;
+		if (!single_picking)break;
+		if (window_mode > 2)break;
+	}
+
+	free(pixels);
+}
+
+unsigned int CApp::GetIndex(HeeksObj *object) {
+	return m_name_index.insert(object);
+}
+
+void CApp::ReleaseIndex(unsigned int index) {
+	return m_name_index.erase(index);
 }

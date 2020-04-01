@@ -9,15 +9,15 @@
 
 class StretchTool: public Undoable{
 private:
-	double m_pos[3];
-	double m_shift[3];
-	double m_new_pos[3];
+	Point3d m_pos;
+	Point3d m_shift;
+	Point3d m_new_pos;
 	void* m_data;
 	HeeksObj *m_object;
 	bool m_undo_uses_add;
 
 public:
-	StretchTool(HeeksObj *object, const double *p, const double* shift, void* data);
+	StretchTool(HeeksObj *object, const Point3d& p, const Point3d& shift, void* data);
 	~StretchTool(void);
 
 	// Tool's virtual functions

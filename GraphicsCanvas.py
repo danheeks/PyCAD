@@ -31,7 +31,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         self.Resize()
         self.paint_callbacks = []
         self.context_menu_enabled = True
-        self.m_middle_down = False
+        self.middle_down = False
         self.observer = RefreshObserver(self)
         cad.RegisterObserver(self.observer)
         global repaint_registered
@@ -53,6 +53,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
     def OnKeyDown(self, event):
         if event.GetKeyCode() == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
             wx.GetApp().frame.ShowFullScreen(False)
+        elif event.GetKeyCode() == wx.WXK_RETURN and wx.GetApp().inMainLoop:
+            wx.GetApp().ExitMainLoop()            
         else:
             key_code = Key.KeyCodeFromWx(event)
             cad.GetInputMode().OnKeyDown(key_code)
@@ -85,26 +87,6 @@ class GraphicsCanvas(glcanvas.GLCanvas):
 
     def OnMouse(self, event):
         e = Mouse.MouseEventFromWx(event)
-        if e.m_controlDown and e.m_event_type == 1:
-            e2 = Mouse.copy(e)
-            e2.m_controlDown = False
-            e2.m_event_type = 6
-            e2.m_leftDown = False
-            e2.m_middleDown = True
-            self.m_middle_down = True
-            self.viewport.OnMouseEvent(e2)
-        if e.m_controlDown and e.m_event_type == 2:
-            e2 = Mouse.copy(e)
-            e2.m_controlDown = False
-            e2.m_event_type = 7
-            e2.m_leftDown = False
-            e2.m_middleDown = False
-            self.m_middle_down = False
-            self.viewport.OnMouseEvent(e2)
-        if self.m_middle_down:
-            e.m_leftDown = False
-            e.m_middleDown = True
-            e.m_controlDown = False
         
         if event.RightDown():
             self.right_down_and_no_left_clicked = True
@@ -116,8 +98,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             self.right_down_and_no_left_clicked = False
         else:
             self.viewport.OnMouseEvent(e)
-            if self.viewport.m_need_update: self.Update()
-            if self.viewport.m_need_refresh: self.Refresh()
+            if self.viewport.need_update: self.Update()
+            if self.viewport.need_refresh: self.Refresh()
         event.Skip()
 
     def OnEraseBackground(self, event):

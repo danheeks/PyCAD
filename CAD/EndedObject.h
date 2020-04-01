@@ -23,8 +23,8 @@ public:
 	// HeeksObj's virtual functions
 	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void Transform(const Matrix& m);
-	bool GetStartPoint(double* pos);
-	bool GetEndPoint(double* pos);
+	bool GetStartPoint(Point3d &pos);
+	bool GetEndPoint(Point3d &pos);
 	void CopyFrom(const HeeksObj* object){ operator=(*((EndedObject*)object)); }
 	void SetColor(const HeeksColor &col){ color = col; }
 	const HeeksColor* GetColor()const{ return &color; }

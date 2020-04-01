@@ -167,8 +167,8 @@ void HCircle::GetGripperPositions(std::list<GripData> *list, bool just_for_endof
 		Point3d x_axis, y_axis;
 		m_axis.arbitrary_axes(x_axis, y_axis);
 		Point3d s = (m_c + x_axis * m_radius);
-		list->push_back(GripData(GripperTypeStretch, m_c.x, m_c.y, m_c.z, &m_c));
-		list->push_back(GripData(GripperTypeStretch, s.x, s.y, s.z, &m_radius));
+		list->push_back(GripData(GripperTypeStretch, m_c, &m_c));
+		list->push_back(GripData(GripperTypeStretch, s, &m_radius));
 	}
 }
 

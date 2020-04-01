@@ -39,9 +39,8 @@ void MagDragWindow::OnMouse( MouseEvent& event )
 	}
 }
 
-bool MagDragWindow::OnModeChange(void){
+void MagDragWindow::OnModeChange(void){
 	save_input_mode = theApp->input_mode_object;
-	return true;
 }
 
 void MagDragWindow::OnFrontRender(){

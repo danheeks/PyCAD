@@ -18,7 +18,7 @@ public:
 	// virtual functions for InputMode
 	const wchar_t* GetTitle(){return L"Magnifying by dragging a window";}
 	void OnMouse( MouseEvent& event );
-	bool OnModeChange(void);
+	void OnModeChange(void);
 	void OnFrontRender();
 };
 

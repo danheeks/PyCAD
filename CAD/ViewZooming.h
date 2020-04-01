@@ -16,5 +16,4 @@ public:
 	const wchar_t* GetTitle(){return L"View Zoom";}
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
-	bool OnModeChange(void);
 };

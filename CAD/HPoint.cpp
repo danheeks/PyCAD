@@ -98,7 +98,7 @@ void HPoint::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
 	if(just_for_endof)
 	{
-		list->push_back(GripData((EnumGripperType)0, m_p.x, m_p.y, m_p.z, NULL));
+		list->push_back(GripData((EnumGripperType)0, m_p, NULL));
 	}
 }
 

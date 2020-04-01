@@ -24,7 +24,6 @@ HArc::HArc(const Point3d &a, const Point3d &b, const Point3d &axis, const Point3
 	B = b;
 	C = c;
 	m_axis = axis;
-	m_radius = a.Dist(c);
 	SetColor(*col);
 }
 
@@ -39,17 +38,23 @@ const wchar_t* HArc::GetIconFilePath()
 
 bool HArc::IsDifferent(HeeksObj* other)
 {
-	HArc* arc = (HArc*)other;
-
-	if(arc->C.Dist(C) > TOLERANCE || arc->m_radius != m_radius)
+	if (EndedObject::IsDifferent(other))
 		return true;
 
-	return EndedObject::IsDifferent(other);
+	HArc* arc = (HArc*)other;
+
+	if(arc->C.Dist(C) > TOLERANCE)
+		return true;
+
+	double radius = arc->C.Dist(A);
+	if (arc->m_axis.Dist(m_axis) * radius > TOLERANCE)// axis magnified by radius
+		return true;
+
+	return false;
 }
 
 const HArc& HArc::operator=(const HArc &b){
 	EndedObject::operator=(b);
-	m_radius = b.m_radius;
 	m_axis = b.m_axis;
 	C = b.C;
 	return *this;
@@ -163,23 +168,23 @@ void HArc::GetSegments(void(*callbackfunc)(const double *p, bool start), double 
 		return;
 	}
 
-
-	Point3d axis = m_axis;
 	Point3d x_axis, y_axis;
-	axis.arbitrary_axes(x_axis, y_axis);
-	Point3d centre = C;
+	m_axis.arbitrary_axes(x_axis, y_axis);
 
-	double ax = Point3d(A - centre) * x_axis;
-	double ay = Point3d(A - centre) * y_axis;
-	double bx = Point3d(B - centre) * x_axis;
-	double by = Point3d(B - centre) * y_axis;
+	double cx = C * x_axis;
+	double cy = C * y_axis;
+	double cz = C * m_axis;
+	double ax = A * x_axis - cx;
+	double ay = A * y_axis - cy;
+	double bx = B * x_axis - cx;
+	double by = B * y_axis - cy;
 
 	double start_angle = atan2(ay, ax);
 	double end_angle = atan2(by, bx);
 
 	if(start_angle > end_angle)end_angle += 6.28318530717958;
 
-	double radius = m_radius;
+	double radius = sqrt(ax*ax + ay*ay);
 	double d_angle = end_angle - start_angle;
 	int segments = (int)(fabs(pixels_per_mm * radius * d_angle / 6.28318530717958 + 1));
 	if(segments<3)segments = 3;
@@ -189,15 +194,18 @@ void HArc::GetSegments(void(*callbackfunc)(const double *p, bool start), double 
     double tangetial_factor = tan(theta);
     double radial_factor = 1 - cos(theta);
 
-    double x = radius * cos(start_angle);
-    double y = radius * sin(start_angle);
+    double x = cos(start_angle);
+    double y = sin(start_angle);
+	double z = A * m_axis - cz;
+	double z_step = (B * m_axis - cz - z) / segments;
+	double radius_step = (sqrt(bx*bx + by*by) - radius)/segments;
 
 	double pp[3];
 	bool start = true;
 
    for(int i = 0; i < segments + 1; i++)
     {
-		Point3d p = centre + x_axis * x + y_axis * y;
+		Point3d p = C + x_axis * radius * x + y_axis * radius * y + m_axis * z;
 		p.get(pp);
 		(*callbackfunc)(pp, start);
 
@@ -211,7 +219,9 @@ void HArc::GetSegments(void(*callbackfunc)(const double *p, bool start), double 
         double ry = - y;
 
         x += rx * radial_factor;
-        y += ry * radial_factor;
+		y += ry * radial_factor;
+		z += z_step;
+		radius += radius_step;
 
 		start = false;
     }
@@ -248,23 +258,24 @@ HeeksObj *HArc::MakeACopy(void)const{
 
 void HArc::Transform(const Matrix& m){
 	EndedObject::Transform(m);
-	m_axis = m_axis.Transformed(m);
+	m_axis = m_axis.TransformedOnlyRotation(m);
 	C = C.Transformed(m);
-	m_radius = C.Dist(A);
 }
 
 void HArc::GetBox(CBox &box){
 	box.Insert(A.x, A.y, A.z);
 	box.Insert(B.x, B.y, B.z);
 
-	if(IsIncluded(Point3d(0,m_radius,0)))
-		box.Insert(C.x,C.y+m_radius,C.z);
-	if(IsIncluded(Point3d(0,-m_radius,0)))
-		box.Insert(C.x,C.y-m_radius,C.z);
-	if(IsIncluded(Point3d(m_radius,0,0)))
-		box.Insert(C.x+m_radius,C.y,C.z);
-	if(IsIncluded(Point3d(-m_radius,0,0)))
-		box.Insert(C.x-m_radius,C.y,C.z);
+	double r = A.Dist2D(C);
+
+	if(IsIncluded(Point3d(0,r,0)))
+		box.Insert(C.x,C.y+r,A.z);
+	if(IsIncluded(Point3d(0,-r,0)))
+		box.Insert(C.x,C.y-r,A.z);
+	if(IsIncluded(Point3d(r,0,0)))
+		box.Insert(C.x+r,C.y,A.z);
+	if(IsIncluded(Point3d(-r,0,0)))
+		box.Insert(C.x-r,C.y,A.z);
 }
 
 bool HArc::IsIncluded(Point3d pnt)
@@ -292,7 +303,12 @@ bool HArc::IsIncluded(Point3d pnt)
 
 void HArc::GetGripperPositions(std::list<GripData> *list, bool just_for_endof){
 	EndedObject::GetGripperPositions(list,just_for_endof);
-	list->push_back(GripData(GripperTypeStretch,C.x,C.y,C.z,&C));
+	list->push_back(GripData(GripperTypeStretch, C, &C));
+
+	// axis gripper
+	double length = A.Dist(B);
+	Point3d p = C + m_axis * length;
+	list->push_back(GripData(GripperTypeStretch, p, &m_axis));
 }
 
 static double length_for_properties = 0.0;
@@ -302,9 +318,8 @@ void HArc::GetProperties(std::list<Property *> *list){
 	list->push_back(PropertyPnt(this, L"end", &B));
 	list->push_back(PropertyPnt(this, L"centre", &C));
 	list->push_back(PropertyPnt(this, L"axis", &m_axis));
-	length_for_properties = A.Dist(B);
-	list->push_back(new PropertyLength(this, L"length", (const double*)&length_for_properties));
-	list->push_back(new PropertyLength(this, L"radius", &m_radius));
+	list->push_back(new PropertyLengthReadOnly(this, L"length", A.Dist(B)));
+	list->push_back(new PropertyLengthReadOnly(this, L"radius", A.Dist(C)));
 
 	HeeksObj::GetProperties(list);
 }
@@ -455,36 +470,13 @@ bool HArc::FindPossTangentPoint(const Line &ray, double *point){
 	return FindNearPoint(ray, point);
 }
 
-bool HArc::Stretch(const double *p, const double* shift, void* data){
-#if 0 // to do
-	Point3d vp = make_point(p);
-	Point3d vshift = make_vector(shift);
-
-	if(A.IsEqual(vp, theApp->m_geom_tol)){
-		Point3d direction = -(GetSegmentVector(1.0));
-		Point3d centre;
-		Point3d axis;
-		Point3d new_A = Point3d(A + vshift);
-		if(HArc::TangentialArc(B, direction, new_A, centre, axis))
-		{
-			m_axis = gp_Ax1(centre, -axis);
-			m_radius = new_A.Distance(centre);
-			A = new_A;
-		}
-	}
-	else if(B.IsEqual(vp, theApp->m_geom_tol)){
-		Point3d direction = GetSegmentVector(0.0);
-		Point3d centre;
-		Point3d axis;
-		Point3d new_B = Point3d(B + vshift);
-		if(HArc::TangentialArc(A, direction, new_B, centre, axis))
-		{
-			m_axis = gp_Ax1(centre, axis);
-			m_radius = A.Distance(centre);
-			B = new_B;
-		}
-	}
-#endif
+bool HArc::Stretch(const Point3d &p, const Point3d &shift, void* data){
+	if (data == &C)
+		C = p + shift;
+	else if (data == &m_axis)
+		m_axis = (p + shift - C).Normalized();
+	else
+		EndedObject::Stretch(p, shift, data);
 	return false;
 }
 
@@ -586,8 +578,6 @@ void HArc::ReadFromXML(TiXmlElement *element)
 	element->Attribute("ay", &m_axis.y);
 	element->Attribute("az", &m_axis.z);
 	EndedObject::ReadFromXML(element);
-	// set radius
-	m_radius = A.Dist(C);
 }
 
 void HArc::Reverse()
@@ -620,7 +610,7 @@ double HArc::IncludedAngle()const
 Circle HArc::GetCircle()const
 {
 	Circle c;
-	c.radius = m_radius;
+	c.radius = A.Dist2D(C);
 	c.pc = Point(C.x, C.y);
 	return c;
 }

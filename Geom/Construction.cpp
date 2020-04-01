@@ -112,12 +112,26 @@
 		// transform Point
 		Point3d ret;
 		m.Transform(&x, &ret.x);
-//		ret.ok = true;
+		//		ret.ok = true;
+		return ret;
+	}
+
+	Point3d Point3d::TransformedOnlyRotation(const Matrix& m) {
+		// transform Point
+		Point3d ret;
+		m.TransformOnlyRotation(&x, &ret.x);
+		//		ret.ok = true;
 		return ret;
 	}
 
 	double Point3d::Dist(const Point3d& p)const {												// distance between 2 points
 		return Point3d(*this, p).magnitude();
+	}
+
+	double Point3d::Dist2D(const Point3d& p)const {	
+		double dx = p.x - x;
+		double dy = p.y - y;
+		return sqrt(dx*dx + dy*dy);
 	}
 
 	double Point3d::DistSq(const Point3d& p)const {			// distance squared
