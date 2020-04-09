@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{0F676874-02F0-4872-A8C2-3AA4C60873EF}") = "Step", "Step.vcxproj", "{30023784-2B8B-4580-8EB0-EDD901D48E98}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30023784-2B8B-4580-8EB0-EDD901D48E98}.Debug|Win32.ActiveCfg = Debug|Win32
+		{30023784-2B8B-4580-8EB0-EDD901D48E98}.Debug|Win32.Build.0 = Debug|Win32
+		{30023784-2B8B-4580-8EB0-EDD901D48E98}.Release|Win32.ActiveCfg = Release|Win32
+		{30023784-2B8B-4580-8EB0-EDD901D48E98}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
