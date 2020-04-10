@@ -28,8 +28,6 @@ public:
 	bool operator== ( const CSketch & rhs ) const;
 	bool operator!= ( const CSketch & rhs ) const { return(! (*this == rhs)); }
 
-	bool IsDifferent( HeeksObj *other ) { return(*this != (*(CSketch *)other)); }
-
 	int GetType()const{return SketchType;}
 	long GetMarkingMask()const{return MARKING_FILTER_SKETCH;}
 	const wchar_t* GetTypeString(void)const{return L"Sketch";}

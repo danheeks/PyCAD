@@ -72,7 +72,7 @@ class SelectMode(cad.InputMode):
                 objects = cad.ObjectsUnderWindow(self.window_box, only_if_fully_in, False, self.filter)
                 for object in objects: cad.Select(object)
                 self.window_box = None
-            else:
+            elif self.button_down_point != None:
                 # select one object
                 objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter)
                 if len(objects) > 0:
@@ -113,7 +113,7 @@ class SelectMode(cad.InputMode):
                 if self.drag_gripper != None:
                     to = cad.Digitize(cad.IPoint(event.x, event.y))
                     self.drag_gripper.OnGripperMoved(self.grip_from, to)                    
-                elif abs(self.button_down_point.x - event.x) > 2 or abs(self.button_down_point.y - event.y) > 2:
+                elif self.button_down_point != None and (abs(self.button_down_point.x - event.x) > 2 or abs(self.button_down_point.y - event.y) > 2):
                     if self.dragging_moves_objects and self.window_box == None:
                         if cad.GetNumSelected() > 0:
                             objects = cad.GetSelectedObjects()

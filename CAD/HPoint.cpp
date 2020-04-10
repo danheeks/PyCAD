@@ -44,15 +44,6 @@ const wchar_t* HPoint::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-bool HPoint::IsDifferent(HeeksObj* o)
-{
-	HPoint* other = (HPoint*)o;
-	if(m_p.Dist(other->m_p) > TOLERANCE)
-		return true;
-
-	return HeeksObj::IsDifferent(o);
-}
-
 void HPoint::glCommands(bool select, bool marked, bool no_color)
 {
 	if(!no_color){

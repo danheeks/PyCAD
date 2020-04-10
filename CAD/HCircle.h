@@ -47,7 +47,6 @@ public:
 	void ReadFromXML(TiXmlElement *element);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	bool DescendForUndo(){ return false; }
-	bool IsDifferent(HeeksObj* other);
 #if 0
 	static bool GetLineTangentPoints(const Circle& c1, const Circle& c2, const Point3d& a, const Point3d& b, Point3d& p1, Point3d& p2);
 	static bool GetLineTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, Point3d& p);

@@ -6,6 +6,7 @@
 
 #include <string.h>	// for memcpy() prototype
 #include <math.h>	// for sqrt() prototype
+#include <iostream>
 
 class CBox{
 public:
@@ -165,3 +166,4 @@ public:
 	}
 };
 
+std::ostream & operator<<(std::ostream &os, const CBox &b);

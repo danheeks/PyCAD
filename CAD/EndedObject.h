@@ -30,7 +30,6 @@ public:
 	const HeeksColor* GetColor()const{ return &color; }
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	HeeksObj* MakeACopyWithID();
-	bool IsDifferent(HeeksObj* other);
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement* element);
 };

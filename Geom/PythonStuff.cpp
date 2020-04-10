@@ -337,6 +337,13 @@ CBox2D CurveGetBox(const CCurve &c)
 	return box;
 }
 
+Point3d CBoxCenter(const CBox& box)
+{
+	double x[3];
+	box.Centre(x);
+	return Point3d(x);
+}
+
 boost::python::list AreaIntersections(const CArea& a, const CCurve& c2) {
 	boost::python::list plist;
 
@@ -579,6 +586,12 @@ static std::string Span__str__(const Span& self) {
 	return ss.str();
 }
 
+static std::string CBox__str__(const CBox& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
 
 BOOST_PYTHON_MODULE(geom) {
 	/// class Point
@@ -710,10 +723,14 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("MaxZ", &CBox::MaxZ)///function MaxZ///return float///returns the maximum z value
 		.def("InsertBox", static_cast< void (CBox::*)(const CBox&) >(&CBox::Insert))///function Insert
 		.def("InsertPoint", static_cast< void (CBox::*)(double, double, double) >(&CBox::Insert))///function Insert
+		.def("Center", &CBoxCenter)
+		.def("Radius", &CBox::Radius)
 		.def_readwrite("valid", &CBox::m_valid)
 		.def("Width", &CBox::Width)
 		.def("Height", &CBox::Height)
-		;
+		.def("Depth", &CBox::Depth)
+		.def("__str__", CBox__str__);
+	;
 
 	/// class Area
 	/// a list of Curve objects that can represent an area with optional islands

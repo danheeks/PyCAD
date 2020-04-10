@@ -105,7 +105,7 @@ void ObjList::glCommands(bool select, bool marked, bool no_color)
 		if(object->OnVisibleLayer() && object->m_visible)
 		{
 			if (select)SetPickingColor(object->GetIndex());
-			(*It)->glCommands(select, marked || theApp->m_marked_list->ObjectMarked(object), select | no_color);
+			(*It)->glCommands(select, marked || theApp->ObjectMarked(object), select | no_color);
 		}
 	}
 }

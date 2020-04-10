@@ -26,7 +26,6 @@ public:
 	void Transform(const Matrix& m);
 	void CopyFrom(const HeeksObj* object){ operator=(*((ExtrudedObj*)object)); }
 	HeeksObj* MakeACopyWithID();
-	bool IsDifferent(HeeksObj* other);
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement* element);
 };
@@ -59,22 +58,6 @@ template < typename T > HeeksObj* ExtrudedObj<T>::MakeACopyWithID()
 	pnew->m_extrusion_vector[1] = m_extrusion_vector[1];
 	pnew->m_extrusion_vector[2] = m_extrusion_vector[2];
 	return (HeeksObj*)pnew;
-}
-
-template < typename T >
-bool ExtrudedObj<T>::IsDifferent(HeeksObj *other)
-{
-	ExtrudedObj<T>* eobj = (ExtrudedObj<T>*)other;
-	if (fabs(eobj->m_thickness - m_thickness) > TOLERANCE)
-		return true;
-
-	for (int i = 0; i<3; i++)
-	{
-		if (fabs(eobj->m_extrusion_vector[i] - m_extrusion_vector[i]) > 0.000000000001)
-			return true;
-	}
-
-	return T::IsDifferent(other);
 }
 
 template < typename T > void ExtrudedObj<T>::Transform(const Matrix& m){

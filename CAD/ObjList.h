@@ -33,7 +33,6 @@ public:
 
 	bool operator==( const ObjList & rhs ) const;
 	bool operator!=( const ObjList & rhs ) const { return(! (*this == rhs)); }
-	bool IsDifferent(HeeksObj *other) { return( *this != (*(ObjList *)other) ); }
 
 	void ClearUndoably(void);
 	void Clear(std::set<HeeksObj*> &to_delete);

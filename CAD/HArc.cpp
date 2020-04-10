@@ -36,23 +36,6 @@ const wchar_t* HArc::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-bool HArc::IsDifferent(HeeksObj* other)
-{
-	if (EndedObject::IsDifferent(other))
-		return true;
-
-	HArc* arc = (HArc*)other;
-
-	if(arc->C.Dist(C) > TOLERANCE)
-		return true;
-
-	double radius = arc->C.Dist(A);
-	if (arc->m_axis.Dist(m_axis) * radius > TOLERANCE)// axis magnified by radius
-		return true;
-
-	return false;
-}
-
 const HArc& HArc::operator=(const HArc &b){
 	EndedObject::operator=(b);
 	m_axis = b.m_axis;

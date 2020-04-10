@@ -152,7 +152,6 @@ public:
 	bool m_mark_newly_added_objects;
 	std::wstring m_version_number;
 	std::list< void(*)(MouseEvent&) > m_lbutton_up_callbacks;
-	std::list< void(*)(bool) > m_on_save_callbacks;
 	std::list< bool(*)() > m_is_modified_callbacks;
 	std::list< void(*)() > m_on_build_texture_callbacks;
 	std::list< void(*)(int, int) > m_beforeneworopen_callbacks;
@@ -183,6 +182,10 @@ public:
 	bool m_extrude_to_solid;
 	double m_revolve_angle;
 	bool m_fit_arcs_on_solid_outline;
+	bool undoable_in_OpenXMLFile;
+	virtual bool GetUndoableForOpenXML(){ return undoable_in_OpenXMLFile; }
+	HeeksObj* paste_into_for_OpenXMLFile;
+	virtual HeeksObj* GetPastIntoForOpenXML(){ return paste_into_for_OpenXMLFile; }
 
 	CInputMode* m_previous_input_mode;
 
@@ -205,7 +208,6 @@ public:
 	bool m_settings_restored;
 
 	// HeeksObj's virtual functions
-	void GetBox(CBox &box);
 	void glCommands(bool select, bool marked, bool no_color);
 	bool CanAdd(HeeksObj* object){ return true; }
 	int GetType()const{ return DocumentType; }
@@ -215,21 +217,21 @@ public:
 	void DestroyLights(void);
 	void SetInputMode(CInputMode *i);
 	void RestoreInputMode();
-	void Repaint(bool soon = false);
+	virtual void Repaint(bool soon = false);
 	void RecalculateGLLists();
 	void SetLikeNewFile(void);
 	bool IsModified(void);
 	void SetAsModified();
 	void ClearHistory(void);
 	void glCommandsAll(const CViewPoint &view_point);
-	double GetPixelScale(void);
+	virtual double GetPixelScale(void);
 	void DoUndoable(Undoable *);
 	bool RollBack(void);
 	bool RollForward(void);
 	bool CanUndo(void);
 	bool CanRedo(void);
-	void StartHistory();
-	void EndHistory(void);
+	virtual void StartHistory();
+	virtual void EndHistory(void);
 	void ClearRollingForward(void);
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
@@ -237,7 +239,7 @@ public:
 	void Transform(std::list<HeeksObj*> objects, const Matrix& m);
 	void Reset();
 	HeeksObj* CreateObjectOfType(const std::string& name);
-	HeeksObj* ReadXMLElement(TiXmlElement* pElem);
+	virtual HeeksObj* ReadXMLElement(TiXmlElement* pElem);
 	virtual void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element);
 	virtual void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element);
 	void InitializeCreateFunctions();
@@ -260,10 +262,10 @@ public:
 	void SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, bool for_clipboard = false);
 	void SaveXMLFile(const wchar_t *filepath){ SaveXMLFile(m_objects, filepath); }
 	bool SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects = NULL);
-	void AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object = NULL);
+	virtual void AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object = NULL);
 	void AddUndoably(const std::list<HeeksObj*>& list, HeeksObj* owner);
-	void DeleteUndoably(HeeksObj* object);
-	void DeleteUndoably(const std::list<HeeksObj*>& list);
+	virtual void DeleteUndoably(HeeksObj* object);
+	virtual void DeleteUndoably(const std::list<HeeksObj*>& list);
 	void CopyUndoably(HeeksObj* object, HeeksObj* copy_with_new_data);
 	void TransformUndoably(HeeksObj *object, const Matrix &m);
 	void TransformUndoably(const std::list<HeeksObj*>& list, const Matrix &m);
@@ -277,7 +279,7 @@ public:
 	Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
 	void GetOptions(std::list<Property *> *list);
 	void DeleteMarkedItems();
-	void glColorEnsuringContrast(const HeeksColor &c);
+	virtual void glColorEnsuringContrast(const HeeksColor &c);
 	void RegisterObserver(Observer* observer);
 	void RemoveObserver(Observer* observer);
 	void ObserversOnChange(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified);
@@ -296,11 +298,11 @@ public:
 	void OnNewOrOpen(bool open, int res);
 	void OnBeforeNewOrOpen(bool open, int res);
 	void OnBeforeFrameDelete(void);
-	HeeksObj* GetIDObject(int type, int id);
+	virtual HeeksObj* GetIDObject(int type, int id);
 	std::list<HeeksObj*> GetIDObjects(int type, int id);
 	virtual void SetObjectID(HeeksObj* object, int id);
-	int GetNextID(int type);
-	void RemoveID(HeeksObj* object); // only call this from ObjList::Remove()
+	virtual int GetNextID(int type);
+	virtual void RemoveID(HeeksObj* object); // only call this from ObjList::Remove()
 	void ResetIDs();
 	bool InputInt(const wchar_t* prompt, const wchar_t* value_name, int &value);
 	bool InputDouble(const wchar_t* prompt, const wchar_t* value_name, double &value);
@@ -311,7 +313,6 @@ public:
 	void SectioningDialog();
 	void RegisterOnGLCommands(void(*callbackfunc)());
 	void RemoveOnGLCommands(void(*callbackfunc)());
-	void RegisterOnSaveFn(void(*callbackfunc)(bool));
 	void RegisterIsModifiedFn(bool(*callbackfunc)());
 	void CreateTransformGLList(const std::list<HeeksObj*>& list, bool show_grippers_on_drag);
 	void DestroyTransformGLList();
@@ -338,7 +339,7 @@ public:
 	void RegisterOnBuildTexture(void(*callbackfunc)());
 	void RegisterOnBeforeNewOrOpen(void(*callbackfunc)(int, int));
 	void RegisterOnBeforeFrameDelete(void(*callbackfunc)());
-	void DoMessageBox(const wchar_t* message);
+	virtual void DoMessageBox(const wchar_t* message);
 
 	typedef int ObjectType_t;
 	typedef int ObjectId_t;
@@ -359,8 +360,10 @@ public:
 	bool GetLastDigitizePosition(double *pos);
 	void ObjectAreaString(HeeksObj* object, std::wstring &s);
 	void SetViewUnits(double units, bool write_to_config);
-	void Mark(HeeksObj* object);
-	void Unmark(HeeksObj* object);
+	virtual void ClearSelection(bool call_OnChanged);
+	virtual bool ObjectMarked(HeeksObj* object);
+	virtual void Mark(HeeksObj* object);
+	virtual void Unmark(HeeksObj* object);
 };
 
 extern CApp* theApp;

@@ -17,6 +17,9 @@ class Object(cad.BaseObject):
     def GetProperties(self):
         return cad.BaseObject.GetBaseProperties(self)
         
+    def GetBox(self):
+        return cad.BaseObject.GetChildrensBox(self)
+        
     def HasEdit(self):
         return False
     

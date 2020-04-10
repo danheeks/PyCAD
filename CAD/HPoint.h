@@ -41,5 +41,4 @@ public:
 	void CopyFrom(const HeeksObj* object){operator=(*((HPoint*)object));}
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement *element);
-	bool IsDifferent(HeeksObj* other);
 };

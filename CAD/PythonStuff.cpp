@@ -334,6 +334,26 @@ void RegisterOnRepaint(PyObject *callback)
 	repaint_callbacks.push_back(callback);
 }
 
+std::list<PyObject*>  end_xml_write_callbacks;
+
+void PythonOnEndXmlWrite()
+{
+	for (std::list<PyObject*>::iterator It = end_xml_write_callbacks.begin(); It != end_xml_write_callbacks.end(); It++)
+	{
+		CallPythonCallback(*It);
+	}
+}
+
+void RegisterOnEndXmlWrite(PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	end_xml_write_callbacks.push_back(callback);
+}
+
 PyObject* message_box_callback = NULL;
 
 void PythonOnMessageBox(const wchar_t* message)
@@ -696,6 +716,13 @@ void ObjListWriteToXML(ObjList& objlist)
 void ObjListCopyFrom(ObjList& objlist, HeeksObj* object)
 {
 	objlist.ObjList::CopyFrom(object);
+}
+
+CBox ObjListGetBox(ObjList& objlist)
+{
+	CBox box;
+	objlist.ObjList::GetBox(box);
+	return box;
 }
 
 
@@ -1687,6 +1714,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("CopyFrom", &ObjListCopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
 			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
+			.def("GetChildrensBox", &ObjListGetBox)
 			.def("ReadObjectXml", &HeeksObjReadObjectXml)
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
@@ -1778,6 +1806,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("ReadXml", &ObjListReadFromXML)
 			.def("WriteXml", &ObjListWriteToXML)
 			.def("CopyFrom", &ObjListCopyFrom)
+			.def("GetChildrensBox", &ObjListGetBox)
 			;
 
 		boost::python::class_<IdNamedObj, boost::python::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
@@ -2188,6 +2217,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("GetFirstXmlChild", GetFirstXmlChild);
 		boost::python::def("GetNextXmlChild", GetNextXmlChild);
 		boost::python::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL, boost::python::arg("paste_before") = NULL)));
+		boost::python::def("RegisterOnEndXmlWrite", RegisterOnEndXmlWrite);
 		boost::python::def("RegisterObserver", RegisterObserver);
 		boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
 		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));

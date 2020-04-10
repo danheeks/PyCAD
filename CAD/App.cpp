@@ -385,6 +385,9 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 		return;
 	}
 
+	undoable_in_OpenXMLFile = undoable;
+	paste_into_for_OpenXMLFile = paste_into;
+
 	TiXmlHandle hDoc(&doc);
 	TiXmlElement* pElem;
 	TiXmlNode* root = &doc;
@@ -1083,6 +1086,8 @@ void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepa
 	}
 }
 
+extern void PythonOnEndXmlWrite();
+
 void CApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, bool for_clipboard)
 {
 	// write an xml file
@@ -1108,6 +1113,7 @@ void CApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 		object->WriteXML(root);
 	}
 
+	PythonOnEndXmlWrite();
 
 	doc.SaveFile(Ttc(filepath));
 }
@@ -1122,13 +1128,6 @@ bool CApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects
 
 	if (endsWith(wf, L".heeks") || endsWith(wf, L".xml"))
 	{
-		// call external OnSave functions
-		for (std::list< void(*)(bool) >::iterator It = m_on_save_callbacks.begin(); It != m_on_save_callbacks.end(); It++)
-		{
-			void(*callbackfunc)(bool) = *It;
-			(*callbackfunc)(false);
-		}
-
 		SaveXMLFile(*objects, filepath);
 	}
 	else if (endsWith(wf, L".dxf"))
@@ -1347,13 +1346,6 @@ void CApp::glCommands(bool select, bool marked, bool no_color)
 		if (select)SetPickingColor(m_ruler->GetIndex());
 		m_ruler->glCommands(select, false, no_color);
 	}
-}
-
-void CApp::GetBox(CBox &box){
-	CBox temp_box;
-	ObjList::GetBox(temp_box);
-	if (temp_box.m_valid && temp_box.Radius() > 0.000001)
-		box.Insert(temp_box);
 }
 
 double CApp::GetPixelScale(void){
@@ -2115,11 +2107,6 @@ void CApp::RemoveOnGLCommands(void(*callbackfunc)())
 	m_on_glCommands_list.remove(callbackfunc);
 }
 
-void CApp::RegisterOnSaveFn(void(*callbackfunc)(bool from_changed_prompt))
-{
-	m_on_save_callbacks.push_back(callbackfunc);
-}
-
 void CApp::RegisterIsModifiedFn(bool(*callbackfunc)())
 {
 	m_is_modified_callbacks.push_back(callbackfunc);
@@ -2563,3 +2550,24 @@ unsigned int CApp::GetIndex(HeeksObj *object) {
 void CApp::ReleaseIndex(unsigned int index) {
 	return m_name_index.erase(index);
 }
+
+void CApp::ClearSelection(bool call_OnChanged)
+{
+	m_marked_list->Clear(call_OnChanged);
+}
+
+bool CApp::ObjectMarked(HeeksObj* object)
+{
+	return m_marked_list->ObjectMarked(object);
+}
+
+void CApp::Mark(HeeksObj* object)
+{
+	m_marked_list->Add(object, true);
+}
+
+void CApp::Unmark(HeeksObj* object)
+{
+	m_marked_list->Remove(object, true);
+}
+

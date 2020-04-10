@@ -57,7 +57,6 @@ public:
 	HeeksObj *MakeACopy()const;
 	void WriteToXML(TiXmlElement *element); 
 	void ReadFromXML(TiXmlElement *element);
-	bool IsDifferent(HeeksObj* obj);
 
 	void AddTriangle(float* t); // 9 floats
 };

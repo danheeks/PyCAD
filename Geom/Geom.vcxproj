@@ -81,6 +81,7 @@
     <ClCompile Include="AreaDxf.cpp" />
     <ClCompile Include="AreaOrderer.cpp" />
     <ClCompile Include="AreaPocket.cpp" />
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="clipper.cpp" />
     <ClCompile Include="Construction.cpp" />

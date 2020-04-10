@@ -33,21 +33,6 @@ HeeksObj* EndedObject::MakeACopyWithID()
 	return pnew;
 }
 
-bool EndedObject::IsDifferent(HeeksObj *other)
-{
-	EndedObject* eobj = (EndedObject*)other;
-	if(eobj->A.Dist(A) > TOLERANCE)
-		return true;
-
-	if (eobj->B.Dist(B) > TOLERANCE)
-		return true;
-
-	if(color.COLORREF_color() != eobj->color.COLORREF_color())
-		return true;
-
-	return ExtrudedObj<HeeksObj>::IsDifferent(other);
-}
-
 void EndedObject::Transform(const Matrix& m){
 	A = A.Transformed(m);
 	B = B.Transformed(m);

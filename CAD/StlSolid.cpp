@@ -231,16 +231,6 @@ const CStlSolid& CStlSolid::operator=(const CStlSolid& s)
 	return *this;
 }
 
-bool CStlSolid::IsDifferent(HeeksObj* other)
-{
-	CStlSolid* shape = (CStlSolid*)other;
-	if(shape->m_color.COLORREF_color() != m_color.COLORREF_color() || (shape->m_title == m_title) || shape->m_box != m_box)
-		return true;
-
-	return HeeksObj::IsDifferent(other);
-}
-
-
 void CStlSolid::KillGLLists()
 {
 	if (m_gl_list)

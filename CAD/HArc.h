@@ -40,7 +40,6 @@ public:
 	void ReadFromXML(TiXmlElement *element);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	bool DescendForUndo(){return false;}
-	bool IsDifferent(HeeksObj* other);
 	HeeksObj* MakeACopyWithID();
 	void ReloadPointers();
 

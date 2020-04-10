@@ -1,6 +1,6 @@
-from App import App
+from SolidApp import SolidApp
 
-app = App()
+app = SolidApp()
 
 app.MainLoop()
 

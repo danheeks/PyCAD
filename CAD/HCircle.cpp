@@ -41,21 +41,6 @@ const wchar_t* HCircle::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-bool HCircle::IsDifferent(HeeksObj* other)
-{
-	HCircle* cir = (HCircle*)other;
-	if (cir->m_c.Dist(m_c) > TOLERANCE)
-		return true;
-
-	if (cir->m_axis != m_axis)
-		return true;
-
-	if (cir->m_radius != m_radius)
-		return true;
-
-	return ExtrudedObj<IdNamedObj>::IsDifferent(other);
-}
-
 //segments - number of segments per full revolution!
 void HCircle::GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const
 {

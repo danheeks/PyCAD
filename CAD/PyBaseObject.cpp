@@ -101,8 +101,11 @@ void BaseObject::GetProperties(std::list<Property *> *list)
 
 void BaseObject::GetBox(CBox &box)
 {
-	if (!CallVoidReturn("GetBox", box))
-		ObjList::GetBox(box);
+	std::pair<bool, CBox> result2 = CallReturnBox("GetBox");
+	if (result2.first)
+	{
+		box.Insert(result2.second);
+	}
 }
 
 void BaseObject::KillGLLists()

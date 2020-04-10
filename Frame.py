@@ -183,7 +183,7 @@ class Frame(wx.Frame):
         self.AddMenuItem('Properties', self.OnViewProperties, self.OnUpdateViewProperties, check_item = True)
         self.EndMenu()
 
-        self.AddExtraMenus();
+        self.AddExtraMenus()
 
         self.SetMenuBar(self.menuBar)
         
