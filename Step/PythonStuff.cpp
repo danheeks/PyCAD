@@ -25,11 +25,13 @@
 #include <boost/python/call.hpp>
 
 #include "strconv.h"
+#include "StepFileObject.h"
 #include "Solid.h"
 #include "Face.h"
 #include "Edge.h"
 #include "Vertex.h"
 #include "Loop.h"
+#include "Wire.h"
 
 std::wstring step_dir;
 

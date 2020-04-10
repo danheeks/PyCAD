@@ -10,7 +10,7 @@ class CSphere: public CSolid{
 protected:
 	// CShape's virtual functions
 	void MakeTransformedShape(const gp_Trsf &mat);
-	wxString StretchedName();
+	std::wstring StretchedName();
 
 public:
 	gp_Pnt m_pos;
@@ -22,7 +22,7 @@ public:
 	CSphere & operator= ( const CSphere &rhs );
 
 	// HeeksObj's virtual functions
-	const wchar_t* GetTypeString(void)const{return _("Sphere");}
+	const wchar_t* GetTypeString(void)const{return L"Sphere";}
 	const wchar_t* GetIconFilePath();
 	HeeksObj *MakeACopy(void)const;
 	void GetProperties(std::list<Property *> *list);
@@ -30,7 +30,6 @@ public:
 	void OnApplyProperties();
 	bool GetCentrePoint(double* pos);
 	bool GetScaleAboutMatrix(double *m);
-	bool IsDifferent(HeeksObj* other);
 	bool DescendForUndo(){return false;}
 
 	// CShape's virtual functions

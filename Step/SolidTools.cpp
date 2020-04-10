@@ -4,19 +4,17 @@
 
 #include "stdafx.h"
 #include "SolidTools.h"
-#include "MarkedList.h"
-#include "HeeksConfig.h"
-#include "HeeksFrame.h"
 #include "Curve.h"
 #include "Area.h"
 
+#if 0
 void GetSolidMenuTools(std::list<Tool*>* t_list){
 	// Tools for multiple selected items.
 	bool solids_in_marked_list = false;
 
 	// check to see what types have been marked
 	std::list<HeeksObj*>::const_iterator It;
-	for (It = wxGetApp().m_marked_list->list().begin(); It != wxGetApp().m_marked_list->list().end(); It++){
+	for (It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++){
 		HeeksObj* object = *It;
 		switch (object->GetType()){
 		case SolidType:
@@ -35,7 +33,7 @@ void GetSolidMenuTools(std::list<Tool*>* t_list){
 void SaveSolids::Run(){
 	std::list<HeeksObj*> objects;
 
-	for (std::list<HeeksObj*>::const_iterator It = wxGetApp().m_marked_list->list().begin(); It != wxGetApp().m_marked_list->list().end(); It++){
+	for (std::list<HeeksObj*>::const_iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++){
 		HeeksObj* object = *It;
 		switch (object->GetType())
 		{
@@ -50,40 +48,40 @@ void SaveSolids::Run(){
 
 	if (objects.size() > 0)
 	{
-		wxString filepath(_T(""));
+		std::wstring filepath(_T(""));
 		{
 			// get last used filepath
 			HeeksConfig config;
 			config.Read(_T("SolidExportFilepath"), &filepath, _T(""));
 		}
 
-		wxFileDialog fd(wxGetApp().m_frame, _("Save solid file"), wxEmptyString, filepath, wxString(_("Solid Files")) + _T(" |*.igs;*.iges;*.stp;*.step;*.stl;*.cpp;*.py|") + _("IGES files") + _T(" (*.igs *.iges)|*.igs;*.iges|") + _("STEP files") + _T(" (*.stp *.step)|*.stp;*.step|") + _("STL files") + _T(" (*.stl)|*.stl|") + _("CPP files") + _T(" (*.cpp)|*.cpp|") + _("OpenCAMLib python files") + _T(" (*.py)|*.py"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+		wxFileDialog fd(theApp->m_frame, L"Save solid file", wxEmptyString, filepath, std::wstring(L"Solid Files") + _T(" |*.igs;*.iges;*.stp;*.step;*.stl;*.cpp;*.py|") + L"IGES files" + _T(" (*.igs *.iges)|*.igs;*.iges|") + L"STEP files" + _T(" (*.stp *.step)|*.stp;*.step|") + L"STL files" + _T(" (*.stl)|*.stl|") + L"CPP files" + _T(" (*.cpp)|*.cpp|") + L"OpenCAMLib python files" + _T(" (*.py)|*.py"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 		fd.SetFilterIndex(0);
 
 		if (fd.ShowModal() == wxID_CANCEL)return;
 		filepath = fd.GetPath();
 
-		wxString wf(filepath);
+		std::wstring wf(filepath);
 		wf.LowerCase();
 
 		if (wf.EndsWith(_T(".stl")))
 		{
-			wxGetApp().SaveSTLFile(objects, filepath, -1.0, NULL, wxGetApp().m_stl_save_as_binary);
+			theApp->SaveSTLFile(objects, filepath, -1.0, NULL, theApp->m_stl_save_as_binary);
 		}
 		else if (wf.EndsWith(_T(".cpp")))
 		{
-			wxGetApp().SaveCPPFile(objects, filepath);
+			theApp->SaveCPPFile(objects, filepath);
 		}
 		else if (wf.EndsWith(_T(".py")))
 		{
-			wxGetApp().SavePyFile(objects, filepath);
+			theApp->SavePyFile(objects, filepath);
 		}
 		else if (CShape::ExportSolidsFile(objects, filepath))
 		{
 		}
 		else
 		{
-			wxMessageBox(_("Invalid solid file type chosen"));
+			theApp->DoMessageBox(L"Invalid solid file type chosen");
 			return;
 		}
 
@@ -123,7 +121,7 @@ void OutlineSolids::Run(){
 	bool save_fit_arcs = CArea::m_fit_arcs;
 	CArea::m_fit_arcs = false;
 	OutlineSolids_curves.clear();
-	for (std::list<HeeksObj*>::const_iterator It = wxGetApp().m_marked_list->list().begin(); It != wxGetApp().m_marked_list->list().end(); It++){
+	for (std::list<HeeksObj*>::const_iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++){
 		HeeksObj* object = *It;
 		object->GetTriangles(OutlineSolids_triangle, 0.01);
 	}
@@ -141,11 +139,12 @@ void OutlineSolids::Run(){
 				new_area.append(curve);
 		}
 
-		if (wxGetApp().m_fit_arcs_on_solid_outline)
+		if (theApp->m_fit_arcs_on_solid_outline)
 			new_area.FitArcs();
-		wxGetApp().AddUndoably(MakeNewSketchFromArea(new_area), NULL, NULL);
+		theApp->AddUndoably(MakeNewSketchFromArea(new_area), NULL, NULL);
 	}
 	CArea::m_fit_arcs = save_fit_arcs;
 
 }
 
+#endif

@@ -7,6 +7,12 @@
 #include "Face.h"
 #include "Edge.h"
 
+// static
+int CLoop::m_type = 0;
+
+CLoop::CLoop() {
+}
+
 CLoop::CLoop(const TopoDS_Wire &wire) {
 	m_topods_wire = wire;
 	m_pface = NULL;

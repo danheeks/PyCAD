@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "ShapeData.h"
 #include "Solid.h"
+#include "strconv.h"
 
 CShapeData::CShapeData(): m_xml_element("")
 {
@@ -16,11 +17,11 @@ CShapeData::CShapeData(): m_xml_element("")
 CShapeData::CShapeData(CShape* shape): m_xml_element("")
 {
 	m_id = shape->m_id;
-	m_title = shape->m_title;
+	m_title = Ttc(shape->m_title.c_str());
 	m_title_made_from_id = shape->m_title_made_from_id;
 	m_visible = shape->m_visible;
 	m_solid_type = SOLID_TYPE_UNKNOWN;
-	if(shape->GetType() == SolidType)m_solid_type = ((CSolid*)shape)->GetSolidType();
+	if(shape->GetType() == CSolid::m_type)m_solid_type = ((CSolid*)shape)->GetSolidType();
 	shape->SetXMLElement(&m_xml_element);
 
 	for(HeeksObj* object = shape->m_faces->GetFirstChild(); object; object = shape->m_faces->GetNextChild())
@@ -43,7 +44,7 @@ CShapeData::CShapeData(CShape* shape): m_xml_element("")
 void CShapeData::SetShape(CShape* shape, bool apply_id)
 {
 	if(apply_id && (m_id != -1))shape->SetID(m_id);
-	if(m_title.length() > 0)shape->m_title = m_title;
+	if(m_title.length() > 0)shape->m_title = Ctt(m_title.c_str());
 	shape->m_title_made_from_id = m_title_made_from_id;
 	shape->m_visible = m_visible;
 	shape->SetFromXMLElement(&m_xml_element);

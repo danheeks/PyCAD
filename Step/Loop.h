@@ -17,7 +17,9 @@ public:
 	std::list<CEdge*> m_edges;
 	std::list<CEdge*>::iterator m_edgeIt;
 	bool m_is_outer;
+	static int m_type;
 
+	CLoop();
 	CLoop(const TopoDS_Wire &wire);
 	~CLoop();
 

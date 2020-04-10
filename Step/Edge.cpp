@@ -7,9 +7,14 @@
 #include "Vertex.h"
 #include "Solid.h"
 #include "Shape.h"
-#include "Tool.h"
-#include "HeeksConfig.h"
+#include "Wire.h"
 #include "Gripper.h"
+#include "strconv.h"
+
+// static
+int CEdge::m_type = 0;
+
+CEdge::CEdge(){}
 
 CEdge::CEdge(const TopoDS_Edge &edge):m_topods_edge(edge), m_vertex0(NULL), m_vertex1(NULL), m_midpoint_calculated(false), m_temp_attr(0){
 	GetCurveParams2(&m_start_u, &m_end_u, &m_isClosed, &m_isPeriodic);
@@ -30,10 +35,10 @@ const wchar_t* CEdge::GetIconFilePath()
 
 void CEdge::glCommands(bool select, bool marked, bool no_color){
 	if(!no_color){
-		wxGetApp().glColorEnsuringContrast(HeeksColor(0, 0, 0));
+		theApp->glColorEnsuringContrast(HeeksColor(0, 0, 0));
 	}
 
-	if(m_owner && m_owner->m_owner && m_owner->m_owner->GetType() == SolidType)
+	if(m_owner && m_owner->m_owner && m_owner->m_owner->GetType() == CSolid::m_type)
 	{
 		// triangulate a face on the edge first
 		if(this->m_faces.size() > 0)
@@ -73,10 +78,10 @@ void CEdge::glCommands(bool select, bool marked, bool no_color){
 	{
 		bool glwidth_done = false;
 		GLfloat save_depth_range[2];
-		if(m_owner == NULL || m_owner->m_owner == NULL || m_owner->m_owner->GetType() != WireType)
+		if(m_owner == NULL || m_owner->m_owner == NULL || m_owner->m_owner->GetType() != CWire::m_type)
 		{
 			BRepTools::Clean(m_topods_edge);
-			double pixels_per_mm = wxGetApp().GetPixelScale();
+			double pixels_per_mm = theApp->GetPixelScale();
 			BRepMesh_IncrementalMesh(m_topods_edge, 1 / pixels_per_mm);
 			if(marked){
 				glGetFloatv(GL_DEPTH_RANGE, save_depth_range);
@@ -122,8 +127,8 @@ void CEdge::GetBox(CBox &box){
 void CEdge::GetGripperPositions(std::list<GripData> *list, bool just_for_endof){
 	if(just_for_endof)
 	{
-		list->push_back(GripData(GripperTypeTranslate,m_start_x,m_start_y,m_start_z,NULL));
-		list->push_back(GripData(GripperTypeTranslate,m_end_x,m_end_y,m_end_z,NULL));
+		list->push_back(GripData(GripperTypeTranslate,Point3d(m_start_x,m_start_y,m_start_z),NULL));
+		list->push_back(GripData(GripperTypeTranslate,Point3d(m_end_x,m_end_y,m_end_z),NULL));
 	}
 	else
 	{
@@ -137,116 +142,8 @@ void CEdge::GetGripperPositions(std::list<GripData> *list, bool just_for_endof){
 			Evaluate(umiddle, m_midpoint, NULL);
 		}
 
-		list->push_back(GripData(GripperTypeTranslate,m_midpoint[0],m_midpoint[1],m_midpoint[2],NULL));
+		list->push_back(GripData(GripperTypeTranslate,Point3d(m_midpoint),NULL));
 	}
-}
-
-static CEdge* edge_for_tools = NULL;
-
-class FilletTool:public Tool
-{
-public:
-	const wchar_t* GetTitle(){return _("Blend edge");}
-	wxString BitmapPath(){return _T("edgeblend");}
-	void Run(){
-		double rad = 2.0;
-		HeeksConfig config;
-		config.Read(_T("EdgeBlendRadius"), &rad);
-		if(wxGetApp().InputLength(_("Enter Blend Radius"), _("Radius"), rad))
-		{
-			edge_for_tools->Blend(rad,false);
-			config.Write(_T("EdgeBlendRadius"), rad);
-		}
-	}
-};
-
-static FilletTool fillet_tool;
-
-
-class ChamferTool:public Tool
-{
-public:
-	const wchar_t* GetTitle(){return _("Chamfer");}
-	wxString BitmapPath(){return _T("edgeblend");}
-	void Run(){
-		double rad = 2.0;
-		HeeksConfig config;
-		config.Read(_T("EdgeChamferDist"), &rad);
-		if(wxGetApp().InputLength(_("Enter Chamfer Distance"), _("Distance"), rad))
-		{
-			edge_for_tools->Blend(rad,true);
-			config.Write(_T("EdgeChamferDist"), rad);
-		}
-	}
-};
-
-static ChamferTool chamfer_tool;
-
-
-class EdgeToSketchTool:public Tool
-{
-public:
-	const wchar_t* GetTitle(){return _("Make a sketch from edge");}
-	wxString BitmapPath(){return _T("edge2sketch");}
-	void Run(){
-		CSketch* new_object = new CSketch();
-		ConvertEdgeToSketch2(edge_for_tools->Edge(), new_object, FaceToSketchTool::deviation);
-		wxGetApp().Add(new_object, NULL);
-	}
-};
-
-static EdgeToSketchTool make_sketch_tool;
-
-static bool EdgeIsFlat(CEdge* edge)
-{
-	bool flat = fabs(edge->GetVertex0()->m_point[2] - edge->GetVertex1()->m_point[2]) < wxGetApp().m_geom_tol;
-	return flat;
-}
-
-class SelectLinkedEdgesTool:public Tool
-{
-public:
-	const wchar_t* GetTitle(){return _("Select Flat Linked Edges");}
-	wxString BitmapPath(){return _T("linked");}
-	void Run(){
-		if(edge_for_tools == NULL)return;
-		std::list<CEdge*> live_edges;
-		std::set<CEdge*> edges_to_mark;
-		edges_to_mark.insert(edge_for_tools);
-		live_edges.push_back(edge_for_tools);
-		while(live_edges.size() > 0)
-		{
-			CEdge* current_edge = live_edges.front();
-			live_edges.pop_front();
-			for(int i = 0; i<2; i++)
-			{
-				HVertex* vertex = (i==0)?current_edge->GetVertex0():current_edge->GetVertex1();
-				for(CEdge* edge = vertex->GetFirstEdge(); edge; edge = vertex->GetNextEdge())
-				{
-					if(edge != current_edge && (wxGetApp().m_marked_list->ObjectMarked(edge) == false) && (edges_to_mark.find(edge) == edges_to_mark.end()) && EdgeIsFlat(edge))
-					{
-						edges_to_mark.insert(edge);
-						live_edges.push_back(edge);
-					}
-				}
-			}
-		}
-
-		std::list<HeeksObj*> obj_list;
-		for(std::set<CEdge*>::iterator It = edges_to_mark.begin(); It != edges_to_mark.end(); It++)obj_list.push_back(*It);
-		wxGetApp().m_marked_list->Add(obj_list, true);
-	}
-};
-
-static SelectLinkedEdgesTool link_flat_tool;
-
-
-void CEdge::GetTools(std::list<Tool*>* t_list, const wxPoint* p){
-	edge_for_tools = this;
-	if(!wxGetApp().m_no_creation_mode && GetParentBody())t_list->push_back(&fillet_tool);
-	if(!wxGetApp().m_no_creation_mode)t_list->push_back(&chamfer_tool);
-	if(!wxGetApp().m_no_creation_mode)t_list->push_back(&make_sketch_tool);
-	if(!wxGetApp().m_no_creation_mode)t_list->push_back(&link_flat_tool);
 }
 
 void CEdge::Blend(double radius,  bool chamfer_not_fillet){
@@ -262,25 +159,25 @@ void CEdge::Blend(double radius,  bool chamfer_not_fillet){
 					chamfer.Add(radius, m_topods_edge, TopoDS::Face(face->Face()));
 				}
 				TopoDS_Shape new_shape = chamfer.Shape();
-				wxGetApp().AddUndoably(new CSolid(*((TopoDS_Solid*)(&new_shape)), _("Solid with edge chamfer"), *(body->GetColor()), body->GetOpacity()), NULL, NULL);
+				theApp->AddUndoably(new CSolid(*((TopoDS_Solid*)(&new_shape)), L"Solid with edge chamfer", *(body->GetColor()), body->GetOpacity()), NULL, NULL);
 			}
 			else
 			{
 				BRepFilletAPI_MakeFillet fillet(body->Shape());
 				fillet.Add(radius, m_topods_edge);
 				TopoDS_Shape new_shape = fillet.Shape();
-				wxGetApp().AddUndoably(new CSolid(*((TopoDS_Solid*)(&new_shape)), _("Solid with edge blend"), *(body->GetColor()), body->GetOpacity()), NULL, NULL);
+				theApp->AddUndoably(new CSolid(*((TopoDS_Solid*)(&new_shape)), L"Solid with edge blend", *(body->GetColor()), body->GetOpacity()), NULL, NULL);
 			}
-			wxGetApp().DeleteUndoably(body);
+			theApp->DeleteUndoably(body);
 		}
 	}
 	catch (Standard_Failure) {
 		Handle_Standard_Failure e = Standard_Failure::Caught();
-		wxMessageBox(wxString(chamfer_not_fillet ?_("Error making fillet"):_("Error making fillet")) + _T(": ") + Ctt(e->GetMessageString()));
+		theApp->DoMessageBox((std::wstring(chamfer_not_fillet ?L"Error making fillet":L"Error making fillet") + L": " + Ctt(e->GetMessageString())).c_str());
 	}
 	catch(...)
 	{
-		wxMessageBox(chamfer_not_fillet ? _("A fatal error happened during Chamfer"):_("A fatal error happened during Blend"));
+		theApp->DoMessageBox(chamfer_not_fillet ? L"A fatal error happened during Chamfer":L"A fatal error happened during Blend");
 	}
 }// end Blend function
 
@@ -289,7 +186,9 @@ static double length_for_properties = 0.0;
 void CEdge::GetProperties(std::list<Property *> *list)
 {
 	length_for_properties = Length();
-	list->push_back(new PropertyLength(NULL, _("length"), (const double*)(&length_for_properties)));
+#if 0
+	list->push_back(new PropertyLength(NULL, L"length", (const double*)(&length_for_properties)));
+#endif
 	HeeksObj::GetProperties(list);
 }
 
@@ -510,7 +409,7 @@ CShape* CEdge::GetParentBody()
 {
 	if(m_owner == NULL)return NULL;
 	if(m_owner->m_owner == NULL)return NULL;
-	if(m_owner->m_owner->GetType() != SolidType)return NULL;
+	if (m_owner->m_owner->GetType() != CSolid::m_type)return NULL;
 	return (CShape*)(m_owner->m_owner);
 }
 

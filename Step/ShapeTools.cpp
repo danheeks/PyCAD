@@ -5,6 +5,9 @@
 #include "stdafx.h"
 #include "ShapeTools.h"
 #include "Vertex.h"
+#include "Edge.h"
+#include "Face.h"
+#include "Loop.h"
 
 const wchar_t* CFaceList::GetIconFilePath()
 {

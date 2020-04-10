@@ -8,6 +8,7 @@
 
 class CFace;
 class HVertex;
+class CShape;
 
 class CEdge:public HeeksObj{
 private:
@@ -39,20 +40,21 @@ public:
 	std::list<bool> m_face_senses;
 	double m_midpoint[3];
 	bool m_midpoint_calculated;
+	static int m_type;
 
+	CEdge();
 	CEdge(const TopoDS_Edge &edge);
 	~CEdge();
 	int m_temp_attr; // not saved with the model
 
-	int GetType()const{return EdgeType;}
-	long GetMarkingMask()const{return MARKING_FILTER_EDGE;}
+	int GetType()const{return m_type;}
+//	long GetMarkingMask()const{return MARKING_FILTER_EDGE;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	HeeksObj *MakeACopy(void)const{ return new CEdge(*this);}
 	const wchar_t* GetIconFilePath();
-	const wchar_t* GetTypeString(void)const{return _("Edge");}
-	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
+	const wchar_t* GetTypeString(void)const{return L"Edge";}
 	void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
 	bool UsesID(){return true;}

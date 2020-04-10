@@ -8,6 +8,7 @@
 
 class CFace;
 class CEdge;
+class CShape;
 
 class HVertex:public HeeksObj{
 private:
@@ -20,17 +21,19 @@ public:
 	std::list<CEdge*> m_edges;
 	std::list<CFace*> m_faces;
 	double m_point[3];
+	static int m_type;
 
+	HVertex();
 	HVertex(const TopoDS_Vertex &vertex);
 	~HVertex();
 
-	int GetType()const{return VertexType;}
-	long GetMarkingMask()const{return MARKING_FILTER_VERTEX;}
+	int GetType()const{return m_type;}
+//	long GetMarkingMask()const{return MARKING_FILTER_VERTEX;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	HeeksObj *MakeACopy(void)const{ return new HVertex(*this);}
 	const wchar_t* GetIconFilePath();
-	const wchar_t* GetTypeString(void)const{return _("Vertex");}
+	const wchar_t* GetTypeString(void)const{return L"Vertex";}
 	bool UsesID(){return true;}
 	void ModifyByMatrix(const double* m);
 

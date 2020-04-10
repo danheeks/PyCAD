@@ -148,6 +148,7 @@ extern "C" {
 }
 
 #include "geometry.h"
+#include "OCCGeom.h"
 #include "Point.h"
 #include "Box.h"
 #include "tinyxml.h"

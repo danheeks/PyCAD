@@ -3,17 +3,22 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 #include "Face.h"
+#include "Solid.h"
 #include "NurbSurfaceParams.h"
 #include "FaceTools.h"
 #include "Sketch.h"
 #include "RuledSurface.h"
-#include "HeeksFrame.h"
-#include "InputModeCanvas.h"
-#include "HPoint.h"
 #include "ShapeBuild_ReShape.hxx"
 #include "Vertex.h"
+#include "Material.h"
+#include "strconv.h"
 
-CFace::CFace():m_temp_attr(0)
+HeeksColor CFace::face_selection_color = HeeksColor(0, 0, 0);
+
+// static
+int CFace::m_type = 0;
+
+CFace::CFace() :m_temp_attr(0)
 {
 }
 
@@ -50,7 +55,7 @@ void CFace::glCommands(bool select, bool marked, bool no_color){
 	}
 	else {
 		// clean mesh
-		double pixels_per_mm = wxGetApp().GetPixelScale();
+		double pixels_per_mm = theApp->GetPixelScale();
 		MeshFace(m_topods_face, 1/pixels_per_mm);
 
 		// use a default material
@@ -198,275 +203,10 @@ void CFace::WriteXML(TiXmlNode *root)
 
 void CFace::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(new PropertyStringReadOnly(_("surface type"), GetSurfaceTypeStr()));
+#if 0
+	list->push_back(new PropertyStringReadOnly(L"surface type", GetSurfaceTypeStr()));
+#endif
 	HeeksObj::GetProperties(list);
-}
-
-static CFace* face_for_tools = NULL;
-
-void FaceToSketchTool::Run(){
-	CSketch* new_object = new CSketch();
-	ConvertFaceToSketch2(face_for_tools->Face(), new_object, deviation);
-	wxGetApp().AddUndoably(new_object, NULL, NULL);
-}
-
-double FaceToSketchTool::deviation = 0.1;
-
-static FaceToSketchTool make_sketch_tool;
-
-class MakeCoordSystem:public Tool
-{
-	// only use this if GetSurfaceType() == GeomAbs_Plane
-public:
-	const wchar_t* GetTitle(){return _("Make Coordinate System");}
-	wxString BitmapPath(){return _T("coordsys");}
-	void Run(){
-		gp_Pln plane;
-		face_for_tools->GetPlaneParams(plane);
-		gp_Dir x_direction = plane.XAxis().Direction();
-		gp_Dir y_direction = plane.YAxis().Direction();
-		if(!face_for_tools->Face().Orientation())
-		{
-			// swap the axes to invert the normal
-			y_direction = plane.XAxis().Direction();
-			x_direction = plane.YAxis().Direction();
-		}
-		CoordinateSystem* new_object = new CoordinateSystem(_("Face Coordinate System"), plane.Location(), x_direction, y_direction);
-		wxGetApp().AddUndoably(new_object, NULL, NULL);
-		wxGetApp().m_marked_list->Clear(true);
-		wxGetApp().m_marked_list->Add(new_object, true);
-		wxGetApp().Repaint();
-	}
-};
-
-static MakeCoordSystem make_coordsys;
-
-class ExtrudeFace:public Tool
-{
-public:
-	const wchar_t* GetTitle(){return _("Extrude Face");}
-	wxString BitmapPath(){return _T("extface");}
-	void Run(){
-		wxGetApp().m_marked_list->Clear(false);
-		wxGetApp().m_marked_list->Add(face_for_tools, false);
-		PickCreateExtrusion();
-	}
-};
-
-static ExtrudeFace extrude_face;
-
-class RotateToFace :public Tool
-{
-public:
-	const wchar_t* GetTitle(){ return _("Rotate to Face"); }
-	wxString BitmapPath(){ return _T("rotface"); }
-	void Run(){
-		gp_Pln plane;
-		face_for_tools->GetPlaneParams(plane);
-		gp_Dir x_direction = plane.XAxis().Direction();
-		gp_Dir y_direction = plane.YAxis().Direction();
-		if (face_for_tools->Face().Orientation() == TopAbs_REVERSED)
-		{
-			// swap the axes to invert the normal
-			y_direction = plane.XAxis().Direction();
-			x_direction = plane.YAxis().Direction();
-		}
-		gp_Trsf face_matrix = make_matrix(plane.Location(), x_direction, y_direction);
-		gp_Trsf inv_matrix = face_matrix.Inverted();
-
-		wxGetApp().StartHistory();
-		double m[16];
-		extract(face_matrix.Inverted(), m);
-		// if any objects are selected, move them
-		if (wxGetApp().m_marked_list->list().size() > 0)
-		{
-			for (std::list<HeeksObj *>::iterator It = wxGetApp().m_marked_list->list().begin(); It != wxGetApp().m_marked_list->list().end(); It++)
-			{
-				HeeksObj* object = *It;
-				wxGetApp().TransformUndoably(object, m);
-			}
-		}
-		else
-		{
-			// move the solid
-			HeeksObj* parent_body = face_for_tools->GetParentBody();
-			if (parent_body)wxGetApp().TransformUndoably(parent_body, m);
-		}
-		wxGetApp().EndHistory();
-	}
-};
-
-static RotateToFace rotate_to_face;
-
-#define USE_BREP_UPDATE
-
-
-class PullFace1mm :public Tool
-{
-public:
-	const wchar_t* GetTitle(){ return _("Pull Face 1mm"); }
-	wxString BitmapPath(){ return _T("rotface"); }
-	void Run(){
-		Handle(Geom_Surface) surface = BRep_Tool::Surface(face_for_tools->Face());
-		Handle(Geom_Plane) plane = Handle(Geom_Plane)::DownCast(surface);
-
-		gp_Trsf trsf;
-		trsf.SetTranslationPart(gp_Vec(1.0, 0.0, 0.0));
-		surface->Transform(trsf);
-
-#ifdef USE_BREP_UPDATE
-#else
-
-		BRepTools_ReShape reshape;
-#endif
-
-		std::set<HVertex*> face_vertex_set;
-		std::set<CEdge*> face_edge_set;
-		std::set<CEdge*> neighbour_edge_set;
-		std::set<CFace*> neighbour_face_set;
-
-		for (CEdge* edge = face_for_tools->GetFirstEdge(); edge != NULL; edge = face_for_tools->GetNextEdge())
-		{
-			face_edge_set.insert(edge);
-			face_vertex_set.insert(edge->GetVertex0());
-			face_vertex_set.insert(edge->GetVertex1());
-			for (CFace* face = edge->GetFirstFace(); face != NULL; face = edge->GetNextFace())
-			{
-				if (face != face_for_tools)
-					neighbour_face_set.insert(face);
-			}
-		}
-
-		for (std::set<HVertex*>::iterator It = face_vertex_set.begin(); It != face_vertex_set.end(); It++)
-		{
-			HVertex* vertex = *It;
-			for (CEdge* edge = vertex->GetFirstEdge(); edge != NULL; edge = vertex->GetNextEdge())
-			{
-				if (face_edge_set.find(edge) == face_edge_set.end())
-				{
-					neighbour_edge_set.insert(edge);
-				}
-			}
-		}
-
-		for (std::set<HVertex*>::iterator It = face_vertex_set.begin(); It != face_vertex_set.end(); It++)
-		{
-			HVertex* vertex = *It;
-#ifdef USE_BREP_UPDATE
-			BRep_Builder aBuilder;
-			//aBuilder.UpdateVertex()
-#else
-			BRepBuilderAPI_Transform brepTrans((*It)->Vertex(), trsf);
-			TopoDS_Vertex newVertex = TopoDS::Vertex(brepTrans.Shape());
-			reshape.Replace((*It)->Vertex(), newVertex);
-#endif
-		}
-
-		for (CEdge* edge = face_for_tools->GetFirstEdge(); edge != NULL; edge = face_for_tools->GetNextEdge())
-		{
-#ifdef USE_BREP_UPDATE
-			BRep_Builder aBuilder;
-#else
-			BRepBuilderAPI_Transform brepTrans(edge->Edge(), trsf);
-			TopoDS_Edge newEdge = TopoDS::Edge(brepTrans.Shape());
-			reshape.Replace(edge->Edge(), newEdge);
-#endif
-		}
-
-		for (std::set<CEdge*>::iterator It = neighbour_edge_set.begin(); It != neighbour_edge_set.end(); It++)
-		{
-			CEdge* edge = *It;
-			HVertex* face_vertex = edge->GetVertex0();
-			HVertex* other_vertex = edge->GetVertex1();
-			bool forwards = true;
-			if (face_vertex_set.find(face_vertex) == face_vertex_set.end())
-			{
-				face_vertex = edge->GetVertex1();
-				other_vertex = edge->GetVertex0();
-				forwards = false;
-			}
-			if (face_vertex_set.find(face_vertex) == face_vertex_set.end())
-			{
-				// neither vertex was on the face!  shouldn't happen
-				continue;
-			}
-
-#ifdef USE_BREP_UPDATE
-			BRep_Builder aBuilder;
-#else
-			TopAbs_Orientation orientation1 = face_vertex->Vertex().Orientation();
-			TopAbs_Orientation orientation2 = other_vertex->Vertex().Orientation();
-
-			// remake the edge
-			BRep_Builder aBuilder;
-			TopoDS_Vertex start, end;
-			aBuilder.MakeVertex(start, gp_Pnt(face_vertex->m_point[0] + 1.0, face_vertex->m_point[1], face_vertex->m_point[2]), wxGetApp().m_geom_tol);
-			start.Orientation(orientation1);
-			//aBuilder.MakeVertex(end, gp_Pnt(other_vertex->m_point[0] + 1.0, other_vertex->m_point[1], other_vertex->m_point[2]), wxGetApp().m_geom_tol);
-			//end.Orientation(orientation2);
-
-			if (forwards)
-			{
-				BRepBuilderAPI_MakeEdge E(start, other_vertex->Vertex());
-				if (!E.IsDone())
-				{
-					continue;
-				}
-				reshape.Replace(edge->Edge(), E.Edge());
-			}
-			else
-			{
-				BRepBuilderAPI_MakeEdge E(other_vertex->Vertex(), start);
-				if (!E.IsDone())
-				{
-					continue;
-				}
-				reshape.Replace(edge->Edge(), E.Edge());
-			}
-#endif
-		}
-
-#ifdef USE_BREP_UPDATE
-#else
-		for (std::set<CFace*>::iterator It = neighbour_face_set.begin(); It != neighbour_face_set.end(); It++)
-		{
-			CFace* face = *It;
-			gp_Pln pln;
-			face->GetPlaneParams(pln);
-			BRepBuilderAPI_MakeFace F(pln);
-			reshape.Replace(face->Face(), F.Face());
-		}
-#endif
-
-#ifdef USE_BREP_UPDATE
-		BRep_Builder aBuilder;
-		const TopLoc_Location &loc = face_for_tools->Face().Location();
-		aBuilder.UpdateFace(face_for_tools->Face(), surface, loc, wxGetApp().m_geom_tol);
-		//aBuilder.UpdateVertex((*(face_vertex_set.begin()))->Vertex());
-#else
-		BRepBuilderAPI_Transform brepTrans(face_for_tools->Face(), trsf);
-		TopoDS_Face newFace = TopoDS::Face(brepTrans.Shape());
-		reshape.Replace(face_for_tools->Face(), newFace);
-		TopoDS_Shape new_shape = reshape.Apply(face_for_tools->GetParentBody()->Shape());
-
-		wxGetApp().AddUndoably(new CSolid(*((TopoDS_Solid*)(&new_shape)), _("Solid with edge blend"), *(face_for_tools->GetParentBody()->GetColor()), 1.0), NULL, NULL);
-#endif
-	}
-};
-
-static PullFace1mm pull_face_1mm;
-
-void CFace::GetTools(std::list<Tool*>* t_list, const wxPoint* p){
-	face_for_tools = this;
-	if(!wxGetApp().m_no_creation_mode)t_list->push_back(&make_sketch_tool);
-	if(IsAPlane(NULL))
-	{
-		if(!wxGetApp().m_no_creation_mode)t_list->push_back(&make_coordsys);
-		t_list->push_back(&rotate_to_face);
-		t_list->push_back(&pull_face_1mm);
-	}
-	if(!wxGetApp().m_no_creation_mode)t_list->push_back(&extrude_face);
-	//t_list->push_back(&intersector);
 }
 
 void CFace::GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof)
@@ -562,7 +302,7 @@ bool CFace::IsAPlane(gp_Pln *returned_plane)
 
 					// check the point lies on the plane
 					double d = fabs(plane.Distance(p));
-					if(d > wxGetApp().m_geom_tol)
+					if(d > TOLERANCE)
 						return false;
 				}
 			}
@@ -573,49 +313,49 @@ bool CFace::IsAPlane(gp_Pln *returned_plane)
 	}
 }
 
-wxString CFace::GetSurfaceTypeStr()
+std::wstring CFace::GetSurfaceTypeStr()
 {
-	wxString surface_type = _("unknown");
+	std::wstring surface_type = L"unknown";
 	switch(GetSurfaceType())
 	{
 	case GeomAbs_Plane:
-		surface_type = _("plane");
+		surface_type = L"plane";
 		break;
 
 	case GeomAbs_Cylinder:
-		surface_type = _("cylinder");
+		surface_type = L"cylinder";
 		break;
 
 	case GeomAbs_Cone:
-		surface_type = _("cone");
+		surface_type = L"cone";
 		break;
 
 	case GeomAbs_Sphere:
-		surface_type = _("sphere");
+		surface_type = L"sphere";
 		break;
 
 	case GeomAbs_Torus:
-		surface_type = _("torus");
+		surface_type = L"torus";
 		break;
 
 	case GeomAbs_BezierSurface:
-		surface_type = _("bezier");
+		surface_type = L"bezier";
 		break;
 
 	case GeomAbs_BSplineSurface:
-		surface_type = _("bspline");
+		surface_type = L"bspline";
 		break;
 
 	case GeomAbs_SurfaceOfRevolution:
-		surface_type = _("revolution");
+		surface_type = L"revolution";
 		break;
 
 	case GeomAbs_SurfaceOfExtrusion:
-		surface_type = _("extrusion");
+		surface_type = L"extrusion";
 		break;
 
 	case GeomAbs_OffsetSurface:
-		surface_type = _("offset");
+		surface_type = L"offset";
 		break;
 	}
 
@@ -808,7 +548,7 @@ bool CFace::GetNurbSurfaceParams(CNurbSurfaceParams* params)
 	}
 	catch(Standard_Failure) {
 		Handle_Standard_Failure e = Standard_Failure::Caught();
-		wxMessageBox(wxString(_("Error in CFace::GetNurbSurfaceParams")) + _T(": ") + Ctt(e->GetMessageString()));
+		theApp->DoMessageBox((std::wstring(L"Error in CFace::GetNurbSurfaceParams") + L": " + Ctt(e->GetMessageString())).c_str());
 		return false;
 	}
 
@@ -873,7 +613,7 @@ CShape* CFace::GetParentBody()
 {
 	if(m_owner == NULL)return NULL;
 	if(m_owner->m_owner == NULL)return NULL;
-	if(m_owner->m_owner->GetType() != SolidType)return NULL;
+	if(m_owner->m_owner->GetType() != CSolid::m_type)return NULL;
 	return (CShape*)(m_owner->m_owner);
 }
 
@@ -911,7 +651,7 @@ void CFace::UpdateMarkingGLList(bool marked, bool no_color)
 		{
 			if (marked)
 			{
-				Material(wxGetApp().face_selection_color).glMaterial(1.0);
+				Material(CFace::face_selection_color).glMaterial(1.0);
 				glDisable(GL_BLEND);
 				glDepthMask(1);
 			}

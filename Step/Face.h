@@ -30,25 +30,26 @@ public:
 	std::list<CEdge*> m_edges;
 	std::list<CLoop*>::iterator m_loopIt;
 	std::list<CLoop*> m_loops;
+	static int m_type;
+	static HeeksColor face_selection_color;
 
 	CFace();
 	CFace(const TopoDS_Face &face);
 	~CFace();
 
-	int GetType()const{return FaceType;}
-	long GetMarkingMask()const{return MARKING_FILTER_FACE;}
+	int GetType()const{return m_type;}
+//	long GetMarkingMask()const{return MARKING_FILTER_FACE;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wchar_t* GetIconFilePath();
 	HeeksObj *MakeACopy(void)const{ return new CFace(*this);}
-	const wchar_t* GetTypeString(void)const{return _("Face");}
+	const wchar_t* GetTypeString(void)const{return L"Face";}
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = false);
 	double Area()const;
 	void ModifyByMatrix(const double* m);
 	void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
 	bool UsesID(){return true;}
-	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof);
 
 	const TopoDS_Face &Face(){return m_topods_face;}
@@ -65,7 +66,7 @@ public:
 	bool GetNurbSurfaceParams(CNurbSurfaceParams* params);
 	int GetSurfaceType();
 	bool IsAPlane(gp_Pln *returned_plane);
-	wxString GetSurfaceTypeStr();
+	std::wstring GetSurfaceTypeStr();
 	CEdge* GetFirstEdge();
 	CEdge* GetNextEdge();
 	CLoop* GetFirstLoop();
@@ -79,14 +80,15 @@ public:
 	void UpdateMarkingGLList(bool marked, bool no_color);
 };
 
+#if 0
 class FaceToSketchTool:public Tool
 {
 public:
-	const wchar_t* GetTitle(){return _("Make a sketch from face");}
-	wxString BitmapPath(){return _T("face2sketch");}
+	const wchar_t* GetTitle(){return L"Make a sketch from face";}
+	std::wstring BitmapPath(){return L"face2sketch";}
 	void Run();
 
 	static double deviation;
 };
 
-
+#endif

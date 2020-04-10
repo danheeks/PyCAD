@@ -16,7 +16,6 @@ protected:
 	int m_select_edge_gl_list;
 	CBox m_box;
 	TopoDS_Shape m_shape;
-	wxLongLong m_creation_time;
 	double m_opacity;
 	bool m_volume_found;
 	double m_volume;
@@ -26,7 +25,7 @@ protected:
 	void delete_faces_and_edges();
 	void CallMesh();
 	virtual void MakeTransformedShape(const gp_Trsf &mat);
-	virtual wxString StretchedName();
+	virtual std::wstring StretchedName();
 
 public:
 	static bool m_solids_found; // a flag for xml writing
@@ -35,6 +34,8 @@ public:
 	CVertexList* m_vertices;
 	HeeksColor m_color;
 	CFace* m_picked_face;
+	static int m_type;
+	static double m_iges_sewing_tolerance;
 
 	CShape();
 	CShape(const TopoDS_Shape &shape, const wchar_t* title, const HeeksColor& col, float opacity);
@@ -44,18 +45,15 @@ public:
 	virtual const CShape& operator=(const CShape& s);
 
 	// HeeksObj's virtual functions
-	bool IsDifferent(HeeksObj* obj);
-	int GetType()const{return SolidType;}
+	int GetType()const{return m_type;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	void KillGLLists(void);
 	void ModifyByMatrix(const double* m);
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
 	double Area()const;
-	void GetTools(std::list<Tool*>* t_list, const wxPoint* p);
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
-	void SetClickMarkPoint(MarkedObject* marked_object, const double* ray_start, const double* ray_direction);
 	bool UsesID(){return true;}
 	bool CanAddTo(HeeksObj* owner){return ((owner != NULL) && (owner->GetType() == GroupType));}
 	bool DescendForUndo(){return false;}

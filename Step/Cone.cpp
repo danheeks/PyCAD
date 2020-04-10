@@ -5,7 +5,8 @@
 #include "stdafx.h"
 #include "Cone.h"
 #include "Gripper.h"
-#include "MarkedList.h"
+#include "GripData.h"
+#include "CoordinateSystem.h"
 
 CCone::CCone(const gp_Ax2& pos, double r1, double r2, double height, const wchar_t* title, const HeeksColor& col, float opacity):CSolid(BRepPrimAPI_MakeCone(pos, r1, r2, height), title, col, opacity), m_render_without_OpenCASCADE(false), m_pos(pos), m_r1(r1), m_r2(r2), m_height(height)
 {
@@ -129,19 +130,6 @@ HeeksObj *CCone::MakeACopy(void)const
 	return new CCone(*this);
 }
 
-bool CCone::IsDifferent(HeeksObj* o)
-{
-	CCone* other = (CCone*)o;
-	if(other->m_r1 != m_r1 || other->m_r2 != m_r2 || other->m_height != other->m_height)
-		return true;
-
-	if(!IsEqual(other->m_pos,m_pos))
-		return true;
-
-	return HeeksObj::IsDifferent(o);
-}
-
-
 void CCone::MakeTransformedShape(const gp_Trsf &mat)
 {
 	m_pos.Transform(mat);
@@ -152,15 +140,16 @@ void CCone::MakeTransformedShape(const gp_Trsf &mat)
 	m_shape = BRepPrimAPI_MakeCone(m_pos, m_r1, m_r2, m_height).Shape();
 }
 
-wxString CCone::StretchedName(){ return _("Stretched Cone");}
+std::wstring CCone::StretchedName(){ return L"Stretched Cone";}
 
 void CCone::GetProperties(std::list<Property *> *list)
 {
-	CoordinateSystem::GetAx2Properties(list, m_pos, this);
-	list->push_back((Property*)(new PropertyLength(this, _("r1"), &m_r1)));
-	list->push_back((Property*)(new PropertyLength(this, _("r2"), &m_r2)));
-	list->push_back((Property*)(new PropertyLength(this, _("height"), &m_height)));
-
+	GetAx2Properties(list, m_pos, this);
+#if 0
+	list->push_back((Property*)(new PropertyLength(this, L"r1", &m_r1)));
+	list->push_back((Property*)(new PropertyLength(this, L"r2", &m_r2)));
+	list->push_back((Property*)(new PropertyLength(this, L"height", &m_height)));
+#endif
 	CSolid::GetProperties(list);
 }
 
@@ -174,34 +163,34 @@ void CCone::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 	gp_Pnt pmx(o.XYZ() + m_pos.XDirection().XYZ() * (-m_r1));
 	gp_Pnt pz(o.XYZ() + z_dir.XYZ() * m_height);
 	gp_Pnt pxz(o.XYZ() + m_pos.XDirection().XYZ() * m_r2 + z_dir.XYZ() * m_height);
-	list->push_back(GripData(GripperTypeTranslate,o.X(),o.Y(),o.Z(),NULL));
-	list->push_back(GripData(GripperTypeStretch,px.X(),px.Y(),px.Z(),NULL));
-	list->push_back(GripData(GripperTypeObjectScaleZ,pz.X(),pz.Y(),pz.Z(),NULL));
-	list->push_back(GripData(GripperTypeStretch,pxz.X(),pxz.Y(),pxz.Z(),NULL));
-	list->push_back(GripData(GripperTypeRotateObject,py.X(),py.Y(),py.Z(),NULL));
-	list->push_back(GripData(GripperTypeRotateObject,pmx.X(),pmx.Y(),pmx.Z(),NULL));
+	list->push_back(GripData(GripperTypeTranslate,G2P(o),NULL));
+	list->push_back(GripData(GripperTypeStretch, G2P(px), NULL));
+	list->push_back(GripData(GripperTypeObjectScaleZ, G2P(pz), NULL));
+	list->push_back(GripData(GripperTypeStretch, G2P(pxz), NULL));
+	list->push_back(GripData(GripperTypeRotateObject, G2P(py), NULL));
+	list->push_back(GripData(GripperTypeRotateObject, G2P(pmx), NULL));
 }
 
 void CCone::OnApplyProperties()
 {
 	bool save_visible = m_visible;
-	*this = CCone(m_pos, m_r1, m_r2, m_height, m_title.c_str(), m_color, m_opacity);
+	*this = CCone(m_pos, m_r1, m_r2, m_height, m_title.c_str(), m_color, (float)m_opacity);
 	m_visible = save_visible;
 	this->create_faces_and_edges();
 }
 
 bool CCone::ValidateProperties()
 {
-	if(m_r1 <= -wxGetApp().m_geom_tol || m_r2 <= -wxGetApp().m_geom_tol)
+	if(m_r1 <= -TOLERANCE || m_r2 <= -TOLERANCE)
 	{
-		wxMessageBox(_("can not enter negative value for radius"));
+		theApp->DoMessageBox(L"can not enter negative value for radius");
 		return false;
 	}
 	if(m_r1 < 0)m_r1 = 0;
 	if(m_r2 < 0)m_r2 = 0;
-	if(fabs(m_r1-m_r2) < wxGetApp().m_geom_tol)
+	if(fabs(m_r1-m_r2) < TOLERANCE)
 	{
-		wxMessageBox(_("cone must not have both radiuses the same"));
+		theApp->DoMessageBox(L"cone must not have both radiuses the same");
 		return false;
 	}
 	return true;
@@ -230,7 +219,7 @@ bool CCone::Stretch2(const double *p, const double* shift, gp_Ax2& new_pos, doub
 
 	bool make_a_new_cone = false;
 
-	if(px.IsEqual(vp, wxGetApp().m_geom_tol)){
+	if(px.IsEqual(vp, TOLERANCE)){
 		px = px.XYZ() + vshift.XYZ();
 		double new_x = gp_Vec(px.XYZ()) * gp_Vec(m_pos.XDirection()) - gp_Vec(o.XYZ()) * gp_Vec(m_pos.XDirection());
 		double new_y = gp_Vec(px.XYZ()) * gp_Vec(m_pos.YDirection()) - gp_Vec(o.XYZ()) * gp_Vec(m_pos.YDirection());
@@ -239,7 +228,7 @@ bool CCone::Stretch2(const double *p, const double* shift, gp_Ax2& new_pos, doub
 			make_a_new_cone = true;
 		}
 	}
-	else if(pxz.IsEqual(vp, wxGetApp().m_geom_tol)){
+	else if(pxz.IsEqual(vp, TOLERANCE)){
 		pxz = pxz.XYZ() + vshift.XYZ();
 		double new_x = gp_Vec(pxz.XYZ()) * gp_Vec(m_pos.XDirection()) - gp_Vec(o.XYZ()) * gp_Vec(m_pos.XDirection());
 		double new_y = gp_Vec(pxz.XYZ()) * gp_Vec(m_pos.YDirection()) - gp_Vec(o.XYZ()) * gp_Vec(m_pos.YDirection());
@@ -248,7 +237,7 @@ bool CCone::Stretch2(const double *p, const double* shift, gp_Ax2& new_pos, doub
 			make_a_new_cone = true;
 		}
 	}
-	else if(pz.IsEqual(vp, wxGetApp().m_geom_tol)){
+	else if(pz.IsEqual(vp, TOLERANCE)){
 		pz = pz.XYZ() + vshift.XYZ();
 		new_height = gp_Vec(pz.XYZ()) * gp_Vec(z_dir) - gp_Vec(o.XYZ()) * gp_Vec(z_dir);
 		if(new_height > 0){
@@ -270,14 +259,14 @@ bool CCone::Stretch(const double *p, const double* shift, void* data)
 
 	if(make_a_new_cone)
 	{
-		CCone* new_object = new CCone(new_pos, new_r1, new_r2, new_height, NULL, m_color, m_opacity);
+		CCone* new_object = new CCone(new_pos, new_r1, new_r2, new_height, NULL, m_color, (float)m_opacity);
 		new_object->CopyIDsFrom(this);
-		wxGetApp().StartHistory();
-		wxGetApp().DeleteUndoably(this);
-		wxGetApp().AddUndoably(new_object,m_owner,NULL);
-		wxGetApp().EndHistory();
-		wxGetApp().m_marked_list->Clear(false);
-		wxGetApp().m_marked_list->Add(new_object, true);
+		theApp->StartHistory();
+		theApp->DeleteUndoably(this);
+		theApp->AddUndoably(new_object,m_owner,NULL);
+		theApp->EndHistory();
+		theApp->ClearSelection(false);
+		theApp->Mark(new_object);
 		this->m_render_without_OpenCASCADE = false;
 	}
 
@@ -296,7 +285,7 @@ bool CCone::StretchTemporary(const double *p, const double* shift, void* data)
 		m_render_without_OpenCASCADE = true;
 		m_temp_r1 = new_r1;
 		m_temp_r2 = new_r2;
-		wxGetApp().Repaint();
+		theApp->Repaint();
 	}
 	return false;
 }

@@ -4,9 +4,19 @@
 #include "stdafx.h"
 #include "Vertex.h"
 #include "Face.h"
+#include "Edge.h"
 #include "Solid.h"
 #include "Gripper.h"
 #include "BRepTools_ReShape.hxx"
+
+// static
+int HVertex::m_type = 0;
+
+HVertex::HVertex() :m_topods_vertex(){
+	m_point[0] = 0.0;
+	m_point[1] = 0.0;
+	m_point[2] = 0.0;
+}
 
 HVertex::HVertex(const TopoDS_Vertex &vertex):m_topods_vertex(vertex){
 	gp_Pnt pos = BRep_Tool::Pnt(vertex);
@@ -43,7 +53,7 @@ void HVertex::glCommands(bool select, bool marked, bool no_color){
 }
 
 void HVertex::GetGripperPositions(std::list<GripData> *list, bool just_for_endof){
-	list->push_back(GripData(GripperTypeTranslate,m_point[0],m_point[1],m_point[2],NULL));
+	list->push_back(GripData(GripperTypeTranslate,Point3d(m_point),NULL));
 }
 
 void HVertex::ModifyByMatrix(const double* m)
@@ -86,6 +96,6 @@ CShape* HVertex::GetParentBody()
 {
 	if(m_owner == NULL)return NULL;
 	if(m_owner->m_owner == NULL)return NULL;
-	if(m_owner->m_owner->GetType() != SolidType)return NULL;
+	if(m_owner->m_owner->GetType() != CSolid::m_type)return NULL;
 	return (CShape*)(m_owner->m_owner);
 }

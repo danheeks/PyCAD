@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "FaceTools.h"
+#include "strconv.h"
 
 static Standard_Boolean TriangleIsValid(const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3)
 { 
@@ -63,17 +64,17 @@ gp_Dir GetFaceNormalAtUV(const TopoDS_Face &face, double u, double v, gp_Pnt *po
 	}
 	catch (Standard_Failure) {
 		Handle_Standard_Failure e = Standard_Failure::Caught();
-		wxMessageBox(wxString(_("Error in GetFaceNormalAtUV")) + _T(": ") + Ctt(e->GetMessageString()));
+		theApp->DoMessageBox((std::wstring(L"Error in GetFaceNormalAtUV") + L": " + Ctt(e->GetMessageString())).c_str());
 		return gp_Dir(0, 0, 1);
 	}
 	catch (const char* str)
 	{
-		wxMessageBox(wxString(_("Error in GetFaceNormalAtUV")) + _T(": ") + Ctt(str));
+		theApp->DoMessageBox((std::wstring(L"Error in GetFaceNormalAtUV") + L": " + Ctt(str)).c_str());
 		return gp_Dir(0, 0, 1);
 	}
 	catch (...)
 	{
-		wxMessageBox(_("Error in GetFaceNormalAtUV"));
+		theApp->DoMessageBox(L"Error in GetFaceNormalAtUV");
 		return gp_Dir(0, 0, 1);
 	}
 }

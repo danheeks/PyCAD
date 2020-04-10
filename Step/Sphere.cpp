@@ -45,14 +45,6 @@ const wchar_t* CSphere::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-bool CSphere::IsDifferent(HeeksObj *other)
-{
-	CSphere* sphere = (CSphere*)other;
-	if(sphere->m_pos.Distance(m_pos) > wxGetApp().m_geom_tol || sphere->m_radius != m_radius)
-		return true;
-	return CShape::IsDifferent(other);
-}
-
 void CSphere::MakeTransformedShape(const gp_Trsf &mat)
 {
 	m_pos.Transform(mat);
@@ -61,27 +53,29 @@ void CSphere::MakeTransformedShape(const gp_Trsf &mat)
 	m_shape = BRepPrimAPI_MakeSphere(m_pos, m_radius).Shape();
 }
 
-wxString CSphere::StretchedName(){ return _("Ellipsoid");}
+std::wstring CSphere::StretchedName(){ return L"Ellipsoid";}
 
 void CSphere::GetProperties(std::list<Property *> *list)
 {
-	list->push_back(PropertyPnt(this, _("centre"), &m_pos));
-	list->push_back(new PropertyLength(this, _("radius"), &m_radius));
+#if 0
+	list->push_back(PropertyPnt(this, L"centre", &m_pos));
+	list->push_back(new PropertyLength(this, L"radius", &m_radius));
+#endif
 
 	CSolid::GetProperties(list);
 }
 
 void CSphere::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
-	list->push_back(GripData(GripperTypeTranslate,m_pos.X(),m_pos.Y(),m_pos.Z(),NULL));
-	list->push_back(GripData(GripperTypeScale,m_pos.X() + m_radius,m_pos.Y(),m_pos.Z(),NULL));
+	list->push_back(GripData(GripperTypeTranslate,G2P(m_pos),NULL));
+	list->push_back(GripData(GripperTypeScale,Point3d(m_pos.X() + m_radius,m_pos.Y(),m_pos.Z()),NULL));
 }
 
 void CSphere::OnApplyProperties()
 {
-	*this = CSphere(m_pos, m_radius, m_title.c_str(), m_color, m_opacity);
+	*this = CSphere(m_pos, m_radius, m_title.c_str(), m_color, (float)m_opacity);
 	this->create_faces_and_edges();
-	wxGetApp().Repaint();
+	theApp->Repaint();
 }
 
 bool CSphere::GetCentrePoint(double* pos)

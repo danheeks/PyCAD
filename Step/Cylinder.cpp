@@ -5,7 +5,8 @@
 #include "stdafx.h"
 #include "Cylinder.h"
 #include "Gripper.h"
-#include "MarkedList.h"
+#include "GripData.h"
+#include "CoordinateSystem.h"
 
 static TopoDS_Solid MakeCylinder(const gp_Ax2& pos, double radius, double height)
 {
@@ -38,18 +39,7 @@ HeeksObj *CCylinder::MakeACopy(void)const
 	return new CCylinder(*this);
 }
 
-bool CCylinder::IsDifferent(HeeksObj* other)
-{
-	CCylinder* cyl = (CCylinder*)other;
-	if(cyl->m_radius != m_radius || cyl->m_height != m_height)
-		return true;
-
-	if(!IsEqual(cyl->m_pos,m_pos))
-		return true;
-	
-	return CShape::IsDifferent(other);
-}
-
+#if 0
 static void on_set_diameter(double value, HeeksObj* object){
 	((CCylinder*)object)->m_radius = value*0.5;
 	object->OnApplyProperties();
@@ -59,7 +49,7 @@ static void on_set_height(double value, HeeksObj* object){
 	((CCylinder*)object)->m_height = value;
 	object->OnApplyProperties();
 }
-
+#endif
 
 void CCylinder::MakeTransformedShape(const gp_Trsf &mat)
 {
@@ -70,13 +60,16 @@ void CCylinder::MakeTransformedShape(const gp_Trsf &mat)
 	m_shape = MakeCylinder(m_pos, m_radius, m_height);
 }
 
-wxString CCylinder::StretchedName(){ return _("Stretched Cylinder");}
+std::wstring CCylinder::StretchedName(){ return L"Stretched Cylinder";}
 
 void CCylinder::GetProperties(std::list<Property *> *list)
 {
-	CoordinateSystem::GetAx2Properties(list, m_pos, this);
-	list->push_back(new PropertyLengthScaled(this, _("diameter"), &m_radius, 2.0));
-	list->push_back(new PropertyLength(this, _("height"), &m_height));
+	GetAx2Properties(list, m_pos, this);
+#if 0
+
+	list->push_back(new PropertyLengthScaled(this, L"diameter", &m_radius, 2.0));
+	list->push_back(new PropertyLength(this, L"height", &m_height));
+#endif
 	CSolid::GetProperties(list);
 }
 
@@ -88,18 +81,18 @@ void CCylinder::GetGripperPositions(std::list<GripData> *list, bool just_for_end
 	gp_Pnt pyz(o.XYZ() + m_pos.YDirection().XYZ() * m_radius + z_dir.XYZ() * m_height);
 	gp_Pnt pmxz(o.XYZ() + m_pos.XDirection().XYZ() * (-m_radius) + z_dir.XYZ() * m_height);
 	gp_Pnt pz(o.XYZ() + z_dir.XYZ() * m_height);
-	list->push_back(GripData(GripperTypeTranslate,o.X(),o.Y(),o.Z(),NULL));
-	list->push_back(GripData(GripperTypeObjectScaleXY,px.X(),px.Y(),px.Z(),NULL));
-	list->push_back(GripData(GripperTypeRotateObject,pyz.X(),pyz.Y(),pyz.Z(),NULL));
-	list->push_back(GripData(GripperTypeRotateObject,pmxz.X(),pmxz.Y(),pmxz.Z(),NULL));
-	list->push_back(GripData(GripperTypeObjectScaleZ,pz.X(),pz.Y(),pz.Z(),NULL));
+	list->push_back(GripData(GripperTypeTranslate,G2P(o),NULL));
+	list->push_back(GripData(GripperTypeObjectScaleXY, G2P(px), NULL));
+	list->push_back(GripData(GripperTypeRotateObject, G2P(pyz), NULL));
+	list->push_back(GripData(GripperTypeRotateObject, G2P(pmxz), NULL));
+	list->push_back(GripData(GripperTypeObjectScaleZ, G2P(pz), NULL));
 }
 
 void CCylinder::OnApplyProperties()
 {
-	*this = CCylinder(m_pos, m_radius, m_height, m_title.c_str(), m_color, m_opacity);
+	*this = CCylinder(m_pos, m_radius, m_height, m_title.c_str(), m_color, (float)m_opacity);
 	this->create_faces_and_edges();
-	wxGetApp().Repaint();
+	theApp->Repaint();
 }
 
 int CCylinder::GetCentrePoints(double* pos, double* pos2)
@@ -131,14 +124,14 @@ bool CCylinder::Stretch(const double *p, const double* shift, void* data)
 
 	bool make_a_new_cylinder = false;
 
-	if(px.IsEqual(vp, wxGetApp().m_geom_tol)){
+	if(px.IsEqual(vp, TOLERANCE)){
 		px = px.XYZ() + vshift.XYZ();
 		double new_x = gp_Vec(px.XYZ()) * gp_Vec(m_pos.XDirection()) - gp_Vec(o.XYZ()) * gp_Vec(m_pos.XDirection());
 		double new_y = gp_Vec(px.XYZ()) * gp_Vec(m_pos.YDirection()) - gp_Vec(o.XYZ()) * gp_Vec(m_pos.YDirection());
 		make_a_new_cylinder = true;
 		m_radius = sqrt(new_x * new_x + new_y * new_y);
 	}
-	else if(pz.IsEqual(vp, wxGetApp().m_geom_tol)){
+	else if(pz.IsEqual(vp, TOLERANCE)){
 		pz = pz.XYZ() + vshift.XYZ();
 		double new_height = gp_Vec(pz.XYZ()) * gp_Vec(z_dir) - gp_Vec(o.XYZ()) * gp_Vec(z_dir);
 		if(new_height > 0){
@@ -149,14 +142,14 @@ bool CCylinder::Stretch(const double *p, const double* shift, void* data)
 
 	if(make_a_new_cylinder)
 	{
-		CCylinder* new_object = new CCylinder(m_pos, m_radius, m_height, NULL, m_color, m_opacity);
+		CCylinder* new_object = new CCylinder(m_pos, m_radius, m_height, NULL, m_color, (float)m_opacity);
 		new_object->CopyIDsFrom(this);
-		wxGetApp().StartHistory();
-		wxGetApp().DeleteUndoably(this);
-		wxGetApp().AddUndoably(new_object,m_owner,NULL);
-		wxGetApp().EndHistory();
-		wxGetApp().m_marked_list->Clear(false);
-		wxGetApp().m_marked_list->Add(new_object, true);
+		theApp->StartHistory();
+		theApp->DeleteUndoably(this);
+		theApp->AddUndoably(new_object,m_owner,NULL);
+		theApp->EndHistory();
+		theApp->ClearSelection(false);
+		theApp->Mark(new_object);
 	}
 
 	return true;

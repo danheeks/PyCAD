@@ -11,8 +11,8 @@ def ammend_file(fname):
     maybe_str = ''
     trans_str = ''
     maybe_i = 0
-    test_str = '_("?")'
-    test_i = 3 # index of ? above
+    test_str = '_T("?")'
+    test_i = 4 # index of ? above
     test_end = len(test_str)
     
     for c in s:
@@ -38,10 +38,9 @@ def ammend_file(fname):
                 trans_str = ''
                 maybe_i = 0
                 new_s += c
-        if maybe_i > 0:
-            print(str(maybe_i))
-    
-    fout = open('c:/tmp/ammend_test.txt', 'wb')
+                
+    f.close()
+    fout = open(fname, 'wb')
     fout.write(new_s.encode('utf-8'))
     fout.close()
 
@@ -50,7 +49,6 @@ for dname, dirs, files in os.walk("./"):
         filename, file_extension = os.path.splitext(fname)
         if file_extension in exts:
             print (fname)
-            ammend_file('ShapeTools.h')
-            break
+            ammend_file(fname)
     break
     

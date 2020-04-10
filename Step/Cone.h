@@ -12,7 +12,7 @@ protected:
 
 	// CShape's virtual functions
 	void MakeTransformedShape(const gp_Trsf &mat);
-	wxString StretchedName();
+	std::wstring StretchedName();
 
 public:
 	gp_Ax2 m_pos;
@@ -21,12 +21,13 @@ public:
 	double m_height;
 	double m_temp_r1;
 	double m_temp_r2;
+	static int m_type;
 
 	CCone(const gp_Ax2& pos, double r1, double r2, double height, const wchar_t* title, const HeeksColor& col, float opacity);
 	CCone(const TopoDS_Solid &solid, const wchar_t* title, const HeeksColor& col, float opacity);
 
 	// HeeksObj's virtual functions
-	const wchar_t* GetTypeString(void)const{return _("Cone");}
+	const wchar_t* GetTypeString(void)const{return L"Cone";}
 	const wchar_t* GetIconFilePath();
 	void glCommands(bool select, bool marked, bool no_color);
 	HeeksObj *MakeACopy(void)const;
@@ -37,7 +38,6 @@ public:
 	bool GetScaleAboutMatrix(double *m);
 	bool Stretch(const double *p, const double* shift, void* data);
 	bool StretchTemporary(const double *p, const double* shift, void* data);
-	bool IsDifferent(HeeksObj*other);
 	bool DescendForUndo(){return false;}
 
 	// CShape's virtual functions

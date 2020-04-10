@@ -9,7 +9,7 @@ class CEdge;
 
 class CFaceList: public ObjList{
 public:
-	const wchar_t* GetTypeString(void)const{return _("Faces");}
+	const wchar_t* GetTypeString(void)const{return L"Faces";}
 	HeeksObj *MakeACopy(void)const{ return new CFaceList(*this);}
 	const wchar_t* GetIconFilePath();
 	bool DescendForUndo(){return false;}
@@ -18,7 +18,7 @@ public:
 
 class CEdgeList: public ObjList{
 public:
-	const wchar_t* GetTypeString(void)const{return _("Edges");}
+	const wchar_t* GetTypeString(void)const{return L"Edges";}
 	HeeksObj *MakeACopy(void)const{ return new CEdgeList(*this);}
 	const wchar_t* GetIconFilePath();
 	bool DescendForUndo(){return false;}
@@ -27,7 +27,7 @@ public:
 
 class CVertexList: public ObjList{
 public:
-	const wchar_t* GetTypeString(void)const{return _("Vertices");}
+	const wchar_t* GetTypeString(void)const{return L"Vertices";}
 	HeeksObj *MakeACopy(void)const{ return new CVertexList(*this);}
 	const wchar_t* GetIconFilePath();
 	bool DescendForUndo(){return false;}

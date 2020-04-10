@@ -78,8 +78,8 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <OutputFile>..\step.pyd</OutputFile>
-      <AdditionalLibraryDirectories>$(BOOST67_PYTHON_PATH)\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;$(PYTHON3_32BIT_LIB);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(CASROOT69)\win32\vc12\lib;$(BOOST67_PYTHON_PATH)\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;TKVrml.lib;TKStl.lib;TKBRep.lib;TKIGES.lib;TKShHealing.lib;TKSTEP.lib;TKSTEP209.lib;TKSTEPAttr.lib;TKSTEPBase.lib;TKXSBase.lib;TKShapeSchema.lib;FWOSPlugin.lib;PTKernel.lib;TKBool.lib;TKCAF.lib;TKCDF.lib;TKernel.lib;TKFeat.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKHLR.lib;TKMath.lib;TKOffset.lib;TKPCAF.lib;TKPrim.lib;TKPShape.lib;TKService.lib;TKTopAlgo.lib;TKV3d.lib;TKMesh.lib;TKBO.lib;TKXDESTEP.lib;TKXCAF.lib;TKXCAFSchema.lib;TKLCAF.lib;TKPLCAF.lib;$(PYTHON3_32BIT_LIB);%(AdditionalDependencies)</AdditionalDependencies>
       <ProgramDatabaseFile>.\vc_msw\step.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -106,14 +106,19 @@
     <ClCompile Include="..\..\..\PyCAD\trunk\Geom\Finite.cpp" />
     <ClCompile Include="..\..\..\PyCAD\trunk\Geom\Matrix.cpp" />
     <ClCompile Include="..\..\..\PyCAD\trunk\Geom\Offset.cpp" />
+    <ClCompile Include="..\CAD\IdNamedObjList.cpp" />
+    <ClCompile Include="..\CAD\ObjList.cpp" />
     <ClCompile Include="Cone.cpp" />
+    <ClCompile Include="CoordinateSystem.cpp" />
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Face.cpp" />
     <ClCompile Include="FaceTools.cpp" />
     <ClCompile Include="Loop.cpp" />
+    <ClCompile Include="OCCGeom.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
+    <ClCompile Include="RuledSurface.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="ShapeData.cpp" />
     <ClCompile Include="ShapeTools.cpp" />
@@ -145,7 +150,10 @@
     <ClInclude Include="..\..\..\PyCAD\trunk\Geom\clipper.hpp" />
     <ClInclude Include="..\..\..\PyCAD\trunk\Geom\Curve.h" />
     <ClInclude Include="..\..\..\PyCAD\trunk\Geom\Point.h" />
+    <ClInclude Include="..\CAD\IdNamedObjList.h" />
+    <ClInclude Include="..\CAD\ObjList.h" />
     <ClInclude Include="Cone.h" />
+    <ClInclude Include="CoordinateSystem.h" />
     <ClInclude Include="Cuboid.h" />
     <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Edge.h" />
@@ -153,6 +161,9 @@
     <ClInclude Include="Face.h" />
     <ClInclude Include="FaceTools.h" />
     <ClInclude Include="Loop.h" />
+    <ClInclude Include="NurbSurfaceParams.h" />
+    <ClInclude Include="OCCGeom.h" />
+    <ClInclude Include="RuledSurface.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="ShapeData.h" />
     <ClInclude Include="ShapeTools.h" />

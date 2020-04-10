@@ -5,6 +5,9 @@
 #include "Solid.h"
 #include "MarkedList.h"
 
+// static
+int CSolid::m_type = 0;
+
 CSolid::CSolid(const TopoDS_Solid &solid, const wchar_t* title, const HeeksColor& col, float opacity):CShape(solid, title, col, opacity)
 {
 }
@@ -58,7 +61,7 @@ void CSolid::OnApplyProperties()
 	new_object->CopyIDsFrom(this);
 	m_owner->Add(new_object, NULL);
 	m_owner->Remove(this);
-	wxGetApp().m_marked_list->Clear(true);
-	if(wxGetApp().m_marked_list->ObjectMarked(this))wxGetApp().m_marked_list->Add(new_object, true);
-	wxGetApp().Repaint();
+	theApp->ClearSelection(true);
+	if(theApp->ObjectMarked(this))theApp->Mark(new_object);
+	theApp->Repaint();
 }
