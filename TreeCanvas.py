@@ -38,9 +38,13 @@ class TreeObserver(cad.Observer):
     def OnSelectionChanged(self, added, removed):
         self.tree_canvas.Refresh()
         
-class TreeCanvas(wx.ScrolledWindow):
+    def OnClear(self):
+        self.tree_canvas.SetVirtualSize(self.tree_canvas.GetRenderSize())
+        self.tree_canvas.Refresh()
+        
+class TreeCanvas(wx.ScrolledCanvas):
     def __init__(self, parent):
-        wx.ScrolledWindow.__init__(self, parent)
+        wx.ScrolledCanvas.__init__(self, parent)
         self.observer = TreeObserver(self)
         cad.RegisterObserver(self.observer)
         self.LButton = False
@@ -130,12 +134,15 @@ class TreeCanvas(wx.ScrolledWindow):
         pass
         
     def OnRemoved(self, removed):
+        self.SetVirtualSize(self.GetRenderSize())
         self.Refresh()
 
     def OnAdded(self, added):
+        self.SetVirtualSize(self.GetRenderSize())
         self.Refresh()
 
     def OnModified(self, modified):
+        self.SetVirtualSize(self.GetRenderSize())
         self.Refresh()
     
     def OnPaint(self, event):

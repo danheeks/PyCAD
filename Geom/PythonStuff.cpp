@@ -693,6 +693,8 @@ BOOST_PYTHON_MODULE(geom) {
         .def("Intersections",&CurveIntersections)///function Intersections///return list///params Curve c2///returns a list of all the intersections between this Curve and the given Curve///ordered along this Curve
 		.def("GetMaxCutterRadius", &CurveGetMaxCutterRadius)
 		.def("GetBox", &CurveGetBox)///function GetBox///return Box///returns the box that fits round the curve
+		.def("Transform", &CCurve::Transform)
+		
 		;
 
 	/// class Box
@@ -706,6 +708,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("MaxY", &CBox2D::MaxY)///function MaxY///return float///returns the maximum y value
 		.def("Width", &CBox2D::Width)
 		.def("Height", &CBox2D::Height)
+		.def("InsertPoint", static_cast< void(CBox2D::*)(const Point&) >(&CBox2D::Insert))
+		.def("InsertBox", static_cast< void(CBox2D::*)(const CBox2D&) >(&CBox2D::Insert))
 		.def_readwrite("minxy", &CBox2D::m_minxy)
 		.def_readwrite("maxxy", &CBox2D::m_maxxy)
 		;
@@ -769,6 +773,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Inverse", &Matrix::Inverse)///function Inverse
 		.def("Rotate", &MatrixRotate)
 		.def("Translate", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Translate))
+		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale))
 		;
 
 	///class Point3d

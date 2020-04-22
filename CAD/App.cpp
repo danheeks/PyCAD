@@ -33,6 +33,9 @@
 #include "HPoint.h"
 #include "CoordinateSystem.h"
 #include "HCircle.h"
+#include "HILine.h"
+#include "HText.h"
+#include "HeeksFont.h"
 
 CApp *theApp = new CApp;
 
@@ -103,9 +106,7 @@ CApp::CApp()
 	m_show_grippers_on_drag = true;
 	m_extrude_removes_sketches = false;
 	m_loft_removes_sketches = false;
-	m_font_tex_number[0] = 0;
-	m_font_tex_number[1] = 0;
-	m_graphics_text_mode = GraphicsTextModeNone;
+	m_graphics_text_mode = GraphicsTextModeWithHelp;// GraphicsTextModeNone;
 	m_file_open_or_import_type = FileOpenOrImportTypeOther;
 	m_file_open_matrix = NULL;
 	m_min_correlation_factor = 0.75;
@@ -144,7 +145,6 @@ CApp::CApp()
 	m_settings_restored = false;
 
 	m_current_viewport = NULL;
-	m_gl_font_initialized = false;
 	m_observers_frozen = 0;
 	frozen_selection_cleared = false;
 	m_previous_input_mode = NULL;
@@ -246,8 +246,8 @@ void CApp::Reset(){
 	m_marked_list->Clear(true);
 	m_marked_list->Reset();
 	m_name_index.clear();
-	ObserversClear();
 	Clear();
+	ObserversClear();
 	EndHistory();
 	delete history;
 	history = new MainHistory;
@@ -265,10 +265,13 @@ void CApp::Reset(){
 
 static HeeksObj* CreateHLine(){ HeeksColor c; return new HLine(Point3d(), Point3d(), &c); }
 static HeeksObj* CreateHArc(){ HeeksColor c; return new HArc(Point3d(), Point3d(), Point3d(), Point3d(), &c); }
+static HeeksObj* CreateHCircle(){ HeeksColor c; return new HCircle(); }
+static HeeksObj* CreateHILine(){ HeeksColor c; return new HILine(Point3d(), Point3d(), &c); }
 static HeeksObj* CreateHPoint(){ HeeksColor c; return new HPoint(Point3d(), &c); }
 static HeeksObj* CreateCSketch(){ return new CSketch; }
 static HeeksObj* CreateCStlSolid(){ return new CStlSolid; }
 static HeeksObj* CreateCoordinateSystem(){ return new CoordinateSystem; }
+static HeeksObj* CreateHText(){ HeeksColor c; return new HText(Matrix(), L"", &c, 0, 0); }
 
 void CApp::InitializeCreateFunctions()
 {
@@ -277,10 +280,13 @@ void CApp::InitializeCreateFunctions()
 	{
 		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Line", CreateHLine));
 		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Arc", CreateHArc));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Circle", CreateHCircle));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("InfiniteLine", CreateHILine));
 		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Point", CreateHPoint));
 		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Sketch", CreateCSketch));
 		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("STLSolid", CreateCStlSolid));
 		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("CoordinateSystem", CreateCoordinateSystem));
+		object_create_fn_map.insert(std::pair< std::string, HeeksObj*(*)() >("Text", CreateHText));
 	}
 }
 
@@ -628,6 +634,7 @@ bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* pas
 	m_in_OpenFile = false;
 
 	if (history_started)EndHistory();
+	else this->ObserversOnChange(&m_objects, NULL, NULL);
 
 	return open_succeeded;
 }
@@ -2017,32 +2024,34 @@ void CApp::SetObjectID(HeeksObj* object, int id)
 	{
 		object->m_id = id;
 		GroupId_t id_group_type = object->GetIDGroupType();
-
-		UsedIds_t::iterator FindIt1 = used_ids.find(id_group_type);
-		if (FindIt1 == used_ids.end())
+		if (id_group_type != 0)
 		{
-			// add a new map
-			std::list<HeeksObj*> empty_list;
-			empty_list.push_back(object);
-			IdsToObjects_t empty_map;
-			empty_map.insert(std::make_pair(id, empty_list));
-			FindIt1 = used_ids.insert(std::make_pair(id_group_type, empty_map)).first;
-		}
-		else
-		{
-
-			IdsToObjects_t &map = FindIt1->second;
-			IdsToObjects_t::iterator FindIt2 = map.find(id);
-			if (FindIt2 == map.end())
+			UsedIds_t::iterator FindIt1 = used_ids.find(id_group_type);
+			if (FindIt1 == used_ids.end())
 			{
+				// add a new map
 				std::list<HeeksObj*> empty_list;
 				empty_list.push_back(object);
-				map.insert(std::make_pair(id, empty_list));
+				IdsToObjects_t empty_map;
+				empty_map.insert(std::make_pair(id, empty_list));
+				FindIt1 = used_ids.insert(std::make_pair(id_group_type, empty_map)).first;
 			}
 			else
 			{
-				std::list<HeeksObj*> &list = FindIt2->second;
-				list.push_back(object);
+
+				IdsToObjects_t &map = FindIt1->second;
+				IdsToObjects_t::iterator FindIt2 = map.find(id);
+				if (FindIt2 == map.end())
+				{
+					std::list<HeeksObj*> empty_list;
+					empty_list.push_back(object);
+					map.insert(std::make_pair(id, empty_list));
+				}
+				else
+				{
+					std::list<HeeksObj*> &list = FindIt2->second;
+					list.push_back(object);
+				}
 			}
 		}
 	}
@@ -2135,56 +2144,26 @@ void CApp::DestroyTransformGLList(){
 }
 
 
-void CApp::create_font()
+void CApp::render_text(const wchar_t* str, bool select, double scale, double blur_scale)
 {
-	if (m_gl_font_initialized)
-		return;
-	std::wstring fstr = GetResFolder() + L"/bitmaps/font.glf";
-
-	glGenTextures(2, m_font_tex_number);
-
-	//Create our glFont from verdana.glf, using texture 1
-	m_gl_font.Create((char*)Ttc(fstr.c_str()), m_font_tex_number[0], m_font_tex_number[1]);
-	m_gl_font_initialized = true;
-}
-
-void CApp::render_text(const wchar_t* str, bool select)
-{
-	//Needs to be called before text output
-	create_font();
-	EnableBlend();
-	glEnable(GL_TEXTURE_2D);
-	glDepthMask(0);
-	glDisable(GL_POLYGON_OFFSET_FILL);
-	m_gl_font.Begin(select);
-
-	//Draws text with a glFont
-	m_gl_font.DrawString(str, get_text_scale(), 0.0f, 0.0f);
-
-	glDepthMask(1);
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	glDisable(GL_TEXTURE_2D);
-	DisableBlend();
+	DrawHeeksFontStringAntialiased(Ttc(str), scale, blur_scale, false, true);
+	//DrawHeeksFontString(Ttc(str), scale, false, true);
 }
 
 bool CApp::get_text_size(const wchar_t* str, float* width, float* height)
 {
-	create_font();
-
+	return false; 
+#if 0
 	std::pair<int, int> size;
 	m_gl_font.GetStringSize(str, &size);
 	*width = (float)(size.first) * get_text_scale();
 	*height = (float)(size.second) * get_text_scale();
 
 	return true;
+#endif
 }
 
-float CApp::get_text_scale()
-{
-	return 21.0f / m_gl_font.GetTexHeight();
-}
-
-void CApp::render_screen_text2(const wchar_t* str, bool select)
+void CApp::render_screen_text2(const wchar_t* str, bool select, double scale)
 {
 	size_t n = wcslen(str);
 
@@ -2201,8 +2180,9 @@ void CApp::render_screen_text2(const wchar_t* str, bool select)
 		j++;
 		if (str[i] == newline || i == n - 1 || j == 1023){
 			buffer[j] = 0;
-			render_text(buffer, select);
-			if (str[i] == newline)glTranslated(0.0, -2.2, 1.0);
+			render_text(buffer, select, scale, 0.2);
+			if (str[i] == newline)
+				glTranslated(0.0, -2.2 * scale, 0.0);
 			j = 0;
 		}
 	}
@@ -2220,11 +2200,9 @@ void CApp::render_screen_text(const wchar_t* str1, const wchar_t* str2, bool sel
 	m_current_viewport->GetViewportSize(&w, &h);
 	glTranslated(2.0, h - 1.0, 0.0);
 
-	glScaled(10.0, 10.0, 0);
-	render_screen_text2(str1, select);
+	render_screen_text2(str1, select, 10.0);
 
-	glScaled(0.612, 0.612, 0);
-	render_screen_text2(str2, select);
+	render_screen_text2(str2, select, 6.12);
 
 	//Even though this is in reverse order, the different matrices have different stacks, and we want to exit here in the modelview
 	glMatrixMode(GL_PROJECTION);
@@ -2261,9 +2239,8 @@ void CApp::render_screen_text_at(const wchar_t* str1, double scale, double x, do
 	m_current_viewport->GetViewportSize(&w, &h);
 	glTranslated(x, y, 0.0);
 
-	glScaled(scale, scale, 0);
 	glRotated(theta, 0, 0, 1);
-	render_screen_text2(str1, select);
+	render_screen_text2(str1, select, scale);
 
 	//Even though this is in reverse order, the different matrices have different stacks, and we want to exit here in the modelview
 	glMatrixMode(GL_PROJECTION);

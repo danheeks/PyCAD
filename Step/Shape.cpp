@@ -714,9 +714,6 @@ return System.Mass();
 
 bool CShape::ImportSolidsFile(const wchar_t* filepath, bool undoably, std::map<int, CShapeData> *index_map, HeeksObj* paste_into)
 {
-	// only allow paste of solids at top level or to groups
-	if(paste_into && paste_into->GetType() != GroupType)return false;
-
 	// returns true, if suffix handled
 	std::wstring wf(filepath);
 
@@ -752,7 +749,7 @@ bool CShape::ImportSolidsFile(const wchar_t* filepath, bool undoably, std::map<i
 						{
 							if(undoably)theApp->AddUndoably(new_object, add_to, NULL);
 							else add_to->Add(new_object, NULL);
-							shape_data.SetShape((CShape*)new_object/*, !theApp->m_inPaste*/, false);
+							shape_data.SetShape((CShape*)new_object/*, !theApp->m_inPaste*/, true);
 						}
 					}
 				}

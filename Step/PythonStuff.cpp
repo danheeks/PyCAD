@@ -32,6 +32,11 @@
 #include "Vertex.h"
 #include "Loop.h"
 #include "Wire.h"
+#include "Sphere.h"
+#include "Cuboid.h"
+#include "Cylinder.h"
+#include "Cone.h"
+#include "App.h"
 
 std::wstring step_dir;
 
@@ -55,6 +60,34 @@ HeeksObj* CreateLoopObject(){ return new CLoop(); }
 HeeksObj* CreateSolidObject(){ return new CSolid(); }
 HeeksObj* CreateWireObject(){ return new CWire(); }
 
+HeeksObj* NewSphere()
+{
+	gp_Trsf mat = make_matrix(theApp->GetDrawMatrix(true).e);
+	CSphere* new_object = new CSphere(gp_Pnt(0, 0, 0).Transformed(mat), 5, NULL, HeeksColor(240, 191, 191), 1.0f);
+	return new_object;
+}
+
+HeeksObj* NewCuboid()
+{
+	gp_Trsf mat = make_matrix(theApp->GetDrawMatrix(false).e);
+	CCuboid* new_object = new CCuboid(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 10, 10, 10, NULL, HeeksColor(191, 240, 191), 1.0f);
+	return new_object;
+}
+
+HeeksObj* NewCyl()
+{
+	gp_Trsf mat = make_matrix(theApp->GetDrawMatrix(true).e);
+	CCylinder* new_object = new CCylinder(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 5, 10, NULL, HeeksColor(191, 191, 240), 1.0f);
+	return new_object;
+}
+
+HeeksObj* NewCone()
+{
+	gp_Trsf mat = make_matrix(theApp->GetDrawMatrix(true).e);
+	CCone* new_object = new CCone(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 10, 5, 20, NULL, HeeksColor(240, 240, 191), 1.0f);
+	return new_object;
+}
+
 void SetStepFileObjectType(int type){ StepFileObject::m_type = type; }
 void SetVertexType(int type){ HVertex::m_type = type; }
 void SetEdgeType(int type){ CEdge::m_type = type; }
@@ -73,8 +106,12 @@ void SetWireType(int type){ CWire::m_type = type; }
 		boost::python::def("CreateEdgeObject", CreateEdgeObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("CreateFaceObject", CreateFaceObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("CreateLoopObject", CreateLoopObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("CreateStepFileObject", CreateStepFileObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("CreateStepFileObject", CreateStepFileObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("CreateSolidObject", CreateSolidObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("CreateWireObject", CreateWireObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewSphere", NewSphere, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewCyl", NewCyl, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewCone", NewCone, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewCuboid", NewCuboid, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("SetStepFileObjectType", SetStepFileObjectType);
 		boost::python::def("SetVertexType", SetVertexType);
 		boost::python::def("SetEdgeType", SetEdgeType);

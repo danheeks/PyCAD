@@ -3,7 +3,6 @@
 
 #include "HeeksColor.h"
 #include "ObjList.h"
-#include "glfont2.h"
 #include "Index.h"
 #include <map>
 
@@ -87,8 +86,7 @@ private:
 	std::list<HeeksObj*> frozen_selection_removed;
 	Index<unsigned, HeeksObj*> m_name_index;
 
-	void render_screen_text2(const wchar_t* str, bool select);
-	float get_text_scale();
+	void render_screen_text2(const wchar_t* str, bool select, double scale);
 	void RenderDatumOrCurrentCoordSys();
 
 public:
@@ -100,7 +98,6 @@ public:
 #define NUM_BACKGROUND_COLORS 10
 	HeeksColor background_color[NUM_BACKGROUND_COLORS];
 	BackgroundMode m_background_mode;
-	bool m_gl_font_initialized;
 	int m_rotate_mode;
 	bool m_antialiasing;
 	bool digitize_end;
@@ -160,9 +157,6 @@ public:
 	Matrix m_drag_matrix;
 	bool m_extrude_removes_sketches;
 	bool m_loft_removes_sketches;
-	bool m_font_created;
-	glfont::GLFont m_gl_font;
-	unsigned int m_font_tex_number[2];
 	GraphicsTextMode m_graphics_text_mode;
 	bool m_print_scaled_to_page;
 	FileOpenOrImportType m_file_open_or_import_type;
@@ -276,7 +270,7 @@ public:
 	void WereModified(const std::list<HeeksObj*>& list);
 	void WereAdded(const std::list<HeeksObj*>& list);
 	void WereRemoved(const std::list<HeeksObj*>& list);
-	Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
+	virtual Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
 	void GetOptions(std::list<Property *> *list);
 	void DeleteMarkedItems();
 	virtual void glColorEnsuringContrast(const HeeksColor &c);
@@ -323,7 +317,7 @@ public:
 	bool CheckForNOrMore(const std::list<HeeksObj*> &list, int min_num, int type, const std::wstring& msg, const std::wstring& caption);
 	bool CheckForNOrMore(const std::list<HeeksObj*> &list, int min_num, int type1, int type2, const std::wstring& msg, const std::wstring& caption);
 	bool CheckForNOrMore(const std::list<HeeksObj*> &list, int min_num, int type1, int type2, int type3, const std::wstring& msg, const std::wstring& caption);
-	void render_text(const wchar_t* str, bool select);
+	void render_text(const wchar_t* str, bool select, double scale, double blur_scale);
 	bool get_text_size(const wchar_t* str, float* width, float* height);
 	void render_screen_text(const wchar_t* str1, const wchar_t* str2, bool select);
 	void render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta, bool select);
@@ -334,7 +328,6 @@ public:
 	void PlotLine(const double* s, const double* e);
 	void PlotArc(const double* s, const double* e, const double* c);
 	void InitialiseLocale();
-	void create_font();
 	void GetPluginsFromCommandLineParams(std::list<std::wstring> &plugins);
 	void RegisterOnBuildTexture(void(*callbackfunc)());
 	void RegisterOnBeforeNewOrOpen(void(*callbackfunc)(int, int));

@@ -152,6 +152,11 @@ public:
 		CallVoidReturn("OnSelectionChanged", added_list, removed_list);
 
 	}
+
+	void Clear()
+	{
+		CallVoidReturn("OnClear");
+	}
 };
 
 static std::wstring str_for_input_mode;
@@ -165,6 +170,17 @@ public:
 	const wchar_t* GetTitle()override
 	{
 		if (boost::python::override f = this->get_override("GetTitle"))
+		{
+			std::string s = f();
+			str_for_input_mode = Ctt(s.c_str());
+			return str_for_input_mode.c_str();
+		}
+		return NULL;
+	}
+
+	const wchar_t* GetHelpText()override
+	{
+		if (boost::python::override f = this->get_override("GetHelpText"))
 		{
 			std::string s = f();
 			str_for_input_mode = Ctt(s.c_str());
@@ -1003,9 +1019,6 @@ void AddProperty(Property* property)
 }
 
 boost::python::object GetObjectFromId(int type, int id) {
-	// to do
-	// this returns a list with the object in, because that works
-	// but it should just return an object
 	boost::python::list olist;
 	HeeksObj* object = theApp->GetIDObject(type, id);
 	if (object != NULL)

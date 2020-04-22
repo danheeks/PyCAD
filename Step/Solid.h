@@ -24,7 +24,8 @@ public:
 	virtual const CSolid& operator=(const CSolid& s){ CShape::operator =(s); return *this;}
 
 	int GetType()const{return m_type;}
-//	long GetMarkingMask()const{return MARKING_FILTER_SOLID;}
+	int GetIDGroupType()const{ return StlSolidType; }
+	//	long GetMarkingMask()const{return MARKING_FILTER_SOLID;}
 	const wchar_t* GetTypeString(void)const{return L"Solid";}
 	const wchar_t* GetIconFilePath();
 	HeeksObj *MakeACopy(void)const;

@@ -43,13 +43,13 @@ public:
 		}
 	}
 	void Insert(double x, double y, double z){ // insert a point
-		if(m_valid){
-			if(x < m_x[0])m_x[0] = x;
-			if(x > m_x[3])m_x[3] = x;
-			if(y < m_x[1])m_x[1] = y;
-			if(y > m_x[4])m_x[4] = y;
-			if(z < m_x[2])m_x[2] = z;
-			if(z > m_x[5])m_x[5] = z;
+		if (m_valid){
+			if (x < m_x[0])m_x[0] = x;
+			if (x > m_x[3])m_x[3] = x;
+			if (y < m_x[1])m_x[1] = y;
+			if (y > m_x[4])m_x[4] = y;
+			if (z < m_x[2])m_x[2] = z;
+			if (z > m_x[5])m_x[5] = z;
 		}
 		else
 		{

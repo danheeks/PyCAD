@@ -21,6 +21,7 @@ public:
 	HeeksColor best_black_or_white(void)const;
 	void glColor(void)const;
 	void glClearColor(GLclampf alpha)const;
+	bool isGray()const{ red == 127 && green == 127 && blue == 127; }
 
 	bool operator!= ( const HeeksColor & rhs ) const { return(! (*this == rhs)); }
 };

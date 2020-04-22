@@ -53,8 +53,8 @@ public:
 	static bool GetArcTangentPoints(const Circle& c, const gp_Lin &line, const Point3d& p, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis);
 	static bool GetArcTangentPoints(const Circle& c1, const Circle &c2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis);
 	static bool GetArcTangentPoints(const gp_Lin& l1, const gp_Lin &l2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis);
-	static bool GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis);
-	static bool GetArcTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis);
+	static bool GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3d& b, const Point3d *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis);
+	static bool GetArcTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, const Point3d *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis);
 #endif
 	void SetCircle(Circle c);
 	Circle GetCircle()const;

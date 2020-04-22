@@ -66,7 +66,7 @@ class Frame(wx.Frame):
         str = self.aui_manager.SavePerspective()
         config = HeeksConfig()
         config.Write('AuiPerspective', str)
-        self.aui_manager.UnInit()
+        #self.aui_manager.UnInit()
         
     def OnSize(self, e):
         size = e.GetSize()
@@ -85,6 +85,7 @@ class Frame(wx.Frame):
             e.Veto()
             return
         e.Skip()
+        self.aui_manager.UnInit()
         
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
@@ -158,6 +159,9 @@ class Frame(wx.Frame):
         self.AddMenuItem('Add Text', self.OnText, None, 'text')
         self.AddMenuItem('Add Dimension', self.OnDimensioning, None, 'dimension')
         self.EndMenu()
+        
+        if wx.GetApp().IsSolidApp():
+            wx.GetApp().AddSolidMenu(self)
 
         self.AddMenu('Set &Origin')
         self.AddMenuItem('Pick 3 points', self.OnCoordinateSystem, None, 'coords3')
@@ -182,10 +186,18 @@ class Frame(wx.Frame):
         self.AddMenuItem('Input', self.OnViewInput, self.OnUpdateViewInput, check_item = True)
         self.AddMenuItem('Properties', self.OnViewProperties, self.OnUpdateViewProperties, check_item = True)
         self.EndMenu()
+        
+        self.AddMenu('Text')
+        self.AddMenuItem('Convert Heeks Font To C++', self.ConvertLines, None)        
+        self.EndMenu()      
 
         self.AddExtraMenus()
 
         self.SetMenuBar(self.menuBar)
+        
+    def ConvertLines(self, e):
+        from HeeksFont import ConvertHeeksFont
+        ConvertHeeksFont()
         
     def AddExtraMenus(self):
         pass

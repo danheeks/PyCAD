@@ -318,6 +318,9 @@ class App(wx.App):
         
     def GetViewport(self):
         return self.frame.graphics_canvas.viewport
+    
+    def IsSolidApp(self):
+        return False
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

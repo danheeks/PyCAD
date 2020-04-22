@@ -111,7 +111,6 @@
     <ClCompile Include="dxf.cpp" />
     <ClCompile Include="EndedObject.cpp" />
     <ClCompile Include="ExtrudedObj.cpp" />
-    <ClCompile Include="glfont2.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Gripper.cpp" />
     <ClCompile Include="GripperSelTransform.cpp" />
@@ -120,11 +119,13 @@
     <ClCompile Include="HCircle.cpp" />
     <ClCompile Include="HDxf.cpp" />
     <ClCompile Include="HeeksColor.cpp" />
+    <ClCompile Include="HeeksFont.cpp" />
     <ClCompile Include="HeeksObj.cpp" />
     <ClCompile Include="HILine.cpp" />
     <ClCompile Include="History.cpp" />
     <ClCompile Include="HLine.cpp" />
     <ClCompile Include="HPoint.cpp" />
+    <ClCompile Include="HText.cpp" />
     <ClCompile Include="HXml.cpp" />
     <ClCompile Include="IdNamedObj.cpp" />
     <ClCompile Include="IdNamedObjList.cpp" />
@@ -183,7 +184,6 @@
     <ClInclude Include="dxf.h" />
     <ClInclude Include="EndedObject.h" />
     <ClInclude Include="ExtrudedObj.h" />
-    <ClInclude Include="glfont2.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GripData.h" />
     <ClInclude Include="Gripper.h" />
@@ -194,11 +194,14 @@
     <ClInclude Include="HCircle.h" />
     <ClInclude Include="HDxf.h" />
     <ClInclude Include="HeeksColor.h" />
+    <ClInclude Include="HeeksFont.h" />
+    <ClInclude Include="HeeksFontData.h" />
     <ClInclude Include="HeeksObj.h" />
     <ClInclude Include="HILine.h" />
     <ClInclude Include="History.h" />
     <ClInclude Include="HLine.h" />
     <ClInclude Include="HPoint.h" />
+    <ClInclude Include="HText.h" />
     <ClInclude Include="HXml.h" />
     <ClInclude Include="IdNamedObj.h" />
     <ClInclude Include="IdNamedObjList.h" />

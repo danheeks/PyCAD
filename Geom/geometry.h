@@ -291,6 +291,7 @@ public:
 	void	ToPeps(int id, bool draw = true);									// copy Point to Peps
 #endif
 	Point3d Transformed(const Matrix& m);
+	void Transform(const Matrix& m);
 	Point3d TransformedOnlyRotation(const Matrix& m);
 	double Dist(const Point3d& p)const;													// distance between 2 points
 	double Dist2D(const Point3d& p)const;

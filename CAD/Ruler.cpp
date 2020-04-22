@@ -57,7 +57,7 @@ void RulerMark::glCommands(double units)
 		glPushMatrix();
 		glTranslated(dpos + half_width, -length + 2.05, 0.0);
 		glColor4ub(0, 0, 0, 255);
-		theApp->render_text(str.c_str(), false);
+		theApp->render_text(str.c_str(), false, 1.0, 1.0 / theApp->GetPixelScale());
 		glPopMatrix();
 	}
 	else if(pos % 10 == 0)

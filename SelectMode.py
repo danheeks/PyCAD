@@ -26,7 +26,26 @@ class SelectMode(cad.InputMode):
         
     # cad.InputMode's overridden method
     def GetTitle(self):
-        return self.prompt_when_doing_a_main_loop if self.doing_a_main_loop else 'Select mode'
+        return self.prompt_when_doing_a_main_loop if self.doing_a_main_loop else 'Select Mode'
+    
+    def GetHelpText(self):
+        s = 'Left button for selecting objects\n( with Ctrl key for extra objects)\n( with Shift key for similar objects)\nDrag with left button to window select'
+        
+        if self.dragging_moves_objects: s+='\nor to move object if on an object'
+        s += '\nMouse wheel to zoom in and out'
+        
+        if self.ctrl_does_rotate:
+            s += '\nMiddle button to pan view\n( with Ctrl key to rotate view )'
+        else:
+            s += '\nMiddle button to rotate view\n( with Ctrl key to pan view )'
+
+        s += '\nRight button for object menu\nSee options window to hide this help\n("view options"->"screen text")'
+        
+        if self.doing_a_main_loop:
+            s += '\nPress Esc key to cancel'
+            s += '\nPress Return key to accept selection'
+
+        return s
 
     def OnMouse(self, event):
         left_and_right_pressed, event_used = self.left_and_right.LeftAndRightPressed(event)

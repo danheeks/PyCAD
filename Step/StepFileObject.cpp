@@ -87,7 +87,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 						ofstream ofs(temp_file.c_str());
 						ofs << file_text;
 					}
-					CShape::ImportSolidsFile(temp_file.c_str(), theApp->GetUndoableForOpenXML(), &index_map, theApp->GetPastIntoForOpenXML());
+					CShape::ImportSolidsFile(temp_file.c_str(), false, &index_map, this);
 				}
 			}
 		}
@@ -107,7 +107,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 					ofstream ofs(temp_file.c_str());
 					ofs << a->Value();
 				}
-				CShape::ImportSolidsFile(temp_file.c_str(), theApp->GetUndoableForOpenXML(), &index_map, theApp->GetPastIntoForOpenXML());
+				CShape::ImportSolidsFile(temp_file.c_str(), false, &index_map, this);
 			}
 		}
 	}

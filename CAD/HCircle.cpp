@@ -186,7 +186,7 @@ bool HCircle::FindPossTangentPoint(const Line &ray, double *point){
 bool HCircle::Stretch(const double *p, const double* shift, void* data){
 #if 0 // to do
 	Point3d vp = make_point(p);
-	gp_Vec vshift = make_vector(shift);
+	Point3d vshift = make_vector(shift);
 
 	gp_Ax2 axis(m_axis.Location(), m_axis.Direction());
 	Point3d x_axis = axis.XDirection();
@@ -227,7 +227,6 @@ void HCircle::WriteToXML(TiXmlElement *element)
 	WriteToXML(element);
 }
 
-// static member function
 void HCircle::ReadFromXML(TiXmlElement* element)
 {
 	int int_value;
@@ -316,19 +315,19 @@ bool HCircle::GetLineTangentPoints(const Circle& c1, const Circle& c2, const Poi
 
 	// they need to be flat ( compared with each other )
 	if (fabs(fabs(c1.Axis().Direction() * c2.Axis().Direction()) - 1.0) > 0.00000001)return false;
-	if (fabs(gp_Vec(c1.Location()) * c1.Axis().Direction() - gp_Vec(c2.Location()) * c1.Axis().Direction()) > 0.00000001)return false;
+	if (fabs(Point3d(c1.Location()) * c1.Axis().Direction() - Point3d(c2.Location()) * c1.Axis().Direction()) > 0.00000001)return false;
 
 	// not concentric
 	if (c1.Location().IsEqual(c2.Location(), theApp->m_geom_tol))return false;
 
 	// find left and right
-	gp_Vec join(c1.Location(), c2.Location());
-	gp_Vec forward = join.Normalized();
-	gp_Vec left1 = c1.Axis().Direction() ^ join;
-	gp_Vec left2 = c2.Axis().Direction() ^ join;
+	Point3d join(c1.Location(), c2.Location());
+	Point3d forward = join.Normalized();
+	Point3d left1 = c1.Axis().Direction() ^ join;
+	Point3d left2 = c2.Axis().Direction() ^ join;
 	if (left1 * left2 < 0)left2 = -left2;
-	gp_Vec c1a(c1.Location(), a);
-	gp_Vec c2b(c2.Location(), b);
+	Point3d c1a(c1.Location(), a);
+	Point3d c2b(c2.Location(), b);
 
 	bool is_left1 = c1a * left1 > 0;
 	bool is_left2 = c2b * left2 > 0;
@@ -372,10 +371,10 @@ bool HCircle::GetLineTangentPoint(const Circle& c, const Point3d& a, const Point
 	// find the tangent point for a line from near point "a" on the circle to point "b"
 
 	// find left and right
-	gp_Vec join(c.Location(), b);
-	gp_Vec forward = join.Normalized();
-	gp_Vec left = c.Axis().Direction() ^ join;
-	gp_Vec ca(c.Location(), a);
+	Point3d join(c.Location(), b);
+	Point3d forward = join.Normalized();
+	Point3d left = c.Axis().Direction() ^ join;
+	Point3d ca(c.Location(), a);
 
 	bool is_left = ca * left > 0;
 	double r = c.Radius();
@@ -399,18 +398,18 @@ bool HCircle::GetArcTangentPoints(const Circle& c, const gp_Lin &line, const Poi
 	// returns p1 - on the line, p2 - on the circle, centre - the centre point of the arc
 
 	// they need to be flat ( compared with each other )
-	if (fabs(gp_Vec(c.Axis().Direction()) * gp_Vec(line.Direction())) > 0.00000001)return false;
-	if (fabs(gp_Vec(c.Location()) * c.Axis().Direction() - gp_Vec(line.Location()) * c.Axis().Direction()) > 0.00000001)return false;
+	if (fabs(Point3d(c.Axis().Direction()) * Point3d(line.Direction())) > 0.00000001)return false;
+	if (fabs(Point3d(c.Location()) * c.Axis().Direction() - Point3d(line.Location()) * c.Axis().Direction()) > 0.00000001)return false;
 
 	// make a concentric circle
-	bool p_infront_of_centre = gp_Vec(p) * gp_Vec(line.Direction()) > gp_Vec(c.Location()) * gp_Vec(line.Direction());
+	bool p_infront_of_centre = Point3d(p) * Point3d(line.Direction()) > Point3d(c.Location()) * Point3d(line.Direction());
 	double R = p_infront_of_centre ? (c.Radius() - radius) : (c.Radius() + radius);
 	if (R < 0.000000000000001)return false;
 	Circle concentric_circle(gp_Ax2(c.Axis().Location(), c.Axis().Direction()), R);
 
 	// make an offset line
-	gp_Vec left = c.Axis().Direction() ^ line.Direction();
-	bool p_on_left_of_line = gp_Vec(p) * left > gp_Vec(line.Location()) * left;
+	Point3d left = c.Axis().Direction() ^ line.Direction();
+	bool p_on_left_of_line = Point3d(p) * left > Point3d(line.Location()) * left;
 	gp_Lin offset_line(Point3d(line.Location() + left * (p_on_left_of_line ? radius : -radius)), line.Direction());
 
 	// find intersection between concentric circle and offset line
@@ -422,7 +421,7 @@ bool HCircle::GetArcTangentPoints(const Circle& c, const gp_Lin &line, const Poi
 		for (std::list<Point3d>::iterator It = rl.begin(); It != rl.end(); It++)
 		{
 			Point3d& pnt = *It;
-			double dp = gp_Vec(pnt) * gp_Vec(line.Direction());
+			double dp = Point3d(pnt) * Point3d(line.Direction());
 			if (best_pnt == NULL || (p_infront_of_centre && dp > best_dp) || (!p_infront_of_centre && dp < best_dp))
 			{
 				best_pnt = &pnt;
@@ -518,19 +517,19 @@ bool HCircle::GetArcTangentPoints(const Circle& c1, const Circle &c2, const Poin
 
 	// theApp need to be flat ( compared with each other )
 	if (fabs(fabs(c1.Axis().Direction() * c2.Axis().Direction()) - 1.0) > 0.00000001)return false;
-	if (fabs(gp_Vec(c1.Location()) * c1.Axis().Direction() - gp_Vec(c2.Location()) * c1.Axis().Direction()) > 0.00000001)return false;
+	if (fabs(Point3d(c1.Location()) * c1.Axis().Direction() - Point3d(c2.Location()) * c1.Axis().Direction()) > 0.00000001)return false;
 
 	// not concentric
 	if (c1.Location().IsEqual(c2.Location(), theApp->m_geom_tol))return false;
 
 	// find left and right
-	gp_Vec join(c1.Location(), c2.Location());
-	gp_Vec forward = join.Normalized();
-	gp_Vec left1 = c1.Axis().Direction() ^ join;
-	gp_Vec left2 = c2.Axis().Direction() ^ join;
+	Point3d join(c1.Location(), c2.Location());
+	Point3d forward = join.Normalized();
+	Point3d left1 = c1.Axis().Direction() ^ join;
+	Point3d left2 = c2.Axis().Direction() ^ join;
 	if (left1 * left2 < 0)left2 = -left2;
-	gp_Vec c1a(c1.Location(), a);
-	gp_Vec c2b(c2.Location(), b);
+	Point3d c1a(c1.Location(), a);
+	Point3d c2b(c2.Location(), b);
 
 	double r1 = c1.Radius();
 	double r2 = c2.Radius();
@@ -589,12 +588,12 @@ bool HCircle::GetArcTangentPoints(const Circle& c1, const Circle &c2, const Poin
 bool HCircle::GetArcTangentPoints(const gp_Lin& l1, const gp_Lin &l2, const Point3d& a, const Point3d& b, double radius, Point3d& p1, Point3d& p2, Point3d& centre, Point3d& axis)
 {
 	// cross product to find axis of arc
-	gp_Vec xp = gp_Vec(l1.Direction()) ^ gp_Vec(l2.Direction());
+	Point3d xp = Point3d(l1.Direction()) ^ Point3d(l2.Direction());
 	if (xp.Magnitude() < 0.00000000000001)return false;
 	axis = Point3d(xp);
 
-	gp_Vec left1 = axis ^ l1.Direction();
-	gp_Vec left2 = axis ^ l2.Direction();
+	Point3d left1 = axis ^ l1.Direction();
+	Point3d left2 = axis ^ l2.Direction();
 
 	gp_Lin offset_l1_left(l1.Location() + left1 * radius, l1.Direction());
 	gp_Lin offset_l1_right(l1.Location() - left1 * radius, l1.Direction());
@@ -641,17 +640,17 @@ bool HCircle::GetArcTangentPoints(const gp_Lin& l1, const gp_Lin &l2, const Poin
 }
 
 // static
-bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis)
+bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3d& b, const Point3d *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis)
 {
 	// find the tangent point on the line l, for an arc from near point "a" on the line to exact given point "b"
 
 	Point3d c = ClosestPointOnLine(l, b);
 	if (c.Distance(b) < 0.000000000001)return false;
-	Point3d sideways(gp_Vec(c, b));
+	Point3d sideways(Point3d(c, b));
 
 	if (final_direction)
 	{
-		if ((*final_direction) * gp_Vec(sideways) >= 0)// b on correct side compared with final direction
+		if ((*final_direction) * Point3d(sideways) >= 0)// b on correct side compared with final direction
 		{
 			gp_Lin final_dir_line(b, Point3d(final_direction->XYZ()));
 			if (!l.Direction().IsEqual(Point3d(final_direction->XYZ()), 0.00000001) && !l.Direction().IsEqual(-Point3d(final_direction->XYZ()), 0.00000001))
@@ -705,7 +704,7 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 				}
 			}
 		}
-		gp_Vec v0 = -(*final_direction);
+		Point3d v0 = -(*final_direction);
 		return HArc::TangentialArc(b, v0, a, centre, axis);
 	}
 	else
@@ -751,7 +750,7 @@ bool HCircle::GetArcTangentPoint(const gp_Lin& l, const Point3d& a, const Point3
 }
 
 // static
-bool HCircle::GetArcTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, const gp_Vec *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis)
+bool HCircle::GetArcTangentPoint(const Circle& c, const Point3d& a, const Point3d& b, const Point3d *final_direction, double* radius, Point3d& p, Point3d& centre, Point3d& axis)
 {
 	// find the tangent point on the circle c, for an arc from near point "a" on the circle to exact given point "b"
 	if (final_direction)
