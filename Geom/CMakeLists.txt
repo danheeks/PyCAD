@@ -64,6 +64,7 @@ set(GEOM_SRC
     AreaDxf.cpp
     AreaOrderer.cpp
     AreaPocket.cpp
+    Box.cpp
     Circle.cpp
     clipper.cpp
     Construction.cpp
@@ -71,12 +72,12 @@ set(GEOM_SRC
     Curve3D.cpp
     dxf.cpp
     Finite.cpp
+    Geom.cpp
     HeeksGeomDxf.cpp
-    kurve.cpp
     Matrix.cpp
     Mesh.cpp
     OctTree.cpp
-    offset.cpp
+    Offset.cpp
     PythonStuff.cpp
     Solid.cpp
     Tris.cpp
