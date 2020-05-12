@@ -169,6 +169,7 @@
     <ClInclude Include="..\Geom\Arc.h" />
     <ClInclude Include="..\Geom\Area.h" />
     <ClInclude Include="..\Geom\AreaOrderer.h" />
+    <ClInclude Include="..\Geom\Box.h" />
     <ClInclude Include="..\Geom\Circle.h" />
     <ClInclude Include="..\Geom\clipper.hpp" />
     <ClInclude Include="..\Geom\Curve.h" />

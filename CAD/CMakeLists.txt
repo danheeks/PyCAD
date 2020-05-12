@@ -122,7 +122,6 @@ set(CAD_SRC
     LineArcDrawing.cpp
     MagDragWindow.cpp
     MarkedList.cpp
-    MarkedObject.cpp
     ObjList.cpp
     Picking.cpp
     PointOrWindow.cpp
