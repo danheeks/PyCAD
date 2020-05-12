@@ -108,6 +108,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
     def Resize(self):
       s = self.GetClientSize()
       self.viewport.WidthAndHeightChanged(s.GetWidth(), s.GetHeight())
+      print('size = ' + str((s.GetWidth(), s.GetHeight())))
       self.Refresh()
 
     def OnPaint(self, event):
@@ -117,4 +118,5 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       for callback in self.paint_callbacks:
           callback()
       self.SwapBuffers()
+      
       return

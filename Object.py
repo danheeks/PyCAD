@@ -14,6 +14,9 @@ class Object(cad.BaseObject):
     def GetTitle(self):
         return self.GetTypeString()
         
+    def GetTypeString(self):
+        return 'Unknown'
+        
     def GetProperties(self):
         return cad.BaseObject.GetBaseProperties(self)
         

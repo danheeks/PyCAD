@@ -100,7 +100,6 @@ set(CAD_SRC
     dxf.cpp
     EndedObject.cpp
     ExtrudedObj.cpp
-    glfont2.cpp
     Grid.cpp
     Gripper.cpp
     GripperSelTransform.cpp
@@ -109,11 +108,13 @@ set(CAD_SRC
     HCircle.cpp
     HDxf.cpp
     HeeksColor.cpp
+    HeeksFont.cpp
     HeeksObj.cpp
     HILine.cpp
     History.cpp
     HLine.cpp
     HPoint.cpp
+    HText.cpp
     HXml.cpp
     IdNamedObj.cpp
     IdNamedObjList.cpp

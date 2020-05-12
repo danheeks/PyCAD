@@ -39,6 +39,7 @@
 
 CApp *theApp = new CApp;
 
+extern void PythonOnGLCommands();
 
 static unsigned int DecimalPlaces(const double value)
 {
@@ -257,6 +258,7 @@ void CApp::Reset(){
 	m_current_viewport->m_view_point.SetView(vy, vz, 6);
 	m_hidden_for_drag.clear();
 	m_show_grippers_on_drag = true;
+	if (m_ruler)delete m_ruler;
 	*m_ruler = HRuler();
 	RestoreInputMode();
 
@@ -1272,6 +1274,7 @@ void CApp::glCommandsAll(const CViewPoint &view_point)
 		void(*callbackfunc)() = *It;
 		(*callbackfunc)();
 	}
+	PythonOnGLCommands();
 	glEnable(GL_POLYGON_OFFSET_FILL);
 
 	input_mode_object->OnRender();

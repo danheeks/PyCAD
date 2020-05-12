@@ -65,23 +65,27 @@ void DrawHeeksFontString(const char* str, double scale, bool outline, bool fill)
 	glPopMatrix();
 }
 
-static double dither_xy[8][2] = {
-	{ 1.0, 0.0, },
-	{ 0.7, 0.7, },
+#define NUM_DITHERS 7
+static double dither_xy[NUM_DITHERS][2] = {
+	{ 0.0, 0.0, },
+	{ 0.866, 0.5, },
 	{ 0.0, 1.0, },
-	{ -0.7, 0.7, },
-	{ -1.0, 0.0, },
-	{ -0.7, -0.7, },
+	{ -0.866, 0.5, },
+	{ -0.866, -0.5, },
 	{ 0.0, -1.0, },
-	{ 0.7, -0.7, },
+	{ 0.866, -0.5, },
 };
 
 void DrawHeeksFontStringAntialiased(const char* str, double scale, double blur_scale, bool outline, bool fill)
 {
-	glColor4ub(0x00, 0x00, 0x00, 0x40);
+	float currentColor[4];
+	glGetFloatv(GL_CURRENT_COLOR, currentColor);
+
+	glColor4f(currentColor[0], currentColor[1], currentColor[2], 0.25f);
+	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < NUM_DITHERS; i++)
 	{
 		glPushMatrix();
 		glTranslated(dither_xy[i][0] * blur_scale, dither_xy[i][1] * blur_scale, 0.0);
@@ -89,4 +93,5 @@ void DrawHeeksFontStringAntialiased(const char* str, double scale, double blur_s
 		glPopMatrix();
 	}
 	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 }

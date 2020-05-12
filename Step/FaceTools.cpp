@@ -83,8 +83,6 @@ void DrawFace(TopoDS_Face face,void(*callbackfunc)(const double* x, const double
 {
 	double x[9], n[9];
 
-	StdPrs_ToolShadedShape SST;
-
 	// Get triangulation
 	TopLoc_Location L;
 	Handle_Poly_Triangulation facing = BRep_Tool::Triangulation(face,L);
@@ -169,7 +167,7 @@ void DrawFace(TopoDS_Face face,void(*callbackfunc)(const double* x, const double
 		const Poly_Array1OfTriangle& triangles = facing->Triangles();
 		TColgp_Array1OfDir myNormal(Nodes.Lower(), Nodes.Upper());
 
-		SST.Normal(face, pc, myNormal);
+		StdPrs_ToolShadedShape::Normal(face, pc, myNormal);
 
 		Standard_Integer nnn = facing->NbTriangles();					// nnn : nombre de triangles
 		Standard_Integer nt, n1, n2, n3 = 0;						// nt  : triangle courant

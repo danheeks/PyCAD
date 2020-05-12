@@ -5,6 +5,7 @@ from TreeCanvas import TreeCanvas
 from InputModeCanvas import InputModeCanvas
 from PropertiesCanvas import PropertiesCanvas
 from ObjPropsCanvas import ObjPropsCanvas
+from Options import Options
 import cad
 import sys
 import os
@@ -22,6 +23,7 @@ class Frame(wx.Frame):
         wx.Frame.__init__(self, parent, id, '', pos, size, style, name)
 
         config = HeeksConfig()
+        self.aui_manager = None
         self.ID_RECENT_FIRST = wx.ID_HIGHEST + 1
         self.ID_RECENT_MENU = self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES
         self.windows_visible = {}
@@ -43,11 +45,15 @@ class Frame(wx.Frame):
         self.aui_manager.AddPane(self.input_mode_canvas, wx.aui.AuiPaneInfo().Name('Input').Caption('Input').Left().BestSize(wx.Size(300,200)).Position(0))
         
         self.properties_canvas = ObjPropsCanvas(self)
-        self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(1))
+        self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(2))
+        
+        #self.options = Options(self)
+        #self.aui_manager.AddPane(self.options, wx.aui.AuiPaneInfo().Name('Options').Caption('Options').Left().BestSize(wx.Size(300,200)).Position(1))
         
         wx.GetApp().RegisterHideableWindow(self.tree_canvas)
         wx.GetApp().RegisterHideableWindow(self.input_mode_canvas)
         wx.GetApp().RegisterHideableWindow(self.properties_canvas)
+        #wx.GetApp().RegisterHideableWindow(self.options)
         
         self.AddExtraWindows()
 
@@ -63,10 +69,10 @@ class Frame(wx.Frame):
         self.gears = []
         
     def __del__(self):
-        str = self.aui_manager.SavePerspective()
-        config = HeeksConfig()
-        config.Write('AuiPerspective', str)
-        #self.aui_manager.UnInit()
+        if self.aui_manager:
+            str = self.aui_manager.SavePerspective()
+            config = HeeksConfig()
+            config.Write('AuiPerspective', str)
         
     def OnSize(self, e):
         size = e.GetSize()
@@ -661,7 +667,7 @@ class Frame(wx.Frame):
         cad.AddUndoably(gear, None, None)
         
     def OnText(self, e):
-        pass
+        cad.AddUndoably(cad.NewText("text"))
         
     def OnDimensioning(self, e):
         pass

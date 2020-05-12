@@ -321,6 +321,13 @@ class App(wx.App):
     
     def IsSolidApp(self):
         return False
+    
+    def GetOptions(self):
+        properties = []
+        
+        properties.append(PyProperty("End Beyond Full Profile", 'end_beyond_full_profile', self))
+        
+        return properties
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

@@ -39,6 +39,7 @@
 #include "HLine.h"
 #include "HArc.h"
 #include "HPoint.h"
+#include "HText.h"
 #include "InputMode.h"
 #include "SelectMode.h"
 #include "MagDragWindow.h"
@@ -350,6 +351,30 @@ void RegisterOnRepaint(PyObject *callback)
 	repaint_callbacks.push_back(callback);
 }
 
+
+
+std::list<PyObject*>  on_gl_commands_callbacks;
+
+void PythonOnGLCommands()
+{
+	for (std::list<PyObject*>::iterator It = on_gl_commands_callbacks.begin(); It != on_gl_commands_callbacks.end(); It++)
+	{
+		CallPythonCallback(*It);
+	}
+}
+
+void RegisterOnGLCommands(PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	on_gl_commands_callbacks.push_back(callback);
+}
+
+
+
 std::list<PyObject*>  end_xml_write_callbacks;
 
 void PythonOnEndXmlWrite()
@@ -660,6 +685,11 @@ HeeksObj* NewPoint(const Point3d& p)
 {
 	HPoint* point = new HPoint(p, &theApp->current_color);
 	return point;
+}
+
+HeeksObj* NewText(const std::wstring &value)
+{
+	return new HText(Matrix(), value, &theApp->current_color, 0, 0);
 }
 
 boost::python::list HeeksObjGetLines(HeeksObj& object)
@@ -1900,6 +1930,11 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("Unproject", &CViewPoint::glUnproject)
 			.def("ShiftI", &CViewPoint::ShiftI)
 			.def("TurnI", &CViewPoint::TurnI)
+			.def("Rightwards", &CViewPoint::rightwards_vector)
+			.def("Forwards", &CViewPoint::forwards_vector)
+			.def_readwrite("lens_point", &CViewPoint::m_lens_point)
+			.def_readwrite("target_point", &CViewPoint::m_target_point)
+			.def_readwrite("vertical", &CViewPoint::m_vertical)
 			;
 
 		boost::python::class_<CViewport>("Viewport")
@@ -2233,6 +2268,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("RegisterOnEndXmlWrite", RegisterOnEndXmlWrite);
 		boost::python::def("RegisterObserver", RegisterObserver);
 		boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
+		boost::python::def("RegisterOnGLCommands", RegisterOnGLCommands);
 		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
 		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
 		boost::python::def("SetInputModeCallback", SetInputModeCallback);
@@ -2289,6 +2325,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("SetEllipseDrawing", SetEllipseDrawing);
 		boost::python::def("SetILineDrawing", SetILineDrawing);
 		boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("PyIncref", PyIncref);
 		boost::python::def("GetNextID", GetNextID);
 		boost::python::def("GetDrawSelect", GetDrawSelect);

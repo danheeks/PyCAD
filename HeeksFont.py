@@ -1,11 +1,12 @@
 import geom
 import cad
+import os
 
 POSITION_COLOUR = 'ff70ff'
 
 def MakeCurveFromD(d, group_name):
     curve = geom.Curve()
-    mode = 'x' # x y h v
+    mode = 'x' # x y h v cx1 cx2 cy1 cy2
     nums = ''
     curp = geom.Point(0,0)
     absolute = True
@@ -39,6 +40,12 @@ def MakeCurveFromD(d, group_name):
         elif c == 'V':
             absolute = True
             mode = 'v'
+        elif c == 'c':
+            mode = 'cx1'
+            absolute = False
+        elif c == 'C':
+            mode = 'cx1'
+            absolute = True
         elif c == ' ':
             if len(nums) > 0:
                 if mode == 'y':
@@ -57,20 +64,30 @@ def MakeCurveFromD(d, group_name):
                     if absolute: curp.y = -float(nums)
                     else: curp.y -= float(nums)
                     curve.Append(curp)
+                elif mode == 'cy1':
+                    print('cy1')
+                    mode = 'cx2'
+                elif mode == 'cy2':
+                    print('cy2')
+                    mode = 'x'
                 nums = ''
         elif c == ',':
             if mode == 'x':
                 if absolute: curp.x = float(nums)
                 else: curp.x += float(nums)
                 mode = 'y'
-                nums = ''
+            elif mode == 'cx1':
+                print('cx1')
+                mode = 'cy1'
+            elif mode == 'cx2':
+                print('cx2')
+                mode = 'cy2'
             else:
                 raise NameError("mode " + mode + " not expecting comma!")
+            nums = ''
         elif c == 'z' or c == 'Z':
             # close the curve
             curve.Append(curve.FirstVertex().p)
-        elif c == 'c':
-            raise NameError("mode c not allowed. Character " + group_name + ". Sharpen your curve at x = " + str(curp.x) + '!\n' + d)
         else:
             nums += c
     
@@ -104,14 +121,19 @@ def ConvertHeeksFont():
 
     import xml.etree.ElementTree as ET
 
-    tree = ET.parse('heeks font.svg')
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    tree = ET.parse(this_dir + '/arial font.svg')
     root = tree.getroot()
     
     for child in root:
         if child.attrib['id'] == 'layer1':
             for item in child:
                 if item.tag == '{http://www.w3.org/2000/svg}g':
-                    label = item.attrib['{http://www.inkscape.org/namespaces/inkscape}label']
+                    expected_label = '{http://www.inkscape.org/namespaces/inkscape}label'
+                    if expected_label in item.attrib:
+                        label = item.attrib[expected_label]
+                    else:
+                        print('warning: ' + expected_label + ' not in g, item = ' + str(item) + "\n item.attrib['id'] = " + str(item.attrib['id']))
                     if label[:4] == 'char' and len(label) == 5:
                         c = label[4]
                         curves = []
@@ -151,7 +173,7 @@ def ConvertHeeksFont():
                         chars[c] = Character(curves, pos, width, tris)
     
     # now write the c++ file
-    f = open('CAD/HeeksFontData.h', 'w')
+    f = open(this_dir + '/CAD/HeeksFontData.h', 'w')
     f.write('// HeeksFontData.h written automatically by HeeksFont.py\n\n')
             
     num_curves = []
@@ -294,4 +316,6 @@ def ConvertHeeksFont():
     
     
     f.close()
+    
+    print('successfully created HeeksFont.h')
             

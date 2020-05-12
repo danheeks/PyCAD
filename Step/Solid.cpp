@@ -57,7 +57,7 @@ void CSolid::MakeTransformedShape(const gp_Trsf &mat)
 
 void CSolid::OnApplyProperties()
 {
-	CSolid* new_object = new CSolid(*((TopoDS_Solid*)(&m_shape)), m_title.c_str(), m_color, m_opacity);
+	CSolid* new_object = new CSolid(*((TopoDS_Solid*)(&m_shape)), m_title.c_str(), m_color, (float)m_opacity);
 	new_object->CopyIDsFrom(this);
 	m_owner->Add(new_object, NULL);
 	m_owner->Remove(this);
