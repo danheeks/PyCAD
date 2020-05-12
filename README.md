@@ -29,12 +29,19 @@ mkdir build\
 cd build\
 cmake ..\
 make
+cp cad.so ../../\
+
+### build Geom python module ###
+cd ../../Geom\
+mkdir build\
+cd build\
+cmake ..\
+make
+cp geom.so ../../\
 
 ### try the test.py ###
-cp cad.so ../../\
 cd ../../\
 python test.py
-
 
 ### Development Plan ###
 To use Property Grid on the raspberry pi, I need to start using Python3, so I need to get boost-python working on the raspberry pi, probably need to build boost python\
