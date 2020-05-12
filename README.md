@@ -10,6 +10,9 @@ Cad objects will implement GetProperties, GetProperty, SetProperty, GetLines, Ge
 ## How to build ##
 Start with a clean Raspbian installation
 
+### build wxPython ###
+https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi
+
 ### Get essentials ###
 ```
 sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev freeglut3-dev
