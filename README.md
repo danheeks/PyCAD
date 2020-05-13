@@ -19,7 +19,13 @@ sudo apt-get install git build-essential debhelper cmake libboost-python-dev pyt
 ```
 
 ### Build boost python for python3 ###
-https://www.boost.org/doc/libs/1_35_0/more/getting_started/unix-variants.html
+download the latest boost\
+unzip\
+cd into boost folder\
+./bootstrap.sh --with-python-version=3.7\
+./b2\
+cd ../\
+
 
 ### Fetch sources ###
 ```
