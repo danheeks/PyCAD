@@ -28,7 +28,7 @@ cd PyCAD/CAD\
 mkdir build\
 cd build\
 cmake ..\
-make
+make\
 cp cad.so ../../\
 
 ### build Geom python module ###
@@ -36,7 +36,7 @@ cd ../../Geom\
 mkdir build\
 cd build\
 cmake ..\
-make
+make\
 cp geom.so ../../\
 
 ### try the test.py ###
