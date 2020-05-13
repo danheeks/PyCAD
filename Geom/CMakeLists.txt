@@ -2,32 +2,34 @@ project(geom)
 
 cmake_minimum_required(VERSION 2.8.3)
 
-FIND_PACKAGE(PythonInterp)
+# Set Python version
+set( APP_PYTHON_VERSION 3.7 )
 
-if (PYTHONINTERP_FOUND)
-  if (UNIX AND NOT APPLE)
-    if (PYTHON_VERSION_MAJOR EQUAL 3)
-        FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_SUFFIX})
-        FIND_PACKAGE(PythonInterp 3)
-        FIND_PACKAGE(PythonLibs 3 REQUIRED)
-    else()
-        FIND_PACKAGE(Boost COMPONENTS python)
-        FIND_PACKAGE(PythonInterp)
-        FIND_PACKAGE(PythonLibs REQUIRED)
-    endif()
-  else()	
-    if (PYTHON_VERSION_MAJOR EQUAL 3)
-        FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-        FIND_PACKAGE(PythonInterp 3)
-        FIND_PACKAGE(PythonLibs 3 REQUIRED)
-    else()
-        FIND_PACKAGE(Boost COMPONENTS python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-        FIND_PACKAGE(PythonInterp)
-        FIND_PACKAGE(PythonLibs REQUIRED)
-    endif()
-  endif()
+#
+# Find Python libraries, interpreter and site-packages directory
+#
+
+# Find Python libs
+find_package( PythonLibs ${APP_PYTHON_VERSION} REQUIRED )
+if( PythonLibs_FOUND )
+  include_directories( ${PYTHON_INCLUDE_DIRS} )
 else()
-    message("Python not found")
+  message( FATAL_ERROR "Python libraries not found" )
+endif()
+
+# Find Python interpreter
+find_package( PythonInterp ${PYTHONLIBS_VERSION_STRING} REQUIRED )
+
+# Find Python's site-packages directory and set PYTHON_SITE_PACKAGES variable
+if( PYTHONINTERP_FOUND )
+  execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+      OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  #message(STATUS "site-packages directory: " ${PYTHON_SITE_PACKAGES})
+else()
+  message( FATAL_ERROR "A valid Python interpreter is required for finding Python's site-packages directory!" )
 endif()
 
 message(STATUS "PYTHON_LIBRARIES = ${PYTHON_LIBRARIES}")
