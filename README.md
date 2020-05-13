@@ -18,6 +18,9 @@ https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi
 sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev freeglut3-dev
 ```
 
+### Build boost python for python3 ###
+https://www.boost.org/doc/libs/1_35_0/more/getting_started/unix-variants.html
+
 ### Fetch sources ###
 ```
 git clone https://github.com/danheeks/PyCAD.git
