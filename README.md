@@ -26,7 +26,9 @@ sudo apt-get install git build-essential debhelper cmake python3-dev freeglut3-d
 
 ### Build boost python for python3 ###
 download the latest boost\
-unzip\
+(look here https://www.boost.org/users/download/ and copy the path for the download\
+which ends with bz2, then on RPI type wget followed by the path)\
+unzip with tar xf followed by filename\
 cd into boost folder\
 ./bootstrap.sh --with-python-version=3.7\
 sudo nano project-config.jam
