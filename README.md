@@ -11,11 +11,17 @@ Cad objects will implement GetProperties, GetProperty, SetProperty, GetLines, Ge
 Start with a clean Raspbian installation
 
 ### build wxPython ###
-https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi
+https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi\
+or if you have already built it copied it's whl to your Windows laptop ( this is for me )\
+on you laptop open a command line\
+pscp c:\tmp\wxPython-4.1.0-cp37-cp37m-linux_armv7l.whl pi@192.168.3.110\
+( type in password )\
+on pi\
+pip3 install wxPython-4.1.0-cp37-cp37m-linux_armv7l.whl\
 
 ### Get essentials ###
 ```
-sudo apt-get install git build-essential debhelper cmake libboost-python-dev python-dev freeglut3-dev
+sudo apt-get install git build-essential debhelper cmake python3-dev freeglut3-dev
 ```
 
 ### Build boost python for python3 ###
@@ -23,7 +29,14 @@ download the latest boost\
 unzip\
 cd into boost folder\
 ./bootstrap.sh --with-python-version=3.7\
+sudo nano project-config.jam
+change
+libraries = ;
+to
+libraries = --with-python ;
+
 ./b2\
+sudo ./b2 install\
 cd ../\
 
 
