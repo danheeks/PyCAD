@@ -12,12 +12,16 @@ Start with a clean Raspbian installation
 
 ### build wxPython ###
 https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi\
-or if you have already built it copied it's whl to your Windows laptop ( this is for me )\
-on you laptop open a command line\
-pscp c:\tmp\wxPython-4.1.0-cp37-cp37m-linux_armv7l.whl pi@192.168.3.110\
+or if you have already built it and copied its whl to your Windows laptop ( this is for me )\
+on your laptop open a command line
+```
+pscp c:\tmp\wxPython-4.1.0-cp37-cp37m-linux_armv7l.whl pi@192.168.3.110
+```
 ( type in password )\
-on pi\
-pip3 install wxPython-4.1.0-cp37-cp37m-linux_armv7l.whl\
+on pi
+```
+pip3 install wxPython-4.1.0-cp37-cp37m-linux_armv7l.whl
+```
 
 ### Get essentials ###
 ```
@@ -29,18 +33,23 @@ download the latest boost\
 (look here https://www.boost.org/users/download/ and copy the path for the download\
 which ends with bz2, then on RPI type wget followed by the path)\
 unzip with tar xf followed by filename\
-cd into boost folder\
-./bootstrap.sh --with-python-version=3.7\
-sudo nano project-config.jam\
+cd into boost folder
+```
+./bootstrap.sh --with-python-version=3.7
+sudo nano project-config.jam
+```
 change\
 libraries = ;\
-to\
-libraries = --with-python ;\
-
-./b2\
-sudo ./b2 install\
-cd ../\
-
+to
+```
+libraries = --with-python ;
+```
+then
+```
+./b2
+sudo ./b2 install
+cd ../
+```
 
 ### Fetch sources ###
 ```
@@ -58,19 +67,23 @@ cp cad.so ../../
 ```
 
 ### build Geom python module ###
-cd ../../Geom\
-mkdir build\
-cd build\
-cmake ..\
-make\
-cp geom.so ../../\
+```
+cd ../../Geom
+mkdir build
+cd build
+cmake ..
+make
+cp geom.so ../../
+```
 
 ### try the test.py ###
-cd ../../\
+```
+cd ../../
 python test.py
+```
 
 ### Development Plan ###
 I am now building boost python for Python3 ok on a RPI 4.\
 The plan is to get back to the same functionality as HeeksCNC 1.4, but working from python 3, using PyCAD.\
 The idea is that an installed version of PyCAD will be in a know place, so extensions can just borrow from it.\
-The idea is for it to be hackable, so all the user interface is done with python.\
+The idea is for it to be hackable, so all the user interface is done with python.
