@@ -2,7 +2,9 @@ project(cad)
 
 cmake_minimum_required(VERSION 2.8.3)
 
-FIND_PACKAGE(PythonInterp)
+FIND_PACKAGE(Boost 1.73.0 COMPONENTS python3)
+FIND_PACKAGE(PythonInterp 3)
+FIND_PACKAGE(PythonLibs 3 REQUIRED)
 
 if (PYTHONINTERP_FOUND)
   if (UNIX AND NOT APPLE)
