@@ -48,12 +48,14 @@ git clone https://github.com/danheeks/PyCAD.git
 ```
 
 ### build CAD python module ###
-cd PyCAD/CAD\
-mkdir build\
-cd build\
-cmake ..\
-make\
-cp cad.so ../../\
+```
+cd PyCAD/CAD
+mkdir build
+cd build
+cmake ..
+make
+cp cad.so ../../
+```
 
 ### build Geom python module ###
 cd ../../Geom\
