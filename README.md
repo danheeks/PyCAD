@@ -74,16 +74,17 @@ cd build
 cmake ..
 make
 cp geom.so ../../
+
 ```
 
 ### try the test.py ###
 ```
 cd ../../
-python test.py
+python3 test.py
 ```
 
 ### Development Plan ###
 I am now building boost python for Python3 ok on a RPI 4.\
 The plan is to get back to the same functionality as HeeksCNC 1.4, but working from python 3, using PyCAD.\
-The idea is that an installed version of PyCAD will be in a know place, so extensions can just borrow from it.\
+The idea is that an installed version of PyCAD will be in a known place, so extensions can just borrow from it.\
 The idea is for it to be hackable, so all the user interface is done with python.
