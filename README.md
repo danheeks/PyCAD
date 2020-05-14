@@ -31,11 +31,11 @@ which ends with bz2, then on RPI type wget followed by the path)\
 unzip with tar xf followed by filename\
 cd into boost folder\
 ./bootstrap.sh --with-python-version=3.7\
-sudo nano project-config.jam
-change
-libraries = ;
-to
-libraries = --with-python ;
+sudo nano project-config.jam\
+change\
+libraries = ;\
+to\
+libraries = --with-python ;\
 
 ./b2\
 sudo ./b2 install\
@@ -68,8 +68,7 @@ cd ../../\
 python test.py
 
 ### Development Plan ###
-To use Property Grid on the raspberry pi, I need to start using Python3, so I need to get boost-python working on the raspberry pi, probably need to build boost python\
-
-The plan is to get back to the same functionality as HeeksCNC 1.3, but working from python 3, using PyCAD.
-I need to think through the mechanism of adding new functionality to PyCAD.
-It doesn't need to be automatic. The idea is for it to be hackable, so that you just download an add-on to PyCAD, then hack the UI in Frame.py, I guess.
+I am now building boost python for Python3 ok on a RPI 4.\
+The plan is to get back to the same functionality as HeeksCNC 1.4, but working from python 3, using PyCAD.\
+The idea is that an installed version of PyCAD will be in a know place, so extensions can just borrow from it.\
+The idea is for it to be hackable, so all the user interface is done with python.\
