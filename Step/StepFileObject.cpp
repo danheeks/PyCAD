@@ -79,8 +79,12 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 			const char* file_text = subElem->GetText();
 			if (file_text)
 			{
+#ifdef WIN32
 				wchar_t temp_folder[1024];
-				if(GetTempPathW(1024, temp_folder))// to do cross platform version
+				if(GetTempPathW(1024, temp_folder))
+#else
+				wchar_t* temp_folder = L"/tmp";
+#endif
 				{
 					std::wstring temp_file = std::wstring(temp_folder) + L"temp_HeeksCAD_STEP_file.step";
 					{
@@ -99,8 +103,12 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 		std::string name(a->Name());
 		if (name == "text")
 		{
+#ifdef WIN32
 			wchar_t temp_folder[1024];
-			if (GetTempPathW(1024, temp_folder))// to do cross platform version
+			if (GetTempPathW(1024, temp_folder))
+#else
+			wchar_t* temp_folder = L"/tmp";
+#endif
 			{
 				std::wstring temp_file = std::wstring(temp_folder) + L"temp_HeeksCAD_STEP_file.step";
 				{
