@@ -79,6 +79,19 @@ cp geom.so ../../
 
 ### build Step python module ###
 ( this stage still in development )
+First build OCE; hours of building; download using wget latest file ending tar.gz from:\
+https://github.com/tpaviot/oce/releases \
+unzip using tar xf\
+cd into the folder starting with oce
+```
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
+
+build step
 ```
 cd ../../Step
 mkdir build
