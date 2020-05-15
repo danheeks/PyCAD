@@ -77,6 +77,18 @@ cp geom.so ../../
 
 ```
 
+### build Step python module ###
+( this stage still in development )
+```
+cd ../../Step
+mkdir build
+cd build
+cmake ..
+make
+cp step.so ../../
+
+```
+
 ### try the test.py ###
 ```
 cd ../../
