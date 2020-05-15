@@ -1,17 +1,17 @@
 # PyCAD
 Experiments in making a CAD software on the Raspberry Pi, using Python, with wxPython boost-python, OpenGL and my geometry derived from HeeksCNC project.\
-This will involve building a CAD python module and a GEOM python module\
-The plan is that all the wx will be done with wxPython scripts.\
-The gl canvas will be created by wxPython.\
-The gl commands will be done in the c++ by my CAD module.\
-Cad object classes will be defined in Python, derived from a cad object base class defined in the cad module.\
-Cad objects will implement GetProperties, GetProperty, SetProperty, GetLines, GetTriangles, GetName, GetIcon, etc.
+This involves building a cad.so python module and a geom.so python module\
+All the user interface is done with wxPython scripts.\
+The graphics canvas is created by wxPython.\
+The OpenGL commands are done in the c++ by my CAD module.\
+Some object classes are defined in Python ( like https://github.com/danheeks/PyCAD/blob/master/Gear.py )\
+derived from a cad object base class defined in the cad module.
 
 ## How to build ##
-Start with a clean Raspbian installation
+Start with a clean Raspbian installation, I just went for the full one. https://www.raspberrypi.org/downloads/raspbian/
 
 ### build wxPython ###
-https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi\
+https://wiki.wxpython.org/BuildWxPythonOnRaspberryPi \
 or if you have already built it and copied its whl to your Windows laptop ( this is for me )\
 on your laptop open a command line
 ```
@@ -74,6 +74,31 @@ cd build
 cmake ..
 make
 cp geom.so ../../
+
+```
+
+### build Step python module ###
+( this stage still in development )
+First build OCE; hours of building; download using wget latest file ending tar.gz from:\
+https://github.com/tpaviot/oce/releases \
+unzip using tar xf\
+cd into the folder starting with oce
+```
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+```
+
+build step
+```
+cd ../../Step
+mkdir build
+cd build
+cmake ..
+make
+cp step.so ../../
 
 ```
 
