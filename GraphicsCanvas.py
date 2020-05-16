@@ -108,7 +108,6 @@ class GraphicsCanvas(glcanvas.GLCanvas):
     def Resize(self):
       s = self.GetClientSize()
       self.viewport.WidthAndHeightChanged(s.GetWidth(), s.GetHeight())
-      print('size = ' + str((s.GetWidth(), s.GetHeight())))
       self.Refresh()
 
     def OnPaint(self, event):
