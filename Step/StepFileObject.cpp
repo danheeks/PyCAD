@@ -88,7 +88,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 				{
 					std::wstring temp_file = std::wstring(temp_folder) + L"temp_HeeksCAD_STEP_file.step";
 					{
-						wofstream ofs(temp_file.c_str());
+						wofstream ofs(Ttc(temp_file.c_str()));
 						ofs << file_text;
 					}
 					CShape::ImportSolidsFile(temp_file.c_str(), false, &index_map, this);
@@ -112,7 +112,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 			{
 				std::wstring temp_file = std::wstring(temp_folder) + L"temp_HeeksCAD_STEP_file.step";
 				{
-					wofstream ofs(temp_file.c_str());
+					wofstream ofs(Ttc(temp_file.c_str()));
 					ofs << a->Value();
 				}
 				CShape::ImportSolidsFile(temp_file.c_str(), false, &index_map, this);
