@@ -1,7 +1,7 @@
 // HeeksColor.cpp
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
-#include "stdafx.h"
+#include <stdafx.h>
 #include "HeeksColor.h"
 
 HeeksColor::HeeksColor(unsigned char r, unsigned char g, unsigned char b){

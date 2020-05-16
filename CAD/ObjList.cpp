@@ -1,7 +1,7 @@
 // ObjList.cpp
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
-#include "stdafx.h"
+#include <stdafx.h>
 #include "ObjList.h"
 #include "MarkedList.h"
 #include "tinyxml.h"
@@ -192,7 +192,7 @@ bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)
 	m_index_list_valid = false;
 	HeeksObj::Add(object, prev_object);
 
-	if(((!theApp->m_in_OpenFile || theApp->m_file_open_or_import_type != FileOpenTypeHeeks) && object->UsesID() && (object->m_id == 0 || (theApp->m_file_open_or_import_type == FileImportTypeHeeks && theApp->m_in_OpenFile))))
+	if (((!theApp->InOpenFile() || theApp->GetFileOpenOrImportType() != FileOpenTypeHeeks) && object->UsesID() && (object->m_id == 0 || (theApp->GetFileOpenOrImportType() == FileImportTypeHeeks && theApp->InOpenFile()))))
 	{
 		object->SetID(theApp->GetNextID(object->GetIDGroupType()));
 	}
@@ -224,9 +224,9 @@ void ObjList::Remove(HeeksObj* object)
 	std::list<HeeksObj*> parents;
 	parents.push_back(this);
 
-	if( (!theApp->m_in_OpenFile || theApp->m_file_open_or_import_type != FileOpenTypeHeeks) &&
+	if ((!theApp->InOpenFile() || theApp->GetFileOpenOrImportType() != FileOpenTypeHeeks) &&
 		object->UsesID() &&
-		(object->m_id == 0 || (theApp->m_file_open_or_import_type == FileImportTypeHeeks && theApp->m_in_OpenFile))
+		(object->m_id == 0 || (theApp->GetFileOpenOrImportType() == FileImportTypeHeeks && theApp->InOpenFile()))
 		)
 	{
 		theApp->RemoveID(object);

@@ -5,7 +5,7 @@
 
 #include "ViewPanning.h"
 #include "SelectMode.h"
-#include "App.h"
+#include "CadApp.h"
 #include "Viewport.h"
 
 void ViewPanning::OnMouse( MouseEvent& event )

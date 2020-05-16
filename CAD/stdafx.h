@@ -14,4 +14,4 @@ extern "C" {
 #include "../Geom/Box.h"
 #include "tinyxml.h"
 #include "IPoint.h"
-#include "App.h"
+#include "CadApp.h"

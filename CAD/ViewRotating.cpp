@@ -5,7 +5,7 @@
 
 #include "ViewRotating.h"
 #include "SelectMode.h"
-#include "App.h"
+#include "CadApp.h"
 #include "Viewport.h"
 
 void ViewRotating::OnMouse( MouseEvent& event )

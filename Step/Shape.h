@@ -8,6 +8,7 @@
 #include "ShapeData.h"
 #include "ShapeTools.h"
 #include "IdNamedObjList.h"
+#include <map>
 
 class CShape:public IdNamedObjList{
 protected:

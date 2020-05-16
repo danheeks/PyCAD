@@ -119,6 +119,7 @@
     <ClCompile Include="OCCGeom.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="RuledSurface.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="ShapeData.cpp" />
     <ClCompile Include="ShapeTools.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="NurbSurfaceParams.h" />
     <ClInclude Include="OCCGeom.h" />
     <ClInclude Include="RuledSurface.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="ShapeData.h" />
     <ClInclude Include="ShapeTools.h" />

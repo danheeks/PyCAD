@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "App.h"
+#include "CadApp.h"
 #include "Grid.h"
 #include "InputMode.h"
 #include "SelectMode.h"
@@ -37,7 +37,7 @@
 #include "HText.h"
 #include "HeeksFont.h"
 
-CApp *theApp = new CApp;
+CCadApp *theApp = new CCadApp;
 
 extern void PythonOnGLCommands();
 
@@ -56,7 +56,7 @@ static unsigned int DecimalPlaces(const double value)
 
 
 
-CApp::CApp()
+CCadApp::CCadApp()
 {
 	m_version_number = std::wstring(HEEKSCAD_VERSION_MAIN) + L" " + HEEKSCAD_VERSION_SUB + L" 0";
 	TiXmlBase::SetRequiredDecimalPlaces(DecimalPlaces(TOLERANCE));	 // Ensure we write XML in enough accuracy to be useful when re-read.
@@ -151,7 +151,7 @@ CApp::CApp()
 	m_previous_input_mode = NULL;
 }
 
-CApp::~CApp()
+CCadApp::~CCadApp()
 {
 	delete m_marked_list;
 	m_marked_list = NULL;
@@ -166,14 +166,14 @@ CApp::~CApp()
 	delete m_ruler;
 }
 
-void CApp::OnExit(){
+void CCadApp::OnExit(){
 	delete history;
 	history = NULL;
 }
 
 extern void PythonOnSetInputMode();
 
-void CApp::SetInputMode(CInputMode *new_mode){
+void CCadApp::SetInputMode(CInputMode *new_mode){
 	if(!new_mode)return;
 
 	m_previous_input_mode = input_mode_object;
@@ -183,7 +183,7 @@ void CApp::SetInputMode(CInputMode *new_mode){
 	RefreshInputCanvas();
 }
 
-void CApp::RestoreInputMode()
+void CCadApp::RestoreInputMode()
 {
 	if (m_previous_input_mode)
 	{
@@ -194,12 +194,12 @@ void CApp::RestoreInputMode()
 	}
 }
 
-void CApp::RefreshInputCanvas()
+void CCadApp::RefreshInputCanvas()
 {
 	PythonOnSetInputMode();
 }
 
-void CApp::CreateLights(void)
+void CCadApp::CreateLights(void)
 {
 	GLfloat amb[4] =  {0.8f, 0.8f, 0.8f, 1.0f};
 	GLfloat dif[4] =  {0.8f, 0.8f, 0.8f, 1.0f};
@@ -235,7 +235,7 @@ void CApp::CreateLights(void)
 	glDisable(GL_LIGHT7);
 }
 
-void CApp::DestroyLights(void)
+void CCadApp::DestroyLights(void)
 {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_LIGHT0);
@@ -243,7 +243,7 @@ void CApp::DestroyLights(void)
 	glDisable(GL_NORMALIZE);
 }
 
-void CApp::Reset(){
+void CCadApp::Reset(){
 	m_marked_list->Clear(true);
 	m_marked_list->Reset();
 	m_name_index.clear();
@@ -275,7 +275,7 @@ static HeeksObj* CreateCStlSolid(){ return new CStlSolid; }
 static HeeksObj* CreateCoordinateSystem(){ return new CoordinateSystem; }
 static HeeksObj* CreateHText(){ HeeksColor c; return new HText(Matrix(), L"", &c, 0, 0); }
 
-void CApp::InitializeCreateFunctions()
+void CCadApp::InitializeCreateFunctions()
 {
 	// set up function map
 	if(object_create_fn_map.size() == 0)
@@ -294,7 +294,7 @@ void CApp::InitializeCreateFunctions()
 
 HeeksObj* CreatePyObjectWithName(const std::string& name);
 
-HeeksObj* CApp::CreateObjectOfType(const std::string& name)
+HeeksObj* CCadApp::CreateObjectOfType(const std::string& name)
 {
 	std::map< std::string, HeeksObj*(*)() >::iterator FindIt = object_create_fn_map.find(name);
 	if (FindIt != object_create_fn_map.end())
@@ -308,7 +308,7 @@ HeeksObj* CApp::CreateObjectOfType(const std::string& name)
 	return new HXml;
 }
 
-HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
+HeeksObj* CCadApp::ReadXMLElement(TiXmlElement* pElem)
 {
 	std::string name(pElem->Value());
 
@@ -323,13 +323,13 @@ HeeksObj* CApp::ReadXMLElement(TiXmlElement* pElem)
 	return object;
 }
 
-void CApp::ObjectWriteToXML(HeeksObj *object, TiXmlElement *element)
+void CCadApp::ObjectWriteToXML(HeeksObj *object, TiXmlElement *element)
 {
 	if (object->UsesID())element->SetAttribute("id", object->m_id);
 	if (!object->m_visible)element->SetAttribute("vis", 0);
 }
 
-void CApp::ObjectReadFromXML(HeeksObj *object, TiXmlElement* element)
+void CCadApp::ObjectReadFromXML(HeeksObj *object, TiXmlElement* element)
 {
 	// get the attributes
 	for (TiXmlAttribute* a = element->FirstAttribute(); a; a = a->Next())
@@ -378,7 +378,7 @@ static bool ImportObjectInto(HeeksObj* object, HeeksObj* add_to, HeeksObj* paste
 	return true;
 }
 
-void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* paste_before, bool call_was_added, bool show_error, bool undoable)
+void CCadApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* paste_before, bool call_was_added, bool show_error, bool undoable)
 {
 	TiXmlDocument doc(Ttc(filepath));
 	if (!doc.LoadFile())
@@ -456,7 +456,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	//CGroup::MoveSolidsToGroupsById(this);
 }
 
-/* static */ void CApp::OpenSVGFile(const wchar_t *filepath)
+/* static */ void CCadApp::OpenSVGFile(const wchar_t *filepath)
 {
 	char oldlocale[1000];
 	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
@@ -465,7 +465,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
-/* static */ void CApp::OpenSTLFile(const wchar_t *filepath)
+/* static */ void CCadApp::OpenSTLFile(const wchar_t *filepath)
 {
 	char oldlocale[1000];
 	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
@@ -476,7 +476,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
-/* static */ void CApp::OpenDXFFile(const wchar_t *filepath )
+/* static */ void CCadApp::OpenDXFFile(const wchar_t *filepath )
 {
 	char oldlocale[1000];
 	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
@@ -486,7 +486,7 @@ void CApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksObj* 
 	setlocale(LC_NUMERIC, oldlocale);
 }
 
-bool CApp::OpenImageFile(const wchar_t *filepath)
+bool CCadApp::OpenImageFile(const wchar_t *filepath)
 {
 #if 0
 	std::wstring wf(filepath);
@@ -510,7 +510,7 @@ bool CApp::OpenImageFile(const wchar_t *filepath)
 	return false;
 }
 
-void CApp::OnNewButton()
+void CCadApp::OnNewButton()
 {
 #if 0
 	int res = CheckForModifiedDoc();
@@ -527,7 +527,7 @@ void CApp::OnNewButton()
 #endif
 }
 
-void CApp::OnOpenButton()
+void CCadApp::OnOpenButton()
 {
 #if 0
 	std::wstring default_directory = wxGetCwd();
@@ -575,7 +575,7 @@ void CApp::OnOpenButton()
 #endif
 }
 
-bool CApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* paste_into, HeeksObj* paste_before, bool retain_filename /* = true */)
+bool CCadApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* paste_into, HeeksObj* paste_before, bool retain_filename /* = true */)
 {
 	bool history_started = false;
 	if (import_not_open)
@@ -729,7 +729,7 @@ static void WriteDXFEntity(HeeksObj* object, CDxfWrite& dxf_file, const std::wst
 	}
 }
 
-void CApp::SaveDXFFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath)
+void CCadApp::SaveDXFFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath)
 {
 	CDxfWrite dxf_file(Ttc(filepath));
 	if (dxf_file.Failed())
@@ -806,7 +806,7 @@ static void write_binary_triangle(const double* x, const double* n)
 	binary_triangles.push_back(t);
 }
 
-void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
+void CCadApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
 #ifdef WIN32
 	ofstream ofs(filepath, ios::binary);
@@ -859,7 +859,7 @@ void CApp::SaveSTLFileBinary(const std::list<HeeksObj*>& objects, const wchar_t 
 	binary_triangles.clear();
 }
 
-void CApp::SaveSTLFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
+void CCadApp::SaveSTLFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
 #ifdef WIN32
 	wofstream ofs(filepath);
@@ -1019,7 +1019,7 @@ static void add_obj_triangles(const double* x, const double* n)
 	vertex_manager_for_write_triangle->InsertTriangle(x);
 }
 
-void CApp::SaveOBJFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
+void CCadApp::SaveOBJFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale)
 {
 	ObjFileVertexManager vertex_manager;
 	vertex_manager_for_write_triangle = &vertex_manager;
@@ -1033,13 +1033,13 @@ void CApp::SaveOBJFileAscii(const std::list<HeeksObj*>& objects, const wchar_t *
 	vertex_manager.WriteObjFile(filepath);
 }
 
-void CApp::SaveSTLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale, bool binary)
+void CCadApp::SaveSTLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance, double* scale, bool binary)
 {
 	if (binary)SaveSTLFileBinary(objects, filepath, facet_tolerance, scale);
 	else SaveSTLFileAscii(objects, filepath, facet_tolerance, scale);
 }
 
-void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
+void CCadApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
 {
 #ifdef WIN32
 	wofstream ofs(filepath);
@@ -1068,7 +1068,7 @@ void CApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 	ofs << "glEnd();" << endl;
 }
 
-void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
+void CCadApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, double facet_tolerance)
 {
 #ifdef WIN32
 	wofstream ofs(filepath);
@@ -1097,7 +1097,7 @@ void CApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *filepa
 
 extern void PythonOnEndXmlWrite();
 
-void CApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, bool for_clipboard)
+void CCadApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, bool for_clipboard)
 {
 	// write an xml file
 	TiXmlDocument doc;
@@ -1127,7 +1127,7 @@ void CApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filep
 	doc.SaveFile(Ttc(filepath));
 }
 
-bool CApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects)
+bool CCadApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects)
 {
 	if (objects == NULL)
 		objects = &m_objects;
@@ -1171,7 +1171,7 @@ bool CApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects
 
 extern void PythonOnRepaint(bool soon);
 
-void CApp::Repaint(bool soon)
+void CCadApp::Repaint(bool soon)
 {
 	PythonOnRepaint(soon);
 }
@@ -1181,14 +1181,14 @@ void CApp::Repaint(bool soon)
 	else m_frame->m_graphics->Refresh();
 #endif
 
-void CApp::RecalculateGLLists()
+void CCadApp::RecalculateGLLists()
 {
 	for (HeeksObj* object = GetFirstChild(); object; object = GetNextChild()){
 		object->KillGLLists();
 	}
 }
 
-void CApp::RenderDatumOrCurrentCoordSys()
+void CCadApp::RenderDatumOrCurrentCoordSys()
 {
 	if (m_show_datum_coords_system || m_current_coordinate_system)
 	{
@@ -1233,7 +1233,7 @@ void CApp::RenderDatumOrCurrentCoordSys()
 	}
 }
 
-void CApp::glCommandsAll(const CViewPoint &view_point)
+void CCadApp::glCommandsAll(const CViewPoint &view_point)
 {
 	CreateLights();
 	glDisable(GL_LIGHTING);
@@ -1329,7 +1329,7 @@ void CApp::glCommandsAll(const CViewPoint &view_point)
 	}
 }
 
-void CApp::OnInputModeTitleChanged()
+void CCadApp::OnInputModeTitleChanged()
 {
 	if (m_graphics_text_mode != GraphicsTextModeNone)
 	{
@@ -1337,7 +1337,7 @@ void CApp::OnInputModeTitleChanged()
 	}
 }
 
-void CApp::OnInputModeHelpTextChanged()
+void CCadApp::OnInputModeHelpTextChanged()
 {
 	if (m_graphics_text_mode == GraphicsTextModeWithHelp)
 	{
@@ -1345,7 +1345,7 @@ void CApp::OnInputModeHelpTextChanged()
 	}
 }
 
-void CApp::glCommands(bool select, bool marked, bool no_color)
+void CCadApp::glCommands(bool select, bool marked, bool no_color)
 {
 	// this is called when select is true
 	ObjList::glCommands(select, marked, no_color);
@@ -1358,11 +1358,11 @@ void CApp::glCommands(bool select, bool marked, bool no_color)
 	}
 }
 
-double CApp::GetPixelScale(void){
+double CCadApp::GetPixelScale(void){
 	return m_current_viewport->m_view_point.m_pixel_scale;
 }
 
-bool CApp::IsModified(void){
+bool CCadApp::IsModified(void){
 	if (history->IsModified())return true;
 
 	for (std::list< bool(*)() >::iterator It = m_is_modified_callbacks.begin(); It != m_is_modified_callbacks.end(); It++)
@@ -1378,25 +1378,25 @@ bool CApp::IsModified(void){
 	return false;
 }
 
-void CApp::SetAsModified(){
+void CCadApp::SetAsModified(){
 	history->SetAsModified();
 }
 
-void CApp::SetLikeNewFile(void){
+void CCadApp::SetLikeNewFile(void){
 	history->SetLikeNewFile();
 }
 
-void CApp::ClearHistory(void){
+void CCadApp::ClearHistory(void){
 	history->ClearFromFront();
 	history->SetLikeNewFile();
 }
 
-void CApp::DoUndoable(Undoable *u)
+void CCadApp::DoUndoable(Undoable *u)
 {
 	history->DoUndoable(u);
 }
 
-bool CApp::RollBack(void)
+bool CCadApp::RollBack(void)
 {
 	ObserversFreeze();
 	m_doing_rollback = true;
@@ -1406,17 +1406,17 @@ bool CApp::RollBack(void)
 	return result;
 }
 
-bool CApp::CanUndo(void)
+bool CCadApp::CanUndo(void)
 {
 	return history->CanUndo();
 }
 
-bool CApp::CanRedo(void)
+bool CCadApp::CanRedo(void)
 {
 	return history->CanRedo();
 }
 
-bool CApp::RollForward(void)
+bool CCadApp::RollForward(void)
 {
 	ObserversFreeze();
 	m_doing_rollback = true;
@@ -1426,33 +1426,33 @@ bool CApp::RollForward(void)
 	return result;
 }
 
-void CApp::StartHistory()
+void CCadApp::StartHistory()
 {
 	history->StartHistory();
 }
 
-void CApp::EndHistory(void)
+void CCadApp::EndHistory(void)
 {
 	history->EndHistory();
 }
 
-void CApp::ClearRollingForward(void)
+void CCadApp::ClearRollingForward(void)
 {
 	history->ClearFromCurPos();
 }
 
-void CApp::RegisterObserver(Observer* observer)
+void CCadApp::RegisterObserver(Observer* observer)
 {
 	if (observer == NULL) return;
 	observers.insert(observer);
 	observer->OnChanged(&m_objects, NULL, NULL);
 }
 
-void CApp::RemoveObserver(Observer* observer){
+void CCadApp::RemoveObserver(Observer* observer){
 	observers.erase(observer);
 }
 
-void CApp::ObserversOnChange(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified){
+void CCadApp::ObserversOnChange(const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed, const std::list<HeeksObj*>* modified){
 	if (m_observers_frozen > 0)
 	{
 		if (added)for (std::list<HeeksObj*>::const_iterator It = added->begin(); It != added->end(); It++)frozen_added.push_back(*It);
@@ -1469,7 +1469,7 @@ void CApp::ObserversOnChange(const std::list<HeeksObj*>* added, const std::list<
 	}
 }
 
-void CApp::ObserversMarkedListChanged(bool selection_cleared, const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed){
+void CCadApp::ObserversMarkedListChanged(bool selection_cleared, const std::list<HeeksObj*>* added, const std::list<HeeksObj*>* removed){
 	if (m_observers_frozen > 0)
 	{
 		if (selection_cleared)
@@ -1491,12 +1491,12 @@ void CApp::ObserversMarkedListChanged(bool selection_cleared, const std::list<He
 	}
 }
 
-void CApp::ObserversFreeze()
+void CCadApp::ObserversFreeze()
 {
 	m_observers_frozen++;
 }
 
-void CApp::ObserversThaw()
+void CCadApp::ObserversThaw()
 {
 	m_observers_frozen--;
 	if (m_observers_frozen == 0)
@@ -1524,7 +1524,7 @@ void CApp::ObserversThaw()
 	}
 }
 
-void CApp::ObserversClear()
+void CCadApp::ObserversClear()
 {
 	std::set<Observer*>::iterator It;
 	for (It = observers.begin(); It != observers.end(); It++){
@@ -1540,7 +1540,7 @@ void CApp::ObserversClear()
 	m_observers_frozen = 0;
 }
 
-bool CApp::Add(HeeksObj *object, HeeksObj* prev_object)
+bool CCadApp::Add(HeeksObj *object, HeeksObj* prev_object)
 {
 	if (!ObjList::Add(object, prev_object)) return false;
 
@@ -1557,7 +1557,7 @@ bool CApp::Add(HeeksObj *object, HeeksObj* prev_object)
 	return true;
 }
 
-void CApp::Remove(HeeksObj* object)
+void CCadApp::Remove(HeeksObj* object)
 {
 #ifdef MULTIPLE_OWNERS
 	HeeksObj* owner = object->GetFirstOwner();
@@ -1587,12 +1587,12 @@ void CApp::Remove(HeeksObj* object)
 	if (object == m_current_coordinate_system)m_current_coordinate_system = NULL;
 }
 
-void CApp::Remove(std::list<HeeksObj*> objects)
+void CCadApp::Remove(std::list<HeeksObj*> objects)
 {
 	ObjList::Remove(objects);
 }
 
-void CApp::AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object)
+void CCadApp::AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object)
 {
 	if (object == NULL)return;
 	if (owner == NULL)owner = this;
@@ -1600,7 +1600,7 @@ void CApp::AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object)
 	DoUndoable(undoable);
 }
 
-void CApp::AddUndoably(const std::list<HeeksObj*> &list, HeeksObj* owner)
+void CCadApp::AddUndoably(const std::list<HeeksObj*> &list, HeeksObj* owner)
 {
 	if (list.size() == 0)return;
 	if (owner == NULL)owner = this;
@@ -1608,14 +1608,14 @@ void CApp::AddUndoably(const std::list<HeeksObj*> &list, HeeksObj* owner)
 	DoUndoable(undoable);
 }
 
-void CApp::DeleteUndoably(HeeksObj *object){
+void CCadApp::DeleteUndoably(HeeksObj *object){
 	if (object == NULL)return;
 	if (!object->CanBeRemoved())return;
 	RemoveObjectTool *undoable = new RemoveObjectTool(object);
 	DoUndoable(undoable);
 }
 
-void CApp::DeleteUndoably(const std::list<HeeksObj*>& list)
+void CCadApp::DeleteUndoably(const std::list<HeeksObj*>& list)
 {
 	if (list.size() == 0)return;
 	std::list<HeeksObj*> list2;
@@ -1629,12 +1629,12 @@ void CApp::DeleteUndoably(const std::list<HeeksObj*>& list)
 	DoUndoable(undoable);
 }
 
-void CApp::CopyUndoably(HeeksObj* object, HeeksObj* copy_with_new_data)
+void CCadApp::CopyUndoably(HeeksObj* object, HeeksObj* copy_with_new_data)
 {
 	DoUndoable(new CopyObjectUndoable(object, copy_with_new_data));
 }
 
-void CApp::TransformUndoably(HeeksObj *object, const Matrix &m)
+void CCadApp::TransformUndoably(HeeksObj *object, const Matrix &m)
 {
 	if (!object)return;
 	Matrix mat = Matrix(m);
@@ -1643,7 +1643,7 @@ void CApp::TransformUndoably(HeeksObj *object, const Matrix &m)
 	DoUndoable(undoable);
 }
 
-void CApp::TransformUndoably(const std::list<HeeksObj*> &list, const Matrix &m)
+void CCadApp::TransformUndoably(const std::list<HeeksObj*> &list, const Matrix &m)
 {
 	if (list.size() == 0)return;
 	Matrix mat = Matrix(m);
@@ -1665,14 +1665,14 @@ public:
 };
 #endif
 
-void CApp::ReverseUndoably(HeeksObj *object)
+void CCadApp::ReverseUndoably(HeeksObj *object)
 {
 #if 0
 	DoUndoable(new ReverseUndoable(object));
 #endif
 }
 
-void CApp::Transform(std::list<HeeksObj*> objects, const Matrix& m)
+void CCadApp::Transform(std::list<HeeksObj*> objects, const Matrix& m)
 {
 	std::list<HeeksObj*>::iterator it;
 	for (it = objects.begin(); it != objects.end(); ++it)
@@ -1681,28 +1681,28 @@ void CApp::Transform(std::list<HeeksObj*> objects, const Matrix& m)
 	}
 }
 
-void CApp::WasModified(HeeksObj *object)
+void CCadApp::WasModified(HeeksObj *object)
 {
 	std::list<HeeksObj*> list;
 	list.push_back(object);
 	WereModified(list);
 }
 
-void CApp::WasAdded(HeeksObj *object)
+void CCadApp::WasAdded(HeeksObj *object)
 {
 	std::list<HeeksObj*> list;
 	list.push_back(object);
 	WereAdded(list);
 }
 
-void CApp::WasRemoved(HeeksObj *object)
+void CCadApp::WasRemoved(HeeksObj *object)
 {
 	std::list<HeeksObj*> list;
 	list.push_back(object);
 	WereRemoved(list);
 }
 
-void CApp::WereModified(const std::list<HeeksObj*>& list)
+void CCadApp::WereModified(const std::list<HeeksObj*>& list)
 {
 	if (list.size() == 0) return;
 	HeeksObj* object = *(list.begin());
@@ -1711,7 +1711,7 @@ void CApp::WereModified(const std::list<HeeksObj*>& list)
 	SetAsModified();
 }
 
-void CApp::WereAdded(const std::list<HeeksObj*>& list)
+void CCadApp::WereAdded(const std::list<HeeksObj*>& list)
 {
 	if (list.size() == 0) return;
 	HeeksObj* object = *(list.begin());
@@ -1720,7 +1720,7 @@ void CApp::WereAdded(const std::list<HeeksObj*>& list)
 	SetAsModified();
 }
 
-void CApp::WereRemoved(const std::list<HeeksObj*>& list)
+void CCadApp::WereRemoved(const std::list<HeeksObj*>& list)
 {
 	if (list.size() == 0) return;
 	HeeksObj* object = *(list.begin());
@@ -1738,7 +1738,7 @@ void CApp::WereRemoved(const std::list<HeeksObj*>& list)
 	SetAsModified();
 }
 
-Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
+Matrix CCadApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 {
 	if (get_the_appropriate_orthogonal){
 		// choose from the three orthoganal possibilities, the one where it's z-axis closest to the camera direction
@@ -1758,7 +1758,7 @@ Matrix CApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 
 extern void PythonOnMessageBox(const wchar_t* message);
 
-void CApp::DoMessageBox(const wchar_t* message)
+void CCadApp::DoMessageBox(const wchar_t* message)
 {
 #ifdef WIN32
 	::MessageBox(NULL, message, L"Message", MB_OK);
@@ -1767,13 +1767,13 @@ void CApp::DoMessageBox(const wchar_t* message)
 #endif
 }
 
-void CApp::GetOptions(std::list<Property *> *list)
+void CCadApp::GetOptions(std::list<Property *> *list)
 {
 	// maybe not
 }
 
 
-void CApp::DeleteMarkedItems()
+void CCadApp::DeleteMarkedItems()
 {
 	std::list<HeeksObj *> list;
 	for (std::list<HeeksObj*>::iterator It = m_marked_list->list().begin(); It != m_marked_list->list().end(); It++)
@@ -1794,21 +1794,21 @@ void CApp::DeleteMarkedItems()
 	Repaint(0);
 }
 
-void CApp::glColorEnsuringContrast(const HeeksColor &c)
+void CCadApp::glColorEnsuringContrast(const HeeksColor &c)
 {
 	if (c == HeeksColor(0, 0, 0) || c == HeeksColor(255, 255, 255))background_color[0].best_black_or_white().glColor();
 	else c.glColor();
 }
 
-std::wstring CApp::GetExeFolder()const{
+std::wstring CCadApp::GetExeFolder()const{
 	return L"";
 }
 
-std::wstring CApp::GetResFolder()const{ return m_res_folder; }
+std::wstring CCadApp::GetResFolder()const{ return m_res_folder; }
 
 
 // do your own glBegin and glEnd
-void CApp::get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy)){
+void CCadApp::get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy)){
 	double ax = xs - xc;
 	double ay = ys - yc;
 	double bx = xe - xc;
@@ -1859,7 +1859,7 @@ void CApp::get_2d_arc_segments(double xs, double ys, double xe, double ye, doubl
 	}
 }
 
-bool CApp::PickPosition(const wchar_t* str, double* pos, void(*callback)(const double*))
+bool CCadApp::PickPosition(const wchar_t* str, double* pos, void(*callback)(const double*))
 {
 	// not sure
 	return false;
@@ -1889,7 +1889,7 @@ bool CApp::PickPosition(const wchar_t* str, double* pos, void(*callback)(const d
 
 static int sphere_display_list = 0;
 
-void CApp::glSphere(double radius, const double* pos)
+void CCadApp::glSphere(double radius, const double* pos)
 {
 	glPushMatrix();
 
@@ -1968,14 +1968,14 @@ void CApp::glSphere(double radius, const double* pos)
 	glPopMatrix();
 }
 
-void CApp::OnNewOrOpen(bool open, int res)
+void CCadApp::OnNewOrOpen(bool open, int res)
 {
 	//PythonOnNewOrOpen(open, res);
 
 	ObserversOnChange(&m_objects, NULL, NULL);
 }
 
-void CApp::OnBeforeNewOrOpen(bool open, int res)
+void CCadApp::OnBeforeNewOrOpen(bool open, int res)
 {
 	for (std::list< void(*)(int, int) >::iterator It = m_beforeneworopen_callbacks.begin(); It != m_beforeneworopen_callbacks.end(); It++)
 	{
@@ -1984,7 +1984,7 @@ void CApp::OnBeforeNewOrOpen(bool open, int res)
 	}
 }
 
-void CApp::OnBeforeFrameDelete(void)
+void CCadApp::OnBeforeFrameDelete(void)
 {
 	for (std::list< void(*)() >::iterator It = m_beforeframedelete_callbacks.begin(); It != m_beforeframedelete_callbacks.end(); It++)
 	{
@@ -1993,7 +1993,7 @@ void CApp::OnBeforeFrameDelete(void)
 	}
 }
 
-HeeksObj* CApp::GetIDObject(int type, int id)
+HeeksObj* CCadApp::GetIDObject(int type, int id)
 {
 	UsedIds_t::iterator FindIt1 = used_ids.find(type);
 	if (FindIt1 == used_ids.end()) return(NULL);
@@ -2007,7 +2007,7 @@ HeeksObj* CApp::GetIDObject(int type, int id)
 	return list.back();
 }
 
-std::list<HeeksObj*> CApp::GetIDObjects(int type, int id)
+std::list<HeeksObj*> CCadApp::GetIDObjects(int type, int id)
 {
 	std::list<HeeksObj *> results;
 
@@ -2021,7 +2021,7 @@ std::list<HeeksObj*> CApp::GetIDObjects(int type, int id)
 	return FindIt2->second;
 }
 
-void CApp::SetObjectID(HeeksObj* object, int id)
+void CCadApp::SetObjectID(HeeksObj* object, int id)
 {
 	if (object->UsesID())
 	{
@@ -2060,7 +2060,7 @@ void CApp::SetObjectID(HeeksObj* object, int id)
 	}
 }
 
-int CApp::GetNextID(int id_group_type)
+int CCadApp::GetNextID(int id_group_type)
 {
 	UsedIds_t::iterator FindIt1 = used_ids.find(id_group_type);
 	if (FindIt1 == used_ids.end())return 1;
@@ -2082,7 +2082,7 @@ int CApp::GetNextID(int id_group_type)
 	return next_id;
 }
 
-void CApp::RemoveID(HeeksObj* object)
+void CCadApp::RemoveID(HeeksObj* object)
 {
 	int id_group_type = object->GetIDGroupType();
 
@@ -2103,28 +2103,28 @@ void CApp::RemoveID(HeeksObj* object)
 	} // End if - then
 }
 
-void CApp::ResetIDs()
+void CCadApp::ResetIDs()
 {
 	used_ids.clear();
 	next_id_map.clear();
 }
 
-void CApp::RegisterOnGLCommands(void(*callbackfunc)())
+void CCadApp::RegisterOnGLCommands(void(*callbackfunc)())
 {
 	m_on_glCommands_list.push_back(callbackfunc);
 }
 
-void CApp::RemoveOnGLCommands(void(*callbackfunc)())
+void CCadApp::RemoveOnGLCommands(void(*callbackfunc)())
 {
 	m_on_glCommands_list.remove(callbackfunc);
 }
 
-void CApp::RegisterIsModifiedFn(bool(*callbackfunc)())
+void CCadApp::RegisterIsModifiedFn(bool(*callbackfunc)())
 {
 	m_is_modified_callbacks.push_back(callbackfunc);
 }
 
-void CApp::CreateTransformGLList(const std::list<HeeksObj*>& list, bool show_grippers_on_drag){
+void CCadApp::CreateTransformGLList(const std::list<HeeksObj*>& list, bool show_grippers_on_drag){
 	DestroyTransformGLList();
 	m_transform_gl_list = glGenLists(1);
 	glNewList(m_transform_gl_list, GL_COMPILE);
@@ -2138,7 +2138,7 @@ void CApp::CreateTransformGLList(const std::list<HeeksObj*>& list, bool show_gri
 	glEndList();
 }
 
-void CApp::DestroyTransformGLList(){
+void CCadApp::DestroyTransformGLList(){
 	if (m_transform_gl_list)
 	{
 		glDeleteLists(m_transform_gl_list, 1);
@@ -2147,13 +2147,13 @@ void CApp::DestroyTransformGLList(){
 }
 
 
-void CApp::render_text(const wchar_t* str, bool select, double scale, double blur_scale)
+void CCadApp::render_text(const wchar_t* str, bool select, double scale, double blur_scale)
 {
 	DrawHeeksFontStringAntialiased(Ttc(str), scale, blur_scale, false, true);
 	//DrawHeeksFontString(Ttc(str), scale, false, true);
 }
 
-bool CApp::get_text_size(const wchar_t* str, float* width, float* height)
+bool CCadApp::get_text_size(const wchar_t* str, float* width, float* height)
 {
 	return false; 
 #if 0
@@ -2166,7 +2166,7 @@ bool CApp::get_text_size(const wchar_t* str, float* width, float* height)
 #endif
 }
 
-void CApp::render_screen_text2(const wchar_t* str, bool select, double scale)
+void CCadApp::render_screen_text2(const wchar_t* str, bool select, double scale)
 {
 	size_t n = wcslen(str);
 
@@ -2191,7 +2191,7 @@ void CApp::render_screen_text2(const wchar_t* str, bool select, double scale)
 	}
 }
 
-void CApp::render_screen_text(const wchar_t* str1, const wchar_t* str2, bool select)
+void CCadApp::render_screen_text(const wchar_t* str1, const wchar_t* str2, bool select)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -2215,7 +2215,7 @@ void CApp::render_screen_text(const wchar_t* str1, const wchar_t* str2, bool sel
 	glPopMatrix();
 }
 
-void CApp::EnableBlend()
+void CCadApp::EnableBlend()
 {
 	if (!m_antialiasing)
 	{
@@ -2225,12 +2225,12 @@ void CApp::EnableBlend()
 	}
 }
 
-void CApp::DisableBlend()
+void CCadApp::DisableBlend()
 {
 	if (!m_antialiasing)glDisable(GL_BLEND);
 }
 
-void CApp::render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta, bool select)
+void CCadApp::render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta, bool select)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -2253,17 +2253,17 @@ void CApp::render_screen_text_at(const wchar_t* str1, double scale, double x, do
 	glPopMatrix();
 }
 
-void CApp::RegisterOnBuildTexture(void(*callbackfunc)())
+void CCadApp::RegisterOnBuildTexture(void(*callbackfunc)())
 {
 	m_on_build_texture_callbacks.push_back(callbackfunc);
 }
 
-void CApp::RegisterOnBeforeNewOrOpen(void(*callbackfunc)(int, int))
+void CCadApp::RegisterOnBeforeNewOrOpen(void(*callbackfunc)(int, int))
 {
 	m_beforeneworopen_callbacks.push_back(callbackfunc);
 }
 
-bool CApp::RegisterFileOpenHandler(const std::list<std::wstring> file_extensions, FileOpenHandler_t fileopen_handler)
+bool CCadApp::RegisterFileOpenHandler(const std::list<std::wstring> file_extensions, FileOpenHandler_t fileopen_handler)
 {
 	std::set<std::wstring> valid_extensions;
 
@@ -2310,7 +2310,7 @@ bool CApp::RegisterFileOpenHandler(const std::list<std::wstring> file_extensions
 	return(true);
 }
 
-bool CApp::UnregisterFileOpenHandler(void(*fileopen_handler)(const wchar_t *path))
+bool CCadApp::UnregisterFileOpenHandler(void(*fileopen_handler)(const wchar_t *path))
 {
 	std::list<FileOpenHandlers_t::iterator> remove;
 	for (FileOpenHandlers_t::iterator itHandler = m_fileopen_handlers.begin(); itHandler != m_fileopen_handlers.end(); itHandler++)
@@ -2327,12 +2327,12 @@ bool CApp::UnregisterFileOpenHandler(void(*fileopen_handler)(const wchar_t *path
 }
 
 
-void CApp::RegisterUnitsChangeHandler(void(*units_changed_handler)(const double value))
+void CCadApp::RegisterUnitsChangeHandler(void(*units_changed_handler)(const double value))
 {
 	m_units_changed_handlers.push_back(units_changed_handler);
 }
 
-void CApp::UnregisterUnitsChangeHandler(void(*units_changed_handler)(const double value))
+void CCadApp::UnregisterUnitsChangeHandler(void(*units_changed_handler)(const double value))
 {
 	for (UnitsChangedHandlers_t::iterator itHandler = m_units_changed_handlers.begin(); itHandler != m_units_changed_handlers.end(); /* increment within loop */)
 	{
@@ -2347,12 +2347,12 @@ void CApp::UnregisterUnitsChangeHandler(void(*units_changed_handler)(const doubl
 	}
 }
 
-IRect CApp::PointToPickBox(const IPoint& point)
+IRect CCadApp::PointToPickBox(const IPoint& point)
 {
 	return IRect(point.x - 5, theApp->m_current_viewport->GetViewportSize().GetHeight() - point.y - 5, 10, 10);
 }
 
-void CApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, unsigned int filter, std::list<HeeksObj*> &objects)
+void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, unsigned int filter, std::list<HeeksObj*> &objects)
 {
 	if (only_if_fully_in){
 		// only select objects which are completely within the window
@@ -2433,7 +2433,7 @@ void CApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool o
 	}
 }
 
-void CApp::ColorPickLowestObjects(IRect window, bool single_picking, std::list<HeeksObj*> &objects)
+void CCadApp::ColorPickLowestObjects(IRect window, bool single_picking, std::list<HeeksObj*> &objects)
 {
 	// render everything with unique colors
 	// window, width and height must be positive
@@ -2523,30 +2523,30 @@ void CApp::ColorPickLowestObjects(IRect window, bool single_picking, std::list<H
 	free(pixels);
 }
 
-unsigned int CApp::GetIndex(HeeksObj *object) {
+unsigned int CCadApp::GetIndex(HeeksObj *object) {
 	return m_name_index.insert(object);
 }
 
-void CApp::ReleaseIndex(unsigned int index) {
+void CCadApp::ReleaseIndex(unsigned int index) {
 	return m_name_index.erase(index);
 }
 
-void CApp::ClearSelection(bool call_OnChanged)
+void CCadApp::ClearSelection(bool call_OnChanged)
 {
 	m_marked_list->Clear(call_OnChanged);
 }
 
-bool CApp::ObjectMarked(HeeksObj* object)
+bool CCadApp::ObjectMarked(HeeksObj* object)
 {
 	return m_marked_list->ObjectMarked(object);
 }
 
-void CApp::Mark(HeeksObj* object)
+void CCadApp::Mark(HeeksObj* object)
 {
 	m_marked_list->Add(object, true);
 }
 
-void CApp::Unmark(HeeksObj* object)
+void CCadApp::Unmark(HeeksObj* object)
 {
 	m_marked_list->Remove(object, true);
 }

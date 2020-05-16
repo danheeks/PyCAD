@@ -153,6 +153,7 @@ extern "C" {
 #include "Box.h"
 #include "tinyxml.h"
 #include "IPoint.h"
+#include "Settings.h"
 
 extern std::wstring step_dir;
 #include "App.h"

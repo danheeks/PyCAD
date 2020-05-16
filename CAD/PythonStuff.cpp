@@ -1628,7 +1628,7 @@ void ChangePropertyCheck(const bool& value, Property* property)
 	theApp->DoUndoable(new PropertyChangeCheck(value, property));
 }
 
-CApp* GetApp()
+CCadApp* GetApp()
 {
 	return theApp;
 }
@@ -1921,8 +1921,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::class_<PropertyChangeChoice, boost::python::bases<Undoable> >("PropertyChangeChoice", boost::python::no_init).def(boost::python::init<const int&, Property*>());
 		boost::python::class_<PropertyChangeCheck, boost::python::bases<Undoable> >("PropertyChangeCheck", boost::python::no_init).def(boost::python::init<const bool&, Property*>());
 
-		boost::python::class_<CApp, boost::python::bases<ObjList>, boost::noncopyable>("App")
-			.def(boost::python::init<CApp>())
+		boost::python::class_<CCadApp, boost::python::bases<ObjList>, boost::noncopyable>("App")
+			.def(boost::python::init<CCadApp>())
 			;
 
 		boost::python::class_<CViewPoint>("ViewPoint", boost::python::no_init)

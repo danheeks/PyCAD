@@ -164,8 +164,8 @@ void CShape::CallMesh()
 void CShape::glCommands(bool select, bool marked, bool no_color)
 {
 	bool mesh_called = false;
-	bool draw_faces = (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewFacesOnly);
-	bool draw_edges = (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewEdgesOnly);
+	bool draw_faces = (theApp->GetSolidViewMode() == SolidViewFacesAndEdges || theApp->GetSolidViewMode() == SolidViewFacesOnly);
+	bool draw_edges = (theApp->GetSolidViewMode() == SolidViewFacesAndEdges || theApp->GetSolidViewMode() == SolidViewEdgesOnly);
 
 	if(draw_faces)
 	{
@@ -370,7 +370,7 @@ static HeeksObj* Fuse(HeeksObj* s1, HeeksObj* s2){
 	{
 		TopoDS_Shape sh1, sh2;
 		TopoDS_Shape new_shape;
-		if(theApp->useOldFuse)new_shape = BRepAlgo_Fuse(((CShape*)s1)->Shape(), ((CShape*)s2)->Shape());
+		if(CSettings::useOldFuse)new_shape = BRepAlgo_Fuse(((CShape*)s1)->Shape(), ((CShape*)s2)->Shape());
 		else new_shape = BRepAlgoAPI_Fuse(((CShape*)s1)->Shape(), ((CShape*)s2)->Shape());
 
 		HeeksObj* new_object = CShape::MakeObject(new_shape, ((CShape*)s1)->m_title_made_from_id ? std::wstring(L"Result of Fuse Operation").c_str() : ((CShape*)s1)->m_title.c_str(), SOLID_TYPE_UNKNOWN, ((CShape*)s1)->m_color, ((CShape*)s1)->GetOpacity());

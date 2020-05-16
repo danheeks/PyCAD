@@ -4,6 +4,8 @@
 
 // Base class for all Properties
 
+#include "HeeksColor.h"
+
 #if !defined Property_HEADER
 #define Property_HEADER
 

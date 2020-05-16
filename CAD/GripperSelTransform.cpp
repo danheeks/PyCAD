@@ -9,7 +9,7 @@
 #include "DigitizeMode.h"
 #include "Viewport.h"
 #include "StretchTool.h"
-#include "App.h"
+#include "CadApp.h"
 //#include "Sketch.h"
 //#include "EndedObject.h"
 

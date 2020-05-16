@@ -10,7 +10,7 @@
 #include "PointOrWindow.h"
 #include "GripperSelTransform.h"
 #include "Picking.h"
-#include "App.h"
+#include "CadApp.h"
 #include "Viewport.h"
 using namespace std;
 

@@ -210,8 +210,8 @@ bool AfterPythonCall(PyObject *main_module)
 
 	int RegisterObjectType(std::wstring name, PyObject *callback)
 	{
-		// registers the Create function to be called in python from CApp::CreateObjectOfType
-		// returns the int type stored by CApp
+		// registers the Create function to be called in python from CCadApp::CreateObjectOfType
+		// returns the int type stored by CCadApp
 		const char* name_c = Ttc(name.c_str());
 
 		if (PyCallable_Check(callback))

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "HeeksColor.h"
+
 class Material{
 public:
 	GLfloat matf[10];

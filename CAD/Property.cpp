@@ -2,7 +2,7 @@
 // Copyright (c) 2018, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-#include "stdafx.h"
+#include <stdafx.h>
 
 #include "Property.h"
 

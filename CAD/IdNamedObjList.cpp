@@ -1,6 +1,6 @@
 // IdNamedObjList.cpp
 
-#include "stdafx.h"
+#include <stdafx.h>
 
 #include "IdNamedObjList.h"
 #include "strconv.h"
