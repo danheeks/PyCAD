@@ -64,7 +64,7 @@ cd build
 cmake ..
 make
 cd ../../
-cp ../../cad.so ./
+cp CAD/build/cad.so ./
 ```
 
 ### build Geom python module ###
@@ -75,7 +75,7 @@ cd build
 cmake ..
 make
 cd ../../
-cp ../../geom.so ./
+cp Geom/build/geom.so ./
 
 ```
 
@@ -102,7 +102,7 @@ cd build
 cmake ..
 make
 cd ../../
-cp ../../step.so ./
+cp Step/build/step.so ./
 
 ```
 
