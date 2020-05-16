@@ -63,17 +63,19 @@ mkdir build
 cd build
 cmake ..
 make
-cp cad.so ../../
+cd ../../
+cp ../../cad.so ./
 ```
 
 ### build Geom python module ###
 ```
-cd ../../Geom
+cd Geom
 mkdir build
 cd build
 cmake ..
 make
-cp geom.so ../../
+cd ../../
+cp ../../geom.so ./
 
 ```
 
@@ -89,22 +91,23 @@ cd build
 cmake ..
 make
 sudo make install
+cd ../../
 ```
 
 build step
 ```
-cd ../../Step
+cd Step
 mkdir build
 cd build
 cmake ..
 make
-cp step.so ../../
+cd ../../
+cp ../../step.so ./
 
 ```
 
 ### try the test.py ###
 ```
-cd ../../
 python3 test.py
 ```
 
