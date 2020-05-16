@@ -103,6 +103,7 @@ set(STEP_SRC
     OCCGeom.cpp
     PythonStuff.cpp
     RuledSurface.cpp
+    Settings.cpp
     Shape.cpp
     ShapeData.cpp
     ShapeTools.cpp
