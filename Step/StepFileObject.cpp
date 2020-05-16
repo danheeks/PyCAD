@@ -83,7 +83,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 				wchar_t temp_folder[1024];
 				if(GetTempPathW(1024, temp_folder))
 #else
-				const wchar_t* temp_folder = L"/tmp";
+				const wchar_t* temp_folder = L"/tmp/";
 #endif
 				{
 					std::wstring temp_file = std::wstring(temp_folder) + L"temp_HeeksCAD_STEP_file.step";
@@ -107,7 +107,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 			wchar_t temp_folder[1024];
 			if (GetTempPathW(1024, temp_folder))
 #else
-			const wchar_t* temp_folder = L"/tmp";
+			const wchar_t* temp_folder = L"/tmp/";
 #endif
 			{
 				std::wstring temp_file = std::wstring(temp_folder) + L"temp_HeeksCAD_STEP_file.step";
