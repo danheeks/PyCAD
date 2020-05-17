@@ -397,6 +397,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.p, plc2.p, plc3.c, c_list);
 				TangentCircles(plc1.p, plc2.p, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Line:
@@ -415,6 +417,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.p, plc2.l, plc3.c, c_list);
 				TangentCircles(plc1.p, plc2.l, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Circle:
@@ -432,6 +436,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 			case PLC_TwoCircle:
 				TangentCircles(plc1.p, plc2.c, plc3.c, c_list);
 				TangentCircles(plc1.p, plc2.c, plc3.c2, c_list);
+				break;
+			default:
 				break;
 			}
 			break;
@@ -456,7 +462,11 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.p, plc2.c2, plc3.c, c_list);
 				TangentCircles(plc1.p, plc2.c2, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
+			break;
+		default:
 			break;
 		}
 		break;
@@ -479,6 +489,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.l, plc2.p, plc3.c, c_list);
 				TangentCircles(plc1.l, plc2.p, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Line:
@@ -497,6 +509,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.l, plc2.l, plc3.c, c_list);
 				TangentCircles(plc1.l, plc2.l, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Circle:
@@ -514,6 +528,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 			case PLC_TwoCircle:
 				TangentCircles(plc1.l, plc2.c, plc3.c, c_list);
 				TangentCircles(plc1.l, plc2.c, plc3.c2, c_list);
+				break;
+			default:
 				break;
 			}
 			break;
@@ -538,7 +554,11 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.l, plc2.c2, plc3.c, c_list);
 				TangentCircles(plc1.l, plc2.c2, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
+			break;
+		default:
 			break;
 		}
 		break;
@@ -561,6 +581,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c, plc2.p, plc3.c, c_list);
 				TangentCircles(plc1.c, plc2.p, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Line:
@@ -579,6 +601,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c, plc2.l, plc3.c, c_list);
 				TangentCircles(plc1.c, plc2.l, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Circle:
@@ -596,6 +620,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 			case PLC_TwoCircle:
 				TangentCircles(plc1.c, plc2.c, plc3.c, c_list);
 				TangentCircles(plc1.c, plc2.c, plc3.c2, c_list);
+				break;
+			default:
 				break;
 			}
 			break;
@@ -620,7 +646,11 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c, plc2.c2, plc3.c, c_list);
 				TangentCircles(plc1.c, plc2.c2, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
+			break;
+		default:
 			break;
 		}
 		break;
@@ -648,6 +678,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c2, plc2.p, plc3.c, c_list);
 				TangentCircles(plc1.c2, plc2.p, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Line:
@@ -671,6 +703,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c2, plc2.l, plc3.c, c_list);
 				TangentCircles(plc1.c2, plc2.l, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
 		case PLC_Circle:
@@ -693,6 +727,8 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c, plc2.c, plc3.c2, c_list);
 				TangentCircles(plc1.c2, plc2.c, plc3.c, c_list);
 				TangentCircles(plc1.c2, plc2.c, plc3.c2, c_list);
+				break;
+			default:
 				break;
 			}
 			break;
@@ -727,9 +763,15 @@ void TangentCircles(const PointLineOrCircle& plc1, const PointLineOrCircle& plc2
 				TangentCircles(plc1.c2, plc2.c2, plc3.c, c_list);
 				TangentCircles(plc1.c2, plc2.c2, plc3.c2, c_list);
 				break;
+			default:
+				break;
 			}
 			break;
+		default:
+			break;
 		}
+		break;
+	default:
 		break;
 	}
 }
