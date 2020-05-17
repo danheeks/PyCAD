@@ -15,16 +15,7 @@ ENABLE_TESTING()
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES}) # Deprecated but so convenient!
 
-
-
-
-# Turn compiler warnings up to 11, at least with gcc.  
-if (CMAKE_BUILD_TOOL MATCHES "make")
-    MESSAGE(STATUS "setting gcc options: -Wall -Werror -Wno-deprecated -pedantic-errors")
-    # NON-optimized build:
-    # add_definitions( -Wall  -Wno-deprecated -Werror -pedantic-errors)
-    add_definitions(-fPIC)
-endif (CMAKE_BUILD_TOOL MATCHES "make")
+add_definitions( -Wall -Wno-deprecated -Werror -pedantic-errors -fPIC -Wno-psabi)
 
 option(BUILD_TYPE
   "Build type: Release=ON/Debug=OFF  " ON)
