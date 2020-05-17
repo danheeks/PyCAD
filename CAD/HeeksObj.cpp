@@ -58,11 +58,8 @@ const wchar_t* HeeksObj::GetIconFilePath()
 	return iconpath.c_str();
 }
 
-static bool test_bool = false;
-
 void HeeksObj::GetProperties(std::list<Property *> *list)
 {
-	bool editable = CanEditString();
 	list->push_back(new PropertyStringReadOnly(L"object type", GetTypeString()));
 	if (GetShortString())list->push_back(new PropertyObjectTitle(this));
 	if(UsesID())list->push_back(new PropertyInt(this, L"ID", (int*)(&m_id)));
