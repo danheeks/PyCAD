@@ -100,11 +100,10 @@ void HILine::GetProperties(std::list<Property *> *list){
 
 bool HILine::FindNearPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point){
 	Line ray(ray_start, ray_direction);
-	Point3d p1;
 	Line lshort;
 	double t1, t2;
 	ray.Shortest(Line(A, B), lshort, t1, t2);
-	point = p1;
+	point = lshort.p0 + lshort.v;
 	return true;
 }
 
