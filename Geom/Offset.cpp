@@ -14,7 +14,7 @@ static CCurve eliminateLoops(const CCurve& k , const CCurve& originalk, double o
 
 	enum SPAN_IDS {
 		UNMARKED = 0xe0000000,
-		ROLL_AROUND,
+		ROLL_AROUND = 1,
 		INTERSECTION,
 		FULL_CIRCLE_KURVE
 	};
