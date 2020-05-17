@@ -280,12 +280,10 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	if(compare_list.size() >0){
 		std::list<DigitizedPoint>::iterator It;
 		double dist;
-		double dp;
 		for(It = compare_list.begin(); It != compare_list.end(); It++){
 			DigitizedPoint *this_digitized_point = &(*It);
 			double t;
 			dist = ray.Near(this_digitized_point->m_point, t).Dist(this_digitized_point->m_point);
-			dp = ray.v * this_digitized_point->m_point - ray.v * ray.p0;
 			if(dist * theApp->GetPixelScale() < 2)dist = 2/theApp->GetPixelScale();
 			if(dist * theApp->GetPixelScale()>10)continue;
 			bool use_this = false;
