@@ -177,6 +177,9 @@ void Drawing::OnKeyDown(KeyCode key_code)
 		// end drawing mode
 		ClearObjectsMade();
 		theApp->RestoreInputMode();
+		break;
+	default:
+		break;
 	}
 }
 
