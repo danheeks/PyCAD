@@ -1278,7 +1278,7 @@ void CoordinateSystem::ReadFromXML(TiXmlElement *element)
 
 #define EulSafe	     "\000\001\002\000"
 #define EulNext	     "\001\002\000\001"
-#define EulGetOrd(ord,i,j,k,h,n,s,f) {unsigned o=ord;f=o&1;o>>=1;s=o&1;o>>=1;n=o&1;o>>=1;i=EulSafe[o&3];j=EulNext[i+n];k=EulNext[i+1-n];h=s?k:i;}
+#define EulGetOrd(ord,i,j,k,n,s,f) {unsigned o=ord;f=o&1;o>>=1;s=o&1;o>>=1;n=o&1;o>>=1;i=EulSafe[o&3];j=EulNext[i+n];k=EulNext[i+1-n];}
 #define EulOrd(i,p,r,f)	   (((((((i)<<1)+(p))<<1)+(r))<<1)+(f))
 #define EulOrdZXZs    EulOrd(2,0,1,0)
 
@@ -1289,8 +1289,8 @@ void CoordinateSystem::AxesToAngles(const Point3d &x, const Point3d &y, double &
 	Matrix(Point3d(0, 0, 0), x, y).Get(M[0]);
 	int order = EulOrdZXZs;
 
-    int i,j,k,h,n,s,f;
-    EulGetOrd(order,i,j,k,h,n,s,f);
+    int i,j,k,n,s,f;
+    EulGetOrd(order,i,j,k,n,s,f);
     if (s==1) {
 	double sy = sqrt(M[i][j]*M[i][j] + M[i][k]*M[i][k]);
 	if (sy > 16 * 1.192092896e-07F) {
@@ -1346,13 +1346,14 @@ static Point3d z_for_PickFrom3Points(0, 0, 1);
 static const double unit_vec_tol = 0.0000000001;
 
 
-
+#if 0
 static void OnGlCommandsForPickFrom3Points()
 {
 	CoordinateSystem::rendering_current = true;
 	coordinate_system_for_PickFrom3Points->glCommands(false, true, false);
 	CoordinateSystem::rendering_current = false;
 }
+#endif
 
 bool CoordinateSystem::PickFrom3Points()
 {
