@@ -450,6 +450,9 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			}
 		}
 		break;
+
+	default:
+		break;
 	}
 
 	return false;
@@ -596,6 +599,8 @@ const wchar_t* LineArcDrawing::GetTitle()
 				str_for_GetTitle.append(std::wstring(L"click on centre point"));
 			}
 			break;
+		default:
+			break;
 		}
 		return str_for_GetTitle.c_str();
 
@@ -608,7 +613,7 @@ const wchar_t* LineArcDrawing::GetTitle()
 void LineArcDrawing::OnKeyDown(KeyCode key_code)
 {
 	switch (key_code){
-	case 'A':
+	case (KeyCode)('A'):
 		// switch to arc drawing mode until a is released
 		if (!m_A_down){
 			m_A_down = true;
@@ -617,6 +622,8 @@ void LineArcDrawing::OnKeyDown(KeyCode key_code)
 			theApp->RefreshInputCanvas();
 		}
 		return;
+	default:
+		break;
 	}
 
 	Drawing::OnKeyDown(key_code);
