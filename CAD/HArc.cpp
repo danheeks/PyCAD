@@ -294,8 +294,6 @@ void HArc::GetGripperPositions(std::list<GripData> *list, bool just_for_endof){
 	list->push_back(GripData(GripperTypeStretch, p, &m_axis));
 }
 
-static double length_for_properties = 0.0;
-
 void HArc::GetProperties(std::list<Property *> *list){
 	list->push_back(PropertyPnt(this, L"start", &A));
 	list->push_back(PropertyPnt(this, L"end", &B));
