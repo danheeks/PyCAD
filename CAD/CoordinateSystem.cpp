@@ -1340,13 +1340,13 @@ void CoordinateSystem::AnglesToAxes(const double &v_angle, const double
 #endif
 } 
 
+#if 0
 static CoordinateSystem* coordinate_system_for_PickFrom3Points = NULL;
 static Point3d y_for_PickFrom3Points(0, 1, 0);
 static Point3d z_for_PickFrom3Points(0, 0, 1);
 static const double unit_vec_tol = 0.0000000001;
 
 
-#if 0
 static void OnGlCommandsForPickFrom3Points()
 {
 	CoordinateSystem::rendering_current = true;
