@@ -30,8 +30,8 @@ public:
 	bool m_highlighted;
 	HeeksObj* m_object;
 
-	Property(void) :m_editable(false), m_highlighted(false), m_object(NULL), m_title(L"Unknown"){} // default constructor for python
-	Property(HeeksObj* object, const wchar_t* title) :m_editable(true), m_highlighted(false), m_object(object), m_title(title){}
+	Property(void) :m_title(L"Unknown"), m_editable(false), m_highlighted(false), m_object(NULL){} // default constructor for python
+	Property(HeeksObj* object, const wchar_t* title) : m_title(title), m_editable(true), m_highlighted(false), m_object(object){}
 	Property(const Property& ho);
 	virtual ~Property(){}
 
@@ -78,7 +78,7 @@ protected:
 	int* m_pvar;
 	std::list< std::wstring > m_choices;
 public:
-	PropertyChoice(HeeksObj* object, const wchar_t* title, const std::list< std::wstring > &choices, int* pvar) :Property(object, title), m_choices(choices), m_pvar(pvar){}
+	PropertyChoice(HeeksObj* object, const wchar_t* title, const std::list< std::wstring > &choices, int* pvar) :Property(object, title), m_pvar(pvar), m_choices(choices){}
 	// Property's virtual functions
 	int get_property_type(){ return ChoicePropertyType; }
 	Property *MakeACopy(void)const;
@@ -152,7 +152,7 @@ class PropertyDoubleLimited :public PropertyDouble{
 	bool m_l, m_u;
 	double m_upper, m_lower;
 public:
-	PropertyDoubleLimited(HeeksObj* object, const wchar_t* title, double* pvar, bool l, double lower, bool u, double upper) :PropertyDouble(object, title, pvar), m_l(l), m_u(u), m_lower(lower), m_upper(upper){}
+	PropertyDoubleLimited(HeeksObj* object, const wchar_t* title, double* pvar, bool l, double lower, bool u, double upper) :PropertyDouble(object, title, pvar), m_l(l), m_u(u), m_upper(upper), m_lower(lower){}
 	// Property's virtual functions
 	int get_property_type(){ return DoublePropertyType; }
 	Property *MakeACopy(void)const;

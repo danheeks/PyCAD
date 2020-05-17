@@ -64,6 +64,8 @@ const wchar_t* DigitizeMode::GetTitle()
 		case DigitizeTangentType:
 			type_str = L"tangent";
 			break;
+		default:
+			break;
 		}
 
 		if(type_str)
@@ -274,7 +276,6 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 		}
 	}
 	double min_dist = -1;
-	double best_dp = 0;
 	DigitizedPoint *best_digitized_point = NULL;
 	if(compare_list.size() >0){
 		std::list<DigitizedPoint>::iterator It;
@@ -294,7 +295,6 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 			if(use_this){
 				min_dist = dist;
 				best_digitized_point = this_digitized_point;
-				best_dp = dp;
 			}
 		}
 	}
