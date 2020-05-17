@@ -367,6 +367,7 @@ void HeeksDxfRead::OnReadText(const double *point, const double height,  const c
 
 void HeeksDxfRead::OnReadDimension(int dimension_type, double angle, double angle2, double angle3, double radius_leader_length, const double *def_point, const double *mid, const double *p1, const double *p2, const double *p3, const double *p4, const double *p5)
 {
+#if 0
 	int type = (dimension_type & 0x07);
 
 	Point3d d(def_point);
@@ -411,6 +412,7 @@ void HeeksDxfRead::OnReadDimension(int dimension_type, double angle, double angl
 	AddObject(new HLine(e, ea1, &c));
 	AddObject(new HLine(ea1, ea2, &c));
 	AddObject(new HLine(ea2, e, &c));
+#endif
 #endif
 }
 
