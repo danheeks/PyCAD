@@ -174,6 +174,7 @@ void CGroup::GetProperties(std::list<Property *> *list)
 	ObjList::GetProperties(list);
 }
 
+#if 0
 static CGroup* object_for_tools = NULL;
 static Point3d* vertex_for_pick_pos = NULL;
 static void(*callback_for_pick_pos)(const double*) = NULL;
@@ -187,6 +188,7 @@ static void on_set_o(const double* pos)
 	object_for_tools->m_pz = object_for_tools->m_pz + shift;
 	theApp->Repaint();
 }
+#endif
 
 Matrix CGroup::GetMatrix()
 {
