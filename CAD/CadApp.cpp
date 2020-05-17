@@ -2507,7 +2507,6 @@ void CCadApp::ColorPickLowestObjects(IRect window, bool single_picking, std::lis
 				color_list.insert(color);
 		}
 
-		bool added = false;
 		for (std::set<unsigned int>::iterator It = color_list.begin(); It != color_list.end(); It++)
 		{
 			unsigned int name = *It;
