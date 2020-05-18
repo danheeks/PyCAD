@@ -174,7 +174,7 @@ bool AfterPythonCall(PyObject *main_module)
 		BeforePythonCall(&main_module, &globals);
 
 		// Execute the python function
-		PyObject* result = PyObject_CallFunction(callback, 0);
+		PyObject_CallFunction(callback, 0);
 
 		AfterPythonCall(main_module);
 
