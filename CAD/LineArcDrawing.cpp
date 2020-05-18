@@ -641,6 +641,8 @@ void LineArcDrawing::OnKeyUp(KeyCode key_code)
 		theApp->RefreshInputCanvas();
 		m_A_down = false;
 		return;
+	default:
+		break;
 	}
 
 	Drawing::OnKeyUp(key_code);
