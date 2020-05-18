@@ -401,7 +401,6 @@ int CViewPoint::ChooseBestPlane(int plane)const{
 	int best_mode = -1;
 	double second_best_dp = 0.0;
 	int second_best_mode = -1;
-	double third_best_dp;
 	int third_best_mode = -1;
 	for(int i = 0; i<3; i++){
 		if(best_mode == -1){
@@ -410,7 +409,6 @@ int CViewPoint::ChooseBestPlane(int plane)const{
 		}
 		else{
 			if(fabs(dp[i])>best_dp){
-				third_best_dp = second_best_dp;
 				third_best_mode = second_best_mode;
 				second_best_dp = best_dp;
 				second_best_mode = best_mode;
@@ -424,13 +422,11 @@ int CViewPoint::ChooseBestPlane(int plane)const{
 				}
 				else{
 					if(fabs(dp[i])>second_best_dp){
-						third_best_dp = second_best_dp;
 						third_best_mode = second_best_mode;
 						second_best_dp = fabs(dp[i]);
 						second_best_mode = i;
 					}
 					else{
-						third_best_dp = fabs(dp[i]);
 						third_best_mode = i;
 					}
 				}

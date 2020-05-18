@@ -13,7 +13,7 @@ public:
 	double m_x[6];
 	bool m_valid;
 
-	CBox():m_valid(false){}
+	CBox() :m_valid(false){ m_x[0] = 0.0; m_x[1] = 0.0; m_x[2] = 0.0; m_x[3] = 0.0; m_x[4] = 0.0; m_x[5] = 0.0; }
 	CBox(const double *e):m_valid(true){memcpy(m_x, e, 6*sizeof(double));}
 	CBox(double xmin, double ymin, double zmin, double xmax, double ymax, double zmax):m_valid(true){m_x[0] = xmin; m_x[1] = ymin; m_x[2] = zmin; m_x[3] = xmax; m_x[4] = ymax; m_x[5] = zmax;}
 
