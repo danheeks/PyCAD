@@ -111,7 +111,7 @@ class HDialog(wx.Dialog):
             sizer_horizontal.Add(control1, 1, wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
             sizer_horizontal.Add(control2, 0, wx.LEFT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
         else:
-            sizer_horizontal.Add(control1, 1, wx.LEFT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
+            sizer_horizontal.Add(control1, 1, wx.LEFT | wx.ALIGN_CENTER_VERTICAL, control_border)
 
         return HControl(wx.EXPAND | wx.ALL, sizer = sizer_horizontal)
         
@@ -134,7 +134,7 @@ class HDialog(wx.Dialog):
         buttonCancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         sizerOKCancel.Add( buttonCancel, 0, wx.ALL + cancel_flag, control_border )
         buttonOK.SetDefault()
-        return HControl(wx.ALL | wx.ALIGN_RIGHT | wx.ALIGN_BOTTOM, sizerOKCancel)
+        return HControl(wx.ALL | wx.ALIGN_RIGHT, sizerOKCancel)
     
     def OnFileBrowseButton(self, event):
         dialog = wx.FileDialog(wx.GetApp().frame, "Choose File", wildcard = "All files" + " |*.*")
