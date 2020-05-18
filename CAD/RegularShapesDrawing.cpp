@@ -474,9 +474,6 @@ const wchar_t* RegularShapesDrawing::GetTitle()
 	}
 }
 
-
-static RegularShapesDrawing* line_drawing_for_GetProperties = NULL;
-
 class PropertyDrawingMode:public Property
 {
 public:
