@@ -64,8 +64,6 @@ public:
 	PropertyCheck(HeeksObj* object, const wchar_t* title, bool* pvar) :Property(object, title), m_pvar(pvar){ }
 	PropertyCheck(HeeksObj* object, const wchar_t* title, const bool* pvar) :Property(object, title), m_pvar((bool*)pvar){ m_editable = false; }
 
-	~PropertyCheck();
-
 	// Property's virtual functions
 	int get_property_type(){ return CheckPropertyType; }
 	Property *MakeACopy(void)const;

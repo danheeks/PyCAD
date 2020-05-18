@@ -26,12 +26,6 @@ Property *PropertyCheck::MakeACopy(void)const{
 	return new_object;
 }
 
-PropertyCheck::~PropertyCheck()
-{
-	int a = 0;
-	a = 3;
-}
-
 Property *PropertyChoice::MakeACopy(void)const{
 	PropertyChoice* new_object = new PropertyChoice(*this);
 	return new_object;
