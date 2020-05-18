@@ -125,5 +125,5 @@ bool startsWith(std::wstring const &fullString, std::wstring const &beginning)
 
 bool contains(std::wstring const &fullString, std::wstring const &substring)
 {
-	return fullString.find(substring) != -1;
+	return fullString.find(substring) != std::wstring::npos;
 }
