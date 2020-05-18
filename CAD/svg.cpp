@@ -385,8 +385,6 @@ void CSvgRead::ReadTransform(TiXmlElement *pElem)
 void CSvgRead::ReadRect(TiXmlElement *pElem)
 {
 	double x = 0,y = 0,width = 0,height = 0;
-	double rx=0; 
-	double ry=0;
 	// get the attributes
 	for(TiXmlAttribute* a = pElem->FirstAttribute(); a; a = a->Next())
 	{
@@ -395,8 +393,6 @@ void CSvgRead::ReadRect(TiXmlElement *pElem)
 		if(name == "y")y=a->DoubleValue();
 		if(name == "width")width=a->DoubleValue();
 		if(name == "height")height=a->DoubleValue();
-		if(name == "rx")rx=a->DoubleValue();
-		if(name == "ry")ry=a->DoubleValue();
 	}
 
 	y=-y;height=-height;
