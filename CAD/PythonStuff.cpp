@@ -55,7 +55,7 @@ void OnExit()
 
 void AddPropertyToPythonList(Property* p, boost::python::list& list)
 {
-	if (PropertyCheck* o = dynamic_cast<PropertyCheck*>(p)){ list.append(boost::python::ptr<Property*>(p)); return;	}
+	if (PropertyCheck* o = dynamic_cast<PropertyCheck*>(p)){ list.append(o); return;	}
 	if (PropertyChoice* o = dynamic_cast<PropertyChoice*>(p)){ list.append(o); return; }
 	if (PropertyColor* o = dynamic_cast<PropertyColor*>(p)){ list.append(o); return; }
 	if (PropertyDoubleScaled* o = dynamic_cast<PropertyDoubleScaled*>(p)){ list.append(o); return; }
@@ -797,20 +797,14 @@ bool HeeksObjHasEdit(const HeeksObj& object)
 boost::python::tuple SketchGetStartPoint(CSketch &sketch)
 {
 	Point3d s(0.0, 0.0, 0.0);
-
-	HeeksObj* last_child = NULL;
-	HeeksObj* child = sketch.GetFirstChild();
-	child->GetStartPoint(s);
+	sketch.GetStartPoint(s);
 	return boost::python::make_tuple(s.x, s.y, s.z);
 }
 
 boost::python::tuple SketchGetEndPoint(CSketch &sketch)
 {
 	Point3d s(0.0, 0.0, 0.0);
-
-	HeeksObj* last_child = NULL;
-	HeeksObj* child = sketch.GetFirstChild();
-	child->GetEndPoint(s);
+	sketch.GetEndPoint(s);
 	return boost::python::make_tuple(s.x, s.y, s.z);
 }
 
@@ -1520,10 +1514,8 @@ bool ShiftSelect(HeeksObj *object, bool control_down)
 	// find most recently marked sibling
 	std::list<HeeksObj*> &marked = theApp->m_marked_list->list();
 	HeeksObj* recently_marked_sibling = NULL;
-	bool recent_first = false;
 	for (std::list<HeeksObj*>::reverse_iterator It = marked.rbegin(); It != marked.rend(); It++)
 	{
-		if (*It == object)recent_first = true;
 		if (sibling_set.find(*It) != sibling_set.end())
 		{
 			recently_marked_sibling = *It;
