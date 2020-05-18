@@ -1,23 +1,8 @@
 #include "stdafx.h"
 
-#include <Python.h>
-
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
-#include <boost/foreach.hpp>
 #include <boost/python.hpp>
-#include <boost/python/module.hpp>
-#include <boost/python/class.hpp>
-#include <boost/python/wrapper.hpp>
-#include <boost/python/call.hpp>
-
 #include "PyBaseObject.h"
 #include "strconv.h"
-
-
-
-
-
 
 
 std::wstring str_for_base_object;
