@@ -632,7 +632,7 @@ void LineArcDrawing::OnKeyDown(KeyCode key_code)
 void LineArcDrawing::OnKeyUp(KeyCode key_code)
 {
 	switch (key_code){
-	case 'A':
+	case K_A:
 		// switch back to previous drawing mode
 		if (m_save_drawing_mode.size()>0){
 			drawing_mode = m_save_drawing_mode.back();
