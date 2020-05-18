@@ -613,7 +613,7 @@ const wchar_t* LineArcDrawing::GetTitle()
 void LineArcDrawing::OnKeyDown(KeyCode key_code)
 {
 	switch (key_code){
-	case (KeyCode)('A'):
+	case K_A:
 		// switch to arc drawing mode until a is released
 		if (!m_A_down){
 			m_A_down = true;
