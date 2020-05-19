@@ -3,6 +3,9 @@ from HeeksConfig import HeeksConfig
 import step
 import cad
 import wx
+    
+def ImportSTEPFile():
+    step.ImportSTEPFile(cad.GetFilePathForImportExport())
 
 class SolidApp(App):
     def __init__(self):
@@ -15,8 +18,11 @@ class SolidApp(App):
         step.SetResPath(self.cad_dir)
         step.SetApp(cad.GetApp())
         App.RegisterObjectTypes(self)
+        cad.RegisterOnEndXmlWrite(step.WriteSolids)
         step.SetStepFileObjectType(cad.RegisterObjectType("STEP_file", step.CreateStepFileObject))
-
+        cad.RegisterImportFileType("step", ImportSTEPFile)
+        cad.RegisterImportFileType("stp", ImportSTEPFile)
+        
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = App.GetObjectTools(self, object, control_pressed, from_tree_canvas)
 #        if object.GetType() == Profile.type:

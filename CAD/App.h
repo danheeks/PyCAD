@@ -4,6 +4,8 @@
 #include "ObjList.h"
 
 class HeeksColor;
+class TiXmlElement;
+class TiXmlNode;
 
 enum FileOpenOrImportType
 {
@@ -56,4 +58,6 @@ public:
 	virtual SolidViewMode GetSolidViewMode() = 0;
 	virtual bool InOpenFile() = 0;
 	virtual FileOpenOrImportType GetFileOpenOrImportType() = 0;
+	virtual TiXmlNode* GetXmlRoot() = 0;
+	virtual TiXmlElement* GetXmlElement() = 0;
 };

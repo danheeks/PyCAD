@@ -6,7 +6,6 @@ public:
 	static bool in_glCommands;
 	static bool triangles_begun;
 	static bool lines_begun;
-	static TiXmlElement* m_cur_element;
 	static bool m_no_colour; // from glCommands
 	static bool m_marked; // from glCommands
 	static bool m_select; // from glCommands

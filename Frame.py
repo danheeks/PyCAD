@@ -403,6 +403,7 @@ class Frame(wx.Frame):
                         wx.GetApp().filepath = filepath[:dot+1] + '.heeks'
                 self.SetFrameTitle()
                 config.Write('ImportDirectory', dialog.GetDirectory())
+                cad.Repaint()
             
     def GetPathSuffix(self, path):
         dot = path.rfind('.')

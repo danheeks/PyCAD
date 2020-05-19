@@ -412,6 +412,60 @@ void RegisterMessageBoxCallback(PyObject *callback)
 	message_box_callback = callback;
 }
 
+std::map<std::wstring, PyObject*>  import_callbacks;
+std::map<std::wstring, PyObject*>  export_callbacks;
+std::wstring filepath_for_FileImportExport;
+
+bool PythonImportFile(const wchar_t* lowercase_extension, const wchar_t* filepath)
+{
+	std::map<std::wstring, PyObject*>::iterator FindIt = import_callbacks.find(lowercase_extension);
+	if (FindIt != import_callbacks.end())
+	{
+		filepath_for_FileImportExport.assign(filepath);
+		CallPythonCallback(FindIt->second);
+		return true; // handled
+	}
+	return false;
+}
+
+bool PythonExportFile(const wchar_t* lowercase_extension, const wchar_t* filepath)
+{
+	std::map<std::wstring, PyObject*>::iterator FindIt = export_callbacks.find(lowercase_extension);
+	if (FindIt != export_callbacks.end())
+	{
+		filepath_for_FileImportExport.assign(filepath);
+		CallPythonCallback(FindIt->second);
+		return true; // handled
+	}
+	return false;
+}
+
+void RegisterImportFileType(const std::wstring& extension, PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	import_callbacks.insert(std::pair<std::wstring, PyObject*>(extension, callback));
+}
+
+void RegisterExportFileType(const std::wstring& extension, PyObject *callback)
+{
+	if (!PyCallable_Check(callback))
+	{
+		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+		return;
+	}
+	export_callbacks.insert(std::pair<std::wstring, PyObject*>(extension, callback));
+}
+
+std::wstring GetFilePathForImportExport()
+{
+	return filepath_for_FileImportExport;
+}
+
+
 PyObject* set_input_mode_callback = NULL;
 
 void PythonOnSetInputMode()
@@ -513,22 +567,22 @@ std::wstring HeeksObjGetIconFilePath(HeeksObj& object)
 
 void HeeksObjReadFromXML(HeeksObj& object)
 {
-	object.ReadFromXML(BaseObject::m_cur_element);
+	object.ReadFromXML(theApp->m_cur_xml_element);
 }
 
 void HeeksObjReadObjectXml(HeeksObj& object)
 {
-	object.HeeksObj::ReadFromXML(BaseObject::m_cur_element);
+	object.HeeksObj::ReadFromXML(theApp->m_cur_xml_element);
 }
 
 void HeeksObjWriteToXML(HeeksObj& object)
 {
-	object.WriteToXML(BaseObject::m_cur_element);
+	object.WriteToXML(theApp->m_cur_xml_element);
 }
 
 void HeeksObjWriteObjectToXML(HeeksObj& object)
 {
-	object.HeeksObj::WriteToXML(BaseObject::m_cur_element);
+	object.HeeksObj::WriteToXML(theApp->m_cur_xml_element);
 }
 
 boost::python::list HeeksObjGetProperties(HeeksObj& object) {
@@ -741,16 +795,16 @@ void ObjListAdd(ObjList& objlist, HeeksObj* object)
 
 void ObjListReadFromXML(ObjList& objlist)
 {
-	TiXmlElement* save_element = BaseObject::m_cur_element;
-	objlist.ObjList::ReadFromXML(BaseObject::m_cur_element);
-	BaseObject::m_cur_element = save_element;
+	TiXmlElement* save_element = theApp->m_cur_xml_element;
+	objlist.ObjList::ReadFromXML(theApp->m_cur_xml_element);
+	theApp->m_cur_xml_element = save_element;
 }
 
 void ObjListWriteToXML(ObjList& objlist)
 {
-	TiXmlElement* save_element = BaseObject::m_cur_element;
-	objlist.ObjList::WriteToXML(BaseObject::m_cur_element);
-	BaseObject::m_cur_element = save_element;
+	TiXmlElement* save_element = theApp->m_cur_xml_element;
+	objlist.ObjList::WriteToXML(theApp->m_cur_xml_element);
+	theApp->m_cur_xml_element = save_element;
 }
 
 void ObjListCopyFrom(ObjList& objlist, HeeksObj* object)
@@ -1056,23 +1110,23 @@ void SetXmlValue(const std::wstring &name, PyObject* value)
 	const char* sname = Ttc(name.c_str());
 	if (PyLong_Check(value))
 	{
-		BaseObject::m_cur_element->SetAttribute(sname, PyLong_AsLong(value));
+		theApp->m_cur_xml_element->SetAttribute(sname, PyLong_AsLong(value));
 	}
 	else if (PyFloat_Check(value))
 	{
-		BaseObject::m_cur_element->SetDoubleAttribute(sname, PyFloat_AsDouble(value));
+		theApp->m_cur_xml_element->SetDoubleAttribute(sname, PyFloat_AsDouble(value));
 	}
 	else if (PyBool_Check(value))
 	{
-		BaseObject::m_cur_element->SetAttribute(sname, PyObject_IsTrue(value) ? 1:0);
+		theApp->m_cur_xml_element->SetAttribute(sname, PyObject_IsTrue(value) ? 1:0);
 	}
 	else if (PyBytes_Check(value))
 	{
-		BaseObject::m_cur_element->SetAttribute(sname, PyBytes_AsString(value));
+		theApp->m_cur_xml_element->SetAttribute(sname, PyBytes_AsString(value));
 	}
 	else if (PyUnicode_Check(value))
 	{
-		BaseObject::m_cur_element->SetAttribute(sname, PyBytes_AsString(PyUnicode_AsASCIIString(value)));
+		theApp->m_cur_xml_element->SetAttribute(sname, PyBytes_AsString(PyUnicode_AsASCIIString(value)));
 	}
 	else
 	{
@@ -1086,19 +1140,19 @@ void BeginXmlChild(const std::wstring &child_name)
 	std::string svalue(Ttc(child_name.c_str()));
 
 	TiXmlElement *element = new TiXmlElement(Ttc(child_name.c_str()));
-	BaseObject::m_cur_element->LinkEndChild(element);
-	BaseObject::m_cur_element = element;
+	theApp->m_cur_xml_element->LinkEndChild(element);
+	theApp->m_cur_xml_element = element;
 }
 
 void EndXmlChild()
 {
-	if (BaseObject::m_cur_element)BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
+	if (theApp->m_cur_xml_element)theApp->m_cur_xml_element = theApp->m_cur_xml_element->Parent()->ToElement();
 }
 
 boost::python::object GetXmlObject() {
-	if (BaseObject::m_cur_element)
+	if (theApp->m_cur_xml_element)
 	{
-		HeeksObj* object = theApp->ReadXMLElement(BaseObject::m_cur_element);
+		HeeksObj* object = theApp->ReadXMLElement(theApp->m_cur_xml_element);
 		if (object != NULL)
 		{
 			boost::python::list olist;
@@ -1116,9 +1170,9 @@ boost::python::object GetXmlObject() {
 
 std::wstring GetXmlValue(const std::wstring &name, const std::wstring &default_value = L"")
 {
-	if (BaseObject::m_cur_element != NULL)
+	if (theApp->m_cur_xml_element != NULL)
 	{
-		const char* value = BaseObject::m_cur_element->Attribute(Ttc(name.c_str()));
+		const char* value = theApp->m_cur_xml_element->Attribute(Ttc(name.c_str()));
 		if (value != NULL)
 			return std::wstring(Ctt(value));
 	}
@@ -1129,31 +1183,31 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlValueOverloads, GetXmlValue, 1, 2)
 
 std::wstring GetXmlText()
 {
-	if (BaseObject::m_cur_element == NULL)return L"";
-	const char* text = BaseObject::m_cur_element->GetText();
+	if (theApp->m_cur_xml_element == NULL)return L"";
+	const char* text = theApp->m_cur_xml_element->GetText();
 	if (text == NULL)return L"";
 	return Ctt(text);
 }
 
 void SetXmlText(const std::wstring& str)
 {
-	if (BaseObject::m_cur_element == NULL)return;
+	if (theApp->m_cur_xml_element == NULL)return;
 
 	// add actual text as a child object
 	TiXmlText* text = new TiXmlText(Ttc(str.c_str()));
-	BaseObject::m_cur_element->LinkEndChild(text);
+	theApp->m_cur_xml_element->LinkEndChild(text);
 }
 
 bool GetXmlBool(const std::wstring &name, bool default_value = false)
 {
-	if (BaseObject::m_cur_element == NULL)
+	if (theApp->m_cur_xml_element == NULL)
 		return default_value;
 
 	const char* cname = Ttc(name.c_str());
-	if (BaseObject::m_cur_element->Attribute(cname) == NULL)
+	if (theApp->m_cur_xml_element->Attribute(cname) == NULL)
 		return default_value;
 	int value;
-	BaseObject::m_cur_element->Attribute(cname, &value);
+	theApp->m_cur_xml_element->Attribute(cname, &value);
 	return value != 0;
 }
 
@@ -1161,14 +1215,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlBoolOverloads, GetXmlBool, 1, 2)
 
 int GetXmlInt(const std::wstring &name, int default_value = 0)
 {
-	if (BaseObject::m_cur_element == NULL)
+	if (theApp->m_cur_xml_element == NULL)
 		return default_value;
 
 	const char* cname = Ttc(name.c_str());
-	if (BaseObject::m_cur_element->Attribute(cname) == NULL)
+	if (theApp->m_cur_xml_element->Attribute(cname) == NULL)
 		return default_value;
 	int value;
-	BaseObject::m_cur_element->Attribute(cname, &value);
+	theApp->m_cur_xml_element->Attribute(cname, &value);
 	return value;
 }
 
@@ -1176,14 +1230,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlIntOverloads, GetXmlInt, 1, 2)
 
 double GetXmlFloat(const std::wstring &name, double default_value = 0)
 {
-	if (BaseObject::m_cur_element == NULL)
+	if (theApp->m_cur_xml_element == NULL)
 		return default_value;
 
 	const char* cname = Ttc(name.c_str());
-	if (BaseObject::m_cur_element->Attribute(cname) == NULL)
+	if (theApp->m_cur_xml_element->Attribute(cname) == NULL)
 		return default_value;
 	double value;
-	BaseObject::m_cur_element->Attribute(cname, &value);
+	theApp->m_cur_xml_element->Attribute(cname, &value);
 	return value;
 }
 
@@ -1191,14 +1245,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlFloatOverloads, GetXmlFloat, 1, 2)
 
 void ReturnFromXmlChild()
 {
-	if(BaseObject::m_cur_element)BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
+	if(theApp->m_cur_xml_element)theApp->m_cur_xml_element = theApp->m_cur_xml_element->Parent()->ToElement();
 }
 
 boost::python::object GetFirstXmlChild()
 {
-	if (BaseObject::m_cur_element)
+	if (theApp->m_cur_xml_element)
 	{
-		TiXmlElement* first_child = BaseObject::m_cur_element->FirstChildElement();
+		TiXmlElement* first_child = theApp->m_cur_xml_element->FirstChildElement();
 		if (first_child == NULL)
 		{
 			// leave current object as it is, but return None
@@ -1207,8 +1261,8 @@ boost::python::object GetFirstXmlChild()
 		else
 		{
 			// set current to the first child and return it
-			BaseObject::m_cur_element = first_child;
-			return boost::python::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
+			theApp->m_cur_xml_element = first_child;
+			return boost::python::object(std::wstring(Ctt(theApp->m_cur_xml_element->Value())));
 		}
 	}
 	return boost::python::object(); // None
@@ -1216,20 +1270,20 @@ boost::python::object GetFirstXmlChild()
 
 boost::python::object GetNextXmlChild()
 {
-	if (BaseObject::m_cur_element)
+	if (theApp->m_cur_xml_element)
 	{
-		TiXmlElement* next_sibling = BaseObject::m_cur_element->NextSiblingElement();
+		TiXmlElement* next_sibling = theApp->m_cur_xml_element->NextSiblingElement();
 		if (next_sibling == NULL)
 		{
 			// set current element to be the parent, but return None
-			BaseObject::m_cur_element = BaseObject::m_cur_element->Parent()->ToElement();
+			theApp->m_cur_xml_element = theApp->m_cur_xml_element->Parent()->ToElement();
 			return boost::python::object(); // None
 		}
 		else
 		{
 			// set current to the next sibling and return it
-			BaseObject::m_cur_element = next_sibling;
-			return boost::python::object(std::wstring(Ctt(BaseObject::m_cur_element->Value())));
+			theApp->m_cur_xml_element = next_sibling;
+			return boost::python::object(std::wstring(Ctt(theApp->m_cur_xml_element->Value())));
 		}
 	}
 	return boost::python::object(); // None
@@ -2256,7 +2310,10 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
 		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
 		boost::python::def("SetInputModeCallback", SetInputModeCallback);
-		boost::python::def("GetResFolder", GetResFolder); 
+		boost::python::def("RegisterImportFileType", RegisterImportFileType);
+		boost::python::def("RegisterExportFileType", RegisterExportFileType);
+		boost::python::def("GetFilePathForImportExport", GetFilePathForImportExport);
+		boost::python::def("GetResFolder", GetResFolder);
 		boost::python::def("SetResFolder", SetResFolder);
 		boost::python::def("MessageBox", CadMessageBox);
 		boost::python::def("GetSelectedObjects", GetSelectedObjects);

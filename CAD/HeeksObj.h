@@ -134,8 +134,9 @@ public:
 	virtual void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true){} // [nine doubles, three doubles],  or [nine doubles, nine doubles] if just_one_average_normal = false
 	virtual double Area()const{ return 0.0; }
 	virtual void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const{};
-	void WriteXML(TiXmlNode *root);
+	virtual void WriteXML(TiXmlNode *root);
 	virtual const wchar_t* GetXMLTypeString(){ return GetTypeString(); } // default is to use the GetTypeString, but Coordinate System's type doesn't has a space in it in the XML.
+	virtual bool OnlyAddChildrenOnReadXML(){ return false; }
 	virtual void WriteToXML(TiXmlElement *element);
 	virtual void ReadFromXML(TiXmlElement* element);
 	void SetID(int id);

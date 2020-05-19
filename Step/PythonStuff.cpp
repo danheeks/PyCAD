@@ -119,4 +119,7 @@ void SetWireType(int type){ CWire::m_type = type; }
 		boost::python::def("SetLoopType", SetLoopType);
 		boost::python::def("SetSolidType", SetSolidType);
 		boost::python::def("SetWireType", SetWireType);
+		boost::python::def("WriteSolids", WriteSolids);
+		boost::python::def("ImportSTEPFile", ImportSTEPFile);
+		
 	}

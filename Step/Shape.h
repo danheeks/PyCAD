@@ -56,7 +56,7 @@ public:
 	void CopyFrom(const HeeksObj* object);
 	void WriteXML(TiXmlNode *root);
 	bool UsesID(){return true;}
-	bool CanAddTo(HeeksObj* owner){return ((owner != NULL) && (owner->GetType() == GroupType));}
+	bool CanAddTo(HeeksObj* owner){ return ((owner != NULL) && (owner->GetType() == GroupType || owner->GetType() == DocumentType)); }
 	bool DescendForUndo(){return false;}
 	bool DrawAfterOthers(){return m_opacity < 0.9999;}
 	void GetProperties(std::list<Property *> *list);

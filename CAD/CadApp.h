@@ -164,14 +164,8 @@ public:
 	virtual HeeksObj* GetPastIntoForOpenXML(){ return paste_into_for_OpenXMLFile; }
 
 	CInputMode* m_previous_input_mode;
-
-	typedef void(*FileOpenHandler_t)(const wchar_t *path);
-	typedef std::map<std::wstring, FileOpenHandler_t> FileOpenHandlers_t;
-
-	FileOpenHandlers_t  m_fileopen_handlers;
-
-	bool RegisterFileOpenHandler(const std::list<std::wstring> file_extensions, FileOpenHandler_t);
-	bool UnregisterFileOpenHandler(void(*fileopen_handler)(const wchar_t *path));
+	TiXmlElement* m_cur_xml_element;
+	TiXmlNode* m_cur_xml_root;
 
 	typedef void(*UnitsChangedHandler_t)(const double value);
 	typedef std::list<UnitsChangedHandler_t> UnitsChangedHandlers_t;
@@ -342,6 +336,8 @@ public:
 	virtual bool InOpenFile(){ return m_in_OpenFile; }
 	virtual FileOpenOrImportType GetFileOpenOrImportType(){ return m_file_open_or_import_type; }
 	virtual SolidViewMode GetSolidViewMode(){ return m_solid_view_mode; }
+	TiXmlNode* GetXmlRoot(){ return m_cur_xml_root; }
+	TiXmlElement* GetXmlElement(){ return m_cur_xml_element; }
 };
 
 extern CCadApp* theApp;

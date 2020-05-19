@@ -40,6 +40,8 @@
 CCadApp *theApp = new CCadApp;
 
 extern void PythonOnGLCommands();
+extern bool PythonImportFile(const wchar_t* lowercase_extension, const wchar_t* filepath);
+extern bool PythonExportFile(const wchar_t* lowercase_extension, const wchar_t* filepath);
 
 static unsigned int DecimalPlaces(const double value)
 {
@@ -127,17 +129,6 @@ CCadApp::CCadApp()
 	m_mouse_move_highlighting = true;
 	m_highlight_color = HeeksColor(128, 255, 0);
 
-	{
-		std::list<std::wstring> extensions;
-		extensions.push_back(L"svg");
-		RegisterFileOpenHandler(extensions, OpenSVGFile);
-	}
-	{
-		std::list<std::wstring> extensions;
-		extensions.push_back(L"stl");
-		RegisterFileOpenHandler(extensions, OpenSTLFile);
-	}
-
 	InitializeCreateFunctions();
 
 	m_settings_restored = false;
@@ -149,6 +140,8 @@ CCadApp::CCadApp()
 	m_observers_frozen = 0;
 	frozen_selection_cleared = false;
 	m_previous_input_mode = NULL;
+	m_cur_xml_element = NULL;
+	m_cur_xml_root = NULL;
 }
 
 CCadApp::~CCadApp()
@@ -259,7 +252,7 @@ void CCadApp::Reset(){
 	m_hidden_for_drag.clear();
 	m_show_grippers_on_drag = true;
 	if (m_ruler)delete m_ruler;
-	*m_ruler = HRuler();
+	m_ruler = new HRuler();
 	RestoreInputMode();
 
 	ResetIDs();
@@ -398,14 +391,14 @@ void CCadApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksOb
 
 	TiXmlHandle hDoc(&doc);
 	TiXmlElement* pElem;
-	TiXmlNode* root = &doc;
+	m_cur_xml_root = &doc;
 
 	pElem = hDoc.FirstChildElement().Element();
 	if (!pElem) return;
 	std::string name(pElem->Value());
 	if (name == "HeeksCAD_Document")
 	{
-		root = pElem;
+		m_cur_xml_root = pElem;
 	}
 
 	ObjectReferences_t unique_set;
@@ -414,12 +407,22 @@ void CCadApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksOb
 	strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
 
 	std::list<HeeksObj*> objects;
-	for (pElem = root->FirstChildElement(); pElem; pElem = pElem->NextSiblingElement())
+	for (pElem = m_cur_xml_root->FirstChildElement(); pElem; pElem = pElem->NextSiblingElement())
 	{
 		HeeksObj* object = ReadXMLElement(pElem);
 		if (object)
 		{
-			objects.push_back(object);
+			if (object->OnlyAddChildrenOnReadXML())
+			{
+				std::list<HeeksObj*> children = object->GetChildren();
+				for (std::list<HeeksObj*>::iterator It = children.begin(); It != children.end(); It++)
+				{
+					HeeksObj* child = *It;
+					objects.push_back(child);
+				}
+			}
+			else
+				objects.push_back(object);
 		}
 	}
 
@@ -611,10 +614,6 @@ bool CCadApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* 
 			m_file_open_or_import_type = FileImportTypeHeeks;
 		OpenXMLFile(filepath, paste_into, paste_before, import_not_open, false, import_not_open);
 	}
-	else if (m_fileopen_handlers.find(extension) != m_fileopen_handlers.end())
-	{
-		(m_fileopen_handlers[extension])(filepath);
-	}
 	else if (endsWith(wf, L".dxf"))
 	{
 		m_file_open_or_import_type = FileOpenOrImportTypeDxf;
@@ -624,7 +623,15 @@ bool CCadApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* 
 	else if (OpenImageFile(filepath))
 	{
 	}
-	else
+	else if (endsWith(wf, L".svg"))
+	{
+		OpenSVGFile(filepath);
+	}
+	else if (endsWith(wf, L".stl"))
+	{
+		OpenSTLFile(filepath);
+	}
+	else if(!PythonImportFile(extension.c_str(), filepath))
 	{
 		// error
 		std::wstring str = std::wstring(L"Invalid file type chosen");
@@ -1108,18 +1115,18 @@ void CCadApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *fi
 	TiXmlDeclaration* decl = new TiXmlDeclaration(l_pszVersion, l_pszEncoding, l_pszStandalone);
 	doc.LinkEndChild(decl);
 
-	TiXmlNode* root = &doc;
+	m_cur_xml_root = &doc;
 	if (!for_clipboard)
 	{
-		root = new TiXmlElement("HeeksCAD_Document");
-		doc.LinkEndChild(root);
+		m_cur_xml_root = new TiXmlElement("HeeksCAD_Document");
+		doc.LinkEndChild(m_cur_xml_root);
 	}
 
 	// loop through all the objects writing them
 	for (std::list<HeeksObj*>::const_iterator It = objects.begin(); It != objects.end(); It++)
 	{
 		HeeksObj* object = *It;
-		object->WriteXML(root);
+		object->WriteXML(m_cur_xml_root);
 	}
 
 	PythonOnEndXmlWrite();
@@ -2262,70 +2269,6 @@ void CCadApp::RegisterOnBeforeNewOrOpen(void(*callbackfunc)(int, int))
 {
 	m_beforeneworopen_callbacks.push_back(callbackfunc);
 }
-
-bool CCadApp::RegisterFileOpenHandler(const std::list<std::wstring> file_extensions, FileOpenHandler_t fileopen_handler)
-{
-	std::set<std::wstring> valid_extensions;
-
-	// For Linux, where the file system supports case-sensitive file names, we should expand
-	// the extensions to include uppercase and lowercase and add them to our set.
-
-	for (std::list<std::wstring>::const_iterator l_itExtension = file_extensions.begin(); l_itExtension != file_extensions.end(); l_itExtension++)
-	{
-		std::wstring extension(*l_itExtension);
-
-		// Make sure the calling routine didn't add the '.'
-		if (startsWith(extension, L"."))
-		{
-			extension.erase(0, 1);
-		}
-
-#ifndef WIN32
-		lowerCase(extension);
-		valid_extensions.insert(extension);
-
-		upperCase(extension);
-		valid_extensions.insert(extension);
-#else
-		lowerCase(extension);
-		valid_extensions.insert(extension);
-#endif // WIN32
-	} // End for
-
-	for (std::set<std::wstring>::iterator itExtension = valid_extensions.begin(); itExtension != valid_extensions.end(); itExtension++)
-	{
-		if (m_fileopen_handlers.find(*itExtension) != m_fileopen_handlers.end())
-		{
-//			MessageBox(L"Aborting file-open handler registration for extension %s as it has already been registered\n", Ttc(itExtension->c_str()));
-			return(false);
-		}
-	}
-
-	// We must not have seen these extensions before.  Go ahead and register them.
-	for (std::set<std::wstring>::iterator itExtension = valid_extensions.begin(); itExtension != valid_extensions.end(); itExtension++)
-	{
-		m_fileopen_handlers.insert(std::make_pair(*itExtension, fileopen_handler));
-	}
-
-	return(true);
-}
-
-bool CCadApp::UnregisterFileOpenHandler(void(*fileopen_handler)(const wchar_t *path))
-{
-	std::list<FileOpenHandlers_t::iterator> remove;
-	for (FileOpenHandlers_t::iterator itHandler = m_fileopen_handlers.begin(); itHandler != m_fileopen_handlers.end(); itHandler++)
-	{
-		if (itHandler->second == fileopen_handler) remove.push_back(itHandler);
-	}
-
-	for (std::list<FileOpenHandlers_t::iterator>::iterator itRemove = remove.begin(); itRemove != remove.end(); itRemove++)
-	{
-		m_fileopen_handlers.erase(*itRemove);
-	}
-
-	return(remove.size() > 0);
-}
-
 
 void CCadApp::RegisterUnitsChangeHandler(void(*units_changed_handler)(const double value))
 {

@@ -12,11 +12,11 @@ HeeksColor color_for_base_object;
 bool BaseObject::NeverDelete(){ return true; }
 
 int BaseObject::GetType()const{
-	return m_type;
-	//std::pair<bool, int> result = CallReturnInt("GetType");
-	//if (result.first)
-	//	return result.second;
-	//return 0;
+	//return m_type;
+	std::pair<bool, int> result = CallReturnInt("GetType");
+	if (result.first)
+		return result.second;
+	return 0;
 }
 
 const wchar_t* BaseObject::GetIconFilePath()
@@ -101,13 +101,13 @@ void BaseObject::KillGLLists()
 
 void BaseObject::WriteToXML(TiXmlElement *element)
 {
-	BaseObject::m_cur_element = element;
+	theApp->m_cur_xml_element = element;
 	CallVoidReturn("WriteXml");
 }
 
 void BaseObject::ReadFromXML(TiXmlElement *element)
 {
-	BaseObject::m_cur_element = element;
+	theApp->m_cur_xml_element = element;
 	CallVoidReturn("ReadXml");
 }
 
@@ -229,7 +229,6 @@ boost::python::override BaseObject::get_override(char const* name) const
 bool BaseObject::in_glCommands = false;
 bool BaseObject::triangles_begun = false;
 bool BaseObject::lines_begun = false;
-TiXmlElement* BaseObject::m_cur_element = NULL;
 bool BaseObject::m_no_colour = false;
 bool BaseObject::m_marked = false;
 bool BaseObject::m_select = false;
