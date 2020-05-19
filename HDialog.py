@@ -95,10 +95,10 @@ class HDialog(wx.Dialog):
     def AddFileNameControl(self, sizer, label, text_control):
         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
         static_label = wx.StaticText(self, wx.ID_ANY, label)
-        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_LEFT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
         sizer_horizontal.Add( text_control, 1, wx.LEFT + wx.RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
         button_control = wx.Button(self, label = "...")
-        sizer_horizontal.Add( button_control, 0, wx.LEFT + wx.ALIGN_RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer_horizontal.Add( button_control, 0, wx.LEFT + wx.ALIGN_CENTER_VERTICAL, control_border )
         sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, control_border )
         self.button_id_txt_map[button_control.GetId()] = text_control
         self.Bind(wx.EVT_BUTTON, self.OnFileBrowseButton, button_control)
@@ -106,10 +106,10 @@ class HDialog(wx.Dialog):
     
     def MakeControlUsingStaticText(self, static_text, control1, control2 = None):
         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_horizontal.Add(static_text, 0, wx.RIGHT | wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL, control_border)
+        sizer_horizontal.Add(static_text, 0, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
         if control2:
-            sizer_horizontal.Add(control1, 1, wx.LEFT | wx.RIGHT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
-            sizer_horizontal.Add(control2, 0, wx.LEFT | wx.ALIGN_RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
+            sizer_horizontal.Add(control1, 1, wx.LEFT | wx.RIGHT | wx.ALIGN_CENTER_VERTICAL, control_border)
+            sizer_horizontal.Add(control2, 0, wx.LEFT | wx.ALIGN_CENTER_VERTICAL, control_border)
         else:
             sizer_horizontal.Add(control1, 1, wx.LEFT | wx.ALIGN_CENTER_VERTICAL, control_border)
 
