@@ -236,21 +236,20 @@ class PropertiesCanvas( wx.Panel ):
 
         # Difference between using PropertyGridManager vs PropertyGrid is that
         # the manager supports multiple pages and a description box.
-        self.pg = pg = wxpg.PropertyGrid(self.panel,
-                        style=wxpg.PG_DEFAULT_STYLE | wxpg.PG_SPLITTER_AUTO_CENTER)
+        self.pg = wxpg.PropertyGrid(self.panel, style=wxpg.PG_DEFAULT_STYLE | wxpg.PG_SPLITTER_AUTO_CENTER)
         
         self.topsizer = wx.BoxSizer(wx.VERTICAL)
-        self.topsizer.Add(pg, 1, wx.EXPAND)
+        self.topsizer.Add(self.pg, 1, wx.EXPAND)
 
         self.ClearProperties() #  initialize data structures
         
         # Show help as tooltips
-        pg.SetExtraStyle(wxpg.PG_EX_HELP_AS_TOOLTIPS)
+        self.pg.SetExtraStyle(wxpg.PG_EX_HELP_AS_TOOLTIPS)
 
-        pg.Bind( wxpg.EVT_PG_CHANGED, self.OnPropGridChange )
-        pg.Bind( wxpg.EVT_PG_PAGE_CHANGED, self.OnPropGridPageChange )
-        pg.Bind( wxpg.EVT_PG_SELECTED, self.OnPropGridSelect )
-        pg.Bind( wxpg.EVT_PG_RIGHT_CLICK, self.OnPropGridRightClick )
+        self.pg.Bind( wxpg.EVT_PG_CHANGED, self.OnPropGridChange )
+        self.pg.Bind( wxpg.EVT_PG_PAGE_CHANGED, self.OnPropGridPageChange )
+        self.pg.Bind( wxpg.EVT_PG_SELECTED, self.OnPropGridSelect )
+        self.pg.Bind( wxpg.EVT_PG_RIGHT_CLICK, self.OnPropGridRightClick )
 
         self.panel.SetSizer(self.topsizer)
         self.topsizer.SetSizeHints(self.panel)
@@ -314,6 +313,7 @@ class PropertiesCanvas( wx.Panel ):
             new_prop = wxpg.EnumProperty(property.GetTitle(), labels = property.GetChoices(), value = property.GetInt())
         elif property.GetType() == cad.PROPERTY_TYPE_CHECK:
             new_prop = wxpg.BoolProperty(property.GetTitle(),value=property.GetBool())
+            new_prop.SetAttribute(wxpg.PG_BOOL_USE_CHECKBOX, True)
         elif property.GetType() == cad.PROPERTY_TYPE_LIST:
             new_prop = wxpg.StringProperty(property.GetTitle(), value='<composed>')
         elif property.GetType() == cad.PROPERTY_TYPE_FILE:

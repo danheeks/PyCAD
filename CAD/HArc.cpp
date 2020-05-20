@@ -479,36 +479,30 @@ Point3d HArc::GetSegmentVector(double fraction)const
 
 Point3d HArc::GetPointAtFraction(double fraction)const
 {
-#if 0 // to do
-	if(A.IsEqual(B, theApp->m_geom_tol)){
+	if(A == B){
 		return A;
 	}
 
-	Point3d axis(C,m_axis.Direction());
-	Point3d x_axis = axis.XDirection();
-	Point3d y_axis = axis.YDirection();
-	Point3d centre = C;
+	Point3d x_axis, y_axis;
+	m_axis.arbitrary_axes(x_axis, y_axis);
 
-	double ax = Point3d(A - centre) * x_axis;
-	double ay = Point3d(A - centre) * y_axis;
-	double bx = Point3d(B - centre) * x_axis;
-	double by = Point3d(B - centre) * y_axis;
+	double ax = Point3d(A - C) * x_axis;
+	double ay = Point3d(A - C) * y_axis;
+	double bx = Point3d(B - C) * x_axis;
+	double by = Point3d(B - C) * y_axis;
 
 	double start_angle = atan2(ay, ax);
 	double end_angle = atan2(by, bx);
 
 	if(start_angle > end_angle)end_angle += 6.28318530717958;
 
-	double radius = m_radius;
+	double radius = C.Dist(A);
 	double d_angle = end_angle - start_angle;
 	double angle = start_angle + d_angle * fraction;
     double x = radius * cos(angle);
     double y = radius * sin(angle);
 
-	return centre + x * x_axis + y * y_axis;
-#else
-	return Point3d(0, 0, 0);
-#endif
+	return C + x_axis * x + y_axis * y;
 }
 
 //static

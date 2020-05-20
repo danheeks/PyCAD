@@ -89,7 +89,7 @@ static void AddObjectToArea(HeeksObj* object)
 	}
 }
 
-void ObjectsToArea(const std::list<HeeksObj*> &objects, std::list<HeeksObj*> objects_to_delete, CArea& area)
+void ObjectsToArea(const std::list<HeeksObj*> &objects, CArea& area, std::list<HeeksObj*> *objects_to_delete)
 {
 	area_to_add_to = &area;
 	curve_to_add_to = NULL;
@@ -97,7 +97,7 @@ void ObjectsToArea(const std::list<HeeksObj*> &objects, std::list<HeeksObj*> obj
 	for (std::list<HeeksObj*>::const_iterator It = objects.begin(); It != objects.end(); It++){
 		HeeksObj* object = *It;
 		AddObjectToArea(object);
-		objects_to_delete.push_back(object);
+		if (objects_to_delete)objects_to_delete->push_back(object);
 	}
 }
 
@@ -107,9 +107,8 @@ CArea ObjectToArea(HeeksObj* object)
 {
 	area_for_ObjectToArea.m_curves.clear();
 	std::list<HeeksObj*> list;
-	std::list<HeeksObj*> objects_to_delete;
 	list.push_back(object);
-	ObjectsToArea(list, objects_to_delete, area_for_ObjectToArea);
+	ObjectsToArea(list, area_for_ObjectToArea);
 	//area_for_ObjectToArea.Reorder();
 	return area_for_ObjectToArea;
 }
