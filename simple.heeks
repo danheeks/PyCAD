@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <HeeksCAD_Document>
-    <Program machine="LinuxCNC" output_file="C:\Users\DANHEE~1\AppData\Local\Temp\heeFF62.tmp.ngc" output_file_name_follows_data_file_name="1" program="# coding=CP1252&#x0A;#English language or it&apos;s variant detected in Microsoft Windows&#x0A;import sys&#x0A;sys.path.insert(0,&apos;C:\\Program Files (x86)\\HeeksCNC 1.5\\HeeksCNC&apos;)&#x0A;import math&#x0A;sys.path.insert(0,&apos;C:\\Program Files (x86)\\HeeksCNC 1.5\\HeeksCNC/Boolean&apos;)&#x0A;import area&#x0A;area.set_units(1)&#x0A;import kurve_funcs&#x0A;from depth_params import depth_params as depth_params&#x0A;&#x0A;from nc.nc import *&#x0A;from nc.emc2b import *&#x0A;&#x0A;output(&apos;C:\\Dev\\PyCAD\\simple.ngc&apos;)&#x0A;program_begin(1, &apos;Program 1&apos;)&#x0A;add_stock(&apos;BLOCK&apos;,[60, 26, 5, -0, -0, 5])&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;#(3 mm Slot Cutter)&#x0A;tool_defn( 1, &apos;3 mm Slot Cutter&apos;, {&apos;corner radius&apos;:0, &apos;cutting edge angle&apos;:0, &apos;cutting edge height&apos;:12, &apos;diameter&apos;:3, &apos;flat radius&apos;:0, &apos;material&apos;:1, &apos;tool length offset&apos;:127, &apos;type&apos;:3, &apos;name&apos;:&apos;3 mm Slot Cutter&apos;})&#x0A;#(4 mm Drill Bit)&#x0A;tool_defn( 2, &apos;4 mm Drill Bit&apos;, {&apos;corner radius&apos;:0, &apos;cutting edge angle&apos;:59, &apos;cutting edge height&apos;:50.8, &apos;diameter&apos;:4, &apos;flat radius&apos;:0, &apos;material&apos;:1, &apos;tool length offset&apos;:100, &apos;type&apos;:0, &apos;name&apos;:&apos;4 mm Drill Bit&apos;})&#x0A;#(6 mm Slot Cutter)&#x0A;tool_defn( 3, &apos;6 mm Slot Cutter&apos;, {&apos;corner radius&apos;:0, &apos;cutting edge angle&apos;:0, &apos;cutting edge height&apos;:30, &apos;diameter&apos;:6, &apos;flat radius&apos;:0, &apos;material&apos;:1, &apos;tool length offset&apos;:100, &apos;type&apos;:3, &apos;name&apos;:&apos;6 mm Slot Cutter&apos;})&#x0A;tool_change( id=2)&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 150)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(0), float(1), float(0), float(0), float(-7), None)&#x0A;tool_diameter = float(4)&#x0A;cutting_edge_angle = float(59)&#x0A;drill(x=36, y=19, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=36, y=13, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=36, y=7, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=30, y=7, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=24, y=7, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;end_canned_cycle()&#x0A;tool_change( id=3)&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 50)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(0), float(3), float(0), float(1), float(-5), None)&#x0A;tool_diameter = float(6)&#x0A;cutting_edge_angle = float(0)&#x0A;roll_radius = float(0.1)&#x0A;offset_extra = 0.1&#x0A;comment(&apos;Sketch 7&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(22, 16))&#x0A;curve.append(area.Vertex(1, area.Point(32, 16), area.Point(27, 16)))&#x0A;curve.append(area.Vertex(1, area.Point(22, 16), area.Point(27, 16)))&#x0A;&#x0A;kurve_funcs.set_good_start_point(curve, True)&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;left&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;feedrate_hv(100, 50)&#x0A;flush_nc()&#x0A;offset_extra = 0.0&#x0A;depthparams.step_down = 6&#x0A;depthparams.z_finish_depth = 0.0&#x0A;comment(&apos;Sketch 7&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(22, 16))&#x0A;curve.append(area.Vertex(-1, area.Point(32, 16), area.Point(27, 16)))&#x0A;curve.append(area.Vertex(-1, area.Point(22, 16), area.Point(27, 16)))&#x0A;&#x0A;kurve_funcs.set_good_start_point(curve, False)&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;right&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 50)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(0), float(3), float(0), float(1), float(-5), None)&#x0A;tool_diameter = float(6)&#x0A;cutting_edge_angle = float(0)&#x0A;roll_radius = float(0.1)&#x0A;offset_extra = 0.1&#x0A;comment(&apos;Sketch 8&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(20, 23))&#x0A;curve.append(area.Point(40, 23))&#x0A;curve.append(area.Point(40, 3))&#x0A;curve.append(area.Point(20, 3))&#x0A;curve.append(area.Point(20, 23))&#x0A;&#x0A;kurve_funcs.make_smaller( curve, start = area.Point(17, 13))&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;kurve_funcs.clear_tags()&#x0A;kurve_funcs.add_tag(area.Point(17, 6), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(17, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 6), 1, 0.7853981634, 1)&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;left&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;feedrate_hv(100, 50)&#x0A;flush_nc()&#x0A;offset_extra = 0.0&#x0A;depthparams.step_down = 6&#x0A;depthparams.z_finish_depth = 0.0&#x0A;comment(&apos;Sketch 8&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(20, 23))&#x0A;curve.append(area.Point(20, 3))&#x0A;curve.append(area.Point(40, 3))&#x0A;curve.append(area.Point(40, 23))&#x0A;curve.append(area.Point(20, 23))&#x0A;&#x0A;kurve_funcs.make_smaller( curve, start = area.Point(17, 13))&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;kurve_funcs.clear_tags()&#x0A;kurve_funcs.add_tag(area.Point(17, 6), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(17, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 6), 1, 0.7853981634, 1)&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;right&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;program_end()&#x0A;" units="1.00000000" ProgramPathControlMode="3" ProgramMotionBlendingTolerance="0.00010000" ProgramNaiveCamTolerance="0.00010000" title_from_id="1" id="1">
+    <Program machine="LinuxCNC" output_file="C:\Users\DANHEE~1\AppData\Local\Temp\heeFF62.tmp.ngc" output_file_name_follows_data_file_name="1" program="# coding=CP1252&#x0A;#English language or it&apos;s variant detected in Microsoft Windows&#x0A;import sys&#x0A;sys.path.insert(0,&apos;C:\\Program Files (x86)\\HeeksCNC 1.5\\HeeksCNC&apos;)&#x0A;import math&#x0A;sys.path.insert(0,&apos;C:\\Program Files (x86)\\HeeksCNC 1.5\\HeeksCNC/Boolean&apos;)&#x0A;import area&#x0A;area.set_units(1)&#x0A;import kurve_funcs&#x0A;import area_funcs&#x0A;from depth_params import depth_params as depth_params&#x0A;&#x0A;from nc.nc import *&#x0A;from nc.emc2b import *&#x0A;&#x0A;output(&apos;C:\\Dev\\PyCAD\\simple.ngc&apos;)&#x0A;program_begin(1, &apos;Program 1&apos;)&#x0A;add_stock(&apos;BLOCK&apos;,[60, 26, 5, -0, -0, 5])&#x0A;absolute()&#x0A;metric()&#x0A;set_plane(0)&#x0A;&#x0A;#(3 mm Slot Cutter)&#x0A;tool_defn( 1, &apos;3 mm Slot Cutter&apos;, {&apos;corner radius&apos;:0, &apos;cutting edge angle&apos;:0, &apos;cutting edge height&apos;:12, &apos;diameter&apos;:3, &apos;flat radius&apos;:0, &apos;material&apos;:1, &apos;tool length offset&apos;:127, &apos;type&apos;:3, &apos;name&apos;:&apos;3 mm Slot Cutter&apos;})&#x0A;#(4 mm Drill Bit)&#x0A;tool_defn( 2, &apos;4 mm Drill Bit&apos;, {&apos;corner radius&apos;:0, &apos;cutting edge angle&apos;:59, &apos;cutting edge height&apos;:50.8, &apos;diameter&apos;:4, &apos;flat radius&apos;:0, &apos;material&apos;:1, &apos;tool length offset&apos;:100, &apos;type&apos;:0, &apos;name&apos;:&apos;4 mm Drill Bit&apos;})&#x0A;#(6 mm Slot Cutter)&#x0A;tool_defn( 3, &apos;6 mm Slot Cutter&apos;, {&apos;corner radius&apos;:0, &apos;cutting edge angle&apos;:0, &apos;cutting edge height&apos;:30, &apos;diameter&apos;:6, &apos;flat radius&apos;:0, &apos;material&apos;:1, &apos;tool length offset&apos;:100, &apos;type&apos;:3, &apos;name&apos;:&apos;6 mm Slot Cutter&apos;})&#x0A;tool_change( id=3)&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 50)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(1), float(3), float(0), float(0), float(0), None)&#x0A;tool_diameter = float(6)&#x0A;cutting_edge_angle = float(0)&#x0A;a = area.Area()&#x0A;entry_moves = []&#x0A;c = area.Curve()&#x0A;c.append(area.Vertex(0, area.Point(20, 23), area.Point(0, 0)))&#x0A;c.append(area.Vertex(0, area.Point(20, 3), area.Point(0, 0)))&#x0A;c.append(area.Vertex(0, area.Point(40, 3), area.Point(0, 0)))&#x0A;c.append(area.Vertex(0, area.Point(40, 23), area.Point(0, 0)))&#x0A;c.append(area.Vertex(0, area.Point(20, 23), area.Point(0, 0)))&#x0A;a.append(c)&#x0A;&#x0A;a.Reorder()&#x0A;entry_style = 0&#x0A;area_funcs.pocket(a, tool_diameter/2, -2, 3, depthparams, 1, True, False, 0,False, None,&apos;climb&apos;,&apos;plunge&apos;)&#x0A;rapid(z = depthparams.clearance_height)&#x0A;tool_change( id=2)&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 150)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(0), float(1), float(0), float(0), float(-7), None)&#x0A;tool_diameter = float(4)&#x0A;cutting_edge_angle = float(59)&#x0A;drill(x=36, y=19, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=36, y=13, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=36, y=7, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=30, y=7, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;drill(x=24, y=7, dwell=0, depthparams = depthparams, retract_mode=0, spindle_mode=0, internal_coolant_on=0, rapid_to_clearance=0)&#x0A;end_canned_cycle()&#x0A;tool_change( id=3)&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 50)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(0), float(3), float(0), float(1), float(-5), None)&#x0A;tool_diameter = float(6)&#x0A;cutting_edge_angle = float(0)&#x0A;roll_radius = float(0.1)&#x0A;offset_extra = 0.1&#x0A;comment(&apos;Sketch 7&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(22, 16))&#x0A;curve.append(area.Vertex(1, area.Point(32, 16), area.Point(27, 16)))&#x0A;curve.append(area.Vertex(1, area.Point(22, 16), area.Point(27, 16)))&#x0A;&#x0A;kurve_funcs.set_good_start_point(curve, True)&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;left&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;feedrate_hv(100, 50)&#x0A;flush_nc()&#x0A;offset_extra = 0.0&#x0A;depthparams.step_down = 6&#x0A;depthparams.z_finish_depth = 0.0&#x0A;comment(&apos;Sketch 7&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(22, 16))&#x0A;curve.append(area.Vertex(-1, area.Point(32, 16), area.Point(27, 16)))&#x0A;curve.append(area.Vertex(-1, area.Point(22, 16), area.Point(27, 16)))&#x0A;&#x0A;kurve_funcs.set_good_start_point(curve, False)&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;right&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;spindle(3000)&#x0A;feedrate_hv(200, 50)&#x0A;flush_nc()&#x0A;depthparams = depth_params(float(5), float(2), float(0), float(3), float(0), float(1), float(-5), None)&#x0A;tool_diameter = float(6)&#x0A;cutting_edge_angle = float(0)&#x0A;roll_radius = float(0.1)&#x0A;offset_extra = 0.1&#x0A;comment(&apos;Sketch 8&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(20, 23))&#x0A;curve.append(area.Point(40, 23))&#x0A;curve.append(area.Point(40, 3))&#x0A;curve.append(area.Point(20, 3))&#x0A;curve.append(area.Point(20, 23))&#x0A;&#x0A;kurve_funcs.make_smaller( curve, start = area.Point(17, 13))&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;kurve_funcs.clear_tags()&#x0A;kurve_funcs.add_tag(area.Point(17, 6), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(17, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 6), 1, 0.7853981634, 1)&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;left&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;feedrate_hv(100, 50)&#x0A;flush_nc()&#x0A;offset_extra = 0.0&#x0A;depthparams.step_down = 6&#x0A;depthparams.z_finish_depth = 0.0&#x0A;comment(&apos;Sketch 8&apos;)&#x0A;curve = area.Curve()&#x0A;curve.append(area.Point(20, 23))&#x0A;curve.append(area.Point(20, 3))&#x0A;curve.append(area.Point(40, 3))&#x0A;curve.append(area.Point(40, 23))&#x0A;curve.append(area.Point(20, 23))&#x0A;&#x0A;kurve_funcs.make_smaller( curve, start = area.Point(17, 13))&#x0A;roll_on = &apos;auto&apos;&#x0A;roll_off = &apos;auto&apos;&#x0A;kurve_funcs.clear_tags()&#x0A;kurve_funcs.add_tag(area.Point(17, 6), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(17, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 20), 1, 0.7853981634, 1)&#x0A;kurve_funcs.add_tag(area.Point(43, 6), 1, 0.7853981634, 1)&#x0A;extend_at_start= 0&#x0A;extend_at_end= 0&#x0A;lead_in_line_len= 0&#x0A;lead_out_line_len= 0&#x0A;kurve_funcs.profile(curve, &apos;right&apos;, tool_diameter/2, offset_extra, roll_radius, roll_on, roll_off, depthparams, extend_at_start,extend_at_end,lead_in_line_len,lead_out_line_len )&#x0A;absolute()&#x0A;program_end()&#x0A;" units="1.00000000" ProgramPathControlMode="3" ProgramMotionBlendingTolerance="0.00010000" ProgramNaiveCamTolerance="0.00010000" title_from_id="1" id="1">
         <Tools>
             <Tool title="3 mm Slot Cutter" tool_number="1" id="5">
                 <params diameter="3.00000000" tool_length_offset="127.00000000" automatically_generate_title="1" material="1" type="slot_cutter" corner_radius="0.00000000" flat_radius="0.00000000" cutting_edge_angle="0.00000000" cutting_edge_height="12.00000000" />
@@ -20,6 +20,11 @@
             </Stock>
         </Stocks>
         <Operations>
+            <Pocket sketch="8" active="1" tool_number="3" pattern="0" surface="0" title_from_id="1" id="1">
+                <params step="3.00000000" cut_mode="1" mat="-2.00000000" from_center="1" keep_tool_down="1" use_zig_zag="0" zig_angle="0.00000000" zig_unidirectional="0" entry_move="0" />
+                <depthop clear="5.00000000" down="3.00000000" userdepths="" startdepth="1.00000000" depth="0.00000000" r="2.00000000" />
+                <speedop hfeed="200.00000000" vfeed="50.00000000" spin="3000.00000000" />
+            </Pocket>
             <Drilling active="1" tool_number="2" pattern="0" surface="0" title_from_id="1" id="1">
                 <params dwell="0.00000000" retract_mode="0" spindle_mode="0" internal_coolant_on="0" rapid_to_clearance="0" />
                 <Point id="2" />
@@ -50,13 +55,13 @@
         </Operations>
         <nccode edited="0" id="1">
             <ncblock id="0">
-                <text col="comment">(Created with emc2b post processor 2020/05/18 11:27)</text>
+                <text col="comment">(Created with emc2b post processor 2020/05/22 11:50)</text>
             </ncblock>
             <ncblock id="0">
-                <text col="comment">(tool change to 4 mm Drill Bit)</text>
+                <text col="comment">(tool change to 6 mm Slot Cutter)</text>
             </ncblock>
             <ncblock id="0">
-                <text col="tool">T2</text>
+                <text col="tool">T3</text>
                 <text> </text>
                 <text col="misc">M06</text>
                 <text> </text>
@@ -71,6 +76,177 @@
                 <text>G90</text>
                 <text> </text>
                 <text col="prep">G21</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="rapid">G00</text>
+                <text> </text>
+                <text col="axis">Z5</text>
+                <text> </text>
+                <text col="axis">S3000</text>
+                <text> </text>
+                <text col="misc">M03</text>
+                <path col="rapid">
+                    <line tool_number="0" x="0.00000000" y="0.00000000" z="5.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X33</text>
+                <text> </text>
+                <text col="axis">Y16</text>
+                <path col="rapid">
+                    <line tool_number="0" x="33.00000000" y="16.00000000" z="5.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">Z3</text>
+                <path col="rapid">
+                    <line tool_number="0" x="33.00000000" y="16.00000000" z="3.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="feed">G01</text>
+                <text> </text>
+                <text col="axis">Z0</text>
+                <text> </text>
+                <text col="axis">F50</text>
+                <path col="feed">
+                    <line tool_number="0" x="33.00000000" y="16.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X27</text>
+                <text> </text>
+                <text col="axis">Y16</text>
+                <text> </text>
+                <text col="axis">F200</text>
+                <path col="feed">
+                    <line tool_number="0" x="27.00000000" y="16.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X27</text>
+                <text> </text>
+                <text col="axis">Y10</text>
+                <path col="feed">
+                    <line tool_number="0" x="27.00000000" y="10.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X33</text>
+                <text> </text>
+                <text col="axis">Y10</text>
+                <path col="feed">
+                    <line tool_number="0" x="33.00000000" y="10.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X33</text>
+                <text> </text>
+                <text col="axis">Y16</text>
+                <path col="feed">
+                    <line tool_number="0" x="33.00000000" y="16.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X36</text>
+                <text> </text>
+                <text col="axis">Y19</text>
+                <path col="feed">
+                    <line tool_number="0" x="36.00000000" y="19.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X24</text>
+                <text> </text>
+                <text col="axis">Y19</text>
+                <path col="feed">
+                    <line tool_number="0" x="24.00000000" y="19.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X24</text>
+                <text> </text>
+                <text col="axis">Y7</text>
+                <path col="feed">
+                    <line tool_number="0" x="24.00000000" y="7.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X36</text>
+                <text> </text>
+                <text col="axis">Y7</text>
+                <path col="feed">
+                    <line tool_number="0" x="36.00000000" y="7.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X36</text>
+                <text> </text>
+                <text col="axis">Y19</text>
+                <path col="feed">
+                    <line tool_number="0" x="36.00000000" y="19.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X39</text>
+                <text> </text>
+                <text col="axis">Y22</text>
+                <path col="feed">
+                    <line tool_number="0" x="39.00000000" y="22.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X21</text>
+                <text> </text>
+                <text col="axis">Y22</text>
+                <path col="feed">
+                    <line tool_number="0" x="21.00000000" y="22.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X21</text>
+                <text> </text>
+                <text col="axis">Y4</text>
+                <path col="feed">
+                    <line tool_number="0" x="21.00000000" y="4.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X39</text>
+                <text> </text>
+                <text col="axis">Y4</text>
+                <path col="feed">
+                    <line tool_number="0" x="39.00000000" y="4.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="axis">X39</text>
+                <text> </text>
+                <text col="axis">Y22</text>
+                <path col="feed">
+                    <line tool_number="0" x="39.00000000" y="22.00000000" z="0.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="rapid">G00</text>
+                <text> </text>
+                <text col="axis">Z5</text>
+                <path col="rapid">
+                    <line tool_number="0" x="39.00000000" y="22.00000000" z="5.00000000" />
+                </path>
+            </ncblock>
+            <ncblock id="0">
+                <text col="comment">(tool change to 4 mm Drill Bit)</text>
+            </ncblock>
+            <ncblock id="0">
+                <text col="tool">T2</text>
+                <text> </text>
+                <text col="misc">M06</text>
+                <text> </text>
+                <text col="rapid">G43</text>
+                <path col="rapid">
+                    <line tool_number="0" x="39.00000000" y="22.00000000" z="5.00000000" />
+                </path>
             </ncblock>
             <ncblock id="0">
                 <text col="feed">G83</text>
@@ -1394,40 +1570,40 @@
                 <vertex id="95" />
                 <vertex id="96" />
             </index_pair>
-            <index_pair index="2" id="2" title="" title_from_id="1" vis="0" solid_type="3" lx="0.00000000" ly="0.00000000" lz="-5.00000000" dx="0.00000000" dy="0.00000000" dz="1.00000000" xx="1.00000000" xy="0.00000000" xz="-0.00000000" wx="60.00000000" wy="26.00000000" wz="5.00000000" col="12579007">
-                <face id="61" />
-                <face id="62" />
-                <face id="63" />
-                <face id="64" />
-                <face id="65" />
-                <face id="66" />
-                <edge id="175" />
-                <edge id="176" />
-                <edge id="177" />
-                <edge id="178" />
-                <edge id="179" />
-                <edge id="180" />
-                <edge id="181" />
-                <edge id="182" />
-                <edge id="183" />
-                <edge id="184" />
-                <edge id="185" />
-                <edge id="186" />
-                <vertex id="129" />
-                <vertex id="130" />
-                <vertex id="131" />
-                <vertex id="132" />
-                <vertex id="133" />
-                <vertex id="134" />
-                <vertex id="135" />
-                <vertex id="136" />
+            <index_pair index="2" id="2" title="STEP solid" title_from_id="1" vis="0" solid_type="3" lx="0.00000000" ly="0.00000000" lz="-5.00000000" dx="0.00000000" dy="0.00000000" dz="1.00000000" xx="1.00000000" xy="0.00000000" xz="-0.00000000" wx="60.00000000" wy="26.00000000" wz="5.20000000" col="12579007">
+                <face id="43" />
+                <face id="44" />
+                <face id="45" />
+                <face id="46" />
+                <face id="47" />
+                <face id="48" />
+                <edge id="139" />
+                <edge id="140" />
+                <edge id="141" />
+                <edge id="142" />
+                <edge id="143" />
+                <edge id="144" />
+                <edge id="145" />
+                <edge id="146" />
+                <edge id="147" />
+                <edge id="148" />
+                <edge id="149" />
+                <edge id="150" />
+                <vertex id="105" />
+                <vertex id="106" />
+                <vertex id="107" />
+                <vertex id="108" />
+                <vertex id="109" />
+                <vertex id="110" />
+                <vertex id="111" />
+                <vertex id="112" />
             </index_pair>
         </index_map>
         <file_text>
             <![CDATA[ISO-10303-21;
 HEADER;
 FILE_DESCRIPTION(('Open CASCADE Model'),'2;1');
-FILE_NAME('Open CASCADE Shape Model','2020-05-18T11:27:28',('Author'),(
+FILE_NAME('Open CASCADE Shape Model','2020-05-22T11:51:14',('Author'),(
     'Open CASCADE'),'Open CASCADE STEP processor 6.5','Open CASCADE 6.5'
   ,'Unknown');
 FILE_SCHEMA(('AUTOMOTIVE_DESIGN_CC2 { 1 2 10303 214 -1 1 5 4 }'));
@@ -1441,8 +1617,8 @@ DATA;
 #4 = PRODUCT_DEFINITION_SHAPE('','',#5);
 #5 = PRODUCT_DEFINITION('design','',#6,#9);
 #6 = PRODUCT_DEFINITION_FORMATION('','',#7);
-#7 = PRODUCT('Open CASCADE STEP translator 6.5 3',
-  'Open CASCADE STEP translator 6.5 3','',(#8));
+#7 = PRODUCT('Open CASCADE STEP translator 6.5 1',
+  'Open CASCADE STEP translator 6.5 1','',(#8));
 #8 = MECHANICAL_CONTEXT('',#2,'mechanical');
 #9 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
 #10 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#15),#1125);
@@ -1486,7 +1662,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #45 = AXIS2_PLACEMENT_3D('',#46,#47,#48);
 #46 = CARTESIAN_POINT('',(20.,3.,-5.));
 #47 = DIRECTION('',(0.E+000,1.,0.E+000));
-#48 = DIRECTION('',(0.E+000,0.E+000,1.));
+#48 = DIRECTION('',(0.E+000,-0.E+000,1.));
 #49 = DEFINITIONAL_REPRESENTATION('',(#50),#54);
 #50 = LINE('',#51,#52);
 #51 = CARTESIAN_POINT('',(0.E+000,0.E+000));
@@ -1518,7 +1694,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #73 = AXIS2_PLACEMENT_3D('',#74,#75,#76);
 #74 = CARTESIAN_POINT('',(20.,3.,-5.));
 #75 = DIRECTION('',(0.E+000,0.E+000,1.));
-#76 = DIRECTION('',(1.,0.E+000,0.E+000));
+#76 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #77 = DEFINITIONAL_REPRESENTATION('',(#78),#82);
 #78 = LINE('',#79,#80);
 #79 = CARTESIAN_POINT('',(0.E+000,0.E+000));
@@ -1550,7 +1726,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #101 = AXIS2_PLACEMENT_3D('',#102,#103,#104);
 #102 = CARTESIAN_POINT('',(20.,23.,-5.));
 #103 = DIRECTION('',(0.E+000,1.,0.E+000));
-#104 = DIRECTION('',(0.E+000,0.E+000,1.));
+#104 = DIRECTION('',(0.E+000,-0.E+000,1.));
 #105 = DEFINITIONAL_REPRESENTATION('',(#106),#110);
 #106 = LINE('',#107,#108);
 #107 = CARTESIAN_POINT('',(0.E+000,0.E+000));
@@ -1580,7 +1756,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #127 = AXIS2_PLACEMENT_3D('',#128,#129,#130);
 #128 = CARTESIAN_POINT('',(20.,3.,0.E+000));
 #129 = DIRECTION('',(0.E+000,0.E+000,1.));
-#130 = DIRECTION('',(1.,0.E+000,0.E+000));
+#130 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #131 = DEFINITIONAL_REPRESENTATION('',(#132),#136);
 #132 = LINE('',#133,#134);
 #133 = CARTESIAN_POINT('',(0.E+000,0.E+000));
@@ -1691,7 +1867,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #224 = AXIS2_PLACEMENT_3D('',#225,#226,#227);
 #225 = CARTESIAN_POINT('',(24.,7.,0.E+000));
 #226 = DIRECTION('',(0.E+000,0.E+000,1.));
-#227 = DIRECTION('',(1.,0.E+000,0.E+000));
+#227 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #228 = PCURVE('',#126,#229);
 #229 = DEFINITIONAL_REPRESENTATION('',(#230),#234);
 #230 = CIRCLE('',#231,2.);
@@ -1706,7 +1882,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #237 = AXIS2_PLACEMENT_3D('',#238,#239,#240);
 #238 = CARTESIAN_POINT('',(24.,7.,-8.));
 #239 = DIRECTION('',(0.E+000,0.E+000,1.));
-#240 = DIRECTION('',(1.,0.E+000,0.E+000));
+#240 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #241 = DEFINITIONAL_REPRESENTATION('',(#242),#245);
 #242 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#243,#244),.UNSPECIFIED.,.F.,.F.,
   (2,2),(0.E+000,3.14159265359),.PIECEWISE_BEZIER_KNOTS.);
@@ -1722,7 +1898,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #250 = AXIS2_PLACEMENT_3D('',#251,#252,#253);
 #251 = CARTESIAN_POINT('',(24.,7.,0.E+000));
 #252 = DIRECTION('',(0.E+000,0.E+000,1.));
-#253 = DIRECTION('',(1.,0.E+000,0.E+000));
+#253 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #254 = PCURVE('',#126,#255);
 #255 = DEFINITIONAL_REPRESENTATION('',(#256),#260);
 #256 = CIRCLE('',#257,2.);
@@ -1754,7 +1930,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #277 = AXIS2_PLACEMENT_3D('',#278,#279,#280);
 #278 = CARTESIAN_POINT('',(30.,7.,0.E+000));
 #279 = DIRECTION('',(0.E+000,0.E+000,1.));
-#280 = DIRECTION('',(1.,0.E+000,0.E+000));
+#280 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #281 = PCURVE('',#126,#282);
 #282 = DEFINITIONAL_REPRESENTATION('',(#283),#287);
 #283 = CIRCLE('',#284,2.);
@@ -1769,7 +1945,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #290 = AXIS2_PLACEMENT_3D('',#291,#292,#293);
 #291 = CARTESIAN_POINT('',(30.,7.,-8.));
 #292 = DIRECTION('',(0.E+000,0.E+000,1.));
-#293 = DIRECTION('',(1.,0.E+000,0.E+000));
+#293 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #294 = DEFINITIONAL_REPRESENTATION('',(#295),#298);
 #295 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#296,#297),.UNSPECIFIED.,.F.,.F.,
   (2,2),(0.E+000,3.14159265359),.PIECEWISE_BEZIER_KNOTS.);
@@ -1785,7 +1961,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #303 = AXIS2_PLACEMENT_3D('',#304,#305,#306);
 #304 = CARTESIAN_POINT('',(30.,7.,0.E+000));
 #305 = DIRECTION('',(0.E+000,0.E+000,1.));
-#306 = DIRECTION('',(1.,0.E+000,0.E+000));
+#306 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #307 = PCURVE('',#126,#308);
 #308 = DEFINITIONAL_REPRESENTATION('',(#309),#313);
 #309 = CIRCLE('',#310,2.);
@@ -1817,7 +1993,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #330 = AXIS2_PLACEMENT_3D('',#331,#332,#333);
 #331 = CARTESIAN_POINT('',(36.,7.,0.E+000));
 #332 = DIRECTION('',(0.E+000,0.E+000,1.));
-#333 = DIRECTION('',(1.,0.E+000,0.E+000));
+#333 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #334 = PCURVE('',#126,#335);
 #335 = DEFINITIONAL_REPRESENTATION('',(#336),#340);
 #336 = CIRCLE('',#337,2.);
@@ -1832,7 +2008,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #343 = AXIS2_PLACEMENT_3D('',#344,#345,#346);
 #344 = CARTESIAN_POINT('',(36.,7.,-8.));
 #345 = DIRECTION('',(0.E+000,0.E+000,1.));
-#346 = DIRECTION('',(1.,0.E+000,0.E+000));
+#346 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #347 = DEFINITIONAL_REPRESENTATION('',(#348),#351);
 #348 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#349,#350),.UNSPECIFIED.,.F.,.F.,
   (2,2),(0.E+000,3.14159265359),.PIECEWISE_BEZIER_KNOTS.);
@@ -1848,7 +2024,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #356 = AXIS2_PLACEMENT_3D('',#357,#358,#359);
 #357 = CARTESIAN_POINT('',(36.,7.,0.E+000));
 #358 = DIRECTION('',(0.E+000,0.E+000,1.));
-#359 = DIRECTION('',(1.,0.E+000,0.E+000));
+#359 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #360 = PCURVE('',#126,#361);
 #361 = DEFINITIONAL_REPRESENTATION('',(#362),#366);
 #362 = CIRCLE('',#363,2.);
@@ -1880,7 +2056,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #383 = AXIS2_PLACEMENT_3D('',#384,#385,#386);
 #384 = CARTESIAN_POINT('',(36.,13.,0.E+000));
 #385 = DIRECTION('',(0.E+000,0.E+000,1.));
-#386 = DIRECTION('',(1.,0.E+000,0.E+000));
+#386 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #387 = PCURVE('',#126,#388);
 #388 = DEFINITIONAL_REPRESENTATION('',(#389),#393);
 #389 = CIRCLE('',#390,2.);
@@ -1895,7 +2071,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #396 = AXIS2_PLACEMENT_3D('',#397,#398,#399);
 #397 = CARTESIAN_POINT('',(36.,13.,-8.));
 #398 = DIRECTION('',(0.E+000,0.E+000,1.));
-#399 = DIRECTION('',(1.,0.E+000,0.E+000));
+#399 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #400 = DEFINITIONAL_REPRESENTATION('',(#401),#404);
 #401 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#402,#403),.UNSPECIFIED.,.F.,.F.,
   (2,2),(0.E+000,3.14159265359),.PIECEWISE_BEZIER_KNOTS.);
@@ -1911,7 +2087,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #409 = AXIS2_PLACEMENT_3D('',#410,#411,#412);
 #410 = CARTESIAN_POINT('',(36.,13.,0.E+000));
 #411 = DIRECTION('',(0.E+000,0.E+000,1.));
-#412 = DIRECTION('',(1.,0.E+000,0.E+000));
+#412 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #413 = PCURVE('',#126,#414);
 #414 = DEFINITIONAL_REPRESENTATION('',(#415),#419);
 #415 = CIRCLE('',#416,2.);
@@ -1943,7 +2119,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #436 = AXIS2_PLACEMENT_3D('',#437,#438,#439);
 #437 = CARTESIAN_POINT('',(36.,19.,0.E+000));
 #438 = DIRECTION('',(0.E+000,0.E+000,1.));
-#439 = DIRECTION('',(1.,0.E+000,0.E+000));
+#439 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #440 = PCURVE('',#126,#441);
 #441 = DEFINITIONAL_REPRESENTATION('',(#442),#446);
 #442 = CIRCLE('',#443,2.);
@@ -1958,7 +2134,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #449 = AXIS2_PLACEMENT_3D('',#450,#451,#452);
 #450 = CARTESIAN_POINT('',(36.,19.,-8.));
 #451 = DIRECTION('',(0.E+000,0.E+000,1.));
-#452 = DIRECTION('',(1.,0.E+000,0.E+000));
+#452 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #453 = DEFINITIONAL_REPRESENTATION('',(#454),#457);
 #454 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#455,#456),.UNSPECIFIED.,.F.,.F.,
   (2,2),(0.E+000,3.14159265359),.PIECEWISE_BEZIER_KNOTS.);
@@ -1974,7 +2150,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #462 = AXIS2_PLACEMENT_3D('',#463,#464,#465);
 #463 = CARTESIAN_POINT('',(36.,19.,0.E+000));
 #464 = DIRECTION('',(0.E+000,0.E+000,1.));
-#465 = DIRECTION('',(1.,0.E+000,0.E+000));
+#465 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #466 = PCURVE('',#126,#467);
 #467 = DEFINITIONAL_REPRESENTATION('',(#468),#472);
 #468 = CIRCLE('',#469,2.);
@@ -2006,7 +2182,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #489 = AXIS2_PLACEMENT_3D('',#490,#491,#492);
 #490 = CARTESIAN_POINT('',(27.,16.,0.E+000));
 #491 = DIRECTION('',(0.E+000,0.E+000,1.));
-#492 = DIRECTION('',(1.,0.E+000,0.E+000));
+#492 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #493 = PCURVE('',#126,#494);
 #494 = DEFINITIONAL_REPRESENTATION('',(#495),#499);
 #495 = CIRCLE('',#496,5.);
@@ -2021,7 +2197,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #502 = AXIS2_PLACEMENT_3D('',#503,#504,#505);
 #503 = CARTESIAN_POINT('',(27.,16.,-8.));
 #504 = DIRECTION('',(0.E+000,0.E+000,1.));
-#505 = DIRECTION('',(1.,0.E+000,0.E+000));
+#505 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #506 = DEFINITIONAL_REPRESENTATION('',(#507),#510);
 #507 = B_SPLINE_CURVE_WITH_KNOTS('',1,(#508,#509),.UNSPECIFIED.,.F.,.F.,
   (2,2),(0.E+000,3.14159265359),.PIECEWISE_BEZIER_KNOTS.);
@@ -2037,7 +2213,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #515 = AXIS2_PLACEMENT_3D('',#516,#517,#518);
 #516 = CARTESIAN_POINT('',(27.,16.,0.E+000));
 #517 = DIRECTION('',(0.E+000,0.E+000,1.));
-#518 = DIRECTION('',(1.,0.E+000,0.E+000));
+#518 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #519 = PCURVE('',#126,#520);
 #520 = DEFINITIONAL_REPRESENTATION('',(#521),#525);
 #521 = CIRCLE('',#522,5.);
@@ -2183,7 +2359,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #640 = AXIS2_PLACEMENT_3D('',#641,#642,#643);
 #641 = CARTESIAN_POINT('',(24.,7.,-5.));
 #642 = DIRECTION('',(0.E+000,0.E+000,1.));
-#643 = DIRECTION('',(1.,0.E+000,0.E+000));
+#643 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #644 = PCURVE('',#72,#645);
 #645 = DEFINITIONAL_REPRESENTATION('',(#646),#650);
 #646 = CIRCLE('',#647,2.);
@@ -2209,7 +2385,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #661 = AXIS2_PLACEMENT_3D('',#662,#663,#664);
 #662 = CARTESIAN_POINT('',(24.,7.,-5.));
 #663 = DIRECTION('',(0.E+000,0.E+000,1.));
-#664 = DIRECTION('',(1.,0.E+000,0.E+000));
+#664 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #665 = PCURVE('',#72,#666);
 #666 = DEFINITIONAL_REPRESENTATION('',(#667),#671);
 #667 = CIRCLE('',#668,2.);
@@ -2241,7 +2417,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #688 = AXIS2_PLACEMENT_3D('',#689,#690,#691);
 #689 = CARTESIAN_POINT('',(30.,7.,-5.));
 #690 = DIRECTION('',(0.E+000,0.E+000,1.));
-#691 = DIRECTION('',(1.,0.E+000,0.E+000));
+#691 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #692 = PCURVE('',#72,#693);
 #693 = DEFINITIONAL_REPRESENTATION('',(#694),#698);
 #694 = CIRCLE('',#695,2.);
@@ -2267,7 +2443,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #709 = AXIS2_PLACEMENT_3D('',#710,#711,#712);
 #710 = CARTESIAN_POINT('',(30.,7.,-5.));
 #711 = DIRECTION('',(0.E+000,0.E+000,1.));
-#712 = DIRECTION('',(1.,0.E+000,0.E+000));
+#712 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #713 = PCURVE('',#72,#714);
 #714 = DEFINITIONAL_REPRESENTATION('',(#715),#719);
 #715 = CIRCLE('',#716,2.);
@@ -2299,7 +2475,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #736 = AXIS2_PLACEMENT_3D('',#737,#738,#739);
 #737 = CARTESIAN_POINT('',(36.,7.,-5.));
 #738 = DIRECTION('',(0.E+000,0.E+000,1.));
-#739 = DIRECTION('',(1.,0.E+000,0.E+000));
+#739 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #740 = PCURVE('',#72,#741);
 #741 = DEFINITIONAL_REPRESENTATION('',(#742),#746);
 #742 = CIRCLE('',#743,2.);
@@ -2325,7 +2501,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #757 = AXIS2_PLACEMENT_3D('',#758,#759,#760);
 #758 = CARTESIAN_POINT('',(36.,7.,-5.));
 #759 = DIRECTION('',(0.E+000,0.E+000,1.));
-#760 = DIRECTION('',(1.,0.E+000,0.E+000));
+#760 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #761 = PCURVE('',#72,#762);
 #762 = DEFINITIONAL_REPRESENTATION('',(#763),#767);
 #763 = CIRCLE('',#764,2.);
@@ -2357,7 +2533,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #784 = AXIS2_PLACEMENT_3D('',#785,#786,#787);
 #785 = CARTESIAN_POINT('',(36.,13.,-5.));
 #786 = DIRECTION('',(0.E+000,0.E+000,1.));
-#787 = DIRECTION('',(1.,0.E+000,0.E+000));
+#787 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #788 = PCURVE('',#72,#789);
 #789 = DEFINITIONAL_REPRESENTATION('',(#790),#794);
 #790 = CIRCLE('',#791,2.);
@@ -2383,7 +2559,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #805 = AXIS2_PLACEMENT_3D('',#806,#807,#808);
 #806 = CARTESIAN_POINT('',(36.,13.,-5.));
 #807 = DIRECTION('',(0.E+000,0.E+000,1.));
-#808 = DIRECTION('',(1.,0.E+000,0.E+000));
+#808 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #809 = PCURVE('',#72,#810);
 #810 = DEFINITIONAL_REPRESENTATION('',(#811),#815);
 #811 = CIRCLE('',#812,2.);
@@ -2415,7 +2591,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #832 = AXIS2_PLACEMENT_3D('',#833,#834,#835);
 #833 = CARTESIAN_POINT('',(36.,19.,-5.));
 #834 = DIRECTION('',(0.E+000,0.E+000,1.));
-#835 = DIRECTION('',(1.,0.E+000,0.E+000));
+#835 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #836 = PCURVE('',#72,#837);
 #837 = DEFINITIONAL_REPRESENTATION('',(#838),#842);
 #838 = CIRCLE('',#839,2.);
@@ -2441,7 +2617,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #853 = AXIS2_PLACEMENT_3D('',#854,#855,#856);
 #854 = CARTESIAN_POINT('',(36.,19.,-5.));
 #855 = DIRECTION('',(0.E+000,0.E+000,1.));
-#856 = DIRECTION('',(1.,0.E+000,0.E+000));
+#856 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #857 = PCURVE('',#72,#858);
 #858 = DEFINITIONAL_REPRESENTATION('',(#859),#863);
 #859 = CIRCLE('',#860,2.);
@@ -2473,7 +2649,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #880 = AXIS2_PLACEMENT_3D('',#881,#882,#883);
 #881 = CARTESIAN_POINT('',(27.,16.,-5.));
 #882 = DIRECTION('',(0.E+000,0.E+000,1.));
-#883 = DIRECTION('',(1.,0.E+000,0.E+000));
+#883 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #884 = PCURVE('',#72,#885);
 #885 = DEFINITIONAL_REPRESENTATION('',(#886),#890);
 #886 = CIRCLE('',#887,5.);
@@ -2499,7 +2675,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #901 = AXIS2_PLACEMENT_3D('',#902,#903,#904);
 #902 = CARTESIAN_POINT('',(27.,16.,-5.));
 #903 = DIRECTION('',(0.E+000,0.E+000,1.));
-#904 = DIRECTION('',(1.,0.E+000,0.E+000));
+#904 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #905 = PCURVE('',#72,#906);
 #906 = DEFINITIONAL_REPRESENTATION('',(#907),#911);
 #907 = CIRCLE('',#908,5.);
@@ -2767,8 +2943,8 @@ GLOBAL_UNIT_ASSIGNED_CONTEXT((#1126,#1127,#1128)) REPRESENTATION_CONTEXT
 #1132 = PRODUCT_DEFINITION_SHAPE('','',#1133);
 #1133 = PRODUCT_DEFINITION('design','',#1134,#1137);
 #1134 = PRODUCT_DEFINITION_FORMATION('','',#1135);
-#1135 = PRODUCT('Open CASCADE STEP translator 6.5 4',
-  'Open CASCADE STEP translator 6.5 4','',(#1136));
+#1135 = PRODUCT('Open CASCADE STEP translator 6.5 2',
+  'Open CASCADE STEP translator 6.5 2','',(#1136));
 #1136 = MECHANICAL_CONTEXT('',#2,'mechanical');
 #1137 = PRODUCT_DEFINITION_CONTEXT('part definition',#2,'design');
 #1138 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#11,#1139),#1469);
@@ -2782,7 +2958,7 @@ GLOBAL_UNIT_ASSIGNED_CONTEXT((#1126,#1127,#1128)) REPRESENTATION_CONTEXT
 #1146 = VERTEX_POINT('',#1147);
 #1147 = CARTESIAN_POINT('',(0.E+000,0.E+000,-5.));
 #1148 = VERTEX_POINT('',#1149);
-#1149 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.E+000));
+#1149 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.2));
 #1150 = SURFACE_CURVE('',#1151,(#1155,#1167),.PCURVE_S1.);
 #1151 = LINE('',#1152,#1153);
 #1152 = CARTESIAN_POINT('',(0.E+000,0.E+000,-5.));
@@ -2851,7 +3027,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1207 = ORIENTED_EDGE('',*,*,#1208,.T.);
 #1208 = EDGE_CURVE('',#1181,#1209,#1211,.T.);
 #1209 = VERTEX_POINT('',#1210);
-#1210 = CARTESIAN_POINT('',(0.E+000,26.,0.E+000));
+#1210 = CARTESIAN_POINT('',(0.E+000,26.,0.2));
 #1211 = SURFACE_CURVE('',#1212,(#1216,#1223),.PCURVE_S1.);
 #1212 = LINE('',#1213,#1214);
 #1213 = CARTESIAN_POINT('',(0.E+000,26.,-5.));
@@ -2884,13 +3060,13 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1236 = EDGE_CURVE('',#1148,#1209,#1237,.T.);
 #1237 = SURFACE_CURVE('',#1238,(#1242,#1249),.PCURVE_S1.);
 #1238 = LINE('',#1239,#1240);
-#1239 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.E+000));
+#1239 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.2));
 #1240 = VECTOR('',#1241,1.);
 #1241 = DIRECTION('',(-0.E+000,1.,0.E+000));
 #1242 = PCURVE('',#1156,#1243);
 #1243 = DEFINITIONAL_REPRESENTATION('',(#1244),#1248);
 #1244 = LINE('',#1245,#1246);
-#1245 = CARTESIAN_POINT('',(5.,0.E+000));
+#1245 = CARTESIAN_POINT('',(5.2,0.E+000));
 #1246 = VECTOR('',#1247,1.);
 #1247 = DIRECTION('',(0.E+000,-1.));
 #1248 = ( GEOMETRIC_REPRESENTATION_CONTEXT(2) 
@@ -2899,7 +3075,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1249 = PCURVE('',#1250,#1255);
 #1250 = PLANE('',#1251);
 #1251 = AXIS2_PLACEMENT_3D('',#1252,#1253,#1254);
-#1252 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.E+000));
+#1252 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.2));
 #1253 = DIRECTION('',(0.E+000,0.E+000,1.));
 #1254 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #1255 = DEFINITIONAL_REPRESENTATION('',(#1256),#1260);
@@ -2918,7 +3094,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1266 = VERTEX_POINT('',#1267);
 #1267 = CARTESIAN_POINT('',(60.,0.E+000,-5.));
 #1268 = VERTEX_POINT('',#1269);
-#1269 = CARTESIAN_POINT('',(60.,0.E+000,0.E+000));
+#1269 = CARTESIAN_POINT('',(60.,0.E+000,0.2));
 #1270 = SURFACE_CURVE('',#1271,(#1275,#1287),.PCURVE_S1.);
 #1271 = LINE('',#1272,#1273);
 #1272 = CARTESIAN_POINT('',(60.,0.E+000,-5.));
@@ -2977,7 +3153,7 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1317 = ORIENTED_EDGE('',*,*,#1318,.T.);
 #1318 = EDGE_CURVE('',#1296,#1319,#1321,.T.);
 #1319 = VERTEX_POINT('',#1320);
-#1320 = CARTESIAN_POINT('',(60.,26.,0.E+000));
+#1320 = CARTESIAN_POINT('',(60.,26.,0.2));
 #1321 = SURFACE_CURVE('',#1322,(#1326,#1333),.PCURVE_S1.);
 #1322 = LINE('',#1323,#1324);
 #1323 = CARTESIAN_POINT('',(60.,26.,-5.));
@@ -3005,13 +3181,13 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1341 = EDGE_CURVE('',#1268,#1319,#1342,.T.);
 #1342 = SURFACE_CURVE('',#1343,(#1347,#1354),.PCURVE_S1.);
 #1343 = LINE('',#1344,#1345);
-#1344 = CARTESIAN_POINT('',(60.,0.E+000,0.E+000));
+#1344 = CARTESIAN_POINT('',(60.,0.E+000,0.2));
 #1345 = VECTOR('',#1346,1.);
 #1346 = DIRECTION('',(0.E+000,1.,0.E+000));
 #1347 = PCURVE('',#1276,#1348);
 #1348 = DEFINITIONAL_REPRESENTATION('',(#1349),#1353);
 #1349 = LINE('',#1350,#1351);
-#1350 = CARTESIAN_POINT('',(5.,0.E+000));
+#1350 = CARTESIAN_POINT('',(5.2,0.E+000));
 #1351 = VECTOR('',#1352,1.);
 #1352 = DIRECTION('',(0.E+000,-1.));
 #1353 = ( GEOMETRIC_REPRESENTATION_CONTEXT(2) 
@@ -3059,13 +3235,13 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1387 = EDGE_CURVE('',#1148,#1268,#1388,.T.);
 #1388 = SURFACE_CURVE('',#1389,(#1393,#1400),.PCURVE_S1.);
 #1389 = LINE('',#1390,#1391);
-#1390 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.E+000));
+#1390 = CARTESIAN_POINT('',(0.E+000,0.E+000,0.2));
 #1391 = VECTOR('',#1392,1.);
 #1392 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #1393 = PCURVE('',#1168,#1394);
 #1394 = DEFINITIONAL_REPRESENTATION('',(#1395),#1399);
 #1395 = LINE('',#1396,#1397);
-#1396 = CARTESIAN_POINT('',(5.,0.E+000));
+#1396 = CARTESIAN_POINT('',(5.2,0.E+000));
 #1397 = VECTOR('',#1398,1.);
 #1398 = DIRECTION('',(0.E+000,1.));
 #1399 = ( GEOMETRIC_REPRESENTATION_CONTEXT(2) 
@@ -3114,13 +3290,13 @@ PARAMETRIC_REPRESENTATION_CONTEXT() REPRESENTATION_CONTEXT('2D SPACE',''
 #1434 = EDGE_CURVE('',#1209,#1319,#1435,.T.);
 #1435 = SURFACE_CURVE('',#1436,(#1440,#1447),.PCURVE_S1.);
 #1436 = LINE('',#1437,#1438);
-#1437 = CARTESIAN_POINT('',(0.E+000,26.,0.E+000));
+#1437 = CARTESIAN_POINT('',(0.E+000,26.,0.2));
 #1438 = VECTOR('',#1439,1.);
 #1439 = DIRECTION('',(1.,0.E+000,-0.E+000));
 #1440 = PCURVE('',#1224,#1441);
 #1441 = DEFINITIONAL_REPRESENTATION('',(#1442),#1446);
 #1442 = LINE('',#1443,#1444);
-#1443 = CARTESIAN_POINT('',(5.,0.E+000));
+#1443 = CARTESIAN_POINT('',(5.2,0.E+000));
 #1444 = VECTOR('',#1445,1.);
 #1445 = DIRECTION('',(0.E+000,1.));
 #1446 = ( GEOMETRIC_REPRESENTATION_CONTEXT(2) 
