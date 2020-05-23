@@ -715,7 +715,8 @@ void DisposeOutPts(OutPt*& pp)
 
 inline void InitEdge(TEdge* e, TEdge* eNext, TEdge* ePrev, const IntPoint& Pt)
 {
-  e->Next = eNext;
+  e->NextInLML = NULL;
+	e->Next = eNext;
   e->Prev = ePrev;
   e->Curr = Pt;
   e->OutIdx = Unassigned;
