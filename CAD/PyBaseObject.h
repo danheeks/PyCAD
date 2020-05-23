@@ -28,6 +28,7 @@ public:
 	void KillGLLists();
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement *element);
+	bool UsesID();
 	HeeksObj* MakeACopy()const;
 	void CopyFrom(const HeeksObj* object);
 	void ReloadPointers();

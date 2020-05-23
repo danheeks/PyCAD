@@ -7,12 +7,21 @@ next_object_index = 1
 class Object(cad.BaseObject):
     # a wrapper for cad.BaseObject, implementing defaults for the methods
     # derive from this, as cad.BaseObject isn't quite as pythonic as I hoped, yet.
-    def __init__(self, type):
+    def __init__(self, type, id_named = False):
         cad.BaseObject.__init__(self, type)
         cad.PyIncref(self)
         self.box = geom.Box3D()
-        
+        self.id_named = id_named
+        if self.id_named:
+            self.title = self.TypeName()
+            self.title_made_from_id = True
+    
     def GetTitle(self):
+        if self.id_named:
+            if self.title_made_from_id:
+                return self.TypeName() + ' ' + str(self.GetID())
+            else:
+                return self.title
         return self.GetTypeString()
         
     def GetTypeString(self):
@@ -30,19 +39,28 @@ class Object(cad.BaseObject):
         return False
     
     def WriteXml(self):
-        if self.CallsObjListReadXml():
-            cad.ObjList.WriteXml(self)
-        else:
-            cad.Object.WriteObjectXml(self)
+        if self.id_named:
+            if not self.title_made_from_id:cad.SetXmlValue('title', self.title)
+            cad.SetXmlValue('title_from_id', self.title_made_from_id)
+        #if self.CallsObjListReadXml():
+        cad.ObjList.WriteXml(self)
+#        else:
+#            cad.Object.WriteObjectXml(self)
     
     def CallsObjListReadXml(self):
         return True
     
     def CopyFrom(self, object):
+        if self.id_named:
+            self.title = object.title
+            self.title_made_from_id = object.title_made_from_id
         for obj in object.GetChildren():
             self.Add(obj.MakeACopy())
     
     def ReadXml(self):
+        if self.id_named:
+            self.title = cad.GetXmlValue('title', self.title)
+            self.title_made_from_id = cad.GetXmlBool('title_from_id', self.title_made_from_id)
         if self.CallsObjListReadXml():
             cad.ObjList.ReadXml(self)
         else:

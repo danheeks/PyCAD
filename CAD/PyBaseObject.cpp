@@ -19,6 +19,14 @@ int BaseObject::GetType()const{
 	return 0;
 }
 
+bool BaseObject::UsesID()
+{
+	std::pair<bool, bool> result = CallReturnBool("UsesID");
+	if (result.first)
+		return result.second;
+	return ObjList::UsesID();
+}
+
 const wchar_t* BaseObject::GetIconFilePath()
 {
 	std::pair<bool, std::string> result = CallReturnString("GetIconFilePath");
