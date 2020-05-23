@@ -373,7 +373,7 @@ class Frame(wx.Frame):
             default_filepath = ''            
         
         dialog = wx.FileDialog(self, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-        dialog.SetFilterIndex(1)
+        dialog.SetFilterIndex(0)
         dialog.CenterOnParent()
         if dialog.ShowModal() != wx.ID_CANCEL:
             self.OnSaveFilepath(dialog.GetPath())
