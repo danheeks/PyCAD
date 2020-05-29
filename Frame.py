@@ -35,7 +35,7 @@ class Frame(wx.Frame):
         self.aui_manager = wx.aui.AuiManager()
         self.aui_manager.SetManagedWindow(self)
 
-        self.graphics_canvas = GraphicsCanvas(self)
+        self.graphics_canvas = self.MakeGraphicsCanvas()
 
         self.aui_manager.AddPane(self.graphics_canvas, wx.aui.AuiPaneInfo().Name('graphics').CentrePane().BestSize(wx.Size(800,800)))
         self.tree_canvas = TreeCanvas(self)
@@ -67,6 +67,9 @@ class Frame(wx.Frame):
         self.Bind(wx.EVT_MOVE, self.OnMove)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.gears = []
+        
+    def MakeGraphicsCanvas(self):
+        return GraphicsCanvas(self)
         
     def __del__(self):
         if self.aui_manager:
