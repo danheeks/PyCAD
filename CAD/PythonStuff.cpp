@@ -658,6 +658,11 @@ CInputMode* GetViewPanning()
 	return theApp->viewpanning;
 }
 
+DigitizeMode* GetDigitizing()
+{
+	return theApp->m_digitizing;
+}
+
 void SetInputMode(CInputMode* input_mode)
 {
 	theApp->SetInputMode(input_mode);
@@ -1835,6 +1840,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
 			.def("OneOfAKind", &HeeksObj::OneOfAKind)
+			.def("CanBeCopied", &HeeksObj::CanBeCopied)
 			.def("CopyFrom", &HeeksObj::CopyFrom)
 			.def("ReadXml", &HeeksObjReadFromXML)
 			.def("ReadObjectXml", &HeeksObjReadObjectXml)
@@ -1846,6 +1852,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.def("GetStartPoint", &HeeksObjGetStartPoint)
 			.def("GetEndPoint", &HeeksObjGetEndPoint)
 			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
+			.def("Clear", &ObjListClear)
+			.def("Add", &ObjListAdd)
 			;
 
 		boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")
@@ -1889,8 +1897,6 @@ int HeeksObjGetIndex(HeeksObj& object)
 
 		boost::python::class_<ObjList, boost::python::bases<HeeksObj>, boost::noncopyable>("ObjList")
 			.def(boost::python::init<ObjList>())
-			.def("Clear", &ObjListClear)
-			.def("Add", &ObjListAdd)
 			.def("ReadXml", &ObjListReadFromXML)
 			.def("WriteXml", &ObjListWriteToXML)
 			.def("CopyFrom", &ObjListCopyFrom)
@@ -2235,6 +2241,13 @@ int HeeksObjGetIndex(HeeksObj& object)
 			.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
 			;
 
+		boost::python::class_<DigitizeMode, boost::python::bases<CInputMode> >("DigitizeMode", boost::python::no_init)
+			.def_readwrite("digitized_point", &DigitizeMode::digitized_point)
+			.def_readwrite("reference_point", &DigitizeMode::reference_point)
+			.def_readwrite("m_prompt_when_doing_a_main_loop", &DigitizeMode::m_prompt_when_doing_a_main_loop)
+			.def_readwrite("wants_to_exit_main_loop", &DigitizeMode::wants_to_exit_main_loop)
+			;
+
 		boost::python::enum_<SketchOrderType>("SketchOrderType")
 			.value("SketchOrderTypeUnknown", SketchOrderTypeUnknown)
 			.value("SketchOrderTypeEmpty", SketchOrderTypeEmpty)
@@ -2359,6 +2372,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("GetViewRotating", GetViewRotating, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetViewZooming", GetViewZooming, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetViewPanning", GetViewPanning, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("GetDigitizing", GetDigitizing, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("SetInputMode", SetInputMode);
 		boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("RestoreInputMode", RestoreInputMode);

@@ -316,6 +316,23 @@ class App(wx.App):
         
         return self.EndPickObjects()
         
+    def PickPosition(self, title):
+        save_mode = cad.GetInputMode()
+        digitizing = cad.GetDigitizing()
+        digitizing.wants_to_exit_main_loop = False
+        digitizing.m_prompt_when_doing_a_main_loop = title
+        cad.SetInputMode(digitizing)
+        
+        self.inMainLoop = True
+        self.OnRun()
+        self.inMainLoop = False
+
+        return_point = None
+        if digitizing.digitized_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
+            return_point = digitizing.digitized_point.point
+        cad.SetInputMode(save_mode);
+        return return_point
+        
     def GetViewport(self):
         return self.frame.graphics_canvas.viewport
     

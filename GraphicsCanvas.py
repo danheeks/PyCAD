@@ -100,6 +100,12 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             self.viewport.OnMouseEvent(e)
             if self.viewport.need_update: self.Update()
             if self.viewport.need_refresh: self.Refresh()
+            
+        if event.LeftUp():
+            d = cad.GetDigitizing()
+            if cad.GetInputMode() == d:
+                if d.wants_to_exit_main_loop:
+                    wx.GetApp().ExitMainLoop()
         event.Skip()
 
     def OnEraseBackground(self, event):

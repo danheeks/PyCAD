@@ -15,8 +15,7 @@
 
 DigitizeMode::DigitizeMode(){
 	point_or_window = new PointOrWindow(false);
-	m_doing_a_main_loop = false;
-	m_callback = NULL;
+	wants_to_exit_main_loop = false;
 }
 
 DigitizeMode::~DigitizeMode(void){
@@ -27,7 +26,6 @@ static std::wstring digitize_title_coords_string;
 
 const wchar_t* DigitizeMode::GetTitle()
 {
-	if(m_doing_a_main_loop)
 	{
 		digitize_title_coords_string = m_prompt_when_doing_a_main_loop;
 		std::wstring xy_str;
@@ -84,7 +82,6 @@ static std::wstring digitize_help_text;
 
 const wchar_t* DigitizeMode::GetHelpText()
 {
-	if(!m_doing_a_main_loop)return NULL;
 	digitize_help_text.assign(L"Press Esc key to cancel");
 	digitize_help_text.append(L"\n");
 	digitize_help_text.append(L"Left button to accept position");
@@ -92,12 +89,6 @@ const wchar_t* DigitizeMode::GetHelpText()
 }
 
 void DigitizeMode::OnMouse( MouseEvent& event ){
-	if(event.m_middleDown || event.GetWheelRotation() != 0)
-	{
-//		theApp->m_select_mode->OnMouse(event);
-		return;
-	}
-
 	if(event.LeftDown()){
 		point_or_window->OnMouse(event);
 		lbutton_point = digitize(IPoint(event.GetX(), event.GetY()));
@@ -105,40 +96,16 @@ void DigitizeMode::OnMouse( MouseEvent& event ){
 	else if(event.LeftUp()){
 		if(lbutton_point.m_type != DigitizeNoItemType){
 			digitized_point = lbutton_point;
-			if(m_doing_a_main_loop){
-				//ExitMainLoop();
-			}
+			wants_to_exit_main_loop = true;
 		}
 	}
 	else if(event.Moving()){
 		digitize(IPoint(event.GetX(), event.GetY()));
 		point_or_window->OnMouse(event);
-		if(m_doing_a_main_loop)
-		{
-			theApp->RefreshInputCanvas();
-			theApp->OnInputModeTitleChanged();
-		}
-		if(m_callback)
-		{
-			double pos[3];
-			digitized_point.m_point.get(pos);
-			(*m_callback)(pos);
-		}
+		theApp->RefreshInputCanvas();
+		theApp->OnInputModeTitleChanged();
 	}
 }
-
-#if 0
-void DigitizeMode::OnKeyDown(KeyCode key_code)
-{
-	switch(event.GetKeyCode())
-	{
-	case WXK_ESCAPE:
-		digitized_point.m_type = DigitizeNoItemType;
-		if(m_doing_a_main_loop)ExitMainLoop();
-		break;
-	}
-}
-#endif
 
 static Matrix global_matrix_relative_to_screen;
 
