@@ -303,7 +303,7 @@ class App(wx.App):
         self.select_mode.just_one = save_just_one_for_EndPickObjects
         cad.SetInputMode(save_mode_for_EndPickObjects)
         
-    def PickObjects(self, str, filter, just_one):
+    def PickObjects(self, str, filter = -1, just_one = False):
         if self.inMainLoop:
             wx.MessageBox('recursive call to PickObjects')
             return

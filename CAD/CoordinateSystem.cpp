@@ -1213,6 +1213,7 @@ void CoordinateSystem::Transform(const Matrix &m)
 
 void CoordinateSystem::GetProperties(std::list<Property *> *list)
 {
+	//list->push_back(PropertyTrsf(this, L"position", &m_p));
 	HeeksObj::GetProperties(list);
 }
 

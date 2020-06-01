@@ -772,7 +772,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Multiply", &Matrix::Multiply)///function Multiply///params Matrix m///transforms this matrix by the given one
 		.def("Inverse", &Matrix::Inverse)///function Inverse
 		.def("Rotate", &MatrixRotate)
-		.def("Translate", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Translate))
+		.def("Translate", static_cast< void (Matrix::*)(const Point3d&) >(&Matrix::Translate))
 		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale))
 		;
 

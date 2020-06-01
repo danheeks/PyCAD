@@ -683,10 +683,13 @@ class Frame(wx.Frame):
         pass
         
     def OnMoveTranslate(self, e):
-        pass
+        from Transform import Translate
+        Translate()
         
     def OnCopyTranslate(self, e):
-        pass
+        from Transform import Translate
+        #Translate(True)
+        # to do need to implement CanBeCopied in Object
         
     def OnMoveRotate(self, e):
         pass

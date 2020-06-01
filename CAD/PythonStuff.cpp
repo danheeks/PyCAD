@@ -1541,6 +1541,11 @@ void AddUndoably(HeeksObj *object, HeeksObj* owner = NULL, HeeksObj* prev_object
 BOOST_PYTHON_FUNCTION_OVERLOADS(AddUndoablyOverloads, AddUndoably, 1, 3)
 
 
+void TransformUndoably(HeeksObj *object, const Matrix &m)
+{
+	theApp->TransformUndoably(object, m);
+}
+
 
 void DoUndoable(Undoable* undoable)
 {
@@ -2336,7 +2341,8 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("RollForward", RollForward);
 		boost::python::def("DeleteUndoably", DeleteUndoably);
 		boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
-		boost::python::def("CopyUndoably", CopyUndoably);
+		boost::python::def("CopyUndoably", CopyUndoably); 
+		boost::python::def("TransformUndoably", TransformUndoably);
 		boost::python::def("DoUndoable", DoUndoable);
 		boost::python::def("WasModified", WasModified);		
 		boost::python::def("ShiftSelect", ShiftSelect);
