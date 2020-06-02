@@ -112,6 +112,24 @@ class Tri:
         self.p1.Transform(mat)
         self.p2.Transform(mat)
 
+def GetScaleFromTransform(transform):
+    if len(transform) < 8:
+        return 1.0
+    
+    if transform[0:6].lower() == 'matrix':
+        s2 = transform[6:].replace("(", "").replace(")", "")
+        parameters = s2.split(",")
+            
+        if len(parameters) > 0:
+            try:
+                scale = float(parameters[0])
+                return scale
+            except Exception as err:
+                print(str(err))
+                print('parameters = ' + str(parameters))
+
+    return 1.0
+
 def ConvertHeeksFont():
     chars = {}
 
@@ -126,6 +144,10 @@ def ConvertHeeksFont():
             for item in child:
                 if item.tag == '{http://www.w3.org/2000/svg}g':
                     expected_label = '{http://www.inkscape.org/namespaces/inkscape}label'
+                    scale = 1.0
+                    if 'transform' in item.attrib:
+                        transform = item.attrib['transform']
+                        scale = GetScaleFromTransform(transform)
                     if expected_label in item.attrib:
                         label = item.attrib[expected_label]
                         if label[:4] == 'char' and len(label) == 5:
@@ -155,15 +177,15 @@ def ConvertHeeksFont():
                                 curve = MakeCurveFromD(path.attrib['d'], c)
                                 box = curve.GetBox()
                                 if stroke == POSITION_COLOUR:
-                                    pos = geom.Point(box.MinX(), box.MinY())
-                                    width = box.MaxX() - box.MinX()
+                                    pos = geom.Point(box.MinX(), box.MinY()) * scale
+                                    width = (box.MaxX() - box.MinX()) * scale
                                 elif stroke != None:
                                     curves.append(curve)
                                 elif fill != None:
                                     if curve.NumVertices() == 4:
                                         # triangle curve
                                         vertices = curve.GetVertices()
-                                        tris.append(Tri(vertices[0].p, vertices[1].p, vertices[2].p))
+                                        tris.append(Tri(vertices[0].p * scale, vertices[1].p * scale, vertices[2].p * scale))
                             chars[c] = Character(curves, pos, width, tris)
     
     # now write the c++ file
@@ -205,7 +227,7 @@ def ConvertHeeksFont():
         tri_index += nt        
             
         mat = geom.Matrix()
-        mat.Translate(-pos.x, -pos.y, 0)
+        mat.Translate(geom.Point3D(-pos.x, -pos.y, 0))
         mat.Scale(0.037037037)
             
         for curve in curves:

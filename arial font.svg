@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.0289001"
-     inkscape:cx="1016.4875"
-     inkscape:cy="499.46403"
+     inkscape:zoom="0.37861251"
+     inkscape:cx="1163.1653"
+     inkscape:cy="649.1701"
      inkscape:document-units="mm"
      inkscape:current-layer="g9814"
      showgrid="true"
@@ -36,7 +36,7 @@
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:snap-global="true"
+     inkscape:snap-global="false"
      inkscape:snap-nodes="true"
      inkscape:object-paths="true"
      inkscape:snap-smooth-nodes="true"
@@ -8178,7 +8178,7 @@
     <g
        id="g12956"
        inkscape:label="char!"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path10004"
@@ -8218,7 +8218,7 @@
     <g
        id="g12959"
        inkscape:label="char "
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-2"
@@ -8228,7 +8228,7 @@
     <g
        id="g12970"
        inkscape:label="char&quot;"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-5"
@@ -8278,7 +8278,7 @@
     <g
        id="g13005"
        inkscape:label="char#"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-6"
@@ -8448,7 +8448,7 @@
     <g
        id="g13084"
        inkscape:label="char$"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-4"
@@ -8838,7 +8838,7 @@
     <g
        id="g13183"
        inkscape:label="char%"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-29"
@@ -9328,7 +9328,7 @@
     <g
        id="g13262"
        inkscape:label="char&amp;"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0"
@@ -9718,7 +9718,7 @@
     <g
        id="g13269"
        inkscape:label="char'"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-1"
@@ -9748,7 +9748,7 @@
     <g
        id="g13292"
        inkscape:label="char("
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9"
@@ -9858,7 +9858,7 @@
     <g
        id="g13313"
        inkscape:label="char)"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-1"
@@ -9958,7 +9958,7 @@
     <g
        id="g13339"
        inkscape:label="char*"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-6"
@@ -10083,7 +10083,7 @@
     <g
        id="g13352"
        inkscape:label="char+"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-5"
@@ -10143,7 +10143,7 @@
     <g
        id="g13366"
        inkscape:label="char,"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-53"
@@ -10208,7 +10208,7 @@
     <g
        id="g13371"
        inkscape:label="char-"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-0"
@@ -10228,7 +10228,7 @@
     <g
        id="g13376"
        inkscape:label="char."
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-8"
@@ -10248,7 +10248,7 @@
     <g
        id="g13381"
        inkscape:label="char/"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-9"
@@ -10268,7 +10268,7 @@
     <g
        id="g13444"
        inkscape:label="char0"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-07"
@@ -10578,7 +10578,7 @@
     <g
        id="g13457"
        inkscape:label="char1"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path5510-7-8-0-0-9-96"
@@ -10638,7 +10638,7 @@
     <g
        id="g13505"
        inkscape:label="char2"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path10979"
@@ -10873,7 +10873,7 @@
     <g
        id="g13574"
        inkscape:label="char3"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path11069"
@@ -11215,7 +11215,7 @@
     <g
        id="g13591"
        inkscape:label="char4"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path11201"
@@ -11295,7 +11295,7 @@
     <g
        id="g13639"
        inkscape:label="char5"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-31.418834,161.96083)">
       <path
          inkscape:connector-curvature="0"
          id="path11229"
@@ -11530,7 +11530,7 @@
     <g
        id="g13711"
        inkscape:label="char6"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11319"
@@ -11885,7 +11885,7 @@
     <g
        id="g13730"
        inkscape:label="char7"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11457"
@@ -11975,7 +11975,7 @@
     <g
        id="g13821"
        inkscape:label="char8"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11489"
@@ -12425,7 +12425,7 @@
     <g
        id="g13901"
        inkscape:label="char9"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11665"
@@ -12820,7 +12820,7 @@
     <g
        id="g13908"
        inkscape:label="char:"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11819"
@@ -12850,7 +12850,7 @@
     <g
        id="g13924"
        inkscape:label="char;"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11819-8"
@@ -12925,7 +12925,7 @@
     <g
        id="g13932"
        inkscape:label="char&lt;"
-       transform="translate(-11.88,171.91059)">
+       transform="matrix(1.3702337,0,0,1.3702337,-418.82683,206.43369)">
       <path
          inkscape:connector-curvature="0"
          id="path11902"
@@ -12960,7 +12960,7 @@
     <g
        id="g13939"
        inkscape:label="char="
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path11912"
@@ -12990,7 +12990,7 @@
     <g
        id="g13947"
        inkscape:label="char&gt;"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path11920"
@@ -13024,7 +13024,7 @@
     </g>
     <g
        id="g13996"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path11930"
@@ -13264,7 +13264,7 @@
     <g
        id="g14126"
        inkscape:label="char@"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12022"
@@ -13909,7 +13909,7 @@
     <g
        id="g14135"
        inkscape:label="char["
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12278"
@@ -13949,7 +13949,7 @@
     <g
        id="g14140"
        inkscape:label="char\"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12290"
@@ -13969,7 +13969,7 @@
     <g
        id="g14149"
        inkscape:label="char]"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12294"
@@ -14009,7 +14009,7 @@
     <g
        id="g14157"
        inkscape:label="char^"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12306"
@@ -14044,7 +14044,7 @@
     <g
        id="g14162"
        inkscape:label="char_"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12316"
@@ -14064,7 +14064,7 @@
     <g
        id="g14167"
        inkscape:label="char`"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12320"
@@ -14084,7 +14084,7 @@
     <g
        id="g14213"
        inkscape:label="char{"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12324"
@@ -14309,7 +14309,7 @@
     <g
        id="g14220"
        inkscape:label="char|"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12421"
@@ -14329,7 +14329,7 @@
     <g
        id="g14275"
        inkscape:label="char}"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12425"
@@ -14599,7 +14599,7 @@
     <g
        id="g14305"
        inkscape:label="char~"
-       transform="translate(-398.32941,211.74353)">
+       transform="matrix(1.3702337,0,0,1.3702337,-416.58234,206.43134)">
       <path
          inkscape:connector-curvature="0"
          id="path12533"
