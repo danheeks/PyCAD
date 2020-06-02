@@ -56,10 +56,10 @@ void HVertex::GetGripperPositions(std::list<GripData> *list, bool just_for_endof
 	list->push_back(GripData(GripperTypeTranslate,Point3d(m_point),NULL));
 }
 
-void HVertex::ModifyByMatrix(const double* m)
+void HVertex::Transform(const Matrix &m)
 {
 #if 1
-	TopLoc_Location loc(make_matrix(m));
+	TopLoc_Location loc(make_matrix(m.e));
 	m_topods_vertex.Move(loc);
 #else
 	gp_Trsf trans = make_matrix(m);

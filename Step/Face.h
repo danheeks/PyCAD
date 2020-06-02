@@ -46,7 +46,7 @@ public:
 	const wchar_t* GetTypeString(void)const{return L"Face";}
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = false);
 	double Area()const;
-	void ModifyByMatrix(const double* m);
+	void Transform(const Matrix &m);
 	void WriteXML(TiXmlNode *root);
 	void GetProperties(std::list<Property *> *list);
 	bool UsesID(){return true;}

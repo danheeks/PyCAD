@@ -50,7 +50,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	void KillGLLists(void);
-	void ModifyByMatrix(const double* m);
+	void Transform(const Matrix &m);
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = true);
 	double Area()const;
 	void CopyFrom(const HeeksObj* object);

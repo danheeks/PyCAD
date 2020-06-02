@@ -35,7 +35,7 @@ public:
 	const wchar_t* GetIconFilePath();
 	const wchar_t* GetTypeString(void)const{return L"Vertex";}
 	bool UsesID(){return true;}
-	void ModifyByMatrix(const double* m);
+	void Transform(const Matrix &m);
 
 	const TopoDS_Vertex &Vertex(){ return m_topods_vertex; }
 	CEdge* GetFirstEdge();

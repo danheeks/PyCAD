@@ -104,10 +104,10 @@ void CFace::GetBox(CBox &box){
 	box.Insert(m_box);
 }
 
-void CFace::ModifyByMatrix(const double *m){
+void CFace::Transform(const Matrix &m){
 	if(GetParentBody() == NULL)
 	{
-		gp_Trsf mat = make_matrix(m);
+		gp_Trsf mat = make_matrix(m.e);
 		BRepBuilderAPI_Transform myBRepTransformation(m_topods_face,mat);
 		m_topods_face = TopoDS::Face(myBRepTransformation.Shape());
 	}

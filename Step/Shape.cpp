@@ -275,8 +275,8 @@ std::wstring CShape::StretchedName()
 	return L"Stretched Shape";
 }
 
-void CShape::ModifyByMatrix(const double* m){
-	gp_Trsf mat = make_matrix(m);
+void CShape::Transform(const Matrix &m){
+	gp_Trsf mat = make_matrix(m.e);
 
 	if(IsMatrixDifferentialScale(mat))
 	{

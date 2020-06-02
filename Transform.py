@@ -88,28 +88,25 @@ class FromAndToDlg(HDialog):
         self.to.x = self.tox.GetValue()
         self.to.y = self.toy.GetValue()
         self.to.z = self.toz.GetValue()
+        ncopies = None
         if self.number_of_copies:
-            return int(self.txt_num_copies.GetValue())
+            ncopies = int(self.txt_num_copies.GetValue())
+        return self.fromp, self.to, ncopies
 
 def InputFromAndTo(fromp, to, ncopies, title):
-    save_from = fromp
-    save_to = to
-    
     while(True):
         dlg = FromAndToDlg(fromp, to, ncopies, title)
         ret = dlg.ShowModal()
-        ncopies = dlg.GetAllValues()
+        fromp, to, ncopies = dlg.GetAllValues()
         
         if ret == wx.ID_OK:
-            return True, ncopies
+            return True, fromp, to, ncopies
         if ret == dlg.btnFrom.GetId():
             fromp = wx.GetApp().PickPosition("Pick position to move from")
         elif ret == dlg.btnTo.GetId():
             to = wx.GetApp().PickPosition("Pick position to move to")
         else:
-            fromp = save_from
-            to = save_to
-            return False, None
+            return False
 
 def Translate(copy = False):
     if cad.GetNumSelected() == 0:
@@ -140,7 +137,7 @@ def Translate(copy = False):
     to.y = config.ReadFloat("TranslateToY", 0.0)
     to.z = config.ReadFloat("TranslateToZ", 0.0)
     
-    result, ncopies = InputFromAndTo(fromp, to, ncopies, 'Move Translate')
+    result, fromp, to, ncopies = InputFromAndTo(fromp, to, ncopies, 'Move Translate')
     if not result:
         return
     

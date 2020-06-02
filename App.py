@@ -329,7 +329,8 @@ class App(wx.App):
 
         return_point = None
         if digitizing.digitized_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
-            return_point = digitizing.digitized_point.point
+            import geom
+            return_point = geom.Point3D(digitizing.digitized_point.point)
         cad.SetInputMode(save_mode);
         return return_point
         
