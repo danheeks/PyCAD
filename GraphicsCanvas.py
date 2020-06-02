@@ -102,9 +102,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             if self.viewport.need_refresh: self.Refresh()
             
         if event.LeftUp():
-            d = cad.GetDigitizing()
-            if cad.GetInputMode() == d:
-                if d.wants_to_exit_main_loop:
+            if cad.GetInputMode().GetType() == cad.GetDigitizing().GetType():
+                if cad.GetDigitizing().wants_to_exit_main_loop:
                     wx.GetApp().ExitMainLoop()
         event.Skip()
 

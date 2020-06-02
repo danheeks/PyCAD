@@ -9,11 +9,18 @@
 
 class MouseEvent;
 
+enum InputModeType
+{
+	InputModeTypeDigitize = 1,
+	InputModeTypeNumberOfTypes,
+};
+
 class CInputMode{
 public:
 	virtual ~CInputMode() {}
 
 	virtual const wchar_t* GetTitle() = 0;
+	virtual int GetType(){ return 0; }
 	virtual bool TitleHighlighted(){return true;}
 	virtual const wchar_t* GetHelpText(){ return NULL; }
 	virtual void OnMouse( MouseEvent& event ){}

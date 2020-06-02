@@ -30,13 +30,31 @@ const wchar_t* DigitizeMode::GetTitle()
 		digitize_title_coords_string = m_prompt_when_doing_a_main_loop;
 		std::wstring xy_str;
 		digitize_title_coords_string.append(L"\n");
-#if 0
-		// to do
-		if(fabs(digitized_point.m_point.z) < 0.00000001)digitize_title_coords_string += std::wstring::Format(_T("X%g Y%g"), digitized_point.m_point.x, digitized_point.m_point.y);
-		else if(fabs(digitized_point.m_point.y) < 0.00000001)digitize_title_coords_string += std::wstring::Format(_T("X%g Z%g"), digitized_point.m_point.x, digitized_point.m_point.z);
-		else if(fabs(digitized_point.m_point.x) < 0.00000001)digitize_title_coords_string += std::wstring::Format(_T("Y%g Z%g"), digitized_point.m_point.y, digitized_point.m_point.z);
-		else digitize_title_coords_string += std::wstring::Format(_T("X%g Y%g Z%g"), digitized_point.m_point.x, digitized_point.m_point.y, digitized_point.m_point.z);
-#endif
+
+		if (fabs(digitized_point.m_point.z) < 0.00000001)
+		{
+			wchar_t buf[256];
+			swprintf(buf, 256, L"X%g Y%g", digitized_point.m_point.x, digitized_point.m_point.y);
+			digitize_title_coords_string += buf;
+		}
+		else if (fabs(digitized_point.m_point.y) < 0.00000001)
+		{
+			wchar_t buf[256];
+			swprintf(buf, 256, L"X%g Z%g", digitized_point.m_point.x, digitized_point.m_point.z);
+			digitize_title_coords_string += buf;
+		}
+		else if (fabs(digitized_point.m_point.x) < 0.00000001)
+		{
+			wchar_t buf[256];
+			swprintf(buf, 256, L"Y%g Z%g", digitized_point.m_point.y, digitized_point.m_point.z);
+			digitize_title_coords_string += buf;
+		}
+		else
+		{
+			wchar_t buf[256];
+			swprintf(buf, 256, L"X%g Y%g Z%g", digitized_point.m_point.x, digitized_point.m_point.y, digitized_point.m_point.z);
+			digitize_title_coords_string += buf;
+		}
 
 		const wchar_t* type_str = NULL;
 		switch(digitized_point.m_type)

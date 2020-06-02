@@ -27,6 +27,7 @@ public:
 	virtual ~DigitizeMode(void);
 
 	// InputMode's virtual functions
+	int GetType(){ return InputModeTypeDigitize; }
 	const wchar_t* GetTitle();
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
