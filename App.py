@@ -149,6 +149,7 @@ class App(wx.App):
         
     def OnInputMode(self):
         self.frame.input_mode_canvas.RemoveAndAddAll()
+        self.frame.graphics_canvas.Refresh()
         
     def SplitSketch(self):
         new_sketches = self.object.Split()
@@ -285,13 +286,10 @@ class App(wx.App):
         global save_just_one_for_EndPickObjects
         global save_mode_for_EndPickObjects
         save_mode_for_EndPickObjects = cad.GetInputMode()
-        self.select_mode.doing_a_main_loop = True
+        self.select_mode.prompt_when_doing_a_main_loop = str
         save_just_one_for_EndPickObjects = self.select_mode.just_one
         self.select_mode.just_one = just_one
-        
         cad.SetInputMode(self.select_mode)
-        
-        
         save_filter_for_StartPickObjects = self.select_mode.filter
         self.select_mode.filter = filter
         
@@ -309,12 +307,15 @@ class App(wx.App):
             return
         
         self.StartPickObjects(str, filter, just_one)
-        
-        self.inMainLoop = True
+
         self.OnRun()
-        self.inMainLoop = False
         
         return self.EndPickObjects()
+        
+    def OnRun(self):
+        self.inMainLoop = True
+        wx.App.OnRun(self)
+        self.inMainLoop = False        
         
     def PickPosition(self, title):
         save_mode = cad.GetInputMode()
@@ -323,9 +324,7 @@ class App(wx.App):
         digitizing.m_prompt_when_doing_a_main_loop = title
         cad.SetInputMode(digitizing)
         
-        self.inMainLoop = True
         self.OnRun()
-        self.inMainLoop = False
 
         return_point = None
         if digitizing.digitized_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:

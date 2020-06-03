@@ -3,7 +3,6 @@
 #include "CadApp.h"
 #include "Grid.h"
 #include "InputMode.h"
-#include "SelectMode.h"
 #include "Material.h"
 #include "Viewport.h"
 #include "MagDragWindow.h"

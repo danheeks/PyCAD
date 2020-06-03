@@ -4,7 +4,6 @@
 #include "stdafx.h"
 
 #include "ViewRotating.h"
-#include "SelectMode.h"
 #include "CadApp.h"
 #include "Viewport.h"
 

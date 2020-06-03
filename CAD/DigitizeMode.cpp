@@ -3,7 +3,6 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 #include "DigitizeMode.h"
-#include "SelectMode.h"
 #include "MarkedList.h"
 #include "CoordinateSystem.h"
 #include "DigitizeMode.h"

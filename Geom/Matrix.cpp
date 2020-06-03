@@ -133,27 +133,27 @@
 		Translate(v.x, v.y, v.z);
 	}
 
-	void	Matrix::Rotate(double angle, Point3d *rotAxis) {
+	void Matrix::Rotate(double angle, const Point3d &rotAxis) {
 		/// Rotation about rotAxis with angle
 		Rotate(sin(angle), cos(angle), rotAxis);
 	}
 
-	void	Matrix::Rotate(double sinang, double cosang, Point3d *rotAxis) {
+	void Matrix::Rotate(double sinang, double cosang, const Point3d &rotAxis) {
 		/// Rotation about rotAxis with cp & dp
 		Matrix rotate;
 		double oneminusc = 1.0 - cosang;
 
-		rotate.e[0] = rotAxis->x * rotAxis->x * oneminusc + cosang;
-		rotate.e[1] = rotAxis->x * rotAxis->y * oneminusc - rotAxis->z * sinang;
-		rotate.e[2] = rotAxis->x * rotAxis->z * oneminusc + rotAxis->y * sinang;
+		rotate.e[0] = rotAxis.x * rotAxis.x * oneminusc + cosang;
+		rotate.e[1] = rotAxis.x * rotAxis.y * oneminusc - rotAxis.z * sinang;
+		rotate.e[2] = rotAxis.x * rotAxis.z * oneminusc + rotAxis.y * sinang;
 
-		rotate.e[4] = rotAxis->x * rotAxis->y * oneminusc + rotAxis->z * sinang;
-		rotate.e[5] = rotAxis->y * rotAxis->y * oneminusc + cosang;
-		rotate.e[6] = rotAxis->y * rotAxis->z * oneminusc - rotAxis->x * sinang;
+		rotate.e[4] = rotAxis.x * rotAxis.y * oneminusc + rotAxis.z * sinang;
+		rotate.e[5] = rotAxis.y * rotAxis.y * oneminusc + cosang;
+		rotate.e[6] = rotAxis.y * rotAxis.z * oneminusc - rotAxis.x * sinang;
 
-		rotate.e[8] = rotAxis->x * rotAxis->z * oneminusc - rotAxis->y * sinang;
-		rotate.e[9] = rotAxis->y * rotAxis->z * oneminusc + rotAxis->x * sinang;
-		rotate.e[10] = rotAxis->z * rotAxis->z * oneminusc  + cosang;
+		rotate.e[8] = rotAxis.x * rotAxis.z * oneminusc - rotAxis.y * sinang;
+		rotate.e[9] = rotAxis.y * rotAxis.z * oneminusc + rotAxis.x * sinang;
+		rotate.e[10] = rotAxis.z * rotAxis.z * oneminusc  + cosang;
 		Multiply(rotate); // concatinate rotation with this matrix
 		m_unit = false;
 		m_mirrored = -1;	// don't know

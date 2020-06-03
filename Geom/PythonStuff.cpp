@@ -74,6 +74,11 @@ void MatrixRotate(Matrix &matrix, double angle)
 	matrix.Rotate(angle, 3);
 }
 
+void MatrixRotateAxis(Matrix &matrix, double angle, const Point3d& axis)
+{
+	matrix.Rotate(angle, axis);
+}
+
 void Point3dTransform(Point3d &p, const Matrix &matrix)
 {
 	p = p.Transformed(matrix);
@@ -772,6 +777,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Multiply", &Matrix::Multiply)///function Multiply///params Matrix m///transforms this matrix by the given one
 		.def("Inverse", &Matrix::Inverse)///function Inverse
 		.def("Rotate", &MatrixRotate)
+		.def("RotateAxis", &MatrixRotateAxis)
 		.def("Translate", static_cast< void (Matrix::*)(const Point3d&) >(&Matrix::Translate))
 		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale))
 		;

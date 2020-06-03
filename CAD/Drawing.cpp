@@ -9,7 +9,6 @@
 #include "HeeksColor.h"
 #include "Property.h"
 #include "LineArcDrawing.h"
-#include "SelectMode.h"
 #include "DigitizeMode.h"
 #include "Viewport.h"
 #include "KeyCode.h"

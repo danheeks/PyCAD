@@ -6,7 +6,6 @@
 #include "PointOrWindow.h"
 #include "Window.h"
 #include "ViewPoint.h"
-#include "SelectMode.h"
 #include "App.h"
 #include "Viewport.h"
 

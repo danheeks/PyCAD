@@ -15,7 +15,6 @@
 #include "HSpline.h"
 #endif
 #include "Sketch.h"
-#include "SelectMode.h"
 #include "DigitizeMode.h"
 #include "Property.h"
 

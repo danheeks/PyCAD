@@ -4,7 +4,6 @@
 #include "stdafx.h"
 
 #include "ViewZooming.h"
-#include "SelectMode.h"
 #include "Viewport.h"
 
 bool ViewZooming::m_reversed = false;

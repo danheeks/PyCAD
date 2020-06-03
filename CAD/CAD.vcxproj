@@ -144,7 +144,6 @@
     <ClCompile Include="RegularShapesDrawing.cpp" />
     <ClCompile Include="RemoveOrAddTool.cpp" />
     <ClCompile Include="Ruler.cpp" />
-    <ClCompile Include="SelectMode.cpp" />
     <ClCompile Include="Sketch.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -227,7 +226,6 @@
     <ClInclude Include="RegularShapesDrawing.h" />
     <ClInclude Include="RemoveOrAddTool.h" />
     <ClInclude Include="Ruler.h" />
-    <ClInclude Include="SelectMode.h" />
     <ClInclude Include="Sketch.h" />
     <ClInclude Include="SketchOrder.h" />
     <ClInclude Include="stdafx.h" />

@@ -6,7 +6,6 @@
 #include "MarkedList.h"
 #include "HeeksObj.h"
 #include "DigitizeMode.h"
-#include "SelectMode.h"
 #include "PointOrWindow.h"
 #include "GripperSelTransform.h"
 #include "Picking.h"

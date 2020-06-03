@@ -691,10 +691,12 @@ class Frame(wx.Frame):
         Translate(True)
         
     def OnMoveRotate(self, e):
-        pass
+        from Transform import Rotate
+        Rotate()
         
     def OnCopyRotate(self, e):
-        pass
+        from Transform import Rotate
+        Rotate(True)
 
     def OnMoveMirror(self, e):
         pass

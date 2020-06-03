@@ -157,8 +157,8 @@ public:
 	void	Translate(double x, double y, double z = 0);		// Translation
 	void	Translate(const Point3d& v);						// Translation
 
-	void	Rotate(double sinang, double cosang, Point3d *rotAxis); // Rotation about rotAxis
-	void	Rotate(double angle, Point3d *rotAxis);			// Rotation about rotAxis
+	void	Rotate(double sinang, double cosang, const Point3d &rotAxis); // Rotation about rotAxis
+	void	Rotate(double angle, const Point3d &rotAxis);			// Rotation about rotAxis
 
 	void	Rotate(double sinang, double cosang, int Axis);			// Rotation with cp & dp
 	void	Rotate(double angle, int Axis);						// Rotation with angle

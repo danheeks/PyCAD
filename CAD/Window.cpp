@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "Window.h"
 #include "HeeksObj.h"
-#include "SelectMode.h"
 #include "Viewport.h"
 
 WindowDragging::WindowDragging(){

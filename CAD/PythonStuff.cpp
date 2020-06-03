@@ -35,7 +35,6 @@
 #include "HPoint.h"
 #include "HText.h"
 #include "InputMode.h"
-#include "SelectMode.h"
 #include "MagDragWindow.h"
 #include "ViewRotating.h"
 #include "ViewZooming.h"
@@ -47,6 +46,7 @@
 #include "DigitizeMode.h"
 #include "KeyCode.h"
 #include "Gripper.h"
+#include "GripperSelTransform.h"
 
 void OnExit()
 {
@@ -1778,7 +1778,9 @@ int HeeksObjGetIndex(HeeksObj& object)
 	return object.GetIndex();
 }
 
+static GripperSelTransform drag_object_gripper(GripData(GripperTypeTranslate, Point3d(0, 0, 0)), NULL);
 
+Gripper* GetDragGripper(){ return &drag_object_gripper; }
 
 
 	BOOST_PYTHON_MODULE(cad) {
@@ -2379,6 +2381,7 @@ int HeeksObjGetIndex(HeeksObj& object)
 		boost::python::def("RestoreInputMode", RestoreInputMode);
 		boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
 		boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("GetDragGripper", GetDragGripper, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
 		boost::python::def("AddDrawingPoint", AddDrawingPoint);
 		boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);

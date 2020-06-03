@@ -298,7 +298,7 @@ void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, con
 			t1.Translate(-rotate_centre_point);
 			mat = t1;
 			Matrix t2;
-			t2.Rotate(angle, &rot_dir);
+			t2.Rotate(angle, rot_dir);
 			mat.Multiply(t2);
 			Matrix t3;
 			t3.Translate(rotate_centre_point);

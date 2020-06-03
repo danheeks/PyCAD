@@ -4,7 +4,6 @@
 #include "stdafx.h"
 
 #include "MagDragWindow.h"
-#include "SelectMode.h"
 #include "Viewport.h"
 
 void MagDragWindow::OnMouse( MouseEvent& event )
