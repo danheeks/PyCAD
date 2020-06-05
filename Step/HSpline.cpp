@@ -349,9 +349,12 @@ void HSpline::ReadFromXML(TiXmlElement *element)
 		pKnot = pKnot->NextSiblingElement("Knot");
 	}
 
-	m_spline = &Geom_BSplineCurve(tkcontrol,tkweight,tkknot,tkmult,degree,periodic,rational);
-	m_spline->D0(m_spline->FirstParameter(), P2G(A));
-	m_spline->D0(m_spline->LastParameter(), P2G(B));
+	m_spline = new Geom_BSplineCurve(tkcontrol,tkweight,tkknot,tkmult,degree,periodic,rational);
+        gp_Pnt p;
+        m_spline->D0(m_spline->FirstParameter(), p);
+        A = G2P(p);
+        m_spline->D0(m_spline->LastParameter(), p);
+        B = G2P(p);
 
 	EndedObject::ReadFromXML(element);
 }

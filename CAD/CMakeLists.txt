@@ -100,7 +100,6 @@ set(CAD_SRC
     RegularShapesDrawing.cpp
     RemoveOrAddTool.cpp
     Ruler.cpp
-    SelectMode.cpp
     Sketch.cpp
     StlSolid.cpp
     strconv.cpp

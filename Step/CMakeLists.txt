@@ -81,6 +81,7 @@ set(STEP_SRC
     ../Geom/Finite.cpp
     ../Geom/Matrix.cpp
     ../Geom/Offset.cpp
+    ../CAD/EndedObject.cpp
     ../CAD/HeeksColor.cpp
     ../CAD/HeeksObj.cpp
     ../CAD/IdNamedObjList.cpp
@@ -93,14 +94,18 @@ set(STEP_SRC
     ../CAD/tinyxmlerror.cpp
     ../CAD/tinyxmlparser.cpp
     Cone.cpp
+    ConversionTools.cpp
     CoordinateSystem.cpp
     Cuboid.cpp
     Cylinder.cpp
     Edge.cpp
     Face.cpp
     FaceTools.cpp
+    HEllipse.cpp
+    HSpline.cpp
     Loop.cpp
     OCCGeom.cpp
+    OCCProperty.cpp
     PythonStuff.cpp
     RuledSurface.cpp
     Settings.cpp
