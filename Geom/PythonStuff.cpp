@@ -84,6 +84,13 @@ void Point3dTransform(Point3d &p, const Matrix &matrix)
 	p = p.Transformed(matrix);
 }
 
+boost::python::tuple ArbitraryAxes(const Point3d& p)
+{
+	Point3d x, y;
+	p.arbitrary_axes(x, y);
+	return bp::make_tuple(x, y);
+}
+
 boost::python::object PlaneIntofPlane(const Plane &plane1, const Plane &plane2)
 {
 	Line line;
@@ -780,6 +787,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("RotateAxis", &MatrixRotateAxis)
 		.def("Translate", static_cast< void (Matrix::*)(const Point3d&) >(&Matrix::Translate))
 		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale))
+		.def("Scale3", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Scale))
 		;
 
 	///class Point3d
@@ -803,6 +811,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Normalized", &Point3d::Normalized)
 		.def("Dist", &Point3d::Dist)
 		.def("Length", &Point3d::magnitude)
+		.def("ArbitraryAxes", &ArbitraryAxes)
 		.def("__str__", Point3d__str__);
 	;
 

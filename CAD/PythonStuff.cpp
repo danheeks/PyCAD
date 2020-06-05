@@ -1856,6 +1856,7 @@ Gripper* GetDragGripper(){ return &drag_object_gripper; }
 			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
+			.def("Transform", &HeeksObj::Transform)
 			;
 
 		boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")

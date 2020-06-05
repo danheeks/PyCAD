@@ -7,6 +7,7 @@
 #include "Gripper.h"
 #include "GripData.h"
 #include "CoordinateSystem.h"
+#include "Property.h"
 
 CCuboid::CCuboid(const gp_Ax2& pos, double x, double y, double z, const wchar_t* title, const HeeksColor& col, float opacity)
 :CSolid(BRepPrimAPI_MakeBox(gp_Ax2(pos.Location().XYZ() + gp_XYZ((x < 0) ? x:0.0, (y < 0) ? y:0.0, (z < 0) ? z:0.0), pos.Direction(), pos.XDirection()), fabs(x), fabs(y), fabs(z)), title, col, opacity)
@@ -67,12 +68,11 @@ std::wstring CCuboid::StretchedName(){ return L"Stretched Cuboid";}
 void CCuboid::GetProperties(std::list<Property *> *list)
 {
 	GetAx2Properties(list, m_pos, this);
-#if 0
-	// to do
+
 	list->push_back(new PropertyLength(this, L"width ( x )", &m_x));
 	list->push_back(new PropertyLength(this, L"height( y )", &m_y));
 	list->push_back(new PropertyLength(this, L"depth ( z )", &m_z));
-#endif
+
 	CSolid::GetProperties(list);
 }
 

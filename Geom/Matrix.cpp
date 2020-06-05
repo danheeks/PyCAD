@@ -9,11 +9,6 @@
 
 #include "geometry.h"
 
-#ifdef PEPSDLL
-	#include "vdm.h"
-	#include "pepsdll.h"
-	#include "realds.h"
-#endif
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // matrix
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -528,48 +523,6 @@
 
 		return a;
 	}
-
-#ifdef PEPSDLL
-	void Matrix::ToPeps(int id)
-	{
-		int set = PepsVdmMake(id, VDM_MATRIX_TYPE , VDM_LOCAL);
-		if(set < 0) FAILURE(L"Failed to create Matrix VDM");
-		struct kgm_header pepsm;
-
-		Get(pepsm.matrix);
-		pepsm.off_rad = 0;
-		pepsm.off_dir = pepsm.origin_id = 0;
-
-		PepsVdmWriteTmx(set , &pepsm );
-
-		PepsVdmClose(set);
-
-	}
-
-	void Matrix::FromPeps(int id)
-	{
-		//	if(id) {
-		int set = PepsVdmOpen(id, VDM_MATRIX_TYPE , VDM_READ_ONLY | VDM_LOCAL);
-		if(set < 0) FAILURE(L"Failed to open Matrix VDM");
-
-		struct kgm_header pepsm;
-		PepsVdmReadTmx(set , &pepsm);
-		memcpy(e, pepsm.matrix, sizeof(pepsm.matrix));
-		m_unit = true;
-		for(int i = 0; i < 16; i++) {
-			// copy over matrix and check for unit matrix
-			if(i == 0 || i == 5 || i == 10 || i == 15) {
-				if((e[i] = pepsm.matrix[i]) != 1) m_unit = false;
-			}
-			else {
-				if((e[i] = pepsm.matrix[i]) != 0) m_unit = false;
-			}
-		}
-		PepsVdmClose(set);
-		m_mirrored = IsMirrored();
-		//	}
-	}
-#endif
 
 	Matrix UnitMatrix;					// a global unit matrix
 

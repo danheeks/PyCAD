@@ -36,6 +36,9 @@ public:
 	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	bool GetCentrePoint(Point3d &pos);
+	bool GetAxis(Point3d &);
+	bool GetRadius(double &);
+	void Reverse();
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement *element);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
@@ -48,7 +51,6 @@ public:
 	Point3d GetPointAtFraction(double fraction)const;
 	static bool TangentialArc(const Point3d &p0, const Point3d &v0, const Point3d &p1, Point3d &centre, Point3d &axis);
 	bool UsesID(){return true;} 
-	void Reverse();
 	double IncludedAngle()const;
 	Circle GetCircle()const;
 };

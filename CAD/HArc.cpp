@@ -467,6 +467,19 @@ bool HArc::GetCentrePoint(Point3d &pos)
 	return true;
 }
 
+bool HArc::GetAxis(Point3d &pos)
+{
+	pos = m_axis;
+	return true;
+}
+
+bool HArc::GetRadius(double &r)
+{
+	r = A.Dist(C);
+	return true;
+}
+
+
 Point3d HArc::GetSegmentVector(double fraction)const
 {
 	Point3d centre = C;

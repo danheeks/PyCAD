@@ -43,6 +43,8 @@ public:
 	bool Stretch(const double *p, const double* shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	bool GetCentrePoint(Point3d &pos);
+	bool GetAxis(Point3d &);
+	bool GetRadius(double &);
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement *element);
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;

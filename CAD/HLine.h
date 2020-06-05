@@ -25,6 +25,7 @@ public:
 	bool GetStartPoint(Point3d &pos);
 	bool GetEndPoint(Point3d &pos);
 	bool GetMidPoint(Point3d &pos);
+	void Reverse();
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void GetProperties(std::list<Property *> *list);
 	bool FindNearPoint(const Point3d & ray_start, const Point3d & ray_direction, Point3d &point);
@@ -36,7 +37,6 @@ public:
 	bool UsesID(){return true;} 
 	bool Intersects(const Point3d &pnt)const;
 	Point3d GetSegmentVector(double fraction);
-	void Reverse();
 
 	Line GetLine()const;
 };

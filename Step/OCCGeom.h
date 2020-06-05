@@ -95,4 +95,8 @@ bool IsEqual(gp_Ax2 ax1, gp_Ax2 ax2);
 bool IsEqual(gp_Ax1 ax1, gp_Ax1 ax2);
 
 Point3d G2P(const gp_Pnt& p);
+Point3d V2P(const gp_Vec& p);
+Point3d D2P(const gp_Dir& p);
 gp_Pnt P2G(const Point3d& p);
+gp_Vec P2V(const Point3d& p);
+gp_Dir P2D(const Point3d& p);

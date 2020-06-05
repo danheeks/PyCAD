@@ -9,48 +9,42 @@
 #include "ConversionTools.h"
 #include "strconv.h"
 
-void PickCreateRuledSurface()
+void PickCreateRuledSurface(bool delete_sketches)
 {
-#if 0
-	if(wxGetApp().m_marked_list->size() == 0)
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+	if (objects.size() == 0)
+		return;
+
+	std::list<TopoDS_Wire> wire_list;
+
+	std::list<HeeksObj*> sketches_to_delete;
+
+	for (std::list<HeeksObj *>::iterator It = objects.begin(); It != objects.end(); It++)
 	{
-		wxGetApp().PickObjects(_("pick some sketches"));
-	}
-
-	if(wxGetApp().m_marked_list->size() > 0)
-	{
-		std::list<TopoDS_Wire> wire_list;
-
-		std::list<HeeksObj*> sketches_to_delete;
-
-		for(std::list<HeeksObj *>::const_iterator It = wxGetApp().m_marked_list->list().begin(); It != wxGetApp().m_marked_list->list().end(); It++)
+		HeeksObj* object = *It;
+		if(object->GetType() == SketchType)
 		{
-			HeeksObj* object = *It;
-			if(object->GetType() == SketchType)
+			std::list<HeeksObj*> list;
+			list.push_back(object);
+			TopoDS_Wire wire;
+			if(ConvertLineArcsToWire2(list, wire))
 			{
-				std::list<HeeksObj*> list;
-				list.push_back(object);
-				TopoDS_Wire wire;
-				if(ConvertLineArcsToWire2(list, wire))
-				{
-					wire_list.push_back(wire);
-					if(wxGetApp().m_loft_removes_sketches)sketches_to_delete.push_back(object);
-				}
+				wire_list.push_back(wire);
+				if (delete_sketches)sketches_to_delete.push_back(object);
 			}
 		}
-
-		TopoDS_Shape shape;
-		if(CreateRuledSurface(wire_list, shape, true))
-		{
-			wxGetApp().StartHistory();
-			wxGetApp().DeleteUndoably(sketches_to_delete);
-			HeeksObj* new_object = CShape::MakeObject(shape, _("Ruled Surface"), SOLID_TYPE_UNKNOWN, HeeksColor(51, 45, 51), 1.0f);
-			wxGetApp().AddUndoably(new_object, NULL, NULL);
-			wxGetApp().EndHistory();
-		}
-
 	}
-#endif
+
+	TopoDS_Shape shape;
+	if(CreateRuledSurface(wire_list, shape, true))
+	{
+		theApp->StartHistory();
+		theApp->DeleteUndoably(sketches_to_delete);
+		HeeksObj* new_object = CShape::MakeObject(shape, L"Ruled Surface", SOLID_TYPE_UNKNOWN, HeeksColor(51, 45, 51), 1.0f);
+		theApp->AddUndoably(new_object, NULL, NULL);
+		theApp->EndHistory();
+	}
 }
 
 void ConvertToFaceOrWire(std::list<HeeksObj*> list, std::list<TopoDS_Shape> &faces_or_wires, bool face_not_wire)
@@ -68,14 +62,14 @@ void ConvertToFaceOrWire(std::list<HeeksObj*> list, std::list<TopoDS_Shape> &fac
 			{
 				if(ConvertSketchToFaceOrWire(object, faces_or_wires, face_not_wire))
 				{
-					if(wxGetApp().m_extrude_removes_sketches)sketches_or_faces_to_delete.push_back(object);
+					if(theApp->m_extrude_removes_sketches)sketches_or_faces_to_delete.push_back(object);
 				}
 			}
 			break;
 
 		case FaceType:
 			faces_or_wires.push_back(((CFace*)object)->Face());
-			if(wxGetApp().m_extrude_removes_sketches)sketches_or_faces_to_delete.push_back(object);
+			if(theApp->m_extrude_removes_sketches)sketches_or_faces_to_delete.push_back(object);
 			break;
 
 		default:
@@ -83,7 +77,7 @@ void ConvertToFaceOrWire(std::list<HeeksObj*> list, std::list<TopoDS_Shape> &fac
 		}
 	}
 
-	wxGetApp().DeleteUndoably(sketches_or_faces_to_delete);
+	theApp->DeleteUndoably(sketches_or_faces_to_delete);
 #endif
 }
 
@@ -95,7 +89,7 @@ HeeksObj* CreateExtrusionOrRevolution(std::list<HeeksObj*> list, double height_o
 	ConvertToFaceOrWire(list, faces_or_wires, (fabs(taper_angle_for_extrusion) <= 0.0000001) && solid_if_possible);
 
 	std::list<TopoDS_Shape> new_shapes;
-	gp_Trsf trsf = wxGetApp().GetDrawMatrix(false);
+	gp_Trsf trsf = theApp->GetDrawMatrix(false);
 	if(revolution_not_extrusion)
 	{
 		CreateRevolutions(faces_or_wires, new_shapes, gp_Ax1(gp_Pnt(0, 0, 0).Transformed(trsf), gp_Vec(1, 0, 0).Transformed(trsf)), height_or_angle);
@@ -109,9 +103,9 @@ HeeksObj* CreateExtrusionOrRevolution(std::list<HeeksObj*> list, double height_o
 	{
 		for(std::list<TopoDS_Shape>::iterator It = new_shapes.begin(); It != new_shapes.end(); It++){
 			TopoDS_Shape& shape = *It;
-			new_object = CShape::MakeObject(shape, revolution_not_extrusion ? _("Revolved Solid") : _("Extruded Solid"), SOLID_TYPE_UNKNOWN, wxGetApp().current_color, 1.0f);
+			new_object = CShape::MakeObject(shape, revolution_not_extrusion ? _("Revolved Solid") : _("Extruded Solid"), SOLID_TYPE_UNKNOWN, theApp->current_color, 1.0f);
 			if(add_new_objects)
-				wxGetApp().AddUndoably(new_object, NULL, NULL);
+				theApp->AddUndoably(new_object, NULL, NULL);
 			else
 				break;
 		}
@@ -144,7 +138,7 @@ HeeksObj* CreatePipeFromProfile(const TopoDS_Wire &spine, std::list<TopoDS_Shape
 			makePipe.Build();
 			TopoDS_Shape shape = makePipe.Shape();
 
-			HeeksObj* new_object = CShape::MakeObject(shape, _("Pipe"), SOLID_TYPE_UNKNOWN, wxGetApp().current_color, 1.0f);
+			HeeksObj* new_object = CShape::MakeObject(shape, _("Pipe"), SOLID_TYPE_UNKNOWN, theApp->current_color, 1.0f);
 			if(new_object)pipe_shapes.push_back(new_object);
 		}
 		catch (Standard_Failure) {
@@ -154,13 +148,13 @@ HeeksObj* CreatePipeFromProfile(const TopoDS_Wire &spine, std::list<TopoDS_Shape
 	}
 	if(pipe_shapes.size() > 0)
 	{
-		wxGetApp().StartHistory();
+		theApp->StartHistory();
 		for(std::list<HeeksObj*>::iterator It = pipe_shapes.begin(); It != pipe_shapes.end(); It++)
 		{
 			HeeksObj* object = *It;
-			wxGetApp().AddUndoably(object, NULL, NULL);
+			theApp->AddUndoably(object, NULL, NULL);
 		}
-		wxGetApp().EndHistory();
+		theApp->EndHistory();
 		return pipe_shapes.front();
 	}
 #endif
@@ -177,7 +171,7 @@ HeeksObj* CreatePipeFromProfile(HeeksObj* spine, HeeksObj* profile)
 	HeeksObj* pipe = CreatePipeFromProfile(wire, faces);
 	if(pipe)
 	{
-		wxGetApp().DeleteUndoably(profile);
+		theApp->DeleteUndoably(profile);
 	}
 	return pipe;
 #else
@@ -207,21 +201,21 @@ void PickCreateSweep()
 {
 #if 0
 	// undoable
-	if(wxGetApp().m_marked_list->size() == 0)
+	if(theApp->m_marked_list->size() == 0)
 	{
-		wxGetApp().PickObjects(_("pick sketches, faces or circles"), MARKING_FILTER_CIRCLE | MARKING_FILTER_SKETCH | MARKING_FILTER_FACE);
+		theApp->PickObjects(_("pick sketches, faces or circles"), MARKING_FILTER_CIRCLE | MARKING_FILTER_SKETCH | MARKING_FILTER_FACE);
 	}
 
-	std::list<HeeksObj*> sweep_objects = wxGetApp().m_marked_list->list();
-	wxGetApp().m_marked_list->Clear(true);
-	if(!wxGetApp().PickObjects(_("Pick a Sketch to sweep along"), MARKING_FILTER_SKETCH, true))return;
-	if(wxGetApp().m_marked_list->list().size() == 0)return;
+	std::list<HeeksObj*> sweep_objects = theApp->m_marked_list->list();
+	theApp->m_marked_list->Clear(true);
+	if(!theApp->PickObjects(_("Pick a Sketch to sweep along"), MARKING_FILTER_SKETCH, true))return;
+	if(theApp->m_marked_list->list().size() == 0)return;
 
-	HeeksObj* sweep_profile = wxGetApp().m_marked_list->list().front();
+	HeeksObj* sweep_profile = theApp->m_marked_list->list().front();
 
-	wxGetApp().StartHistory();
+	theApp->StartHistory();
 	CreateSweep(sweep_objects, sweep_profile, true);
-	wxGetApp().EndHistory();
+	theApp->EndHistory();
 #endif
 }
 
@@ -256,9 +250,9 @@ HeeksObj* CreateRuledFromSketches(std::list<HeeksObj*> list, bool make_solid)
 void PickCreateExtrusion()
 {
 #if 0
-	if(wxGetApp().m_marked_list->size() == 0)
+	if(theApp->m_marked_list->size() == 0)
 	{
-		wxGetApp().PickObjects(_("pick sketches, faces or circles"), MARKING_FILTER_CIRCLE | MARKING_FILTER_SKETCH | MARKING_FILTER_FACE);
+		theApp->PickObjects(_("pick sketches, faces or circles"), MARKING_FILTER_CIRCLE | MARKING_FILTER_SKETCH | MARKING_FILTER_FACE);
 	}
 
 	double height;
@@ -269,20 +263,20 @@ void PickCreateExtrusion()
 		config.Read(_T("ExtrusionTaperAngle"), &taper_angle, 0.0);
 	}
 
-	if(InputExtrusionHeight(height, &(wxGetApp().m_extrude_to_solid), &taper_angle))
+	if(InputExtrusionHeight(height, &(theApp->m_extrude_to_solid), &taper_angle))
 	{
 		{
 			HeeksConfig config;
 			config.Write(_T("ExtrusionHeight"), height);
 			config.Write(_T("ExtrusionTaperAngle"), taper_angle);
-			config.Write(_T("ExtrudeToSolid"), wxGetApp().m_extrude_to_solid);
+			config.Write(_T("ExtrudeToSolid"), theApp->m_extrude_to_solid);
 		}
 
-		if(wxGetApp().m_marked_list->size() > 0)
+		if(theApp->m_marked_list->size() > 0)
 		{
-			wxGetApp().StartHistory();
-			CreateExtrusionOrRevolution(wxGetApp().m_marked_list->list(),height, wxGetApp().m_extrude_to_solid, false, taper_angle);
-			wxGetApp().EndHistory();
+			theApp->StartHistory();
+			CreateExtrusionOrRevolution(theApp->m_marked_list->list(),height, theApp->m_extrude_to_solid, false, taper_angle);
+			theApp->EndHistory();
 		}
 	}
 #endif
@@ -290,9 +284,9 @@ void PickCreateExtrusion()
 void PickCreateRevolution()
 {
 #if 0
-	if(wxGetApp().m_marked_list->size() == 0)
+	if(theApp->m_marked_list->size() == 0)
 	{
-		wxGetApp().PickObjects(_("pick sketches, faces or circles"), MARKING_FILTER_CIRCLE | MARKING_FILTER_SKETCH | MARKING_FILTER_FACE);
+		theApp->PickObjects(_("pick sketches, faces or circles"), MARKING_FILTER_CIRCLE | MARKING_FILTER_SKETCH | MARKING_FILTER_FACE);
 	}
 
 	double angle;
@@ -301,15 +295,15 @@ void PickCreateRevolution()
 		config.Read(_T("RevolutionAngle"), &angle, 360.0);
 	}
 
-	if(InputRevolutionAngle(angle, &wxGetApp().m_extrude_to_solid))
+	if(InputRevolutionAngle(angle, &theApp->m_extrude_to_solid))
 	{
 		{
 			HeeksConfig config;
 			config.Write(_T("RevolutionAngle"), angle);
 		}
-		if(wxGetApp().m_marked_list->size() > 0)
+		if(theApp->m_marked_list->size() > 0)
 		{
-			CreateExtrusionOrRevolution(wxGetApp().m_marked_list->list(), angle, wxGetApp().m_extrude_to_solid, true, 0.0, true);
+			CreateExtrusionOrRevolution(theApp->m_marked_list->list(), angle, theApp->m_extrude_to_solid, true, 0.0, true);
 		}
 	}
 #endif
@@ -317,7 +311,6 @@ void PickCreateRevolution()
 
 bool CreateRuledSurface(const std::list<TopoDS_Wire> &wire_list, TopoDS_Shape& shape, bool make_solid)
 {
-#if 0
 	if(wire_list.size() > 0)
 	{
 			BRepOffsetAPI_ThruSections generator( make_solid ? Standard_True : Standard_True, Standard_False );
@@ -333,18 +326,17 @@ bool CreateRuledSurface(const std::list<TopoDS_Wire> &wire_list, TopoDS_Shape& s
 		}
 		catch (Standard_Failure) {
 			Handle_Standard_Failure e = Standard_Failure::Caught();
-			theApp->DoMessageBox(wxString(_("Error making ruled solid")) + _T(": ") + Ctt(e->GetMessageString()));
+			theApp->DoMessageBox((std::wstring(L"Error making ruled solid: ") + Ctt(e->GetMessageString())).c_str());
 			return false;
 		}
 		catch(...)
 		{
-			theApp->DoMessageBox(_("Fatal error making ruled solid"));
+			theApp->DoMessageBox(L"Fatal error making ruled solid");
 			return false;
 		}
 
 		return true;
 	}
-#endif
 	return false;
 }
 

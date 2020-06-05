@@ -52,6 +52,7 @@ public:
 	virtual unsigned int GetIndex(HeeksObj *object) = 0;
 	virtual void ReleaseIndex(unsigned int index) = 0;
 	virtual void ClearSelection(bool call_OnChanged) = 0;
+	virtual void GetSelection(std::list<HeeksObj*> &objects) = 0;
 	virtual bool ObjectMarked(HeeksObj* object) = 0;
 	virtual void Mark(HeeksObj* object) = 0;
 	virtual void Unmark(HeeksObj* object) = 0;
@@ -60,4 +61,9 @@ public:
 	virtual FileOpenOrImportType GetFileOpenOrImportType() = 0;
 	virtual TiXmlNode* GetXmlRoot() = 0;
 	virtual TiXmlElement* GetXmlElement() = 0;
+	virtual void SketchSplit(HeeksObj*, std::list<HeeksObj*> &) = 0;
+	virtual HeeksObj* CreateNewLine(const Point3d& s, const Point3d& e) = 0;
+	virtual HeeksObj* CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c) = 0;
+	virtual HeeksObj* CreateNewCircle(const Point3d& c, const Point3d& a, double r) = 0;
+	virtual HeeksObj* CreateNewPoint(const Point3d& p) = 0;
 };

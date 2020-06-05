@@ -214,6 +214,18 @@ bool HCircle::GetCentrePoint(Point3d &pos)
 	return true;
 }
 
+bool HCircle::GetAxis(Point3d &pos)
+{
+	pos = m_axis;
+	return true;
+}
+
+bool HCircle::GetRadius(double &r)
+{
+	r = m_radius;
+	return true;
+}
+
 void HCircle::WriteToXML(TiXmlElement *element)
 {
 	element->SetAttribute("col", color.COLORREF_color());

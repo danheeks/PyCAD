@@ -330,6 +330,7 @@ public:
 	void ObjectAreaString(HeeksObj* object, std::wstring &s);
 	void SetViewUnits(double units, bool write_to_config);
 	virtual void ClearSelection(bool call_OnChanged);
+	void GetSelection(std::list<HeeksObj*> &objects);
 	virtual bool ObjectMarked(HeeksObj* object);
 	virtual void Mark(HeeksObj* object);
 	virtual void Unmark(HeeksObj* object);
@@ -338,6 +339,11 @@ public:
 	virtual SolidViewMode GetSolidViewMode(){ return m_solid_view_mode; }
 	TiXmlNode* GetXmlRoot(){ return m_cur_xml_root; }
 	TiXmlElement* GetXmlElement(){ return m_cur_xml_element; }
+	void SketchSplit(HeeksObj*, std::list<HeeksObj*> &);
+	HeeksObj* CreateNewLine(const Point3d& s, const Point3d& e);
+	HeeksObj* CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c);
+	HeeksObj* CreateNewCircle(const Point3d& c, const Point3d& a, double r);
+	HeeksObj* CreateNewPoint(const Point3d& p);
 };
 
 extern CCadApp* theApp;

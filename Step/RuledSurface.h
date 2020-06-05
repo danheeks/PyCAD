@@ -2,7 +2,7 @@
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 
-extern void PickCreateRuledSurface();
+extern void PickCreateRuledSurface(bool delete_sketches);
 extern void PickCreateExtrusion();
 extern void PickCreateRevolution();
 extern void PickCreateSweep();

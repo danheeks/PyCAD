@@ -5,6 +5,7 @@ import wx
 from HeeksConfig import HeeksConfig
 from HDialog import HDialog
 from HDialog import control_border
+from HDialog import HControl
 from NiceTextCtrl import DoubleCtrl
 from NiceTextCtrl import LengthCtrl
 from PictureFrame import PictureWindow
@@ -105,9 +106,11 @@ def InputFromAndTo(fromp, to, ncopies, title):
         if ret == wx.ID_OK:
             return True, fromp, to, ncopies
         if ret == dlg.btnFrom.GetId():
-            fromp = wx.GetApp().PickPosition("Pick position to move from")
+            pos = wx.GetApp().PickPosition("Pick position to move from")
+            if pos != None: fromp = pos
         elif ret == dlg.btnTo.GetId():
-            to = wx.GetApp().PickPosition("Pick position to move to")
+            pos = wx.GetApp().PickPosition("Pick position to move to")
+            if pos != None: to = pos
         else:
             return False, None, None, None
 
@@ -354,18 +357,25 @@ def InputAngleWithPlane(angle, axis, pos, ncopies, axial_shift, title):
         
         if ret == wx.ID_OK:
             return True, angle, axis, pos, ncopies, axial_shift
-        if ret == dlg.rbXy.GetId():
+        elif ret == dlg.rbXy.GetId():
             continue
-        if ret == dlg.rbXz.GetId():
+        elif ret == dlg.rbXz.GetId():
             continue
-        if ret == dlg.rbYz.GetId():
+        elif ret == dlg.rbYz.GetId():
             continue
-        if ret == dlg.rbOther.GetId():
+        elif ret == dlg.rbOther.GetId():
             continue
-        if ret == dlg.btnPick.GetId():
-            pos = wx.GetApp().PickPosition("Pick Position To Rotate About")
+        elif ret == dlg.btnPick.GetId():
+            p = wx.GetApp().PickPosition("Pick Position To Rotate About")
+            if p != None: pos = p
         elif ret == dlg.btnVectorPick.GetId():
-            axis = (wx.GetApp().PickPosition("Pick Position On Rotation Axis") - pos).Normalized()
+            p = wx.GetApp().PickPosition("Pick Position On Rotation Axis");
+            if p != None:
+                v = p - pos
+                if v.Length() < 0.01:
+                    wx.MessageBox('Axis Point Too Close to Position')
+            else:
+                axis = v.Normalized()
         else:
             return False, None, None, None, None, None
     
@@ -444,6 +454,252 @@ def Rotate(copy = False):
         mat.RotateAxis(angle * 0.0174532925199433, axis)
         mat.Translate(pos)
         for object in selected_items:
+            cad.TransformUndoably(object, mat)
+    
+    cad.EndHistory()    
+            
+class MirrorDlg(HDialog):
+    def __init__(self, axis, pos, axis_type, copy, title):
+        HDialog.__init__(self, title)
+        self.ignore_event_functions = True
+        sizerMain = wx.BoxSizer(wx.VERTICAL)
+        
+        self.copy = copy
+        self.axis = axis
+        self.axis_type = axis_type
+        self.pos = pos
+        self.btnPick = None
+        self.btnVectorPick = None
+        
+        self.chkCopy = wx.CheckBox(self, wx.ID_ANY, 'Keep Original')
+        HControl(wx.ALL, self.chkCopy).AddToSizer(sizerMain)
+        self.chkCopy.SetValue(copy)
+            
+        sizerPosAndAxis = wx.BoxSizer(wx.HORIZONTAL)
+        sizerMain.Add(sizerPosAndAxis, 0, wx.EXPAND)
+            
+        sizerPos = wx.BoxSizer(wx.VERTICAL)
+        sizerPosAndAxis.Add(sizerPos, 0, wx.EXPAND)
+        if axis_type == 0:
+            sizerPos.Add( wx.StaticText(self, label = 'Position to Mirror About'), 0, wx.EXPAND | wx.ALL, control_border)
+        else:
+            self.btnPick = wx.Button(self, label = 'Select')
+            self.AddLabelAndControl(sizerPos, 'Position to Mirror About', self.btnPick)
+        self.posx = LengthCtrl(self)
+        self.AddLabelAndControl(sizerPos, 'X', self.posx )
+        self.posy = LengthCtrl(self)
+        self.AddLabelAndControl(sizerPos, 'Y', self.posy )
+        self.posz = LengthCtrl(self)
+        self.AddLabelAndControl(sizerPos, 'Z', self.posz )
+        if axis_type == 0:
+            self.btnPick = wx.Button(self, label = 'Select')
+            sizerPos.Add( self.btnPick, wx.EXPAND | wx.ALL, control_border )
+        self.posx.SetValue(self.pos.x)
+        self.posy.SetValue(self.pos.y)
+        self.posz.SetValue(self.pos.z) 
+        if axis_type != 0:
+            self.posx.Enable( axis_type == 1 )
+            self.posy.Enable( axis_type == 2 )
+            self.posz.Enable( axis_type == 3 )        
+        
+        if axis_type == 0:
+            # non standard axis
+            sizerAxis = wx.BoxSizer(wx.VERTICAL)
+            sizerPosAndAxis.Add(sizerAxis, 0, wx.EXPAND)
+            
+            sizerAxis.Add( wx.StaticText(self, label = 'Axis to Mirror Through'), 0, wx.EXPAND | wx.ALL, control_border )
+            self.vectorx = DoubleCtrl(self)
+            self.AddLabelAndControl( sizerAxis, 'X', self.vectorx )
+            self.vectory = DoubleCtrl(self)
+            self.AddLabelAndControl( sizerAxis, 'Y', self.vectory )
+            self.vectorz = DoubleCtrl(self)
+            self.AddLabelAndControl( sizerAxis, 'Z', self.vectorz )
+            self.btnVectorPick = wx.Button(self, label = 'Select Axis Point')
+            sizerAxis.Add( self.btnVectorPick, 0, wx.EXPAND | wx.ALL, control_border )
+            self.vectorx.SetValue( axis.x )
+            self.vectory.SetValue( axis.y )
+            self.vectorz.SetValue( axis.z )
+        else:
+            self.vectorx = None        
+                         
+        # add picture
+        self.picture = PictureWindow(self, wx.Size(150, 100))
+        pictureSizer = wx.BoxSizer(wx.HORIZONTAL)
+        pictureSizer.Add( self.picture, 1, wx.EXPAND )
+        sizerMain.Add( pictureSizer, 0, wx.ALL, control_border )
+        sizerPlane = wx.BoxSizer(wx.VERTICAL)
+        pictureSizer.Add(sizerPlane, 0, wx.EXPAND )
+
+        
+        self.rbH = wx.RadioButton( self, label = 'Horizontal', style = wx.RB_GROUP)
+        self.rbV = wx.RadioButton( self, label = 'Vertical')
+        self.rbZ = wx.RadioButton( self, label = 'Z')
+        self.rbOther = wx.RadioButton( self, label = 'Other')
+        sizerPlane.Add( self.rbH, 0, wx.ALL, control_border )
+        sizerPlane.Add( self.rbV, 0, wx.ALL, control_border )
+        sizerPlane.Add( self.rbZ, 0, wx.ALL, control_border )
+        sizerPlane.Add( self.rbOther, 0, wx.ALL, control_border )
+        
+        self.rbH.SetValue( axis_type == 1 )
+        self.rbV.SetValue( axis_type == 2 )
+        self.rbZ.SetValue( axis_type == 3 )
+        self.rbOther.SetValue( axis_type == 0 )
+        
+        self.MakeOkAndCancel(wx.HORIZONTAL).AddToSizer(sizerMain)
+
+        self.SetPicture()
+            
+        self.SetSizer(sizerMain)
+        sizerMain.SetSizeHints(self)
+        sizerMain.Fit(self)
+        
+        self.chkCopy.SetFocus()
+            
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButton, self.rbH)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButton, self.rbV)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButton, self.rbZ)
+        self.Bind(wx.EVT_RADIOBUTTON, self.OnRadioButton, self.rbOther)
+        if self.btnPick: self.Bind(wx.EVT_BUTTON, self.OnPick, self.btnPick)
+        if self.btnVectorPick: self.Bind(wx.EVT_BUTTON, self.OnPickVector, self.btnVectorPick)
+            
+        self.ignore_event_functions = False
+        
+    def OnPick(self, event):
+        self.EndModal(self.btnPick.GetId())
+        
+    def OnPickVector(self, event):
+        self.EndModal(self.btnVectorPick.GetId())
+        
+    def OnRadioButton(self, event):
+        if self.ignore_event_functions:
+            return
+        
+        if event.GetId() == self.rbH.GetId() or event.GetId() == self.rbV.GetId() or event.GetId() == self.rbZ.GetId():
+            if self.axis_type == 0:
+                self.EndModal(event.GetId())
+                
+        if event.GetId() == self.rbOther.GetId() and self.axis_type != 0:
+            self.EndModal(event.GetId())
+            
+        self.SetPicture()
+        
+    def SetPictureByName(self, name):
+        self.picture.SetPicture(wx.GetApp().cad_dir + '/bitmaps/mirror/' + name + '.png')
+
+    def SetPicture(self):
+        if self.rbH.GetValue():self.SetPictureByName('horiz')
+        elif self.rbV.GetValue():self.SetPictureByName('vert')
+        elif self.rbZ.GetValue():self.SetPictureByName('z')
+        elif self.rbOther.GetValue():self.SetPictureByName('other')
+        
+    def GetAllValues(self):
+        if self.rbH.GetValue():
+            axis = geom.Point3D(1,0,0)
+            axis_type = 1
+        elif self.rbV.GetValue():
+            axis = geom.Point3D(0,1,0)
+            axis_type = 2
+        elif self.rbZ.GetValue():
+            axis = geom.Point3D(0,0,1)
+            axis_type = 3
+        else:
+            if self.vectorx == None:
+                axis = self.axis
+            else:
+                axis = geom.Point3D(self.vectorx.GetValue(), self.vectory.GetValue(), self.vectorz.GetValue())
+            axis_type = 0
+        pos = geom.Point3D(self.posx.GetValue(), self.posy.GetValue(), self.posz.GetValue())
+            
+        copy = self.chkCopy.GetValue()
+        
+        return axis, pos, axis_type, copy
+
+def InputMirrorPlane(axis, pos, copy, title):
+    axis_type = 0 # not one of the three
+    if axis == geom.Point3D(1,0,0):axis_type = 1
+    elif axis == geom.Point3D(0,1,0):axis_type = 2
+    elif axis == geom.Point3D(0,0,1):axis_type = 3
+
+    while(True):
+        dlg = MirrorDlg(axis, pos, axis_type, copy, title)
+        ret = dlg.ShowModal()
+        axis, pos, axis_type, copy = dlg.GetAllValues()
+        
+        if ret == wx.ID_OK:
+            return True, axis, pos, copy
+        elif ret == dlg.rbH.GetId():
+            continue
+        elif ret == dlg.rbV.GetId():
+            continue
+        elif ret == dlg.rbZ.GetId():
+            continue
+        elif ret == dlg.rbOther.GetId():
+            continue
+        elif ret == dlg.btnPick.GetId():
+            p = wx.GetApp().PickPosition("Pick Position To Mirror About")
+            if p != None: pos = p
+        elif (dlg.btnVectorPick != None) and (ret == dlg.btnVectorPick.GetId()):
+            p = wx.GetApp().PickPosition("Pick Position On Mirror Axis")
+            if p != None:
+                v = p - pos
+                if v.Length() < 0.01:
+                    wx.MessageBox('Axis Point Too Close to Position')
+                else:
+                    axis = v.Normalized()
+        else:
+            return False, None, None, None
+
+def Mirror():
+    if cad.GetNumSelected() == 0:
+        wx.GetApp().PickObjects('Pick objects to mirror')
+    
+    if cad.GetNumSelected() == 0:
+        return
+    
+    config = HeeksConfig()
+        
+    selected_items = cad.GetSelectedObjects()
+    
+    cad.ClearSelection(False)
+    
+    copy = config.ReadBool("MirrorCopy", False)
+    axis = geom.Point3D(0,0,1)
+    pos = geom.Point3D(0,0,0)
+    axis.x = config.ReadFloat("MirrorAxisX", 1.0)
+    axis.y = config.ReadFloat("MirrorAxisY", 0.0)
+    axis.z = config.ReadFloat("MirrorAxisZ", 0.0)
+    pos.x = config.ReadFloat("MirrorPosX", 0.0)
+    pos.y = config.ReadFloat("MirrorPosY", 0.0)
+    pos.z = config.ReadFloat("MirrorPosZ", 0.0)
+    
+    result, axis, pos, copy = InputMirrorPlane(axis, pos, copy, 'Mirror')
+    if not result:
+        return
+    
+    config.WriteBool("MirrorCopy", copy)
+    config.WriteFloat("MirrorAxisX", axis.x)
+    config.WriteFloat("MirrorAxisY", axis.y)
+    config.WriteFloat("MirrorAxisZ", axis.z)
+    config.WriteFloat("MirrorPosX", pos.x)
+    config.WriteFloat("MirrorPosY", pos.y)
+    config.WriteFloat("MirrorPosZ", pos.z)
+    
+    cad.StartHistory()
+
+    mat = geom.Matrix()
+    x, y = axis.ArbitraryAxes()
+    axis_mat = geom.Matrix(pos, x, y)
+    inv_mat = axis_mat.Inverse()
+    mat.Multiply(inv_mat) # transform so axis goes to z axis
+    mat.Scale3(1.0, 1.0, -1.0) # mirror in z axis
+    mat.Multiply(axis_mat) # transform back to where it was
+    for object in selected_items:
+        if copy:
+            if object.CanBeCopied():
+                object = object.MakeACopy()
+                object.Transform(mat)
+                cad.AddUndoably(object)
+        else:
             cad.TransformUndoably(object, mat)
     
     cad.EndHistory()    

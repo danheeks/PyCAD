@@ -31,7 +31,6 @@ enum{
 	TextType,
 	DimensionType,
 	RulerType,
-    EllipseType,
 	GroupType,
 	AngularDimensionType,
 	GearType,
@@ -98,8 +97,11 @@ public:
 	virtual void SetStartPoint(const Point3d &pos){}
 	virtual bool GetEndPoint(Point3d &pos){ return false; }
 	virtual bool GetCentrePoint(Point3d &pos){ return false; }
+	virtual bool GetAxis(Point3d &){ return false; }
+	virtual bool GetRadius(double &){ return false; }
 	virtual int GetCentrePoints(Point3d &pos, Point3d &pos2){ if (GetCentrePoint(pos))return 1; return 0; }
 	virtual bool GetMidPoint(Point3d &pos){ return false; }
+	virtual void Reverse(){}
 	virtual bool GetScaleAboutMatrix(Matrix &m);
 	virtual void GetProperties(std::list<Property *> *list);
 	virtual void GetOnEdit(bool(**callback)(HeeksObj*)){ *callback = NULL; } // returns a function for doing edit with a dialog
@@ -136,7 +138,7 @@ public:
 	virtual void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const{};
 	virtual void WriteXML(TiXmlNode *root);
 	virtual const wchar_t* GetXMLTypeString(){ return GetTypeString(); } // default is to use the GetTypeString, but Coordinate System's type doesn't has a space in it in the XML.
-	virtual bool OnlyAddChildrenOnReadXML(){ return false; }
+	virtual bool AddOnlyChildrenOnReadXML(){ return false; }
 	virtual void WriteToXML(TiXmlElement *element);
 	virtual void ReadFromXML(TiXmlElement* element);
 	void SetID(int id);

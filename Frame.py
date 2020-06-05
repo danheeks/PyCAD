@@ -184,10 +184,8 @@ class Frame(wx.Frame):
         self.AddMenuItem('Move Rotate', self.OnMoveRotate, None, 'mover')
         self.AddMenuItem('Copy Rotate', self.OnCopyRotate, None, 'copyr')
         self.AddSeparator()
-        self.AddMenuItem('Move Mirror', self.OnMoveMirror, None, 'movem')
-        self.AddMenuItem('Copy Mirror', self.OnCopyMirror, None, 'copym')
-        self.AddSeparator()
-        self.AddMenuItem('Move Scale', self.OnMoveScale, None, 'moves')
+        self.AddMenuItem('Mirror', self.OnMirror, None, 'copym')
+        self.AddMenuItem('Scale', self.OnMoveScale, None, 'moves')
         self.EndMenu()
 
         self.window_menu = self.AddMenu('&Window')
@@ -698,11 +696,13 @@ class Frame(wx.Frame):
         from Transform import Rotate
         Rotate(True)
 
-    def OnMoveMirror(self, e):
-        pass
+    def OnMirror(self, e):
+        from Transform import Mirror
+        Mirror()
         
     def OnCopyMirror(self, e):
-        pass
+        from Transform import Mirror
+        Mirror(True)
         
     def OnMoveScale(self, e):
         pass

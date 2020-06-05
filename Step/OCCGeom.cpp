@@ -1266,7 +1266,27 @@ Point3d G2P(const gp_Pnt& p)
 	return Point3d(p.X(), p.Y(), p.Z());
 }
 
+Point3d V2P(const gp_Vec& p)
+{
+	return Point3d(p.X(), p.Y(), p.Z());
+}
+
+Point3d D2P(const gp_Dir& p)
+{
+	return Point3d(p.X(), p.Y(), p.Z());
+}
+
 gp_Pnt P2G(const Point3d& p)
 {
 	return gp_Pnt(p.x, p.y, p.z);
+}
+
+gp_Vec P2V(const Point3d& p)
+{
+	return gp_Vec(p.x, p.y, p.z);
+}
+
+gp_Dir P2D(const Point3d& p)
+{
+	return gp_Dir(p.x, p.y, p.z);
 }

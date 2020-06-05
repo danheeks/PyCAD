@@ -411,7 +411,7 @@ void CCadApp::OpenXMLFile(const wchar_t *filepath, HeeksObj* paste_into, HeeksOb
 		HeeksObj* object = ReadXMLElement(pElem);
 		if (object)
 		{
-			if (object->OnlyAddChildrenOnReadXML())
+			if (object->AddOnlyChildrenOnReadXML())
 			{
 				std::list<HeeksObj*> children = object->GetChildren();
 				for (std::list<HeeksObj*>::iterator It = children.begin(); It != children.end(); It++)
@@ -2477,6 +2477,11 @@ void CCadApp::ClearSelection(bool call_OnChanged)
 	m_marked_list->Clear(call_OnChanged);
 }
 
+void CCadApp::GetSelection(std::list<HeeksObj*> &objects)
+{
+	objects = m_marked_list->list();
+}
+
 bool CCadApp::ObjectMarked(HeeksObj* object)
 {
 	return m_marked_list->ObjectMarked(object);
@@ -2492,3 +2497,15 @@ void CCadApp::Unmark(HeeksObj* object)
 	m_marked_list->Remove(object, true);
 }
 
+void CCadApp::SketchSplit(HeeksObj* object, std::list<HeeksObj*> &new_separate_sketches)
+{
+	if (object->GetType() != SketchType)
+		return;
+
+	((CSketch*)object)->ExtractSeparateSketches(new_separate_sketches);
+}
+
+HeeksObj* CCadApp::CreateNewLine(const Point3d& s, const Point3d& e){ return new HLine(s, e, &current_color); }
+HeeksObj* CCadApp::CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c){ return new HArc(s, e, a, c, &current_color); }
+HeeksObj* CCadApp::CreateNewCircle(const Point3d& c, const Point3d& a, double r){ return new HCircle(c, a, r, &current_color); }
+HeeksObj* CCadApp::CreateNewPoint(const Point3d& p){ return new HPoint(p, &current_color); }

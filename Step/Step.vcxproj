@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CAD\EndedObject.cpp" />
     <ClCompile Include="..\CAD\HeeksColor.cpp" />
     <ClCompile Include="..\CAD\HeeksObj.cpp" />
     <ClCompile Include="..\CAD\IdNamedObjList.cpp" />
@@ -109,14 +110,18 @@
     <ClCompile Include="..\Geom\Matrix.cpp" />
     <ClCompile Include="..\Geom\Offset.cpp" />
     <ClCompile Include="Cone.cpp" />
+    <ClCompile Include="ConversionTools.cpp" />
     <ClCompile Include="CoordinateSystem.cpp" />
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Edge.cpp" />
     <ClCompile Include="Face.cpp" />
     <ClCompile Include="FaceTools.cpp" />
+    <ClCompile Include="HEllipse.cpp" />
+    <ClCompile Include="HSpline.cpp" />
     <ClCompile Include="Loop.cpp" />
     <ClCompile Include="OCCGeom.cpp" />
+    <ClCompile Include="OCCProperty.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="RuledSurface.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -151,9 +156,11 @@
     <ClInclude Include="..\..\PyCAD\Geom\clipper.hpp" />
     <ClInclude Include="..\..\PyCAD\Geom\Curve.h" />
     <ClInclude Include="..\..\PyCAD\Geom\Point.h" />
+    <ClInclude Include="..\CAD\EndedObject.h" />
     <ClInclude Include="..\CAD\IdNamedObjList.h" />
     <ClInclude Include="..\CAD\ObjList.h" />
     <ClInclude Include="Cone.h" />
+    <ClInclude Include="ConversionTools.h" />
     <ClInclude Include="CoordinateSystem.h" />
     <ClInclude Include="Cuboid.h" />
     <ClInclude Include="Cylinder.h" />
@@ -161,9 +168,12 @@
     <ClInclude Include="EdgeBlend.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="FaceTools.h" />
+    <ClInclude Include="HEllipse.h" />
+    <ClInclude Include="HSpline.h" />
     <ClInclude Include="Loop.h" />
     <ClInclude Include="NurbSurfaceParams.h" />
     <ClInclude Include="OCCGeom.h" />
+    <ClInclude Include="OCCProperty.h" />
     <ClInclude Include="RuledSurface.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shape.h" />

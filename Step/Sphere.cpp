@@ -6,6 +6,7 @@
 #include "Sphere.h"
 #include "Gripper.h"
 #include "MarkedList.h"
+#include "OCCProperty.h"
 
 CSphere::CSphere(const gp_Pnt& pos, double radius, const wchar_t* title, const HeeksColor& col, float opacity):CSolid(BRepPrimAPI_MakeSphere(pos, radius), title, col, opacity), m_pos(pos), m_radius(radius)
 {
@@ -57,10 +58,8 @@ std::wstring CSphere::StretchedName(){ return L"Ellipsoid";}
 
 void CSphere::GetProperties(std::list<Property *> *list)
 {
-#if 0
-	list->push_back(PropertyPnt(this, L"centre", &m_pos));
+	list->push_back(PropertyGp<gp_Pnt>(this, L"centre", &m_pos));
 	list->push_back(new PropertyLength(this, L"radius", &m_radius));
-#endif
 
 	CSolid::GetProperties(list);
 }

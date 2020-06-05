@@ -37,6 +37,7 @@
 #include "Cylinder.h"
 #include "Cone.h"
 #include "App.h"
+#include "RuledSurface.h"
 
 std::wstring step_dir;
 
@@ -95,7 +96,12 @@ void SetFaceType(int type){ CFace::m_type = type; }
 void SetLoopType(int type){ CLoop::m_type = type; }
 void SetSolidType(int type){ CSolid::m_type = type; }
 void SetWireType(int type){ CWire::m_type = type; }
-
+int GetVertexType(){ return HVertex::m_type; }
+int GetEdgeType(){ return CEdge::m_type; }
+int GetFaceType(){ return CFace::m_type; }
+int GetLoopType(){ return CLoop::m_type; }
+int GetSolidType(){ return CSolid::m_type; }
+int GetWireType(){ return CWire::m_type; }
 
 	BOOST_PYTHON_MODULE(step) {
 		
@@ -119,7 +125,18 @@ void SetWireType(int type){ CWire::m_type = type; }
 		boost::python::def("SetLoopType", SetLoopType);
 		boost::python::def("SetSolidType", SetSolidType);
 		boost::python::def("SetWireType", SetWireType);
+
+		boost::python::def("GetVertexType", GetVertexType);
+		boost::python::def("GetEdgeType", GetEdgeType);
+		boost::python::def("GetFaceType", GetFaceType);
+		boost::python::def("GetLoopType", GetLoopType);
+		boost::python::def("GetSolidType", GetSolidType);
+		boost::python::def("GetWireType", GetWireType);
+
+		
 		boost::python::def("WriteSolids", WriteSolids);
+		boost::python::def("CreateRuledSurface", PickCreateRuledSurface);
+		boost::python::def("CreateExtrusion", PickCreateExtrusion);
 		boost::python::def("ImportSTEPFile", ImportSTEPFile);
 		
 	}
