@@ -121,7 +121,6 @@
     <ClCompile Include="HSpline.cpp" />
     <ClCompile Include="Loop.cpp" />
     <ClCompile Include="OCCGeom.cpp" />
-    <ClCompile Include="OCCProperty.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="RuledSurface.cpp" />
     <ClCompile Include="Settings.cpp" />
