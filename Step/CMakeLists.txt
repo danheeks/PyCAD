@@ -81,10 +81,13 @@ set(STEP_SRC
     ../Geom/Finite.cpp
     ../Geom/Matrix.cpp
     ../Geom/Offset.cpp
+    ../CAD/DigitizedPoint.cpp
+    ../CAD/Drawing.cpp
     ../CAD/EndedObject.cpp
     ../CAD/HeeksColor.cpp
     ../CAD/HeeksObj.cpp
     ../CAD/IdNamedObjList.cpp
+    ../CAD/LeftAndRight.cpp
     ../CAD/ObjList.cpp
     ../CAD/Picking.cpp
     ../CAD/Property.cpp
@@ -99,6 +102,7 @@ set(STEP_SRC
     Cuboid.cpp
     Cylinder.cpp
     Edge.cpp
+    EllipseDrawing.cpp
     Face.cpp
     FaceTools.cpp
     HEllipse.cpp
