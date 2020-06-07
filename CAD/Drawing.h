@@ -8,6 +8,8 @@
 #include "LeftAndRight.h"
 #include "DigitizedPoint.h"
 
+#include <map>
+
 class HeeksObj;
 
 class ViewSpecific{
@@ -70,6 +72,7 @@ public:
 	void OnFrontRender();
 	void OnRender();
 	const wchar_t* GetTitle(){return L"Drawing";}
+	bool IsDrawing(){ return true; }
 
 	// Drawing's virtual functions
 	virtual void AddPoint();
@@ -84,7 +87,6 @@ public:
 	const DigitizedPoint& GetBeforeStartPos()const{return current_view_stuff->before_start_pos;}
 	const DigitizedPoint& GetBeforeBeforeStartPos()const{return current_view_stuff->before_before_start_pos;}
 	void SetStartPosUndoable(const DigitizedPoint& pos);
-	bool IsDrawing(CInputMode* i);
 
 	void set_start_pos_not_undoable(const DigitizedPoint& pos){current_view_stuff->before_before_start_pos = current_view_stuff->before_start_pos; current_view_stuff->before_start_pos = current_view_stuff->start_pos; current_view_stuff->start_pos = pos;}
 

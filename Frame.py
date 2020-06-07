@@ -160,6 +160,7 @@ class Frame(wx.Frame):
         self.AddMenuItem('Draw a sketch', self.OnLines, None, 'lines')
         self.AddMenuItem('Draw circles through 3 points', self.OnCircles3p, None, 'circ3p')
         self.AddMenuItem('Draw circles, centre and point', self.OnCircles2p, None, 'circ2p')
+        self.AddMenuItem('Draw circles, centre and radius', self.OnCircles1p, None, 'circpr')
         self.AddMenuItem('DrawEllipses', self.OnEllipse, None, 'circles')
         self.AddMenuItem('Draw Infinite Lines', self.OnILine, None, 'iline')
         self.AddMenuItem('Draw Points', self.OnPoints, None, 'point')

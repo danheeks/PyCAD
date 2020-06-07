@@ -1001,7 +1001,6 @@ bool CShape::ExportSolidsFile(const std::list<HeeksObj*>& objects, const wchar_t
 		char oldlocale[1000];
 		strcpy(oldlocale, setlocale(LC_NUMERIC, "C"));
 
-		Standard_CString aFileName = (Standard_CString) (Ttc(filepath));
 		STEPControl_Writer writer;
 		// add all the solids
 		int i = 1;
@@ -1010,6 +1009,7 @@ bool CShape::ExportSolidsFile(const std::list<HeeksObj*>& objects, const wchar_t
 			HeeksObj* object = *It;
 			WriteShapeOrGroup(writer, object, index_map, i);
 		}
+		Standard_CString aFileName = (Standard_CString)(Ttc(filepath));
 		writer.Write(aFileName);
 
 		setlocale(LC_NUMERIC, oldlocale);

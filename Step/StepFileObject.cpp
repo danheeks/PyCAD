@@ -129,6 +129,7 @@ void WriteSolids()
 		std::wstring temp_file = GetTempFolder() + TEMP_FILE_NAME;
 		std::map<int, CShapeData> index_map;
 		std::list<HeeksObj*> objects = theApp->GetChildren();
+		wprintf(temp_file.c_str());
 		CShape::ExportSolidsFile(objects, temp_file.c_str(), &index_map);
 
 		TiXmlElement *step_file_element = new TiXmlElement("STEP_file");

@@ -96,19 +96,6 @@ int LineArcDrawing::number_of_steps()
 			break;
 		}
 		break;
-	case SplineDrawingMode:
-		switch(spline_mode)
-		{
-		case CubicSplineMode:
-			return 4;
-		case QuarticSplineMode:
-			return 3;
-		case RationalSplineMode:
-			return 20;
-		}
-		break;
-	case EllipseDrawingMode:
-		return 3;
 	default:
 		break;
 	}
@@ -122,21 +109,11 @@ int LineArcDrawing::step_to_go_to_after_last_step()
 	case LineDrawingMode:
 	case ArcDrawingMode:
 		return 1;
-	case SplineDrawingMode:
-		return 3;
 	case ILineDrawingMode:
 	case CircleDrawingMode:
-	case EllipseDrawingMode:
 	default:
 		return 0;
 	}
-}
-
-bool LineArcDrawing::is_a_draw_level(int level)
-{
-	if(drawing_mode == SplineDrawingMode && spline_mode == RationalSplineMode)
-		return level>=3;
-	return Drawing::is_a_draw_level(level);
 }
 
 bool LineArcDrawing::is_an_add_level(int level)
@@ -154,19 +131,6 @@ bool LineArcDrawing::is_an_add_level(int level)
 			break;
 		}
 		break;
-	case EllipseDrawingMode:
-		return level == 2;
-	case SplineDrawingMode:
-		switch(spline_mode)
-		{
-		case CubicSplineMode:
-			return level == 3;
-		case QuarticSplineMode:
-			return level == 2;
-		case RationalSplineMode:
-			return level == 20;
-		}
-		break;
 	default:
 		break;
 	}
@@ -181,10 +145,6 @@ void LineArcDrawing::AddPoint()
 		{
 		Drawing::AddPoint();
 		}
-		break;
-
-	case EllipseDrawingMode:
-		Drawing::AddPoint();
 		break;
 
 	case LineDrawingMode:
@@ -252,7 +212,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 				ClearObjectsMade();
 			}
 			Point3d p1, p2;
-			DigitizedPoint::GetLinePoints(GetStartPos(), end, p1, p2);
+			DigitizeMode::GetLinePoints(GetStartPos(), end, p1, p2);
 			if (p1 == p2)return false;
 			end.m_point = p2;
 			if(TempObject() == NULL){
@@ -275,7 +235,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			Point3d centre;
 			Point3d axis;
 			Point3d p1, p2;
-			bool arc_found = DigitizedPoint::GetArcPoints(GetStartPos(), m_previous_direction_set ? (&m_previous_direction) : NULL, end, p1, p2, centre, axis);
+			bool arc_found = DigitizeMode::GetArcPoints(GetStartPos(), m_previous_direction_set ? (&m_previous_direction) : NULL, end, p1, p2, centre, axis);
 			if (p1 == p2)return false;
 
 			if(arc_found)
@@ -317,7 +277,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 				ClearObjectsMade();
 			}
 			Point3d p1, p2;
-			DigitizedPoint::GetLinePoints(GetStartPos(), end, p1, p2);
+			DigitizeMode::GetLinePoints(GetStartPos(), end, p1, p2);
 			if (p1 == p2)return false;
 			if(TempObject() == NULL){
 				AddToTempObjects(new HILine(p1, p2, &theApp->current_color));
@@ -393,7 +353,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 				{
 					Point3d p1, p2, centre;
 					Point3d axis;
-					DigitizedPoint::GetArcPoints(GetStartPos(), NULL, end, p1, p2, centre, axis);
+					DigitizeMode::GetArcPoints(GetStartPos(), NULL, end, p1, p2, centre, axis);
 					radius_for_circle = p1.Dist(p2);
 
 					if(TempObject() == NULL){
@@ -409,7 +369,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			case ThreePointsCircleMode:
 				{
 					Circle c;
-					if(DigitizedPoint::GetTangentCircle(GetBeforeStartPos(), GetStartPos(), end, c))
+					if (DigitizeMode::GetTangentCircle(GetBeforeStartPos(), GetStartPos(), end, c))
 					{
 						if(TempObject() == NULL){
 							AddToTempObjects(new HCircle(c.pc, Point3d(0,0,1), c.radius, &theApp->current_color));
@@ -423,7 +383,7 @@ bool LineArcDrawing::calculate_item(DigitizedPoint &end){
 			case TwoPointsCircleMode:
 				{
 					Circle c;
-					if(DigitizedPoint::GetCircleBetween(GetStartPos(), end, c))
+					if (DigitizeMode::GetCircleBetween(GetStartPos(), end, c))
 					{
 						if(TempObject() == NULL){
 							AddToTempObjects(new HCircle(c.pc, Point3d(0, 0, 1), c.radius, &theApp->current_color));
@@ -508,57 +468,6 @@ const wchar_t* LineArcDrawing::GetTitle()
 		str_for_GetTitle.append(std::wstring(L" : "));
 		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on first point"));
 		else str_for_GetTitle.append(std::wstring(L"click on second point"));
-		return str_for_GetTitle.c_str();
-
-	case EllipseDrawingMode:
-		str_for_GetTitle = std::wstring(L"Ellipse drawing mode");
-		str_for_GetTitle.append(std::wstring(L" : "));
-
-		str_for_GetTitle.append(std::wstring(L"center and 2 points mode"));
-		str_for_GetTitle.append(std::wstring(L"\n  "));
-		if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on center point"));
-		else if(GetDrawStep() == 1) 
-		{
-			str_for_GetTitle.append(std::wstring(L"click on point on ellipse"));
-			str_for_GetTitle.append(std::wstring(L"\n  "));
-			str_for_GetTitle.append(std::wstring(L"(colinear or orthogonal to axis)"));
-		}
-		else str_for_GetTitle.append(std::wstring(L"click on another point on ellipse"));
-		
-		return str_for_GetTitle.c_str();
-
-	case SplineDrawingMode:
-		
-		str_for_GetTitle = std::wstring(L"Spline drawing mode");
-		str_for_GetTitle.append(std::wstring(L" : "));
-
-		switch(spline_mode){
-			case CubicSplineMode:
-				str_for_GetTitle.append(std::wstring(L"cubic spline mode"));
-				str_for_GetTitle.append(std::wstring(L"\n  "));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
-				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(L"click on end point"));
-				else if (GetDrawStep() == 2) str_for_GetTitle.append(std::wstring(L"click on first control point"));
-				else str_for_GetTitle.append(std::wstring(L"click on second control point"));
-				break;
-			case QuarticSplineMode:
-				str_for_GetTitle.append(std::wstring(L"quartic spline mode"));
-				str_for_GetTitle.append(std::wstring(L"\n  "));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
-				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(L"click on end point"));
-				else str_for_GetTitle.append(std::wstring(L"click on control point"));
-				break;
-			case RationalSplineMode:
-				str_for_GetTitle.append(std::wstring(L"rational spline mode"));
-				str_for_GetTitle.append(std::wstring(L"\n  "));
-				if (GetDrawStep() == 0)str_for_GetTitle.append(std::wstring(L"click on start point"));
-				else if (GetDrawStep() == 1) str_for_GetTitle.append(std::wstring(L"click on first control point"));
-				else if (GetDrawStep() == 2) str_for_GetTitle.append(std::wstring(L"click on second control point"));
-				else str_for_GetTitle.append(std::wstring(L"click on next control point or endpoint"));
-	
-				break;
-		}
-
 		return str_for_GetTitle.c_str();
 
 	case CircleDrawingMode:
@@ -736,13 +645,4 @@ void LineArcDrawing::OnModeChange(void){
 
 	ClearPrevObject();
 	m_previous_direction_set = false;
-}
-
-void LineArcDrawing::set_draw_step_not_undoable(int s)
-{
-	Drawing::set_draw_step_not_undoable(s);
-	if(drawing_mode == SplineDrawingMode && spline_mode == RationalSplineMode)
-	{
-		spline_points.push_back(GetStartPos());
-	}
 }

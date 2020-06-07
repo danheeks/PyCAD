@@ -11,8 +11,6 @@ enum EnumDrawingMode{
 	ArcDrawingMode,
 	ILineDrawingMode,
 	CircleDrawingMode,
-	EllipseDrawingMode,
-	SplineDrawingMode
 };
 
 enum EnumCircleDrawingMode{
@@ -22,16 +20,8 @@ enum EnumCircleDrawingMode{
 	CentreAndRadiusCircleMode // only one click needed ( edit radius in the properties before clicking)
 };
 
-enum EnumSplineDrawingMode{
-	CubicSplineMode,
-	QuarticSplineMode,
-	RationalSplineMode
-};
-
-
 class LineArcDrawing: public Drawing{
 private:
-	std::list<DigitizedPoint> spline_points;
 	bool m_A_down; // is key A pressed
 	HeeksObj* m_container;
 	bool m_add_to_sketch;
@@ -42,7 +32,6 @@ private:
 	int number_of_steps();
 	int step_to_go_to_after_last_step();
 	bool is_an_add_level(int level);
-	bool is_a_draw_level(int level);
 	HeeksObj* GetOwnerForDrawingObjects();
 	void AddPoint();
 
@@ -53,7 +42,6 @@ public:
 	std::list<EnumDrawingMode> m_save_drawing_mode;
 	double radius_for_circle;
 	EnumCircleDrawingMode circle_mode;
-	EnumSplineDrawingMode spline_mode;
 	bool m_previous_direction_set;
 	Point3d m_previous_direction;
 
@@ -67,9 +55,6 @@ public:
 	void set_cursor(void);
 	void GetProperties(std::list<Property *> *list);
 	void OnModeChange(void);
-
-	// Drawing's virtual functions
-	void set_draw_step_not_undoable(int s);
 
 	void EndDrawing(); // won't stay here;  just a test
 };

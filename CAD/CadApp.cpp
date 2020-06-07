@@ -1130,7 +1130,8 @@ void CCadApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *fi
 
 	PythonOnEndXmlWrite();
 
-	doc.SaveFile(Ttc(filepath));
+	if(!doc.SaveFile(Ttc(filepath)))
+		this->DoMessageBox((std::wstring(L"failed to open file for saving: ") + filepath).c_str());
 }
 
 bool CCadApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* objects)
@@ -1761,6 +1762,14 @@ Matrix CCadApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 	if (m_current_coordinate_system)mat = m_current_coordinate_system->GetMatrix();
 	return mat;
 }
+
+void CCadApp::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing)
+{
+	m_current_viewport->DrawObjectsOnFront(list, do_depth_testing);
+}
+
+CInputMode* CCadApp::GetDigitizing(){ return m_digitizing; }
+
 
 extern void PythonOnMessageBox(const wchar_t* message);
 
@@ -2509,3 +2518,37 @@ HeeksObj* CCadApp::CreateNewLine(const Point3d& s, const Point3d& e){ return new
 HeeksObj* CCadApp::CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c){ return new HArc(s, e, a, c, &current_color); }
 HeeksObj* CCadApp::CreateNewCircle(const Point3d& c, const Point3d& a, double r){ return new HCircle(c, a, r, &current_color); }
 HeeksObj* CCadApp::CreateNewPoint(const Point3d& p){ return new HPoint(p, &current_color); }
+
+void CCadApp::DrawFront()
+{
+	m_current_viewport->DrawFront();
+}
+
+void CCadApp::EndDrawFront()
+{
+	m_current_viewport->EndDrawFront();
+}
+
+static DigitizedPoint digitized_point_for_return;
+
+DigitizedPoint& CCadApp::Digitize(const IPoint& p)
+{
+	digitized_point_for_return = m_digitizing->digitize(p);
+	return digitized_point_for_return;
+}
+
+const DigitizedPoint& CCadApp::GetLastDigitizePoint()
+{
+	digitized_point_for_return = m_digitizing->digitized_point;
+	return digitized_point_for_return;
+}
+
+void CCadApp::SetLastDigitizedPoint(const DigitizedPoint& p)
+{
+	m_digitizing->digitized_point = p;
+}
+
+void CCadApp::UseDigitiedPointAsReference()
+{
+	m_digitizing->reference_point = m_digitizing->digitized_point;
+}

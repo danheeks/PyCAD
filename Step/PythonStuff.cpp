@@ -100,6 +100,44 @@ int GetLoopType(){ return CLoop::m_type; }
 int GetSolidType(){ return CSolid::m_type; }
 int GetWireType(){ return CWire::m_type; }
 
+void CreateSweepPy(boost::python::list &list, HeeksObj* profile, const HeeksColor& color)
+{
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	CreateSweep(o_list, profile, true, color);
+}
+
+void CutShapes()
+{
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+	CShape::CutShapes(objects);
+}
+
+void FuseShapes()
+{
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+	CShape::FuseShapes(objects);
+}
+
+void CommonShapes()
+{
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+	CShape::CommonShapes(objects);
+}
+
+void FilletOrChamferEdges(double rad, bool chamfer_not_fillet)
+{
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+	CShape::FilletOrChamferEdges(objects, rad, chamfer_not_fillet);
+}
+
 	BOOST_PYTHON_MODULE(step) {
 		
 		boost::python::def("SetResPath", SetResPath);
@@ -122,18 +160,19 @@ int GetWireType(){ return CWire::m_type; }
 		boost::python::def("SetLoopType", SetLoopType);
 		boost::python::def("SetSolidType", SetSolidType);
 		boost::python::def("SetWireType", SetWireType);
-
 		boost::python::def("GetVertexType", GetVertexType);
 		boost::python::def("GetEdgeType", GetEdgeType);
 		boost::python::def("GetFaceType", GetFaceType);
 		boost::python::def("GetLoopType", GetLoopType);
 		boost::python::def("GetSolidType", GetSolidType);
 		boost::python::def("GetWireType", GetWireType);
-
-		
 		boost::python::def("WriteSolids", WriteSolids);
 		boost::python::def("CreateRuledSurface", PickCreateRuledSurface);
-		boost::python::def("CreateExtrusion", PickCreateExtrusion);
+		boost::python::def("CreateExtrusion", CreateExtrusionOrRevolution);
+		boost::python::def("CreateSweep", CreateSweepPy);
 		boost::python::def("ImportSTEPFile", ImportSTEPFile);
-		
+		boost::python::def("CutShapes", CutShapes);
+		boost::python::def("FuseShapes", FuseShapes);
+		boost::python::def("CommonShapes", CommonShapes);
+		boost::python::def("FilletOrChamferEdges", FilletOrChamferEdges);
 	}

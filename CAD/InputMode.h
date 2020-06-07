@@ -20,6 +20,7 @@ public:
 	virtual ~CInputMode() {}
 
 	virtual const wchar_t* GetTitle() = 0;
+	virtual bool IsDrawing(){ return false; }
 	virtual int GetType(){ return 0; }
 	virtual bool TitleHighlighted(){return true;}
 	virtual const wchar_t* GetHelpText(){ return NULL; }

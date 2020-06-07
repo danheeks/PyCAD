@@ -722,12 +722,6 @@ void SetCircle1pDrawing()
 	theApp->SetInputMode(&line_strip);
 }
 
-void SetEllipseDrawing()
-{
-	line_strip.drawing_mode = EllipseDrawingMode;
-	theApp->SetInputMode(&line_strip);
-}
-
 void SetILineDrawing()
 {
 	line_strip.drawing_mode = ILineDrawingMode;
@@ -2388,7 +2382,6 @@ Gripper* GetDragGripper(){ return &drag_object_gripper; }
 		boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
 		boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
 		boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
-		boost::python::def("SetEllipseDrawing", SetEllipseDrawing);
 		boost::python::def("SetILineDrawing", SetILineDrawing);
 		boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());

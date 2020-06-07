@@ -247,6 +247,8 @@ public:
 	void WereAdded(const std::list<HeeksObj*>& list);
 	void WereRemoved(const std::list<HeeksObj*>& list);
 	virtual Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
+	void DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing);
+	CInputMode* GetDigitizing();
 	void GetOptions(std::list<Property *> *list);
 	void DeleteMarkedItems();
 	virtual void glColorEnsuringContrast(const HeeksColor &c);
@@ -300,6 +302,7 @@ public:
 	void OnInputModeTitleChanged();
 	void OnInputModeHelpTextChanged();
 	void RefreshInputCanvas();
+	CInputMode* GetInputMode(){ return input_mode_object; }
 	void PlotSetColor(const HeeksColor &c);
 	void PlotLine(const double* s, const double* e);
 	void PlotArc(const double* s, const double* e, const double* c);
@@ -325,8 +328,10 @@ public:
 	void LinkXMLEndChild(TiXmlNode* root, TiXmlElement* pElem);
 	TiXmlElement* FirstNamedXMLChildElement(TiXmlElement* pElem, const char* name);
 	void RemoveXMLChild(TiXmlNode* pElem, TiXmlElement* child);
-	bool Digitize(const IPoint &point, double* pos);
-	bool GetLastDigitizePosition(double *pos);
+	DigitizedPoint& Digitize(const IPoint&);
+	const DigitizedPoint& GetLastDigitizePoint();
+	void SetLastDigitizedPoint(const DigitizedPoint&);
+	void UseDigitiedPointAsReference();
 	void ObjectAreaString(HeeksObj* object, std::wstring &s);
 	void SetViewUnits(double units, bool write_to_config);
 	virtual void ClearSelection(bool call_OnChanged);
@@ -344,6 +349,9 @@ public:
 	HeeksObj* CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c);
 	HeeksObj* CreateNewCircle(const Point3d& c, const Point3d& a, double r);
 	HeeksObj* CreateNewPoint(const Point3d& p);
+	const HeeksColor& GetCurrentColor(){ return current_color; }
+	void DrawFront();
+	void EndDrawFront();
 };
 
 extern CCadApp* theApp;

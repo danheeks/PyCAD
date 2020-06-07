@@ -7,6 +7,8 @@ from HeeksConfig import HeeksConfig
 import ContextTool
 import ToolBarTool
 import SelectMode
+from HDialog import HDialog
+from HDialog import control_border
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -345,6 +347,36 @@ class App(wx.App):
         properties.append(PyProperty("End Beyond Full Profile", 'end_beyond_full_profile', self))
         
         return properties
+        
+    def CheckForNumberOrMore(self, min_num, types, msg, caption):
+        num_found = 0
+        for object in cad.GetSelectedObjects():
+            for type in types:
+                if object.GetType() == type:
+                    num_found += 1
+                    break
+                
+        if num_found < min_num:
+            wx.MessageBox(msg, caption)
+            return False
+        return True
+
+    def InputLength(self, prompt, name, value):
+        dlg = HDialog('Input')
+        sizerMain = wx.BoxSizer(wx.VERTICAL)
+        static_label = wx.StaticText(dlg, label = prompt)
+        sizerMain.Add( static_label, 0, wx.ALL, wx.ALIGN_LEFT, control_border )
+        value_control = LengthCtrl(dlg)
+        dlg.AddLabelAndControl( sizerMain, name, value_control )
+        dlg.MakeOkAndCancel( wx.HORIZONTAL ).AddToSizer( sizerMain )
+        dlg.SetSizer( sizerMain )
+        sizerMain.SetSizeHints(dlg)
+        sizerMain.Fit(dlg)
+        value_control.SetFocus()
+        if dlg.ShowModal() == wx.ID_OK:
+            value = value_control.GetValue()
+            return True
+        return False
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

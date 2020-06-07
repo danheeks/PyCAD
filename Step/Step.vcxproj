@@ -85,10 +85,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CAD\DigitizedPoint.cpp" />
+    <ClCompile Include="..\CAD\Drawing.cpp" />
     <ClCompile Include="..\CAD\EndedObject.cpp" />
     <ClCompile Include="..\CAD\HeeksColor.cpp" />
     <ClCompile Include="..\CAD\HeeksObj.cpp" />
     <ClCompile Include="..\CAD\IdNamedObjList.cpp" />
+    <ClCompile Include="..\CAD\LeftAndRight.cpp" />
     <ClCompile Include="..\CAD\ObjList.cpp" />
     <ClCompile Include="..\CAD\Picking.cpp" />
     <ClCompile Include="..\CAD\Property.cpp" />
@@ -115,6 +118,7 @@
     <ClCompile Include="Cuboid.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Edge.cpp" />
+    <ClCompile Include="EllipseDrawing.cpp" />
     <ClCompile Include="Face.cpp" />
     <ClCompile Include="FaceTools.cpp" />
     <ClCompile Include="HEllipse.cpp" />
@@ -155,8 +159,11 @@
     <ClInclude Include="..\..\PyCAD\Geom\clipper.hpp" />
     <ClInclude Include="..\..\PyCAD\Geom\Curve.h" />
     <ClInclude Include="..\..\PyCAD\Geom\Point.h" />
+    <ClInclude Include="..\CAD\DigitizedPoint.h" />
+    <ClInclude Include="..\CAD\Drawing.h" />
     <ClInclude Include="..\CAD\EndedObject.h" />
     <ClInclude Include="..\CAD\IdNamedObjList.h" />
+    <ClInclude Include="..\CAD\LeftAndRight.h" />
     <ClInclude Include="..\CAD\ObjList.h" />
     <ClInclude Include="Cone.h" />
     <ClInclude Include="ConversionTools.h" />
@@ -165,6 +172,7 @@
     <ClInclude Include="Cylinder.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="EdgeBlend.h" />
+    <ClInclude Include="EllipseDrawing.h" />
     <ClInclude Include="Face.h" />
     <ClInclude Include="FaceTools.h" />
     <ClInclude Include="HEllipse.h" />
