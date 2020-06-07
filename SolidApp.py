@@ -240,3 +240,9 @@ class SolidApp(App):
         frame.AddMenuItem('Fillet', self.OnFillet, None, 'fillet')
         frame.AddMenuItem('Chamfer', self.OnChamfer, None, 'chamfer')
         frame.EndMenu()
+
+        frame.AddMenuItem('Draw Ellipses', self.OnEllipse, None, 'circles', menu = frame.menuBar.GetMenu(frame.menuBar.FindMenu('&Geometry')))
+        
+    def OnEllipse(self, e):
+        step.SetEllipseDrawing()
+

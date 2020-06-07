@@ -35,6 +35,7 @@
 #include "Cone.h"
 #include "App.h"
 #include "RuledSurface.h"
+#include "EllipseDrawing.h"
 
 std::wstring step_dir;
 
@@ -138,6 +139,12 @@ void FilletOrChamferEdges(double rad, bool chamfer_not_fillet)
 	CShape::FilletOrChamferEdges(objects, rad, chamfer_not_fillet);
 }
 
+void SetEllipseDrawing()
+{
+	ellipse_drawing.drawing_mode = EllipseDrawingMode;
+	theApp->SetInputMode(&ellipse_drawing);
+}
+
 	BOOST_PYTHON_MODULE(step) {
 		
 		boost::python::def("SetResPath", SetResPath);
@@ -175,4 +182,6 @@ void FilletOrChamferEdges(double rad, bool chamfer_not_fillet)
 		boost::python::def("FuseShapes", FuseShapes);
 		boost::python::def("CommonShapes", CommonShapes);
 		boost::python::def("FilletOrChamferEdges", FilletOrChamferEdges);
+		boost::python::def("SetEllipseDrawing", SetEllipseDrawing);
 	}
+	

@@ -53,6 +53,7 @@ public:
 	virtual void OnInputModeTitleChanged() = 0;
 	virtual void RefreshInputCanvas() = 0;
 	virtual CInputMode* GetInputMode() = 0;
+	virtual void SetInputMode(CInputMode*) = 0;
 	virtual void RestoreInputMode() = 0;
 	virtual DigitizedPoint& Digitize(const IPoint&) = 0;
 	virtual const DigitizedPoint& GetLastDigitizePoint() = 0;
