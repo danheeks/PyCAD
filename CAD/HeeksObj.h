@@ -13,6 +13,9 @@ class Property;
 class TiXmlNode;
 class TiXmlElement;
 class GripData;
+class Matrix;
+class Point3d;
+class Line;
 
 // NOTE: If adding to this enumeration, please also add the verbose description to the HeeksCADType() routine
 enum{

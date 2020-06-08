@@ -8,6 +8,7 @@ class TiXmlElement;
 class TiXmlNode;
 class DigitizedPoint;
 class CInputMode;
+class IPoint;
 
 enum FileOpenOrImportType
 {
@@ -84,4 +85,6 @@ public:
 	virtual HeeksObj* CreateNewCircle(const Point3d& c, const Point3d& a, double r) = 0;
 	virtual HeeksObj* CreateNewPoint(const Point3d& p) = 0;
 	virtual const HeeksColor& GetCurrentColor() = 0;
+	virtual void RegisterOnGLCommands(void(*callbackfunc)()) = 0;
+
 };
