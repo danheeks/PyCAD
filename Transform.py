@@ -702,4 +702,48 @@ def Mirror():
         else:
             cad.TransformUndoably(object, mat)
     
-    cad.EndHistory()    
+    cad.EndHistory()   
+    
+def PickOrigin(prompt):
+    wx.GetApp().PickObjects(prompt)
+    origin = None
+    for object in cad.GetSelectedObjects():
+        if object.GetType() == cad.OBJECT_TYPE_COORD_SYS:
+            origin = object
+            break
+    return origin
+
+def OriTransform():
+    if cad.GetNumSelected() == 0:
+        wx.GetApp().PickObjects('Pick objects to transform')
+    
+    if cad.GetNumSelected() == 0:
+        return
+    
+    config = HeeksConfig()
+        
+    selected_items = cad.GetSelectedObjects()
+    
+    cad.ClearSelection(False)
+    
+    o1 = PickOrigin('Pick From Origin')
+    if o1 == None:
+        wx.MessageBox("You didn't pick an origin\nTransform Cancelled!")
+        return
+    
+    o2 = PickOrigin('Pick To Origin')
+    if o2 == None:
+        wx.MessageBox("You didn't pick an origin\nTransform Cancelled!")
+        return
+    
+    cad.StartHistory()
+
+    m1 = o1.GetOrigin()
+    mat = m1.Inverse()
+    m2 = o2.GetOrigin()
+    mat.Multiply(m2)
+    for object in selected_items:
+        cad.TransformUndoably(object, mat)
+    
+    cad.EndHistory()   
+   

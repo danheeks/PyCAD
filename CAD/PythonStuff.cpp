@@ -792,6 +792,13 @@ void ObjListAdd(ObjList& objlist, HeeksObj* object)
 	objlist.Add(object, NULL);
 }
 
+Matrix ObjGetOrigin(HeeksObj& object)
+{
+	Matrix m;
+	object.GetScaleAboutMatrix(m);
+	return m;
+}
+
 void ObjListReadFromXML(ObjList& objlist)
 {
 	TiXmlElement* save_element = theApp->m_cur_xml_element;
@@ -1850,6 +1857,7 @@ Gripper* GetDragGripper(){ return &drag_object_gripper; }
 			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("Clear", &ObjListClear)
 			.def("Add", &ObjListAdd)
+			.def("GetOrigin", &ObjGetOrigin)
 			.def("Transform", &HeeksObj::Transform)
 			;
 
@@ -2402,7 +2410,8 @@ Gripper* GetDragGripper(){ return &drag_object_gripper; }
 		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType; 
 		boost::python::scope().attr("OBJECT_TYPE_GRIPPER") = (int)GripperType;
 		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
-		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
+		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType; 
+		boost::python::scope().attr("OBJECT_TYPE_COORD_SYS") = (int)CoordinateSystemType;
 		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_LONG_STRING") = (int)LongStringPropertyType;

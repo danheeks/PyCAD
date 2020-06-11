@@ -186,6 +186,8 @@ class Frame(wx.Frame):
         self.AddSeparator()
         self.AddMenuItem('Mirror', self.OnMirror, None, 'copym')
         self.AddMenuItem('Scale', self.OnMoveScale, None, 'moves')
+        self.AddSeparator()
+        self.AddMenuItem('From One Origin To Another', self.OnOriginTransform, None, 'coords3')
         self.EndMenu()
 
         self.window_menu = self.AddMenu('&Window')
@@ -703,6 +705,10 @@ class Frame(wx.Frame):
         
     def OnMoveScale(self, e):
         pass
+    
+    def OnOriginTransform(self, e):
+        from Transform import OriTransform
+        OriTransform()
     
     def OnViewObjects(self, e):
         pane_info = self.aui_manager.GetPane(self.tree_canvas)
