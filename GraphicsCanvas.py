@@ -51,9 +51,10 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       tool.Run()
       
     def OnKeyDown(self, event):
-        if event.GetKeyCode() == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
+        k = event.GetKeyCode()
+        if k == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
             wx.GetApp().frame.ShowFullScreen(False)
-        elif event.GetKeyCode() == wx.WXK_RETURN and wx.GetApp().inMainLoop:
+        elif k == wx.WXK_RETURN and wx.GetApp().inMainLoop:
             wx.GetApp().ExitMainLoop()            
         else:
             key_code = Key.KeyCodeFromWx(event)
