@@ -14,23 +14,25 @@ from Printout import Printout
 from PointDrawing import point_drawing
 import geom
 import Gear
+from Ribbon import Ribbon
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
 
 class Frame(wx.Frame):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
+        self.ID_RECENT_FIRST = wx.ID_HIGHEST + 1
+        self.ID_NEXT_ID = self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES
         wx.Frame.__init__(self, parent, id, '', pos, size, style, name)
 
         config = HeeksConfig()
         self.aui_manager = None
-        self.ID_RECENT_FIRST = wx.ID_HIGHEST + 1
-        self.ID_RECENT_MENU = self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES
         self.windows_visible = {}
         
         self.SetIcon(wx.Icon(pycad_dir + "/heekscad.png", wx.BITMAP_TYPE_PNG))
         
-        self.MakeMenus()
+        self.bitmap_path = pycad_dir + '/bitmaps'
+        #self.MakeMenus()
         
         self.aui_manager = wx.aui.AuiManager()
         self.aui_manager.SetManagedWindow(self)
@@ -47,19 +49,23 @@ class Frame(wx.Frame):
         self.properties_canvas = ObjPropsCanvas(self)
         self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(2))
         
-        #self.options = Options(self)
-        #self.aui_manager.AddPane(self.options, wx.aui.AuiPaneInfo().Name('Options').Caption('Options').Left().BestSize(wx.Size(300,200)).Position(1))
+        self.ribbon = Ribbon(self)
+        self.aui_manager.AddPane(self.ribbon, wx.aui.AuiPaneInfo().ToolbarPane().Name('Ribbon').Top().Movable(False).Gripper(False))
         
         wx.GetApp().RegisterHideableWindow(self.tree_canvas)
         wx.GetApp().RegisterHideableWindow(self.input_mode_canvas)
         wx.GetApp().RegisterHideableWindow(self.properties_canvas)
-        #wx.GetApp().RegisterHideableWindow(self.options)
+        wx.GetApp().RegisterHideableWindow(self.ribbon)
         
         self.AddExtraWindows()
 
         perspective = config.Read('AuiPerspective', 'default')
-        if perspective != 'default':
-            self.aui_manager.LoadPerspective(perspective)
+        #if perspective != 'default':
+        #    self.aui_manager.LoadPerspective(perspective)
+        self.ribbon.SetHeightAndImages()
+        maximised = config.ReadBool('AuiMaximised', False)
+        if maximised:
+            self.Maximize()
         self.aui_manager.Update()
         
         self.Bind(wx.EVT_MENU_RANGE, self.OnOpenRecent, id=self.ID_RECENT_FIRST, id2=self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES)
@@ -99,7 +105,6 @@ class Frame(wx.Frame):
     def MakeMenus(self):
         self.menuBar = wx.MenuBar()
         self.current_menu_stack = []
-        self.bitmap_path = pycad_dir + '/bitmaps'
 
         self.AddMenu('&File')
         self.AddMenuItem('&New', self.OnNew, None, 'new')
