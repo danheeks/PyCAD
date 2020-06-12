@@ -16,8 +16,9 @@ class Ribbon(wx.ribbon.RibbonBar):
     def __init__(self, parent):
         self.next_id = parent.ID_NEXT_ID
         wx.ribbon.RibbonBar.__init__(self, parent, style = wx.ribbon.RIBBON_BAR_FLOW_HORIZONTAL | wx.ribbon.RIBBON_BAR_SHOW_PAGE_LABELS | wx.ribbon.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS | wx.ribbon.RIBBON_BAR_SHOW_HELP_BUTTON)
-        main_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
         
+        main_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
+
         panel = wx.ribbon.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
         toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.AddToolBarTool(toolbar,RibbonButtonData('New', self.Image('new'), 'New File', parent.OnNew))
@@ -36,6 +37,16 @@ class Ribbon(wx.ribbon.RibbonBar):
         self.AddToolBarTool(toolbar, RibbonButtonData("Print Preview", self.Image("ppreview"), "Show a preview of the print view", parent.OnPrintPreview))
 
         main_page.Realize()
+
+        
+        geom_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('lines'))
+        
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
+        toolbar = wx.ribbon.RibbonButtonBar(panel)
+        self.AddToolBarTool(toolbar,RibbonButtonData('Lines', self.Image('lines'), 'Draw a sketch with lines and arcs', parent.OnLines))
+        
+        geom_page.Realize()
+        
         self.Realize()
         
     def Image(self, name):
