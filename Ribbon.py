@@ -88,10 +88,10 @@ class Ribbon(wx.ribbon.RibbonBar):
         panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Snapping', self.Image('endof'))
         self.snapping_toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.endof_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Endof', self.Image('endof' if cad.GetDigitizeEnd() else 'endofgray'), 'Snap to end point', self.OnEndof))
-        self.inters_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to end point', self.OnInters))
-        self.centre_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Centre', self.Image('centre' if cad.GetDigitizeCentre() else 'centregray'), 'Snap to end point', self.OnCentre))
-        self.midpoint_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Midpoint', self.Image('midpoint' if cad.GetDigitizeMidpoint() else 'midpointgray'), 'Snap to end point', self.OnMidpoint))
-        self.grid_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Grid', self.Image('snap' if cad.GetDigitizeSnapToGrid() else 'snapgray'), 'Snap to end point', self.OnGrid))
+        self.inters_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to intersection', self.OnInters))
+        self.centre_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Centre', self.Image('centre' if cad.GetDigitizeCentre() else 'centregray'), 'Snap to centre', self.OnCentre))
+        self.midpoint_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Midpoint', self.Image('midpoint' if cad.GetDigitizeMidpoint() else 'midpointgray'), 'Snap to midpoint', self.OnMidpoint))
+        self.grid_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Grid', self.Image('snap' if cad.GetDigitizeSnapToGrid() else 'snapgray'), 'Snap to grid', self.OnSnap, None, self.OnSnapDropdown if cad.GetDigitizeSnapToGrid() else None))
 
         geom_page.Realize()
         
@@ -142,20 +142,27 @@ class Ribbon(wx.ribbon.RibbonBar):
     def OnInters(self, e):
         cad.SetDigitizeInters( not cad.GetDigitizeInters() )
         self.snapping_toolbar.DeleteButton(self.inters_button)
-        self.snapping_toolbar.InsertButton(1, self.inters_button, 'Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to end point')
+        self.snapping_toolbar.InsertButton(1, self.inters_button, 'Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to intersection')
     
     def OnCentre(self, e):
         cad.SetDigitizeCentre( not cad.GetDigitizeCentre() )
         self.snapping_toolbar.DeleteButton(self.centre_button)
-        self.snapping_toolbar.InsertButton(2, self.centre_button, 'Centre', self.Image('centre' if cad.GetDigitizeCentre() else 'centregray'), 'Snap to end point')
+        self.snapping_toolbar.InsertButton(2, self.centre_button, 'Centre', self.Image('centre' if cad.GetDigitizeCentre() else 'centregray'), 'Snap to centre')
     
     def OnMidpoint(self, e):
         cad.SetDigitizeMidpoint( not cad.GetDigitizeMidpoint() )
         self.snapping_toolbar.DeleteButton(self.midpoint_button)
-        self.snapping_toolbar.InsertButton(3, self.midpoint_button, 'Midpoint', self.Image('midpoint' if cad.GetDigitizeMidpoint() else 'midpointgray'), 'Snap to end point')
+        self.snapping_toolbar.InsertButton(3, self.midpoint_button, 'Midpoint', self.Image('midpoint' if cad.GetDigitizeMidpoint() else 'midpointgray'), 'Snap to mid point')
     
-    def OnGrid(self, e):
+    def OnSnap(self, e):
         cad.SetDigitizeSnapToGrid( not cad.GetDigitizeSnapToGrid() )
         self.snapping_toolbar.DeleteButton(self.grid_button)
-        self.snapping_toolbar.InsertButton(4, self.grid_button, 'Grid', self.Image('snap' if cad.GetDigitizeSnapToGrid() else 'snapgray'), 'Snap to end point')
+        if cad.GetDigitizeSnapToGrid():
+            self.snapping_toolbar.InsertHybridButton(4, self.grid_button, 'Grid', self.Image('snap'), 'Snap to Grid')
+        else:
+            self.snapping_toolbar.InsertButton(4, self.grid_button, 'Grid', self.Image('snapgray'), 'Snap to Grid')
 
+    def OnSnapDropdown(self, e):
+        if cad.GetDigitizeSnapToGrid():
+            cad.SetDigitizeGridSize(wx.GetApp().InputLength('Edit Snap Grid', 'Snap Grid', cad.GetDigitizeGridSize()))
+            
