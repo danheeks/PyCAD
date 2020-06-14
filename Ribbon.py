@@ -2,6 +2,8 @@ import wx
 import wx.ribbon as RB
 import cad
 
+control_border = 2
+
 class RibbonButtonData:
     def __init__(self, title, bitmap, caption, on_button, on_update_button = None, on_dropdown = None, key_flags = 0, key_code = 0):
         self.title = title
@@ -14,10 +16,10 @@ class RibbonButtonData:
 class Ribbon(RB.RibbonBar):
     def __init__(self, parent):
         self.next_id = parent.ID_NEXT_ID
-        RB.RibbonBar.__init__(self, parent, style = RB.RIBBON_BAR_FLOW_HORIZONTAL | RB.RIBBON_BAR_SHOW_PAGE_LABELS | RB.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS)
+        RB.RibbonBar.__init__(self, parent, style = RB.RIBBON_BAR_FLOW_HORIZONTAL | RB.RIBBON_BAR_SHOW_PAGE_LABELS | RB.RIBBON_BAR_SHOW_PAGE_ICONS | RB.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS | RB.RIBBON_BAR_SHOW_HELP_BUTTON)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
-        main_page = RB.RibbonPage(self, wx.ID_ANY, 'File')
+        main_page = RB.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
         main_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
@@ -50,7 +52,7 @@ class Ribbon(RB.RibbonBar):
         main_page.Realize()
 
         
-        geom_page = RB.RibbonPage(self, wx.ID_ANY, 'Geom')
+        geom_page = RB.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('lines'))
         geom_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
@@ -99,7 +101,7 @@ class Ribbon(RB.RibbonBar):
         geom_page.Realize()
         
 
-        view_page = RB.RibbonPage(self, wx.ID_ANY, 'View')
+        view_page = RB.RibbonPage(self, wx.ID_ANY, 'View', self.Image('mag'))
         view_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'Magnify', self.Image('mag'))
@@ -134,13 +136,62 @@ class Ribbon(RB.RibbonBar):
         self.windows_toolbar = RB.RibbonButtonBar(panel)
         objects_button_is_ticked = parent.aui_manager.GetPane(parent.tree_canvas).IsShown()
         properties_button_is_ticked = parent.aui_manager.GetPane(parent.properties_canvas).IsShown()
+        input_button_is_ticked = parent.aui_manager.GetPane(parent.input_mode_canvas).IsShown()
         self.objects_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Objects', self.Image('objects' if objects_button_is_ticked else 'objectsgray'), 'Objects', self.OnObjects))
         self.properties_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Properties', self.Image('properties' if objects_button_is_ticked else 'propertiesgray'), 'Properties', self.OnProperties))
+        self.input_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Input', self.Image('input' if input_button_is_ticked else 'inputgray'), 'Input', self.OnInput))
 
         view_page.Realize()
 
 
+        
+        options_page = RB.RibbonPage(self, wx.ID_ANY, 'Options', self.Image('mag'))
+        options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        
+        panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View', self.Image('mag'))
+
+        combo_rotate_mode = wx.ComboBox(panel, choices = ["Item 1", "Item 2"] )
+        combo_rotate_mode.Select(0)
+        hello_check = wx.CheckBox(panel, wx.ID_ANY, "hello")
+        sizer_panelsizer = wx.BoxSizer(wx.VERTICAL)
+        sizer_panelsizer.AddStretchSpacer(1)
+        self.AddLabelAndControl(panel, sizer_panelsizer, 'Rotate Mode', combo_rotate_mode)
+        sizer_panelsizer.Add(hello_check, 0, wx.ALL|wx.EXPAND, 2)
+        sizer_panelsizer.AddStretchSpacer(1)
+        panel.SetSizer(sizer_panelsizer)
+        
+        panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View Colors', self.Image('mag'))
+        self.view_colors_toolbar = RB.RibbonButtonBar(panel)
+        self.background_button1 = self.AddToolBarTool(self.view_colors_toolbar,RibbonButtonData('Background Color 1', self.ColorBitmap(0), 'Edit background color 1', self.OnBackgroundColor1))
+        self.background_button2 = self.AddToolBarTool(self.view_colors_toolbar,RibbonButtonData('Background Color 2', self.ColorBitmap(1), 'Edit background color 2', self.OnBackgroundColor2))
+        
+        options_page.Realize()
+        
+        
+        
+        
+        
+        
+                
         self.Realize()
+        
+    def ColorBitmap(self, index):
+        color = cad.GetBackgroundColor(index)
+        bitmap = wx.Bitmap(24, 24)
+        dc = wx.MemoryDC(bitmap)
+        dc.SetBrush(wx.Brush(wx.Colour(color.red, color.green, color.blue)))
+        dc.DrawRectangle(0,0,24,24)
+        del dc
+        return bitmap
+        
+    def AddLabelAndControl(self, panel, sizer, label, control):
+        sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
+        static_label = wx.StaticText(panel, wx.ID_ANY, label)
+        sizer_horizontal.Add( static_label, 0, wx.RIGHT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer_horizontal.Add( control, 1, wx.LEFT + wx.ALIGN_CENTER_VERTICAL, control_border )
+        sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, control_border )
+        return static_label
+        
         
     def Image(self, name):
         image = wx.Image(self.GetParent().BitmapPath(name))
@@ -226,15 +277,12 @@ class Ribbon(RB.RibbonBar):
             
         f.ribbon.SetObjectsButtonImage()
         
-    def SetObjectsButtonImage(self, turned_off = False):
+    def SetObjectsButtonImage(self):
         pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().tree_canvas)
         is_shown = pane_info.IsShown()
-        if turned_off:
-            is_shown = False
-            self.object_button_is_ticked = is_shown
-            self.windows_toolbar.DeleteButton(self.objects_button)
-            self.windows_toolbar.InsertButton(0, self.objects_button, 'Objects', self.Image('objects' if is_shown else 'objectsgray'), 'Objects')
-            self.windows_toolbar.Realize()
+        self.windows_toolbar.DeleteButton(self.objects_button)
+        self.windows_toolbar.InsertButton(0, self.objects_button, 'Objects', self.Image('objects' if is_shown else 'objectsgray'), 'Objects')
+        self.windows_toolbar.Realize()
             
     def OnProperties(self, e):
         f = self.GetParent()
@@ -248,12 +296,55 @@ class Ribbon(RB.RibbonBar):
             
         f.ribbon.SetPropertiesButtonImage()
         
-    def SetPropertiesButtonImage(self, turned_off = False):
+    def SetPropertiesButtonImage(self):
         pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().properties_canvas)
         is_shown = pane_info.IsShown()
-        if turned_off:
-            is_shown = False
-            self.properties_button_is_ticked = is_shown
-            self.windows_toolbar.DeleteButton(self.properties_button)
-            self.windows_toolbar.InsertButton(0, self.properties_button, 'Properties', self.Image('properties' if is_shown else 'propertiesgray'), 'Properties')
-            self.windows_toolbar.Realize()            
+        self.windows_toolbar.DeleteButton(self.properties_button)
+        self.windows_toolbar.InsertButton(1, self.properties_button, 'Properties', self.Image('properties' if is_shown else 'propertiesgray'), 'Properties')
+        self.windows_toolbar.Realize()            
+            
+    def OnInput(self, e):
+        f = self.GetParent()
+        pane_info = f.aui_manager.GetPane(f.input_mode_canvas)
+        is_shown = pane_info.IsShown()
+        
+        if pane_info.IsOk():
+            pane_info.Show(not is_shown)
+            is_shown = not is_shown
+            f.aui_manager.Update()
+            
+        f.ribbon.SetInputButtonImage()
+        
+    def SetInputButtonImage(self):
+        pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().input_mode_canvas)
+        is_shown = pane_info.IsShown()
+        self.windows_toolbar.DeleteButton(self.input_button)
+        self.windows_toolbar.InsertButton(2, self.input_button, 'Input', self.Image('input' if is_shown else 'inputgray'), 'Input')
+        self.windows_toolbar.Realize()                        
+        
+    def OnBackgroundColor1(self, e):
+        self.SelectNewColour(0)
+        self.view_colors_toolbar.DeleteButton(self.background_button1)
+        self.view_colors_toolbar.InsertButton(0, self.background_button1, 'Background Color 1', self.ColorBitmap(0), 'Edit background color 1')
+        self.view_colors_toolbar.Realize()                        
+    
+    def OnBackgroundColor2(self, e):
+        pass
+        
+    def SetBackgroundColor(self, index, wxcolor):
+        c = cad.Color()
+        c.red = wxcolor.red
+        c.green = wxcolor.green
+        c.blue = wxcolor.blue
+        cad.SetBackgroundColor(index, c)
+        self.GetParent().graphics_canvas.Refresh()
+
+    def SelectNewColour(self, index):
+        c = cad.GetBackgroundColor(index)
+        data = wx.ColourData()
+        data.SetColour(wx.Colour(c.red, c.green, c.blue))
+        dlg = wx.ColourDialog(self, data)
+        if dlg.ShowModal() == wx.ID_OK:
+            # Colour did change.
+            self.SetBackgroundColor(index, dlg.GetColourData().GetColour())
+            self.GetParent().graphics_canvas.Refresh()

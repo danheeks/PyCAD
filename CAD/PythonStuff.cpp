@@ -1811,6 +1811,20 @@ void SetDigitizeSnapToGrid(bool value){ theApp->draw_to_grid = value; }
 double GetDigitizeGridSize(){ return theApp->digitizing_grid; }
 void SetDigitizeGridSize(double value){ theApp->digitizing_grid = value; }
 
+HeeksColor GetBackgroundColor(int index)
+{
+	if (index < 0 || index >= NUM_BACKGROUND_COLORS)
+		return HeeksColor(0,0,0);
+	return theApp->background_color[index];
+}
+
+void SetBackgroundColor(int index, const HeeksColor& color)
+{
+	if (index >= 0 && index < NUM_BACKGROUND_COLORS)
+		theApp->background_color[index] = color;
+}
+
+
 	BOOST_PYTHON_MODULE(cad) {
 		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
 			.def(boost::python::init<int>())
@@ -2336,7 +2350,6 @@ void SetDigitizeGridSize(double value){ theApp->digitizing_grid = value; }
 		boost::python::def("DrawDeleteList", &DrawDeleteList);
 		boost::python::def("DrawEnableLights", &DrawDeleteList);
 		boost::python::def("DrawDisableLights", &DrawDeleteList);
-
 		boost::python::def("AddProperty", AddProperty);
 		boost::python::def("GetObjectFromId", &GetObjectFromId);
 		boost::python::def("RegisterObjectType", RegisterObjectType);
@@ -2449,6 +2462,8 @@ void SetDigitizeGridSize(double value){ theApp->digitizing_grid = value; }
 		boost::python::def("SetDigitizeSnapToGrid", SetDigitizeSnapToGrid);
 		boost::python::def("GetDigitizeGridSize", GetDigitizeGridSize);
 		boost::python::def("SetDigitizeGridSize", SetDigitizeGridSize);
+		boost::python::def("GetBackgroundColor", GetBackgroundColor);
+		boost::python::def("SetBackgroundColor", SetBackgroundColor);
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
