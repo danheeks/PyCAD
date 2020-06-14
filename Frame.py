@@ -598,7 +598,7 @@ class Frame(wx.Frame):
         
     def OnMagAxes(self, unitY, unitZ):
         self.graphics_canvas.viewport.ClearViewpoints()
-        self.graphics_canvas.viewport.m_view_point.SetView(unitY, unitZ, 6)
+        self.graphics_canvas.viewport.view_point.SetView(unitY, unitZ, 6)
         self.graphics_canvas.viewport.StoreViewPoint()
         self.Refresh()
         
