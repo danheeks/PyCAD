@@ -54,8 +54,6 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         k = event.GetKeyCode()
         if k == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
             wx.GetApp().frame.ShowFullScreen(False)
-        elif k == wx.WXK_RETURN and wx.GetApp().inMainLoop:
-            wx.GetApp().ExitMainLoop()            
         else:
             key_code = Key.KeyCodeFromWx(event)
             cad.GetInputMode().OnKeyDown(key_code)

@@ -130,18 +130,6 @@ class TreeCanvas(wx.ScrolledCanvas):
             if len(self.rendered_objects):
                 cad.Select(self.rendered_objects[index])
         
-        elif k == wx.WXK_DELETE:
-            if cad.GetNumSelected() > 0:
-                cad.StartHistory()
-                for object in cad.GetSelectedObjects():
-                    cad.DeleteUndoably(object)
-                cad.EndHistory()
-                cad.ClearSelection(True)
-
-        elif k == wx.WXK_RETURN:
-            if wx.GetApp().inMainLoop:
-                wx.GetApp().ExitMainLoop()
-        
     def OnKeyUp(self, e):
         pass
         

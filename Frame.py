@@ -15,6 +15,7 @@ from PointDrawing import point_drawing
 import geom
 import Gear
 from Ribbon import Ribbon
+from About import AboutBox
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
@@ -436,6 +437,10 @@ class Frame(wx.Frame):
             else:
                 cad.SaveFile(path)
             config.Write('ExportDirectory', dialog.GetDirectory())
+            
+    def OnAbout(self, e):
+        dlg = AboutBox(self)
+        dlg.ShowModal()
                 
     def OnPrint(self, e):
         printDialogData = wx.PrintDialogData(wx.GetApp().printData)
@@ -741,5 +746,3 @@ class Frame(wx.Frame):
         
     def OnUpdateViewProperties(self, e):
         e.Check(self.aui_manager.GetPane(self.properties_canvas).IsShown())
-    
-                

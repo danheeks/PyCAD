@@ -1783,6 +1783,24 @@ static GripperSelTransform drag_object_gripper(GripData(GripperTypeTranslate, Po
 
 Gripper* GetDragGripper(){ return &drag_object_gripper; }
 
+bool GetDigitizeEnd(){ return theApp->digitize_end; }
+void SetDigitizeEnd(bool value){ theApp->digitize_end = value; }
+bool GetDigitizeInters(){ return theApp->digitize_inters; }
+void SetDigitizeInters(bool value){ theApp->digitize_inters = value; }
+bool GetDigitizeCentre(){ return theApp->digitize_centre; }
+void SetDigitizeCentre(bool value){ theApp->digitize_centre = value; }
+bool GetDigitizeMidpoint(){ return theApp->digitize_midpoint; }
+void SetDigitizeMidpoint(bool value){ theApp->digitize_midpoint = value; }
+bool GetDigitizeNearest(){ return theApp->digitize_nearest; }
+void SetDigitizeNearest(bool value){ theApp->digitize_nearest = value; }
+bool GetDigitizeCoords(){ return theApp->digitize_coords; }
+void SetDigitizeCoords(bool value){ theApp->digitize_coords = value; }
+bool GetDigitizeTangent(){ return theApp->digitize_tangent; }
+void SetDigitizeTangent(bool value){ theApp->digitize_tangent = value; }
+bool GetDigitizeSnapToGrid(){ return theApp->draw_to_grid; }
+void SetDigitizeSnapToGrid(bool value){ theApp->draw_to_grid = value; }
+double GetDigitizeGridSize(){ return theApp->digitizing_grid; }
+void SetDigitizeGridSize(double value){ theApp->digitizing_grid = value; }
 
 	BOOST_PYTHON_MODULE(cad) {
 		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
@@ -2402,7 +2420,24 @@ Gripper* GetDragGripper(){ return &drag_object_gripper; }
 		boost::python::def("EndDrawing", EndDrawing);
 		boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
 		boost::python::def("Digitize", Digitize);
-
+		boost::python::def("GetDigitizeEnd", GetDigitizeEnd);
+		boost::python::def("SetDigitizeEnd", SetDigitizeEnd);
+		boost::python::def("GetDigitizeInters", GetDigitizeInters);
+		boost::python::def("SetDigitizeInters", SetDigitizeInters);
+		boost::python::def("GetDigitizeCentre", GetDigitizeCentre);
+		boost::python::def("SetDigitizeCentre", SetDigitizeCentre);
+		boost::python::def("GetDigitizeMidpoint", GetDigitizeMidpoint);
+		boost::python::def("SetDigitizeMidpoint", SetDigitizeMidpoint);
+		boost::python::def("GetDigitizeNearest", GetDigitizeNearest);
+		boost::python::def("SetDigitizeNearest", SetDigitizeNearest);
+		boost::python::def("GetDigitizeCoords", GetDigitizeCoords);
+		boost::python::def("SetDigitizeCoords", SetDigitizeCoords);
+		boost::python::def("GetDigitizeTangent", GetDigitizeTangent);
+		boost::python::def("SetDigitizeTangent", SetDigitizeTangent);
+		boost::python::def("GetDigitizeSnapToGrid", GetDigitizeSnapToGrid);
+		boost::python::def("SetDigitizeSnapToGrid", SetDigitizeSnapToGrid);
+		boost::python::def("GetDigitizeGridSize", GetDigitizeGridSize);
+		boost::python::def("SetDigitizeGridSize", SetDigitizeGridSize);
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;

@@ -45,18 +45,6 @@ class SelectMode(cad.InputMode):
 
         return s
     
-    def OnKeyDown(self, k):
-        if k == cad.KeyCode.Delete:
-            if cad.GetNumSelected() > 0:
-                cad.StartHistory()
-                for object in cad.GetSelectedObjects():
-                    cad.DeleteUndoably(object)
-                cad.EndHistory()
-                cad.ClearSelection(True)
-        elif k == cad.KeyCode.Return:
-            if wx.GetApp().inMainLoop:
-                wx.GetApp().ExitMainLoop()
-
     def OnMouse(self, event):
         left_and_right_pressed, event_used = self.left_and_right.LeftAndRightPressed(event)
         

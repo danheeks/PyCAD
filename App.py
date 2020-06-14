@@ -25,6 +25,7 @@ save_mode_for_EndPickObjects = None
 
 class App(wx.App):
     def __init__(self):
+        self.version_number = '2 0' # just main number and sub number. I'm not using sub-sub numbers
         self.settings_restored = False
         self.recent_files = []
         self.MAX_RECENT_FILES = 20
@@ -37,6 +38,7 @@ class App(wx.App):
         save_out = sys.stdout
         save_err = sys.stderr
         wx.App.__init__(self)
+        self.SetEvtHandlerEnabled(True)
         sys.stdout = save_out
         sys.stderr = save_err
         
@@ -377,6 +379,40 @@ class App(wx.App):
             value = value_control.GetValue()
             return True
         return False
+        
+    def FilterEvent(self, e):
+        if e.GetEventType() == wx.EVT_KEY_DOWN.typeId:
+            k = e.GetKeyCode()
+            if k == wx.WXK_DELETE:
+                if cad.GetNumSelected() > 0:
+                    cad.StartHistory()
+                    for object in cad.GetSelectedObjects():
+                        cad.DeleteUndoably(object)
+                    cad.EndHistory()
+                    cad.ClearSelection(True)
+            elif k == wx.WXK_RETURN:
+                if wx.GetApp().inMainLoop:
+                    wx.GetApp().ExitMainLoop()
+            elif k == ord('Z'):
+                if e.ControlDown():
+                    if e.ShiftDown():
+                        self.frame.OnRedo(e)
+                    else:
+                        self.frame.OnUndo(e)
+            elif k == ord('X'):
+                if e.ControlDown():
+                    self.frame.OnCut(e)
+            elif k == ord('C'):
+                if e.ControlDown():
+                    self.frame.OnCopy(e)
+            elif k == ord('V'):
+                if e.ControlDown():
+                    self.frame.OnPaste(e)
+            else:
+                return -1
+            return True
+
+        return -1
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):
