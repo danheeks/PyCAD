@@ -15,8 +15,10 @@ class Ribbon(wx.ribbon.RibbonBar):
     def __init__(self, parent):
         self.next_id = parent.ID_NEXT_ID
         wx.ribbon.RibbonBar.__init__(self, parent, style = wx.ribbon.RIBBON_BAR_FLOW_HORIZONTAL | wx.ribbon.RIBBON_BAR_SHOW_PAGE_LABELS | wx.ribbon.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS | wx.ribbon.RIBBON_BAR_SHOW_HELP_BUTTON)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         main_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
+        main_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         panel = wx.ribbon.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
         toolbar = wx.ribbon.RibbonButtonBar(panel)
@@ -49,6 +51,7 @@ class Ribbon(wx.ribbon.RibbonBar):
 
         
         geom_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('lines'))
+        geom_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
         toolbar = wx.ribbon.RibbonButtonBar(panel)
@@ -133,6 +136,9 @@ class Ribbon(wx.ribbon.RibbonBar):
             self.Bind(wx.EVT_MENU, self.OnRecentFile, menu.Append(recent_id, filepath))
             recent_id += 1
         event.PopupMenu(menu);
+        
+    def OnKeyDown(self, event):
+        wx.GetApp().OnKeyDown(event)
     
     def OnEndof(self, e):
         cad.SetDigitizeEnd( not cad.GetDigitizeEnd() )

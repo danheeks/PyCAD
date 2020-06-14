@@ -184,24 +184,24 @@ public:
 		return NULL;
 	}
 
-	void OnKeyDown(KeyCode key_code)override
+	bool OnKeyDown(KeyCode key_code)override
 	{
 		if (boost::python::override f = this->get_override("OnKeyDown"))
 		{
-			f(key_code);
+			return f(key_code);
 		}
 		else
-			CInputMode::OnKeyDown(key_code);
+			return CInputMode::OnKeyDown(key_code);
 	}
 
-	void OnKeyUp(KeyCode key_code)override
+	bool OnKeyUp(KeyCode key_code)override
 	{
 		if (boost::python::override f = this->get_override("OnKeyUp"))
 		{
-			f(key_code);
+			return f(key_code);
 		}
 		else
-			CInputMode::OnKeyUp(key_code);
+			return CInputMode::OnKeyUp(key_code);
 	}
 
 	void GetProperties(std::list<Property *> *list)

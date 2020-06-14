@@ -25,8 +25,8 @@ public:
 	virtual bool TitleHighlighted(){return true;}
 	virtual const wchar_t* GetHelpText(){ return NULL; }
 	virtual void OnMouse( MouseEvent& event ){}
-	virtual void OnKeyDown( KeyCode key_code ){}
-	virtual void OnKeyUp( KeyCode key_code ){}
+	virtual bool OnKeyDown(KeyCode key_code){ return false; } // return true if handled
+	virtual bool OnKeyUp(KeyCode key_code){ return false; } // return true if handled
 	virtual void OnModeChange(void){ }
 	virtual void OnFrontRender(){}
 	virtual void OnRender(){}

@@ -38,7 +38,6 @@ class App(wx.App):
         save_out = sys.stdout
         save_err = sys.stderr
         wx.App.__init__(self)
-        self.SetEvtHandlerEnabled(True)
         sys.stdout = save_out
         sys.stderr = save_err
         
@@ -255,7 +254,6 @@ class App(wx.App):
                 item = wx.MenuItem(menu, wx.ID_ANY, tool.GetTitle())        
                 self.SetMenuItemBitmap(item, tool)
                 self.Bind(wx.EVT_MENU, tool.Run, menu.Append(item))     
-            
         
     def GetDropDownTools(self, x, y, control_pressed):
         self.tool_index_list = [] # list of tool and index pairs
@@ -380,39 +378,36 @@ class App(wx.App):
             return True
         return False
         
-    def FilterEvent(self, e):
-        if e.GetEventType() == wx.EVT_KEY_DOWN.typeId:
-            k = e.GetKeyCode()
-            if k == wx.WXK_DELETE:
-                if cad.GetNumSelected() > 0:
-                    cad.StartHistory()
-                    for object in cad.GetSelectedObjects():
-                        cad.DeleteUndoably(object)
-                    cad.EndHistory()
-                    cad.ClearSelection(True)
-            elif k == wx.WXK_RETURN:
-                if wx.GetApp().inMainLoop:
-                    wx.GetApp().ExitMainLoop()
-            elif k == ord('Z'):
-                if e.ControlDown():
-                    if e.ShiftDown():
-                        self.frame.OnRedo(e)
-                    else:
-                        self.frame.OnUndo(e)
-            elif k == ord('X'):
-                if e.ControlDown():
-                    self.frame.OnCut(e)
-            elif k == ord('C'):
-                if e.ControlDown():
-                    self.frame.OnCopy(e)
-            elif k == ord('V'):
-                if e.ControlDown():
-                    self.frame.OnPaste(e)
-            else:
-                return -1
-            return True
-
-        return -1
+    def OnKeyDown(self, e):
+        k = e.GetKeyCode()
+        if k == wx.WXK_DELETE:
+            if cad.GetNumSelected() > 0:
+                cad.StartHistory()
+                for object in cad.GetSelectedObjects():
+                    cad.DeleteUndoably(object)
+                cad.EndHistory()
+                cad.ClearSelection(True)
+        elif k == wx.WXK_RETURN:
+            if wx.GetApp().inMainLoop:
+                wx.GetApp().ExitMainLoop()
+        elif k == ord('Z'):
+            if e.ControlDown():
+                if e.ShiftDown():
+                    self.frame.OnRedo(e)
+                else:
+                    self.frame.OnUndo(e)
+        elif k == ord('X'):
+            if e.ControlDown():
+                self.frame.OnCut(e)
+        elif k == ord('C'):
+            if e.ControlDown():
+                self.frame.OnCopy(e)
+        elif k == ord('V'):
+            if e.ControlDown():
+                self.frame.OnPaste(e)
+        else:
+            return False
+        return True
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

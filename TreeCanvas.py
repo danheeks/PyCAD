@@ -129,6 +129,8 @@ class TreeCanvas(wx.ScrolledCanvas):
             
             if len(self.rendered_objects):
                 cad.Select(self.rendered_objects[index])
+        else:
+            wx.GetApp().OnKeyDown(e)
         
     def OnKeyUp(self, e):
         pass

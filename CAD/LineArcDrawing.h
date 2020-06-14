@@ -50,8 +50,8 @@ public:
 
 	// InputMode's virtual functions
 	const wchar_t* GetTitle();
-	void OnKeyDown(KeyCode key_code);
-	void OnKeyUp(KeyCode key_code);
+	bool OnKeyDown(KeyCode key_code);
+	bool OnKeyUp(KeyCode key_code);
 	void set_cursor(void);
 	void GetProperties(std::list<Property *> *list);
 	void OnModeChange(void);

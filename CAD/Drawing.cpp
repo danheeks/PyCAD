@@ -168,7 +168,7 @@ void Drawing::OnMouse( MouseEvent& event )
 	}
 }
 
-void Drawing::OnKeyDown(KeyCode key_code)
+bool Drawing::OnKeyDown(KeyCode key_code)
 {
 	switch (key_code){
 	case K_F1:
@@ -177,10 +177,11 @@ void Drawing::OnKeyDown(KeyCode key_code)
 		// end drawing mode
 		ClearObjectsMade();
 		theApp->RestoreInputMode();
-		break;
+		return true;
 	default:
 		break;
 	}
+	return false;
 }
 
 void Drawing::OnModeChange(void){

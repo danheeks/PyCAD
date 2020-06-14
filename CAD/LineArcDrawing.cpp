@@ -518,7 +518,7 @@ const wchar_t* LineArcDrawing::GetTitle()
 }
 
 
-void LineArcDrawing::OnKeyDown(KeyCode key_code)
+bool LineArcDrawing::OnKeyDown(KeyCode key_code)
 {
 	switch (key_code){
 	case K_A:
@@ -529,15 +529,15 @@ void LineArcDrawing::OnKeyDown(KeyCode key_code)
 			drawing_mode = ArcDrawingMode;
 			theApp->RefreshInputCanvas();
 		}
-		return;
+		return true;
 	default:
 		break;
 	}
 
-	Drawing::OnKeyDown(key_code);
+	return Drawing::OnKeyDown(key_code);
 }
 
-void LineArcDrawing::OnKeyUp(KeyCode key_code)
+bool LineArcDrawing::OnKeyUp(KeyCode key_code)
 {
 	switch (key_code){
 	case K_A:
@@ -548,12 +548,12 @@ void LineArcDrawing::OnKeyUp(KeyCode key_code)
 		}
 		theApp->RefreshInputCanvas();
 		m_A_down = false;
-		return;
+		return true;
 	default:
 		break;
 	}
 
-	Drawing::OnKeyUp(key_code);
+	return Drawing::OnKeyUp(key_code);
 }
 
 void LineArcDrawing::set_cursor(void){

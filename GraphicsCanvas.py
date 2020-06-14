@@ -56,7 +56,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             wx.GetApp().frame.ShowFullScreen(False)
         else:
             key_code = Key.KeyCodeFromWx(event)
-            cad.GetInputMode().OnKeyDown(key_code)
+            if not cad.GetInputMode().OnKeyDown(key_code):
+                wx.GetApp().OnKeyDown(event)
             
     def OnKeyUp(self, event):
         key_code = Key.KeyCodeFromWx(event)
