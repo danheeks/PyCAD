@@ -33,6 +33,7 @@ class Frame(wx.Frame):
         self.SetIcon(wx.Icon(pycad_dir + "/heekscad.png", wx.BITMAP_TYPE_PNG))
         
         self.bitmap_path = pycad_dir + '/bitmaps'
+        self.menuBar = None
         #self.MakeMenus()
         
         self.aui_manager = wx.aui.AuiManager()
@@ -543,7 +544,10 @@ class Frame(wx.Frame):
         f = open(temp_file, 'w')
         f.write(s)
         f.close()
+        cad.ClearSelection()
+        cad.SetMarkNewlyAddedObjects(True)
         cad.Import(temp_file)
+        cad.SetMarkNewlyAddedObjects(False)
         
     def IsPasteReady(self):
         if wx.TheClipboard.IsOpened():
@@ -636,8 +640,10 @@ class Frame(wx.Frame):
             for w in wx.GetApp().hideable_windows:
                 self.windows_visible[w] = self.aui_manager.GetPane(w).IsShown() and w.IsShown()
                 self.aui_manager.GetPane(w).Show(False)
+            self.graphics_canvas.SetFocus()# so escape key works to get out
         else:
-            self.SetMenuBar(self.menuBar)
+            if self.menuBar != None:
+                self.SetMenuBar(self.menuBar)
             for w in wx.GetApp().hideable_windows:
                 if w in self.windows_visible:
                     visible = self.windows_visible[w]

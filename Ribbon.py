@@ -17,7 +17,7 @@ class Ribbon(wx.ribbon.RibbonBar):
         wx.ribbon.RibbonBar.__init__(self, parent, style = wx.ribbon.RIBBON_BAR_FLOW_HORIZONTAL | wx.ribbon.RIBBON_BAR_SHOW_PAGE_LABELS | wx.ribbon.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS | wx.ribbon.RIBBON_BAR_SHOW_HELP_BUTTON)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
-        main_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
+        main_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'File')
         main_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         panel = wx.ribbon.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
@@ -50,10 +50,10 @@ class Ribbon(wx.ribbon.RibbonBar):
         main_page.Realize()
 
         
-        geom_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('lines'))
+        geom_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'Geom')
         geom_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
-        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches')
         toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.AddToolBarTool(toolbar,RibbonButtonData('Lines', self.Image('lines'), 'Draw a sketch with lines and arcs', parent.OnLines))
         self.AddToolBarTool(toolbar,RibbonButtonData('Rectangles', self.Image('rect'), 'Draw rectangles', parent.OnLines))
@@ -61,24 +61,24 @@ class Ribbon(wx.ribbon.RibbonBar):
         self.AddToolBarTool(toolbar,RibbonButtonData('Polygons', self.Image('pentagon'), 'Draw polygons', parent.OnLines))
         self.AddToolBarTool(toolbar,RibbonButtonData('Gear', self.Image('gear'), 'Add a gear', parent.OnGear))
         
-        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Circles', self.Image('circ3p'))
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Circles')
         toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.AddToolBarTool(toolbar,RibbonButtonData('3 Points', self.Image('circ3p'), 'Draw circles through 3 points', parent.OnCircles3p))
         self.AddToolBarTool(toolbar,RibbonButtonData('2 Points', self.Image('circ2p'), 'Draw circles, centre and point', parent.OnCircles2p))
         self.AddToolBarTool(toolbar,RibbonButtonData('Radius', self.Image('circpr'), 'Draw circles, centre and radius', parent.OnCircles1p))
         
-        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'OtherDrawing', self.Image('point'))
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'OtherDrawing')
         toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.AddToolBarTool(toolbar,RibbonButtonData('Infinite Line', self.Image('iline'), 'Drawing Infinite Lines', parent.OnILine))
         self.AddToolBarTool(toolbar,RibbonButtonData('Points', self.Image('point'), 'Drawing Points', parent.OnPoints))
         self.AddToolBarTool(toolbar,RibbonButtonData('Spline', self.Image('splpts'), 'Spline Through Points', parent.OnGear))
         
-        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Text', self.Image('text'))
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Text')
         toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.AddToolBarTool(toolbar,RibbonButtonData('Text', self.Image('text'), 'Add a text object', parent.OnText))
         self.AddToolBarTool(toolbar,RibbonButtonData('Dimensioning', self.Image('dimension'), 'Add a dimension', parent.OnDimensioning))
         
-        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Transformations', self.Image('movet'))
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Transformations')
         toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.AddToolBarTool(toolbar,RibbonButtonData('Move Translate', self.Image('movet'), 'Translate selected items', parent.OnMoveTranslate))
         self.AddToolBarTool(toolbar,RibbonButtonData('Copy Translate', self.Image('copyt'), 'Copy and translate selected items', parent.OnCopyTranslate))
@@ -88,7 +88,7 @@ class Ribbon(wx.ribbon.RibbonBar):
         self.AddToolBarTool(toolbar,RibbonButtonData('Move Scale', self.Image('moves'), 'Scale selected items', parent.OnMoveScale))
         self.AddToolBarTool(toolbar,RibbonButtonData('Move Origin', self.Image('coords3'), 'Move selected items from one origin to another', parent.OnOriginTransform))
         
-        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Snapping', self.Image('endof'))
+        panel = wx.ribbon.RibbonPanel(geom_page, wx.ID_ANY, 'Snapping')
         self.snapping_toolbar = wx.ribbon.RibbonButtonBar(panel)
         self.endof_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Endof', self.Image('endof' if cad.GetDigitizeEnd() else 'endofgray'), 'Snap to end point', self.OnEndof))
         self.inters_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to intersection', self.OnInters))
@@ -98,6 +98,32 @@ class Ribbon(wx.ribbon.RibbonBar):
 
         geom_page.Realize()
         
+
+        view_page = wx.ribbon.RibbonPage(self, wx.ID_ANY, 'View')
+        view_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        
+        panel = wx.ribbon.RibbonPanel(view_page, wx.ID_ANY, 'Magnify')
+        toolbar = wx.ribbon.RibbonButtonBar(panel)
+        self.AddToolBarTool(toolbar,RibbonButtonData('Mag Extents', self.Image('magextents'), 'Zoom in to fit the extents of the drawing into the graphics window', parent.OnMagExtents))
+        self.AddToolBarTool(toolbar,RibbonButtonData('Mag No Rotation', self.Image('magnorot'), 'Zoom in to fit the extents of the drawing into the graphics window, but without rotating the view', parent.OnMagNoRot))
+        self.AddToolBarTool(toolbar,RibbonButtonData('Zoom Window', self.Image('mag'), 'Zoom in to a dragged window', parent.OnMag))
+        
+        panel = wx.ribbon.RibbonPanel(view_page, wx.ID_ANY, 'General')
+        toolbar = wx.ribbon.RibbonButtonBar(panel)
+        self.AddToolBarTool(toolbar,RibbonButtonData('View Back', self.Image('magprev'), 'Go back to previous view', parent.OnMagPrevious))
+        self.AddToolBarTool(toolbar,RibbonButtonData('FullScreen', self.Image('fullscreen'), 'Switch to full screen view ( press escape to return )', parent.OnFullScreen))
+        self.AddToolBarTool(toolbar,RibbonButtonData('Redraw', self.Image('redraw'), 'Redraw', parent.OnRedraw))
+        
+        panel = wx.ribbon.RibbonPanel(view_page, wx.ID_ANY, 'Windows')
+        self.windows_toolbar = wx.ribbon.RibbonButtonBar(panel)
+        objects_button_is_ticked = parent.aui_manager.GetPane(parent.tree_canvas).IsShown()
+        properties_button_is_ticked = parent.aui_manager.GetPane(parent.properties_canvas).IsShown()
+        self.objects_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Objects', self.Image('objects' if objects_button_is_ticked else 'objectsgray'), 'Objects', self.OnObjects))
+        self.properties_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Properties', self.Image('properties' if objects_button_is_ticked else 'propertiesgray'), 'Properties', self.OnProperties))
+
+        view_page.Realize()
+
+
         self.Realize()
         
     def Image(self, name):
@@ -171,4 +197,47 @@ class Ribbon(wx.ribbon.RibbonBar):
     def OnSnapDropdown(self, e):
         if cad.GetDigitizeSnapToGrid():
             cad.SetDigitizeGridSize(wx.GetApp().InputLength('Edit Snap Grid', 'Snap Grid', cad.GetDigitizeGridSize()))
+
+    def OnObjects(self, e):
+        f = self.GetParent()
+        pane_info = f.aui_manager.GetPane(f.tree_canvas)
+        is_shown = pane_info.IsShown()
+        
+        if pane_info.IsOk():
+            pane_info.Show(not is_shown)
+            is_shown = not is_shown
+            f.aui_manager.Update()
             
+        f.ribbon.SetObjectsButtonImage()
+        
+    def SetObjectsButtonImage(self, turned_off = False):
+        pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().tree_canvas)
+        is_shown = pane_info.IsShown()
+        if turned_off:
+            is_shown = False
+            self.object_button_is_ticked = is_shown
+            self.windows_toolbar.DeleteButton(self.objects_button)
+            self.windows_toolbar.InsertButton(0, self.objects_button, 'Objects', self.Image('objects' if is_shown else 'objectsgray'), 'Objects')
+            self.windows_toolbar.Realize()
+            
+    def OnProperties(self, e):
+        f = self.GetParent()
+        pane_info = f.aui_manager.GetPane(f.properties_canvas)
+        is_shown = pane_info.IsShown()
+        
+        if pane_info.IsOk():
+            pane_info.Show(not is_shown)
+            is_shown = not is_shown
+            f.aui_manager.Update()
+            
+        f.ribbon.SetPropertiesButtonImage()
+        
+    def SetPropertiesButtonImage(self, turned_off = False):
+        pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().properties_canvas)
+        is_shown = pane_info.IsShown()
+        if turned_off:
+            is_shown = False
+            self.properties_button_is_ticked = is_shown
+            self.windows_toolbar.DeleteButton(self.properties_button)
+            self.windows_toolbar.InsertButton(0, self.properties_button, 'Properties', self.Image('properties' if is_shown else 'propertiesgray'), 'Properties')
+            self.windows_toolbar.Realize()            

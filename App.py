@@ -9,6 +9,7 @@ import ToolBarTool
 import SelectMode
 from HDialog import HDialog
 from HDialog import control_border
+from NiceTextCtrl import LengthCtrl
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -374,9 +375,8 @@ class App(wx.App):
         sizerMain.Fit(dlg)
         value_control.SetFocus()
         if dlg.ShowModal() == wx.ID_OK:
-            value = value_control.GetValue()
-            return True
-        return False
+            return value_control.GetValue()
+        return value
         
     def OnKeyDown(self, e):
         k = e.GetKeyCode()

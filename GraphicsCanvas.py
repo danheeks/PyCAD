@@ -52,6 +52,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       
     def OnKeyDown(self, event):
         k = event.GetKeyCode()
+        print('k = ' + str(k))
         if k == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
             wx.GetApp().frame.ShowFullScreen(False)
         else:

@@ -1445,7 +1445,15 @@ boost::python::list GetSelectionProperties()
 	return return_list;
 }
 
+void SetMarkNewlyAddedObjects(bool value)
+{
+	theApp->m_mark_newly_added_objects = value;
+}
 
+bool GetMarkNewlyAddedObjects(void)
+{
+	return theApp->m_mark_newly_added_objects;
+}
 
 unsigned int GetNumSelected()
 {
@@ -1473,16 +1481,17 @@ void Select(HeeksObj* object, bool call_OnChanged = true)
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(SelectOverloads, Select, 1, 2)
 
-
 void Unselect(HeeksObj* object, bool call_OnChanged)
 {
 	theApp->m_marked_list->Remove(object, call_OnChanged);
 }
 
-void ClearSelection(bool call_OnChanged)
+void ClearSelection(bool call_OnChanged = false)
 {
 	theApp->m_marked_list->Clear(call_OnChanged);
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(ClearSelectionOverloads, ClearSelection, 0, 1)
 
 double GetViewUnits()
 {
@@ -2364,8 +2373,10 @@ void SetDigitizeGridSize(double value){ theApp->digitizing_grid = value; }
 		boost::python::def("ObjectMarked", ObjectMarked);
 		boost::python::def("Select", &Select, SelectOverloads(	(boost::python::arg("object"),	boost::python::arg("CallOnChanged") = NULL)));
 		boost::python::def("Unselect", Unselect);
-		boost::python::def("ClearSelection", ClearSelection);
+		boost::python::def("ClearSelection", &ClearSelection, ClearSelectionOverloads(boost::python::arg("CallOnChanged") = false));
 		boost::python::def("GetSelectionProperties", GetSelectionProperties);
+		boost::python::def("SetMarkNewlyAddedObjects", SetMarkNewlyAddedObjects);
+		boost::python::def("GetMarkNewlyAddedObjects", GetMarkNewlyAddedObjects);
 		boost::python::def("GetViewUnits", GetViewUnits);
 		boost::python::def("SetViewUnits", SetViewUnits);
 		boost::python::def("GetApp", GetApp, boost::python::return_value_policy<boost::python::reference_existing_object>());
