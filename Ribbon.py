@@ -86,6 +86,7 @@ class BackgroundColorButton:
         if dlg.ShowModal() == wx.ID_OK:
             # Colour did change.
             self.SetBackgroundColor(index, dlg.GetColourData().GetColour())
+            HeeksConfig().WriteInt("BackgroundColor" + str(index), cad.GetBackgroundColor(index).ref())
             self.ribbon.GetParent().graphics_canvas.Refresh()
 
 
@@ -97,7 +98,7 @@ class Ribbon(RB.RibbonBar):
         Ribbon.next_id = parent.ID_NEXT_ID
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
-        main_page = RB.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
+        main_page = RB.RibbonPage(self, wx.ID_ANY, 'File', self.Image('file'))
         main_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
 
         panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
@@ -130,7 +131,7 @@ class Ribbon(RB.RibbonBar):
         main_page.Realize()
 
         
-        geom_page = RB.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('lines'))
+        geom_page = RB.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('geom'))
         geom_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
@@ -179,7 +180,7 @@ class Ribbon(RB.RibbonBar):
         geom_page.Realize()
         
 
-        view_page = RB.RibbonPage(self, wx.ID_ANY, 'View', self.Image('mag'))
+        view_page = RB.RibbonPage(self, wx.ID_ANY, 'View', self.Image('view'))
         view_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'Magnify', self.Image('mag'))
@@ -232,12 +233,12 @@ class Ribbon(RB.RibbonBar):
         combo = wx.ComboBox(panel, choices = ["None", "Input Mode Title", "Full Help"], style = wx.CB_READONLY )
         combo.Select(cad.GetGraphicsTextMode())
         self.Bind(wx.EVT_COMBOBOX, self.OnScreenText, combo)
-        sizer_panelsizer = wx.BoxSizer(wx.VERTICAL)
-        sizer_panelsizer.AddStretchSpacer(1)
-        sizer_panelsizer.Add(check, 0, wx.ALL|wx.EXPAND, 2)
-        self.AddLabelAndControl(panel, sizer_panelsizer, 'Screen Text', combo)
-        sizer_panelsizer.AddStretchSpacer(1)
-        panel.SetSizer(sizer_panelsizer)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.AddStretchSpacer(1)
+        sizer.Add(check, 0, wx.ALL|wx.EXPAND, 2)
+        self.AddLabelAndControl(panel, sizer, 'Screen Text', combo)
+        sizer.AddStretchSpacer(1)
+        panel.SetSizer(sizer)
         
         panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View Colors', self.Image('mag'))
         toolbar = RB.RibbonButtonBar(panel)
@@ -245,12 +246,8 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddBackgroundColorButton(toolbar, 'Background Color Bottom', 'Edit bottom background color')
         
         options_page.Realize()
-        
-        
-        
-        
-        
-        
+
+
                 
         self.Realize()
         

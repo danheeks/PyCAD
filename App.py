@@ -114,6 +114,9 @@ class App(wx.App):
         cad.SetRotateUpright(config.ReadBool("RotateUpright", False))
         cad.SetGraphicsTextMode(cad.GraphicsTextMode(config.ReadInt("TextMode", int(cad.GraphicsTextMode.FullHelp))))
         
+        cad.SetBackgroundColor(0, cad.Color(config.ReadInt("BackgroundColor0", cad.Color(230, 255, 255).ref())))
+        cad.SetBackgroundColor(1, cad.Color(config.ReadInt("BackgroundColor1", cad.Color(255, 255, 255).ref())))
+        
 
     def GetDefaultDir(self):
         default_directory = os.getcwd()
