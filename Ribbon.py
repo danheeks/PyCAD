@@ -1,22 +1,100 @@
 import wx
 import wx.ribbon as RB
 import cad
+from HeeksConfig import HeeksConfig
 
 control_border = 2
 
-class RibbonButtonData:
-    def __init__(self, title, bitmap, caption, on_button, on_update_button = None, on_dropdown = None, key_flags = 0, key_code = 0):
-        self.title = title
-        self.bitmap = bitmap
-        self.caption = caption
-        self.on_button = on_button
-        self.on_update_button = on_update_button
-        self.on_dropdown = on_dropdown
+class OnOffButton:
+    def __init__(self, name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down = None):
+        self.name = name
+        self.bitmap_name = bitmap_name
+        self.bitmap_name_off = bitmap_name_off
+        self.get_fn = get_fn
+        self.set_fn = set_fn
+        self.help_str = help_str
+        self.drop_down = drop_down
+        self.index = None
+        
+    def AddToToolbar(self, toolbar):
+        on = self.get_fn()
+        bm = self.bitmap_name if on else self.bitmap_name_off
+        self.index = toolbar.GetButtonCount()
+        Ribbon.AddToolBarTool(toolbar, self.name, bm, self.help_str, self.OnButton, None, self.drop_down)       
+            
+    def OnButton(self, event):
+        on = self.get_fn()
+        on = not on
+        self.set_fn(on)
+
+        # remember config
+        config = HeeksConfig()
+        config.WriteBool(self.name, on)
+        
+        bm = self.bitmap_name if on else self.bitmap_name_off
+        toolbar = event.GetBar()
+        button = event.GetButton()
+        ribbon = toolbar.GetParent().GetParent().GetParent()
+        bitmap = ribbon.Image(bm)
+        item_id = toolbar.GetItemId(button)
+        toolbar.DeleteButton(item_id)
+        item = toolbar.InsertButton(self.index, item_id, self.name, bitmap, self.help_str)
+        
+class BackgroundColorButton:
+    def __init__(self, name, help_str):
+        self.name = name
+        self.help_str = help_str
+        self.index = None
+        self.ribbon = None
+        
+    def AddToToolbar(self, toolbar):
+        self.index = toolbar.GetButtonCount()
+        self.ribbon = toolbar.GetParent().GetParent().GetParent()
+        Ribbon.AddToolBarTool2(toolbar, self.name, self.ColorBitmap(), self.help_str, self.OnButton)       
+        
+    def ColorBitmap(self):
+        color = cad.GetBackgroundColor(self.index)
+        bitmap = wx.Bitmap(24, 24)
+        dc = wx.MemoryDC(bitmap)
+        dc.SetBrush(wx.Brush(wx.Colour(color.red, color.green, color.blue)))
+        dc.DrawRectangle(0,0,24,24)
+        del dc
+        return bitmap
+        
+    def OnButton(self, event):
+        self.SelectNewColour(self.index)
+
+        toolbar = event.GetBar()
+        button = event.GetButton()
+        item_id = toolbar.GetItemId(button)
+        toolbar.DeleteButton(item_id)
+        item = toolbar.InsertButton(self.index, item_id, self.name, self.ColorBitmap(), self.help_str)
+        
+    def SetBackgroundColor(self, index, wxcolor):
+        c = cad.Color()
+        c.red = wxcolor.red
+        c.green = wxcolor.green
+        c.blue = wxcolor.blue
+        cad.SetBackgroundColor(index, c)
+        self.ribbon.GetParent().graphics_canvas.Refresh()
+
+    def SelectNewColour(self, index):
+        c = cad.GetBackgroundColor(index)
+        data = wx.ColourData()
+        data.SetColour(wx.Colour(c.red, c.green, c.blue))
+        dlg = wx.ColourDialog(self.ribbon, data)
+        if dlg.ShowModal() == wx.ID_OK:
+            # Colour did change.
+            self.SetBackgroundColor(index, dlg.GetColourData().GetColour())
+            self.ribbon.GetParent().graphics_canvas.Refresh()
+
 
 class Ribbon(RB.RibbonBar):
+    next_id = 0
+    
     def __init__(self, parent):
-        self.next_id = parent.ID_NEXT_ID
         RB.RibbonBar.__init__(self, parent, style = RB.RIBBON_BAR_FLOW_HORIZONTAL | RB.RIBBON_BAR_SHOW_PAGE_LABELS | RB.RIBBON_BAR_SHOW_PAGE_ICONS | RB.RIBBON_BAR_SHOW_PANEL_EXT_BUTTONS | RB.RIBBON_BAR_SHOW_HELP_BUTTON)
+        Ribbon.next_id = parent.ID_NEXT_ID
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         main_page = RB.RibbonPage(self, wx.ID_ANY, 'File', self.Image('new'))
@@ -24,30 +102,30 @@ class Ribbon(RB.RibbonBar):
 
         panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('New', self.Image('new'), 'New File', parent.OnNew))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Open", self.Image("open"), "Open file", parent.OnOpen, None, self.OnOpenDropdown))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Import", self.Image("import"), "Import file", parent.OnImport));
-        self.AddToolBarTool(toolbar, RibbonButtonData("Export", self.Image("export"), "Export file", parent.OnExport));
-        self.AddToolBarTool(toolbar, RibbonButtonData("Save", self.Image("save"), "Save file", parent.OnSave, parent.OnUpdateSave));
-        self.AddToolBarTool(toolbar, RibbonButtonData("Save As", self.Image("saveas"), "Save file with given name", parent.OnSaveAs));
-        self.AddToolBarTool(toolbar, RibbonButtonData("Restore Defaults", self.Image("restore"), "Restore all defaults", parent.OnResetDefaults));
-        self.AddToolBarTool(toolbar, RibbonButtonData("About", self.Image("about"), "Software Information", parent.OnAbout));
+        Ribbon.AddToolBarTool(toolbar, 'New', 'new', 'New File', parent.OnNew)
+        Ribbon.AddToolBarTool(toolbar, "Open", 'open', "Open file", parent.OnOpen, None, self.OnOpenDropdown)
+        Ribbon.AddToolBarTool(toolbar, "Import", 'import', "Import file", parent.OnImport)
+        Ribbon.AddToolBarTool(toolbar, "Export", 'export', "Export file", parent.OnExport)
+        Ribbon.AddToolBarTool(toolbar, "Save", 'save', "Save file", parent.OnSave, parent.OnUpdateSave)
+        Ribbon.AddToolBarTool(toolbar, "Save As", 'saveas', "Save file with given name", parent.OnSaveAs)
+        Ribbon.AddToolBarTool(toolbar, "Restore Defaults", 'restore', "Restore all defaults", parent.OnResetDefaults)
+        Ribbon.AddToolBarTool(toolbar, "About", 'about', "Software Information", parent.OnAbout)
 
         panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'Print', self.Image('print'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar, RibbonButtonData("Print", self.Image("print"), "Print the view to a printer", parent.OnPrint))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Page Setup", self.Image("psetup"), "Setup the printer layout", parent.OnPageSetup))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Print Preview", self.Image("ppreview"), "Show a preview of the print view", parent.OnPrintPreview))
+        Ribbon.AddToolBarTool(toolbar, "Print", 'print', "Print the view to a printer", parent.OnPrint)
+        Ribbon.AddToolBarTool(toolbar, "Page Setup", 'psetup', "Setup the printer layout", parent.OnPageSetup)
+        Ribbon.AddToolBarTool(toolbar, "Print Preview", 'ppreview', "Show a preview of the print view", parent.OnPrintPreview)
 
         panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'Edit', self.Image('cut'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar, RibbonButtonData("Undo", self.Image('undo'), 'Undo the previous command', parent.OnUndo, parent.OnUpdateUndo, None))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Redo", self.Image('redo'), 'Redo the next command', parent.OnRedo, parent.OnUpdateRedo, None))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Cut", self.Image('cut'), 'Cut selected items to the clipboard', parent.OnCut, parent.OnUpdateCut))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Copy", self.Image('copy'), 'Copy selected items to the clipboard', parent.OnCopy, parent.OnUpdateCopy))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Paste", self.Image('paste'), 'Paste items from the clipboard', parent.OnPaste, parent.OnUpdatePaste))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Delete", self.Image('delete'), 'Delete selected items', parent.OnDelete, parent.OnUpdateDelete))
-        self.AddToolBarTool(toolbar, RibbonButtonData("Select", self.Image('select'), 'Select Mode', parent.OnSelectMode))
+        Ribbon.AddToolBarTool(toolbar, "Undo", 'undo', 'Undo the previous command', parent.OnUndo, parent.OnUpdateUndo, None)
+        Ribbon.AddToolBarTool(toolbar, "Redo", 'redo', 'Redo the next command', parent.OnRedo, parent.OnUpdateRedo, None)
+        Ribbon.AddToolBarTool(toolbar, "Cut", 'cut', 'Cut selected items to the clipboard', parent.OnCut, parent.OnUpdateCut)
+        Ribbon.AddToolBarTool(toolbar, "Copy", 'copy', 'Copy selected items to the clipboard', parent.OnCopy, parent.OnUpdateCopy)
+        Ribbon.AddToolBarTool(toolbar, "Paste", 'paste', 'Paste items from the clipboard', parent.OnPaste, parent.OnUpdatePaste)
+        Ribbon.AddToolBarTool(toolbar, "Delete", 'delete', 'Delete selected items', parent.OnDelete, parent.OnUpdateDelete)
+        Ribbon.AddToolBarTool(toolbar, "Select", 'select', 'Select Mode', parent.OnSelectMode)
 
         main_page.Realize()
 
@@ -57,46 +135,46 @@ class Ribbon(RB.RibbonBar):
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('Lines', self.Image('lines'), 'Draw a sketch with lines and arcs', parent.OnLines))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Rectangles', self.Image('rect'), 'Draw rectangles', parent.OnLines))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Obrounds', self.Image('obround'), 'Draw obrounds', parent.OnLines))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Polygons', self.Image('pentagon'), 'Draw polygons', parent.OnLines))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Gear', self.Image('gear'), 'Add a gear', parent.OnGear))
+        Ribbon.AddToolBarTool(toolbar,'Lines', 'lines', 'Draw a sketch with lines and arcs', parent.OnLines)
+        Ribbon.AddToolBarTool(toolbar,'Rectangles', 'rect', 'Draw rectangles', parent.OnLines)
+        Ribbon.AddToolBarTool(toolbar,'Obrounds', 'obround', 'Draw obrounds', parent.OnLines)
+        Ribbon.AddToolBarTool(toolbar,'Polygons', 'pentagon', 'Draw polygons', parent.OnLines)
+        Ribbon.AddToolBarTool(toolbar,'Gear', 'gear', 'Add a gear', parent.OnGear)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Circles', self.Image('circ3p'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('3 Points', self.Image('circ3p'), 'Draw circles through 3 points', parent.OnCircles3p))
-        self.AddToolBarTool(toolbar,RibbonButtonData('2 Points', self.Image('circ2p'), 'Draw circles, centre and point', parent.OnCircles2p))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Radius', self.Image('circpr'), 'Draw circles, centre and radius', parent.OnCircles1p))
+        Ribbon.AddToolBarTool(toolbar,'3 Points', 'circ3p', 'Draw circles through 3 points', parent.OnCircles3p)
+        Ribbon.AddToolBarTool(toolbar,'2 Points', 'circ2p', 'Draw circles, centre and point', parent.OnCircles2p)
+        Ribbon.AddToolBarTool(toolbar,'Radius', 'circpr', 'Draw circles, centre and radius', parent.OnCircles1p)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'OtherDrawing', self.Image('point'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('Infinite Line', self.Image('iline'), 'Drawing Infinite Lines', parent.OnILine))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Points', self.Image('point'), 'Drawing Points', parent.OnPoints))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Spline', self.Image('splpts'), 'Spline Through Points', parent.OnGear))
+        Ribbon.AddToolBarTool(toolbar,'Infinite Line', 'iline', 'Drawing Infinite Lines', parent.OnILine)
+        Ribbon.AddToolBarTool(toolbar,'Points', 'point', 'Drawing Points', parent.OnPoints)
+        Ribbon.AddToolBarTool(toolbar,'Spline', 'splpts', 'Spline Through Points', parent.OnGear)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Text', self.Image('text'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('Text', self.Image('text'), 'Add a text object', parent.OnText))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Dimensioning', self.Image('dimension'), 'Add a dimension', parent.OnDimensioning))
+        Ribbon.AddToolBarTool(toolbar,'Text', 'text', 'Add a text object', parent.OnText)
+        Ribbon.AddToolBarTool(toolbar,'Dimensioning', 'dimension', 'Add a dimension', parent.OnDimensioning)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Transformations', self.Image('movet'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('Move Translate', self.Image('movet'), 'Translate selected items', parent.OnMoveTranslate))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Copy Translate', self.Image('copyt'), 'Copy and translate selected items', parent.OnCopyTranslate))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Move Rotate', self.Image('mover'), 'Rotate selected items', parent.OnMoveRotate))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Copy Rotate', self.Image('copyr'), 'Copy and rotate selected items', parent.OnCopyRotate))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Move Mirror', self.Image('copym'), 'Mirror selected items', parent.OnMirror))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Move Scale', self.Image('moves'), 'Scale selected items', parent.OnMoveScale))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Move Origin', self.Image('coords3'), 'Move selected items from one origin to another', parent.OnOriginTransform))
+        Ribbon.AddToolBarTool(toolbar,'Move Translate', 'movet', 'Translate selected items', parent.OnMoveTranslate)
+        Ribbon.AddToolBarTool(toolbar,'Copy Translate', 'copyt', 'Copy and translate selected items', parent.OnCopyTranslate)
+        Ribbon.AddToolBarTool(toolbar,'Move Rotate', 'mover', 'Rotate selected items', parent.OnMoveRotate)
+        Ribbon.AddToolBarTool(toolbar,'Copy Rotate', 'copyr', 'Copy and rotate selected items', parent.OnCopyRotate)
+        Ribbon.AddToolBarTool(toolbar,'Move Mirror', 'copym', 'Mirror selected items', parent.OnMirror)
+        Ribbon.AddToolBarTool(toolbar,'Move Scale', 'moves', 'Scale selected items', parent.OnMoveScale)
+        Ribbon.AddToolBarTool(toolbar,'Move Origin', 'coords3', 'Move selected items from one origin to another', parent.OnOriginTransform)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Snapping', self.Image('endof'))
-        self.snapping_toolbar = RB.RibbonButtonBar(panel)
-        self.endof_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Endof', self.Image('endof' if cad.GetDigitizeEnd() else 'endofgray'), 'Snap to end point', self.OnEndof))
-        self.inters_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to intersection', self.OnInters))
-        self.centre_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Centre', self.Image('centre' if cad.GetDigitizeCentre() else 'centregray'), 'Snap to centre', self.OnCentre))
-        self.midpoint_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Midpoint', self.Image('midpoint' if cad.GetDigitizeMidpoint() else 'midpointgray'), 'Snap to midpoint', self.OnMidpoint))
-        self.grid_button = self.AddToolBarTool(self.snapping_toolbar,RibbonButtonData('Grid', self.Image('snap' if cad.GetDigitizeSnapToGrid() else 'snapgray'), 'Snap to grid', self.OnSnap, None, self.OnSnapDropdown if cad.GetDigitizeSnapToGrid() else None))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddOnOffButton(toolbar, 'Endof', 'endof', 'endofgray', cad.GetDigitizeEnd, cad.SetDigitizeEnd, 'Snap to end point')
+        Ribbon.AddOnOffButton(toolbar, 'Inters', 'inters', 'intersgray', cad.GetDigitizeInters, cad.SetDigitizeInters, 'Snap to intersection')
+        Ribbon.AddOnOffButton(toolbar, 'Centre', 'centre', 'centregray', cad.GetDigitizeCentre, cad.SetDigitizeCentre, 'Snap to centre')
+        Ribbon.AddOnOffButton(toolbar, 'Midpoint', 'midpoint', 'midpointgray', cad.GetDigitizeMidpoint, cad.SetDigitizeMidpoint, 'Snap to midpoint')
+        Ribbon.AddOnOffButton(toolbar, 'Grid', 'snap', 'snapgray', cad.GetDigitizeSnapToGrid, cad.SetDigitizeSnapToGrid, 'Snap to grid', self.OnSnapDropdown)
 
         geom_page.Realize()
         
@@ -106,64 +184,65 @@ class Ribbon(RB.RibbonBar):
         
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'Magnify', self.Image('mag'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('Mag Extents', self.Image('magextents'), 'Zoom in to fit the extents of the drawing into the graphics window', parent.OnMagExtents))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Mag No Rotation', self.Image('magnorot'), 'Zoom in to fit the extents of the drawing into the graphics window, but without rotating the view', parent.OnMagNoRot))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Zoom Window', self.Image('mag'), 'Zoom in to a dragged window', parent.OnMag))
+        Ribbon.AddToolBarTool(toolbar,'Mag Extents', 'magextents', 'Zoom in to fit the extents of the drawing into the graphics window', parent.OnMagExtents)
+        Ribbon.AddToolBarTool(toolbar,'Mag No Rotation', 'magnorot', 'Zoom in to fit the extents of the drawing into the graphics window, but without rotating the view', parent.OnMagNoRot)
+        Ribbon.AddToolBarTool(toolbar,'Zoom Window', 'mag', 'Zoom in to a dragged window', parent.OnMag)
         
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'General', self.Image('fullscreen'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('View Back', self.Image('magprev'), 'Go back to previous view', parent.OnMagPrevious))
-        self.AddToolBarTool(toolbar,RibbonButtonData('FullScreen', self.Image('fullscreen'), 'Switch to full screen view ( press escape to return )', parent.OnFullScreen))
-        self.AddToolBarTool(toolbar,RibbonButtonData('Redraw', self.Image('redraw'), 'Redraw', parent.OnRedraw))
+        Ribbon.AddToolBarTool(toolbar,'View Back', 'magprev', 'Go back to previous view', parent.OnMagPrevious)
+        Ribbon.AddToolBarTool(toolbar,'FullScreen', 'fullscreen', 'Switch to full screen view ( press escape to return )', parent.OnFullScreen)
+        Ribbon.AddToolBarTool(toolbar,'Redraw', 'redraw', 'Redraw', parent.OnRedraw)
         
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'Specific Views', self.Image('magxy'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('View XY Front', self.Image('magxy'), 'View XY Front', parent.OnMagXY))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View XY Back', self.Image('magxym'), 'View XY Back', parent.OnMagXYM))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View XZ Top', self.Image('magxz'), 'View XZ Top', parent.OnMagXZ))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View XZ Bottom', self.Image('magxzm'), 'View XZ Bottom', parent.OnMagXZM))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View YZ Right', self.Image('magyz'), 'View YZ Right', parent.OnMagYZ))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View YZ Left', self.Image('magyzm'), 'View YZ Left', parent.OnMagYZM))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View XY Isometric', self.Image('magxyz'), 'View XY Isometric', parent.OnMagXYZ))
+        Ribbon.AddToolBarTool(toolbar,'View XY Front', 'magxy', 'View XY Front', parent.OnMagXY)
+        Ribbon.AddToolBarTool(toolbar,'View XY Back', 'magxym', 'View XY Back', parent.OnMagXYM)
+        Ribbon.AddToolBarTool(toolbar,'View XZ Top', 'magxz', 'View XZ Top', parent.OnMagXZ)
+        Ribbon.AddToolBarTool(toolbar,'View XZ Bottom', 'magxzm', 'View XZ Bottom', parent.OnMagXZM)
+        Ribbon.AddToolBarTool(toolbar,'View YZ Right', 'magyz', 'View YZ Right', parent.OnMagYZ)
+        Ribbon.AddToolBarTool(toolbar,'View YZ Left', 'magyzm', 'View YZ Left', parent.OnMagYZM)
+        Ribbon.AddToolBarTool(toolbar,'View XY Isometric', 'magxyz', 'View XY Isometric', parent.OnMagXYZ)
         
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'View Dragging', self.Image('viewrot'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.AddToolBarTool(toolbar,RibbonButtonData('View Rotate', self.Image('viewrot'), 'Enter view rotating mode', parent.OnViewRotate))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View Zoom', self.Image('zoom'), 'Drag to zoom in and out', parent.OnViewZoom))
-        self.AddToolBarTool(toolbar,RibbonButtonData('View Pan', self.Image('pan'), 'Drag to move view', parent.OnViewPan))
+        Ribbon.AddToolBarTool(toolbar,'View Rotate', 'viewrot', 'Enter view rotating mode', parent.OnViewRotate)
+        Ribbon.AddToolBarTool(toolbar,'View Zoom', 'zoom', 'Drag to zoom in and out', parent.OnViewZoom)
+        Ribbon.AddToolBarTool(toolbar,'View Pan', 'pan', 'Drag to move view', parent.OnViewPan)
 
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'Windows', self.Image('viewrot'))
-        self.windows_toolbar = RB.RibbonButtonBar(panel)
-        objects_button_is_ticked = parent.aui_manager.GetPane(parent.tree_canvas).IsShown()
-        properties_button_is_ticked = parent.aui_manager.GetPane(parent.properties_canvas).IsShown()
-        input_button_is_ticked = parent.aui_manager.GetPane(parent.input_mode_canvas).IsShown()
-        self.objects_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Objects', self.Image('objects' if objects_button_is_ticked else 'objectsgray'), 'Objects', self.OnObjects))
-        self.properties_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Properties', self.Image('properties' if objects_button_is_ticked else 'propertiesgray'), 'Properties', self.OnProperties))
-        self.input_button = self.AddToolBarTool(self.windows_toolbar, RibbonButtonData('Input', self.Image('input' if input_button_is_ticked else 'inputgray'), 'Input', self.OnInput))
+        toolbar = RB.RibbonButtonBar(panel)
+        self.window_button_index = 0
+        self.AddWindowButton(toolbar, 'Objects')
+        self.AddWindowButton(toolbar, 'Properties')
+        self.AddWindowButton(toolbar, 'Input')
 
         view_page.Realize()
 
 
         
-        options_page = RB.RibbonPage(self, wx.ID_ANY, 'Options', self.Image('mag'))
+        options_page = RB.RibbonPage(self, wx.ID_ANY, 'Options', self.Image('settings'))
         options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View', self.Image('mag'))
 
-        combo_rotate_mode = wx.ComboBox(panel, choices = ["Item 1", "Item 2"] )
-        combo_rotate_mode.Select(0)
-        hello_check = wx.CheckBox(panel, wx.ID_ANY, "hello")
+        check = wx.CheckBox(panel, wx.ID_ANY, 'rotate upright')
+        check.SetValue(cad.GetRotateUpright())
+        self.Bind(wx.EVT_CHECKBOX, self.OnRotateUpright, check)
+        combo = wx.ComboBox(panel, choices = ["None", "Input Mode Title", "Full Help"], style = wx.CB_READONLY )
+        combo.Select(cad.GetGraphicsTextMode())
+        self.Bind(wx.EVT_COMBOBOX, self.OnScreenText, combo)
         sizer_panelsizer = wx.BoxSizer(wx.VERTICAL)
         sizer_panelsizer.AddStretchSpacer(1)
-        self.AddLabelAndControl(panel, sizer_panelsizer, 'Rotate Mode', combo_rotate_mode)
-        sizer_panelsizer.Add(hello_check, 0, wx.ALL|wx.EXPAND, 2)
+        sizer_panelsizer.Add(check, 0, wx.ALL|wx.EXPAND, 2)
+        self.AddLabelAndControl(panel, sizer_panelsizer, 'Screen Text', combo)
         sizer_panelsizer.AddStretchSpacer(1)
         panel.SetSizer(sizer_panelsizer)
         
         panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View Colors', self.Image('mag'))
-        self.view_colors_toolbar = RB.RibbonButtonBar(panel)
-        self.background_button1 = self.AddToolBarTool(self.view_colors_toolbar,RibbonButtonData('Background Color 1', self.ColorBitmap(0), 'Edit background color 1', self.OnBackgroundColor1))
-        self.background_button2 = self.AddToolBarTool(self.view_colors_toolbar,RibbonButtonData('Background Color 2', self.ColorBitmap(1), 'Edit background color 2', self.OnBackgroundColor2))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddBackgroundColorButton(toolbar, 'Background Color Top', 'Edit top background color')
+        Ribbon.AddBackgroundColorButton(toolbar, 'Background Color Bottom', 'Edit bottom background color')
         
         options_page.Realize()
         
@@ -175,14 +254,25 @@ class Ribbon(RB.RibbonBar):
                 
         self.Realize()
         
-    def ColorBitmap(self, index):
-        color = cad.GetBackgroundColor(index)
-        bitmap = wx.Bitmap(24, 24)
-        dc = wx.MemoryDC(bitmap)
-        dc.SetBrush(wx.Brush(wx.Colour(color.red, color.green, color.blue)))
-        dc.DrawRectangle(0,0,24,24)
-        del dc
-        return bitmap
+    def AddOnOffButton(toolbar, name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down = None):
+        OnOffButton(name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down).AddToToolbar(toolbar)
+        
+    def AddBackgroundColorButton(toolbar, name, help_str):
+        BackgroundColorButton(name, help_str).AddToToolbar(toolbar)
+        
+    def OnOnOffButton(self):
+        pass
+        
+    def AddWindowButton(self, toolbar, name):
+        shown = self.GetParent().aui_manager.GetPane(name).IsShown()
+        bitmap_name = name.lower()
+        if not shown: bitmap_name += 'gray'
+        help_str = 'Hide' if shown else 'Show'
+        help_str += ' ' + name + ' Window'
+        window_button = Ribbon.AddToolBarTool(toolbar, name, bitmap_name, help_str, self.OnWindowButton)
+        item = toolbar.GetItemById(window_button)
+        toolbar.SetItemClientData(item, (self.GetParent().aui_manager.GetPane(name).window, self.window_button_index))
+        self.window_button_index += 1
         
     def AddLabelAndControl(self, panel, sizer, label, control):
         sizer_horizontal = wx.BoxSizer(wx.HORIZONTAL)
@@ -201,16 +291,21 @@ class Ribbon(RB.RibbonBar):
     def MakeNextIDForTool(self, data):
         return wx.ID_ANY
                         
-    def AddToolBarTool(self, toolbar, data):
-        if data.on_dropdown != None:
-            toolbar.AddHybridButton(self.next_id, data.title, data.bitmap, help_string = data.caption)
-            toolbar.Bind(RB.EVT_RIBBONBUTTONBAR_DROPDOWN_CLICKED, data.on_dropdown, id=self.next_id)
+    def AddToolBarTool2(toolbar, title, bitmap, caption, on_button, on_update_button = None, on_dropdown = None):
+        if on_dropdown != None:
+            toolbar.AddHybridButton(Ribbon.next_id, title, bitmap, help_string = caption)
+            toolbar.Bind(RB.EVT_RIBBONBUTTONBAR_DROPDOWN_CLICKED, on_dropdown, id=Ribbon.next_id)
         else:
-            toolbar.AddButton(self.next_id, data.title, data.bitmap, help_string = data.caption)
-        toolbar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, data.on_button, id=self.next_id)
-        id_to_return = self.next_id
-        self.next_id += 1
+            toolbar.AddButton(Ribbon.next_id, title, bitmap, help_string = caption)
+        toolbar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, on_button, id=Ribbon.next_id)
+        id_to_return = Ribbon.next_id
+        Ribbon.next_id += 1
         return id_to_return
+                        
+    def AddToolBarTool(toolbar, title, bitmap_name, caption, on_button, on_update_button = None, on_dropdown = None):
+        ribbon = toolbar.GetParent().GetParent().GetParent()
+        bitmap = ribbon.Image(bitmap_name)
+        return Ribbon.AddToolBarTool2(toolbar, title, bitmap, caption, on_button, on_update_button, on_dropdown)
                         
     def SetHeightAndImages(self):
         height = self.GetBestHeight(2000)
@@ -233,118 +328,43 @@ class Ribbon(RB.RibbonBar):
     def OnKeyDown(self, event):
         wx.GetApp().OnKeyDown(event)
     
-    def OnEndof(self, e):
-        cad.SetDigitizeEnd( not cad.GetDigitizeEnd() )
-        self.snapping_toolbar.DeleteButton(self.endof_button)
-        self.snapping_toolbar.InsertButton(0, self.endof_button, 'Endof', self.Image('endof' if cad.GetDigitizeEnd() else 'endofgray'), 'Snap to end point')
-    
-    def OnInters(self, e):
-        cad.SetDigitizeInters( not cad.GetDigitizeInters() )
-        self.snapping_toolbar.DeleteButton(self.inters_button)
-        self.snapping_toolbar.InsertButton(1, self.inters_button, 'Inters', self.Image('inters' if cad.GetDigitizeInters() else 'intersgray'), 'Snap to intersection')
-    
-    def OnCentre(self, e):
-        cad.SetDigitizeCentre( not cad.GetDigitizeCentre() )
-        self.snapping_toolbar.DeleteButton(self.centre_button)
-        self.snapping_toolbar.InsertButton(2, self.centre_button, 'Centre', self.Image('centre' if cad.GetDigitizeCentre() else 'centregray'), 'Snap to centre')
-    
-    def OnMidpoint(self, e):
-        cad.SetDigitizeMidpoint( not cad.GetDigitizeMidpoint() )
-        self.snapping_toolbar.DeleteButton(self.midpoint_button)
-        self.snapping_toolbar.InsertButton(3, self.midpoint_button, 'Midpoint', self.Image('midpoint' if cad.GetDigitizeMidpoint() else 'midpointgray'), 'Snap to mid point')
-    
-    def OnSnap(self, e):
-        cad.SetDigitizeSnapToGrid( not cad.GetDigitizeSnapToGrid() )
-        self.snapping_toolbar.DeleteButton(self.grid_button)
-        if cad.GetDigitizeSnapToGrid():
-            self.snapping_toolbar.InsertHybridButton(4, self.grid_button, 'Grid', self.Image('snap'), 'Snap to Grid')
-        else:
-            self.snapping_toolbar.InsertButton(4, self.grid_button, 'Grid', self.Image('snapgray'), 'Snap to Grid')
-
     def OnSnapDropdown(self, e):
-        if cad.GetDigitizeSnapToGrid():
-            cad.SetDigitizeGridSize(wx.GetApp().InputLength('Edit Snap Grid', 'Snap Grid', cad.GetDigitizeGridSize()))
+        cad.SetDigitizeGridSize(wx.GetApp().InputLength('Edit Snap Grid', 'Snap Grid', cad.GetDigitizeGridSize()))
 
-    def OnObjects(self, e):
+    def OnWindowButton(self, e):
         f = self.GetParent()
-        pane_info = f.aui_manager.GetPane(f.tree_canvas)
-        is_shown = pane_info.IsShown()
+        toolbar = e.GetBar()
+        button = e.GetButton()
+        window, index = toolbar.GetItemClientData(button)
+        pane_info = f.aui_manager.GetPane(window)
+        shown = pane_info.IsShown()
         
         if pane_info.IsOk():
-            pane_info.Show(not is_shown)
-            is_shown = not is_shown
+            shown = not shown
+            pane_info.Show(shown)
             f.aui_manager.Update()
-            
-        f.ribbon.SetObjectsButtonImage()
-        
-    def SetObjectsButtonImage(self):
-        pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().tree_canvas)
-        is_shown = pane_info.IsShown()
-        self.windows_toolbar.DeleteButton(self.objects_button)
-        self.windows_toolbar.InsertButton(0, self.objects_button, 'Objects', self.Image('objects' if is_shown else 'objectsgray'), 'Objects')
-        self.windows_toolbar.Realize()
-            
-    def OnProperties(self, e):
-        f = self.GetParent()
-        pane_info = f.aui_manager.GetPane(f.properties_canvas)
-        is_shown = pane_info.IsShown()
-        
-        if pane_info.IsOk():
-            pane_info.Show(not is_shown)
-            is_shown = not is_shown
-            f.aui_manager.Update()
-            
-        f.ribbon.SetPropertiesButtonImage()
-        
-    def SetPropertiesButtonImage(self):
-        pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().properties_canvas)
-        is_shown = pane_info.IsShown()
-        self.windows_toolbar.DeleteButton(self.properties_button)
-        self.windows_toolbar.InsertButton(1, self.properties_button, 'Properties', self.Image('properties' if is_shown else 'propertiesgray'), 'Properties')
-        self.windows_toolbar.Realize()            
-            
-    def OnInput(self, e):
-        f = self.GetParent()
-        pane_info = f.aui_manager.GetPane(f.input_mode_canvas)
-        is_shown = pane_info.IsShown()
-        
-        if pane_info.IsOk():
-            pane_info.Show(not is_shown)
-            is_shown = not is_shown
-            f.aui_manager.Update()
-            
-        f.ribbon.SetInputButtonImage()
-        
-    def SetInputButtonImage(self):
-        pane_info = self.GetParent().aui_manager.GetPane(self.GetParent().input_mode_canvas)
-        is_shown = pane_info.IsShown()
-        self.windows_toolbar.DeleteButton(self.input_button)
-        self.windows_toolbar.InsertButton(2, self.input_button, 'Input', self.Image('input' if is_shown else 'inputgray'), 'Input')
-        self.windows_toolbar.Realize()                        
-        
-    def OnBackgroundColor1(self, e):
-        self.SelectNewColour(0)
-        self.view_colors_toolbar.DeleteButton(self.background_button1)
-        self.view_colors_toolbar.InsertButton(0, self.background_button1, 'Background Color 1', self.ColorBitmap(0), 'Edit background color 1')
-        self.view_colors_toolbar.Realize()                        
-    
-    def OnBackgroundColor2(self, e):
-        pass
-        
-    def SetBackgroundColor(self, index, wxcolor):
-        c = cad.Color()
-        c.red = wxcolor.red
-        c.green = wxcolor.green
-        c.blue = wxcolor.blue
-        cad.SetBackgroundColor(index, c)
-        self.GetParent().graphics_canvas.Refresh()
 
-    def SelectNewColour(self, index):
-        c = cad.GetBackgroundColor(index)
-        data = wx.ColourData()
-        data.SetColour(wx.Colour(c.red, c.green, c.blue))
-        dlg = wx.ColourDialog(self, data)
-        if dlg.ShowModal() == wx.ID_OK:
-            # Colour did change.
-            self.SetBackgroundColor(index, dlg.GetColourData().GetColour())
-            self.GetParent().graphics_canvas.Refresh()
+        name = f.aui_manager.GetPane(window).name
+        bitmap_name = name.lower()
+        if not shown: bitmap_name += 'gray'
+        bitmap = self.Image(bitmap_name)
+        help_str = 'Hide' if shown else 'Show'
+        help_str += ' ' + name + ' Window'
+            
+        item_id = toolbar.GetItemId(button)
+        toolbar.DeleteButton(item_id)
+        item = toolbar.InsertButton(index, item_id, name, bitmap, help_str)
+        toolbar.SetItemClientData(item, (self.GetParent().aui_manager.GetPane(name).window, index))
+        
+        toolbar.Realize()
+            
+    def OnRotateUpright(self, event):
+        cad.SetRotateUpright(event.IsChecked())
+        HeeksConfig().WriteBool("RotateUpright", event.IsChecked())
+        
+    def OnScreenText(self, event):
+        cad.SetGraphicsTextMode(cad.GraphicsTextMode(event.GetSelection()))
+        HeeksConfig().WriteInt("TextMode", event.GetSelection())
+
+        cad.Repaint()
+        

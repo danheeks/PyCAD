@@ -79,10 +79,11 @@ class App(wx.App):
                 height = -1
                 x = -1
                 y = -1
+                
+        self.LoadConfig()
         
         self.frame = self.NewFrame(wx.Point(x, y), wx.Size(width, height))
         self.frame.Show()
-        self.LoadConfig()
         self.OnNewOrOpen(False)
         cad.ClearHistory()
         cad.SetLikeNewFile()
@@ -102,6 +103,17 @@ class App(wx.App):
     def LoadConfig(self):
         config = HeeksConfig(self.settings_restored)
         self.LoadRecentFiles(config)
+
+        # snapping
+        cad.SetDigitizeEnd(config.ReadBool("Endof", True))
+        cad.SetDigitizeInters(config.ReadBool("Inters", False))
+        cad.SetDigitizeCentre(config.ReadBool("Centre", True))
+        cad.SetDigitizeMidpoint(config.ReadBool("Midpoint", False))
+        cad.SetDigitizeSnapToGrid(config.ReadBool("Grid", True))
+        
+        cad.SetRotateUpright(config.ReadBool("RotateUpright", False))
+        cad.SetGraphicsTextMode(cad.GraphicsTextMode(config.ReadInt("TextMode", int(cad.GraphicsTextMode.FullHelp))))
+        
 
     def GetDefaultDir(self):
         default_directory = os.getcwd()
@@ -368,6 +380,7 @@ class App(wx.App):
         static_label = wx.StaticText(dlg, label = prompt)
         sizerMain.Add( static_label, 0, wx.ALL, wx.ALIGN_LEFT, control_border )
         value_control = LengthCtrl(dlg)
+        value_control.SetValue(value)
         dlg.AddLabelAndControl( sizerMain, name, value_control )
         dlg.MakeOkAndCancel( wx.HORIZONTAL ).AddToSizer( sizerMain )
         dlg.SetSizer( sizerMain )

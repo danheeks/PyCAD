@@ -43,7 +43,7 @@ public:
 	void Turn(double ang_x, double ang_y);
 	void TurnI(IPoint point_diff);
 	void TurnVertical(double ang_x, double ang_y);
-	void TurnVertical(IPoint point_diff);
+	void TurnVerticalI(IPoint point_diff);
 	void Shift(const Point3d &tv);
 	void ShiftI(const IPoint &point_diff);
 	void Scale(double multiplier, bool use_initial_pixel_scale = false);

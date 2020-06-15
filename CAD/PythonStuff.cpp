@@ -47,6 +47,7 @@
 #include "KeyCode.h"
 #include "Gripper.h"
 #include "GripperSelTransform.h"
+#include "CoordinateSystem.h"
 
 void OnExit()
 {
@@ -1824,6 +1825,129 @@ void SetBackgroundColor(int index, const HeeksColor& color)
 		theApp->background_color[index] = color;
 }
 
+BackgroundMode GetBackgroundMode()
+{
+	return theApp->m_background_mode;
+}
+
+void SetBackgroundMode(BackgroundMode mode)
+{
+	theApp->m_background_mode = mode;
+}
+
+bool GetRotateUpright()
+{
+	return theApp->m_rotate_mode == 0;
+}
+
+void SetRotateUpright(bool upright)
+{
+	theApp->m_rotate_mode = upright ? 0:1;
+}
+
+GraphicsTextMode GetGraphicsTextMode()
+{
+	return theApp->m_graphics_text_mode;
+}
+
+void SetGraphicsTextMode(GraphicsTextMode mode)
+{
+	theApp->m_graphics_text_mode = mode;
+}
+
+bool GetReverseZooming()
+{
+	return ViewZooming::m_reversed;
+}
+
+void SetReverseZooming(bool reversed)
+{
+	ViewZooming::m_reversed = reversed;
+}
+
+bool GetShowDatum()
+{
+	return theApp->m_show_datum_coords_system;
+}
+
+void SetShowDatum(bool show)
+{
+	theApp->m_show_datum_coords_system = show;
+}
+
+bool GetDatumSolid()
+{
+	return theApp->m_datum_coords_system_solid_arrows;
+}
+
+void SetDatumSolid(bool solid)
+{
+	theApp->m_datum_coords_system_solid_arrows = solid;
+}
+
+double GetDatumSize()
+{
+	return CoordinateSystem::size;
+}
+
+void SetDatumSize(double size)
+{
+	CoordinateSystem::size = size;
+}
+
+bool GetDatumSizeIsPixelsNotMm()
+{
+	return CoordinateSystem::size_is_pixels;
+}
+
+void SetDatumSizeIsPixelsNotMm(bool p)
+{
+	CoordinateSystem::size_is_pixels = p;
+}
+
+bool GetShowRuler()
+{
+	return theApp->m_show_ruler;
+}
+
+void SetShowRuler(bool show)
+{
+	theApp->m_show_ruler = show;
+}
+
+int GetGridMode()
+{
+	return theApp->grid_mode;
+}
+
+void SetGridMode(int mode)
+{
+	theApp->grid_mode = mode;
+}
+
+bool GetPerspective()
+{
+	return theApp->m_current_viewport->m_view_point.GetPerspective();
+}
+
+void SetPerspective(bool p)
+{
+	theApp->m_current_viewport->m_view_point.SetPerspective(p);
+}
+
+
+HeeksColor GetCurrentColor()
+{
+	return theApp->current_color;
+}
+
+void SetCurrentColor(const HeeksColor& color)
+{
+	theApp->current_color = color;
+}
+
+
+
 
 	BOOST_PYTHON_MODULE(cad) {
 		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
@@ -2025,6 +2149,7 @@ void SetBackgroundColor(int index, const HeeksColor& color)
 			.def("Unproject", &CViewPoint::glUnproject)
 			.def("ShiftI", &CViewPoint::ShiftI)
 			.def("TurnI", &CViewPoint::TurnI)
+			.def("TurnVerticalI", &CViewPoint::TurnVerticalI)
 			.def("Rightwards", &CViewPoint::rightwards_vector)
 			.def("Forwards", &CViewPoint::forwards_vector)
 			.def_readwrite("lens_point", &CViewPoint::m_lens_point)
@@ -2309,6 +2434,20 @@ void SetBackgroundColor(int index, const HeeksColor& color)
 			.value("MaxSketchOrderTypes", MaxSketchOrderTypes)
 			;
 
+		boost::python::enum_<GraphicsTextMode>("GraphicsTextMode")
+			.value("None", GraphicsTextModeNone)
+			.value("InputTitle", GraphicsTextModeInputTitle)
+			.value("FullHelp", GraphicsTextModeWithHelp)
+			;
+
+		boost::python::enum_<BackgroundMode>("BackgroundMode")
+			.value("OneColor", BackgroundModeOneColor)
+			.value("TwoColors", BackgroundModeTwoColors)
+			.value("TwoColorsLeftToRight", BackgroundModeTwoColorsLeftToRight)
+			.value("FourColors", BackgroundModeFourColors)
+			.value("SkyDome", BackgroundModeSkyDome)
+			;
+
 		boost::python::class_<DigitizedPoint>("DigitizedPoint")
 			.def(boost::python::init<DigitizedPoint>())
 			.def_readwrite("point", &DigitizedPoint::m_point)
@@ -2464,6 +2603,30 @@ void SetBackgroundColor(int index, const HeeksColor& color)
 		boost::python::def("SetDigitizeGridSize", SetDigitizeGridSize);
 		boost::python::def("GetBackgroundColor", GetBackgroundColor);
 		boost::python::def("SetBackgroundColor", SetBackgroundColor);
+		boost::python::def("GetBackgroundMode", GetBackgroundMode);
+		boost::python::def("SetBackgroundMode", SetBackgroundMode);
+		boost::python::def("GetRotateUpright", GetRotateUpright);
+		boost::python::def("SetRotateUpright", SetRotateUpright);
+		boost::python::def("GetGraphicsTextMode", GetGraphicsTextMode);
+		boost::python::def("SetGraphicsTextMode", SetGraphicsTextMode);
+		boost::python::def("GetReverseZooming", GetReverseZooming);
+		boost::python::def("SetReverseZooming", SetReverseZooming);
+		boost::python::def("GetShowDatum", GetShowDatum);
+		boost::python::def("SetShowDatum", SetShowDatum);
+		boost::python::def("GetDatumSolid", GetDatumSolid);
+		boost::python::def("SetDatumSolid", SetDatumSolid);
+		boost::python::def("GetDatumSize", GetDatumSize);
+		boost::python::def("SetDatumSize", SetDatumSize);
+		boost::python::def("GetDatumSizeIsPixelsNotMm", GetDatumSizeIsPixelsNotMm);
+		boost::python::def("SetDatumSizeIsPixelsNotMm", SetDatumSizeIsPixelsNotMm);
+		boost::python::def("GetShowRuler", GetShowRuler);
+		boost::python::def("SetShowRuler", SetShowRuler);
+		boost::python::def("GetGridMode", GetGridMode);
+		boost::python::def("SetGridMode", SetGridMode);
+		boost::python::def("GetPerspective", GetPerspective);
+		boost::python::def("SetPerspective", SetPerspective);
+		boost::python::def("GetCurrentColor", GetCurrentColor);
+		boost::python::def("SetCurrentColor", SetCurrentColor);
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;

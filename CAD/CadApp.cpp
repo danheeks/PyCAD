@@ -67,7 +67,7 @@ CCadApp::CCadApp()
 	for (int i = 0; i<NUM_BACKGROUND_COLORS; i++)background_color[i] = HeeksColor(0, 0, 0);
 	background_color[0] = HeeksColor(255, 255, 255);
 	background_color[1] = HeeksColor(181, 230, 29);
-	m_background_mode = BackgroundModeOneColor;
+	m_background_mode = BackgroundModeTwoColors;
 	current_color = HeeksColor(0, 0, 0);
 	input_mode_object = NULL;
 	cur_mouse_pos = IPoint(0, 0);
@@ -125,8 +125,6 @@ CCadApp::CCadApp()
 	m_revolve_angle = 360.0;
 	m_fit_arcs_on_solid_outline = false;
 	m_stl_save_as_binary = true;
-	m_mouse_move_highlighting = true;
-	m_highlight_color = HeeksColor(128, 255, 0);
 
 	InitializeCreateFunctions();
 

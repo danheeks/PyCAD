@@ -30,7 +30,7 @@ void ViewRotating::OnMouse( MouseEvent& event )
 			}
 			else
 			{
-				theApp->m_current_viewport->m_view_point.TurnVertical(dm);
+				theApp->m_current_viewport->m_view_point.TurnVerticalI(dm);
 			}
 		}
 		else if(event.m_middleDown)

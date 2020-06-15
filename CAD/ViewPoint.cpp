@@ -69,7 +69,7 @@ void CViewPoint::Turn(double ang_x, double ang_y){
 	m_vertical = m_vertical - uu * (1-cos(ang_y));
 }
 
-void CViewPoint::TurnVertical(IPoint point_diff){
+void CViewPoint::TurnVerticalI(IPoint point_diff){
 	if(point_diff.x > 100)point_diff.x = 100;
 	else if(point_diff.x < -100)point_diff.x = -100;
 	if(point_diff.y > 100)point_diff.y = 100;

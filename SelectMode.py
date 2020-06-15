@@ -121,7 +121,10 @@ class SelectMode(cad.InputMode):
                 if event.controlDown and not event.leftDown:
                     v.view_point.ShiftI(dm)
                 else:
-                    v.view_point.TurnI(dm)
+                    if cad.GetRotateUpright():
+                        v.view_point.TurnVerticalI(dm)
+                    else:
+                        v.view_point.TurnI(dm)
                 v.need_update = True
                 v.need_refresh = True
             elif event.leftDown:
