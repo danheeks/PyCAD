@@ -37,8 +37,7 @@ class OnOffButton:
         ribbon = toolbar.GetParent().GetParent().GetParent()
         bitmap = ribbon.Image(bm)
         item_id = toolbar.GetItemId(button)
-        toolbar.DeleteButton(item_id)
-        item = toolbar.InsertButton(self.index, item_id, self.name, bitmap, self.help_str)
+        toolbar.SetButtonIcon(item_id, bitmap)
         
 class BackgroundColorButton:
     def __init__(self, name, help_str):
@@ -67,8 +66,7 @@ class BackgroundColorButton:
         toolbar = event.GetBar()
         button = event.GetButton()
         item_id = toolbar.GetItemId(button)
-        toolbar.DeleteButton(item_id)
-        item = toolbar.InsertButton(self.index, item_id, self.name, self.ColorBitmap(), self.help_str)
+        toolbar.SetButtonIcon(item_id, self.ColorBitmap())
         
     def SetBackgroundColor(self, index, wxcolor):
         c = cad.Color()
@@ -349,9 +347,7 @@ class Ribbon(RB.RibbonBar):
         help_str += ' ' + name + ' Window'
             
         item_id = toolbar.GetItemId(button)
-        toolbar.DeleteButton(item_id)
-        item = toolbar.InsertButton(index, item_id, name, bitmap, help_str)
-        toolbar.SetItemClientData(item, (self.GetParent().aui_manager.GetPane(name).window, index))
+        toolbar.SetButtonIcon(item_id, bitmap)
         
         toolbar.Realize()
             
@@ -364,4 +360,8 @@ class Ribbon(RB.RibbonBar):
         HeeksConfig().WriteInt("TextMode", event.GetSelection())
 
         cad.Repaint()
-        
+
+if __name__ == '__main__':
+    from SolidApp import SolidApp
+    app = SolidApp()
+    app.MainLoop()
