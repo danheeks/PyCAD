@@ -7,7 +7,7 @@ from HDialog import HDialog
 from HDialog import control_border
 from NiceTextCtrl import LengthCtrl
 from NiceTextCtrl import DoubleCtrl
-import wx.ribbon as RB
+from Ribbon import RB
 from Ribbon import Ribbon
     
 def ImportSTEPFile():
@@ -223,28 +223,6 @@ class SolidApp(App):
             config.WriteFloat('EdgeChamferDist', rad)
             cad.ClearSelection(True)
             cad.EndHistory()
-    
-    def AddSolidMenu(self, frame):
-        frame.AddMenu('&Solid')
-        frame.AddMenuItem('Add a sphere', self.OnSphere, None, 'sphere')
-        frame.AddMenuItem('Add a cube', self.OnCube, None, 'cube')
-        frame.AddMenuItem('Add a cylinder', self.OnCyl, None, 'cyl')
-        frame.AddMenuItem('Add a cone', self.OnCone, None, 'cone')
-        frame.AddSeparator()
-        frame.AddMenuItem('Loft two sketches', self.OnRuledSurface, None, 'ruled')
-        frame.AddMenuItem('Extrude a sketch', self.OnExtrude, None, 'extrude')
-        frame.AddMenuItem('Revolve a sketch', self.OnRevolve, None, 'revolve')
-        frame.AddMenuItem('Sweep objects along a sketch', self.OnSweep, None, 'sweep')
-        frame.AddSeparator()
-        frame.AddMenuItem('Cut', self.OnSubtract, None, 'subtract')
-        frame.AddMenuItem('Fuse', self.OnFuse, None, 'fuse')
-        frame.AddMenuItem('Common', self.OnCommon, None, 'common')
-        frame.AddSeparator()
-        frame.AddMenuItem('Fillet', self.OnFillet, None, 'fillet')
-        frame.AddMenuItem('Chamfer', self.OnChamfer, None, 'chamfer')
-        frame.EndMenu()
-
-        frame.AddMenuItem('Draw Ellipses', self.OnEllipse, None, 'circles', menu = frame.menuBar.GetMenu(frame.menuBar.FindMenu('&Geometry')))
         
     def AddExtraRibbonPages(self, ribbon):
         
@@ -271,13 +249,18 @@ class SolidApp(App):
         Ribbon.AddToolBarTool(toolbar, 'Fuse', 'fuse', 'Join solids', self.OnFuse)
         Ribbon.AddToolBarTool(toolbar, 'Common', 'common', 'Leave intersection of solids', self.OnCommon)
 
-        panel = RB.RibbonPanel(page, wx.ID_ANY, 'Operations', ribbon.Image('subtract'))
+        panel = RB.RibbonPanel(page, wx.ID_ANY, 'Edge Modifiers', ribbon.Image('subtract'))
         toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(toolbar, 'Round', 'fillet', 'Make Edges Rounded', self.OnFillet)
         Ribbon.AddToolBarTool(toolbar, 'Chamfer', 'chamfer', 'Make Edges Chamfered', self.OnChamfer)
 
-        page.Realize()
+        #frame.AddMenuItem('Draw Ellipses', self.OnEllipse, None, 'circles', menu = frame.menuBar.GetMenu(frame.menuBar.FindMenu('&Geometry')))
 
+        page.Realize()
+        
+        Ribbon.AddToolBarTool(ribbon.other_drawing_toolbar, 'Ellipses', 'circles', 'Draw Ellipses', self.OnEllipse)
+        ribbon.geom_page.Realize()        
+        
         
     def OnEllipse(self, e):
         step.SetEllipseDrawing()
