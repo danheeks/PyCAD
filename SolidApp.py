@@ -7,6 +7,8 @@ from HDialog import HDialog
 from HDialog import control_border
 from NiceTextCtrl import LengthCtrl
 from NiceTextCtrl import DoubleCtrl
+import wx.ribbon as RB
+from Ribbon import Ribbon
     
 def ImportSTEPFile():
     step.ImportSTEPFile(cad.GetFilePathForImportExport())
@@ -23,7 +25,8 @@ class SolidApp(App):
         step.SetApp(cad.GetApp())
         App.RegisterObjectTypes(self)
         cad.RegisterOnEndXmlWrite(step.WriteSolids)
-        step.SetStepFileObjectType(cad.RegisterObjectType("STEP_file", step.CreateStepFileObject))
+        step.SetStepFileObjectType(cad.RegisterObjectType("STEP_file", step.CreateStepFileObject, add_to_filter = False))
+        step.SetSolidType(cad.RegisterObjectType("Solid", None))
         cad.RegisterImportFileType("step", ImportSTEPFile)
         cad.RegisterImportFileType("stp", ImportSTEPFile)
         
@@ -242,6 +245,39 @@ class SolidApp(App):
         frame.EndMenu()
 
         frame.AddMenuItem('Draw Ellipses', self.OnEllipse, None, 'circles', menu = frame.menuBar.GetMenu(frame.menuBar.FindMenu('&Geometry')))
+        
+    def AddExtraRibbonPages(self, ribbon):
+        
+        page = RB.RibbonPage(ribbon, wx.ID_ANY, 'Solid', ribbon.Image('solids'))
+        page.Bind(wx.EVT_KEY_DOWN, ribbon.OnKeyDown)
+
+        panel = RB.RibbonPanel(page, wx.ID_ANY, 'Primitives', ribbon.Image('solids'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar, 'Sphere', 'sphere', 'Add a sphere', self.OnSphere)
+        Ribbon.AddToolBarTool(toolbar, 'Cube', 'cube', 'Add a cube', self.OnCube)
+        Ribbon.AddToolBarTool(toolbar, 'Cylinder', 'cyl', 'Add a cylinder', self.OnCyl)
+        Ribbon.AddToolBarTool(toolbar, 'Cone', 'cone', 'Add a cone', self.OnCone)
+
+        panel = RB.RibbonPanel(page, wx.ID_ANY, 'Sketch Conversions', ribbon.Image('ruled'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar, 'Ruled', 'ruled', 'Loft multiple sketches', self.OnRuledSurface)
+        Ribbon.AddToolBarTool(toolbar, 'Extrude', 'extrude', 'Extrude a sketch', self.OnExtrude)
+        Ribbon.AddToolBarTool(toolbar, 'Revolve', 'revolve', 'Revolve a sketch', self.OnRevolve)
+        Ribbon.AddToolBarTool(toolbar, 'Sweep', 'sweep', 'Sweep objects along a sketch', self.OnSweep)
+
+        panel = RB.RibbonPanel(page, wx.ID_ANY, 'Operations', ribbon.Image('subtract'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar, 'Cut', 'subtract', 'Cut solid with solids', self.OnSubtract)
+        Ribbon.AddToolBarTool(toolbar, 'Fuse', 'fuse', 'Join solids', self.OnFuse)
+        Ribbon.AddToolBarTool(toolbar, 'Common', 'common', 'Leave intersection of solids', self.OnCommon)
+
+        panel = RB.RibbonPanel(page, wx.ID_ANY, 'Operations', ribbon.Image('subtract'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar, 'Round', 'fillet', 'Make Edges Rounded', self.OnFillet)
+        Ribbon.AddToolBarTool(toolbar, 'Chamfer', 'chamfer', 'Make Edges Chamfered', self.OnChamfer)
+
+        page.Realize()
+
         
     def OnEllipse(self, e):
         step.SetEllipseDrawing()

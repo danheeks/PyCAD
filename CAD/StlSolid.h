@@ -38,7 +38,6 @@ public:
 	virtual const CStlSolid& operator=(const CStlSolid& s);
 
 	int GetType()const{return StlSolidType;}
-	long GetMarkingMask()const{return MARKING_FILTER_STL_SOLID;}
 	const wchar_t* GetTypeString(void)const{return L"STL Solid";}
 	const wchar_t* GetIconFilePath();
 	void GetProperties(std::list<Property *> *list);

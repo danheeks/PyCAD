@@ -24,7 +24,6 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return PointType;}
-	long GetMarkingMask()const{return MARKING_FILTER_POINT;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{return L"Point";}

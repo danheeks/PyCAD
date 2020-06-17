@@ -48,6 +48,7 @@
 #include "Gripper.h"
 #include "GripperSelTransform.h"
 #include "CoordinateSystem.h"
+#include "Filter.h"
 
 void OnExit()
 {
@@ -302,6 +303,8 @@ void CadImport(const std::wstring &filepath, HeeksObj* paste_into = NULL)
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(CadImportOverloads, CadImport, 1, 2)
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(RegisterObjectTypeOverloads, RegisterObjectType, 2, 3)
 
 bool CadSaveFile(std::wstring fp)
 {
@@ -1759,7 +1762,7 @@ void EndDrawing()
 	theApp->RestoreInputMode();
 }
 
-boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool one_of_each, int filter)
+boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool one_of_each, const CFilter &filter)
 {
 	window.MakePositive();
 
@@ -2233,6 +2236,12 @@ void SetCurrentColor(const HeeksColor& color)
 			.def_readwrite("height", &IRect::height)
 			;
 
+		boost::python::class_<CFilter>("Filter")
+			.def("Clear", &CFilter::Clear)
+			.def("AddType", &CFilter::AddType)
+			.def("CanTypeBePicked", &CFilter::CanTypeBePicked)
+			;
+
 		boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
 			.def(boost::python::init<ObserverWrap>())
 			;
@@ -2491,7 +2500,8 @@ void SetCurrentColor(const HeeksColor& color)
 		boost::python::def("DrawDisableLights", &DrawDeleteList);
 		boost::python::def("AddProperty", AddProperty);
 		boost::python::def("GetObjectFromId", &GetObjectFromId);
-		boost::python::def("RegisterObjectType", RegisterObjectType);
+		boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));
+		boost::python::def("GetObjectNamesAndTypes", GetObjectNamesAndTypes);
 		boost::python::def("SetXmlValue", SetXmlValue);
 		boost::python::def("BeginXmlChild", BeginXmlChild);
 		boost::python::def("EndXmlChild", EndXmlChild);
@@ -2647,7 +2657,5 @@ void SetCurrentColor(const HeeksColor& color)
 		boost::python::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
-		boost::python::scope().attr("MARKING_FILTER_SKETCH_GROUP") = (int)MARKING_FILTER_SKETCH_GROUP;
-		boost::python::scope().attr("MARKING_FILTER_STL_SOLID") = (int)MARKING_FILTER_STL_SOLID;
 		
 	}

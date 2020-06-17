@@ -185,6 +185,7 @@
     <ClInclude Include="dxf.h" />
     <ClInclude Include="EndedObject.h" />
     <ClInclude Include="ExtrudedObj.h" />
+    <ClInclude Include="Filter.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="GripData.h" />
     <ClInclude Include="Gripper.h" />

@@ -116,6 +116,7 @@ class App(wx.App):
         
         cad.SetBackgroundColor(0, cad.Color(config.ReadInt("BackgroundColor0", cad.Color(230, 255, 255).ref())))
         cad.SetBackgroundColor(1, cad.Color(config.ReadInt("BackgroundColor1", cad.Color(255, 255, 255).ref())))
+        cad.SetCurrentColor(cad.Color(config.ReadInt("CurrentColor", cad.Color(0, 0, 0).ref())))
         
 
     def GetDefaultDir(self):
@@ -424,6 +425,9 @@ class App(wx.App):
         else:
             return False
         return True
+    
+    def AddExtraRibbonPages(self, ribbon):
+        pass
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

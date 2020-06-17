@@ -43,7 +43,7 @@ class OnOffButton:
             toolbar.DeleteButton(item_id)
             toolbar.InsertButton(self.index, item_id, self.name, bitmap, self.help_str)
         
-class BackgroundColorButton:
+class ColorButton:
     def __init__(self, name, help_str):
         self.name = name
         self.help_str = help_str
@@ -56,7 +56,7 @@ class BackgroundColorButton:
         Ribbon.AddToolBarTool2(toolbar, self.name, self.ColorBitmap(), self.help_str, self.OnButton)       
         
     def ColorBitmap(self):
-        color = cad.GetBackgroundColor(self.index)
+        color = self.GetColor()
         bitmap = wx.Bitmap(24, 24)
         dc = wx.MemoryDC(bitmap)
         dc.SetBrush(wx.Brush(wx.Colour(color.red, color.green, color.blue)))
@@ -65,8 +65,7 @@ class BackgroundColorButton:
         return bitmap
         
     def OnButton(self, event):
-        self.SelectNewColour(self.index)
-
+        self.SelectNewColour()
         toolbar = event.GetBar()
         button = event.GetButton()
         item_id = toolbar.GetItemId(button)
@@ -75,25 +74,47 @@ class BackgroundColorButton:
         except AttributeError:
             toolbar.DeleteButton(item_id)
             item = toolbar.InsertButton(self.index, item_id, self.name, self.ColorBitmap(), self.help_str)
-        
-    def SetBackgroundColor(self, index, wxcolor):
-        c = cad.Color()
-        c.red = wxcolor.red
-        c.green = wxcolor.green
-        c.blue = wxcolor.blue
-        cad.SetBackgroundColor(index, c)
-        self.ribbon.GetParent().graphics_canvas.Refresh()
 
-    def SelectNewColour(self, index):
-        c = cad.GetBackgroundColor(index)
+    def SelectNewColour(self):
+        c = self.GetColor()
         data = wx.ColourData()
         data.SetColour(wx.Colour(c.red, c.green, c.blue))
         dlg = wx.ColourDialog(self.ribbon, data)
         if dlg.ShowModal() == wx.ID_OK:
             # Colour did change.
-            self.SetBackgroundColor(index, dlg.GetColourData().GetColour())
-            HeeksConfig().WriteInt("BackgroundColor" + str(index), cad.GetBackgroundColor(index).ref())
-            self.ribbon.GetParent().graphics_canvas.Refresh()
+            self.SetColor(self.wxToCadColor(dlg.GetColourData().GetColour()))
+        
+    def wxToCadColor(self, wxcolor):
+        c = cad.Color()
+        c.red = wxcolor.red
+        c.green = wxcolor.green
+        c.blue = wxcolor.blue
+        return c
+        
+class CurrentColorButton(ColorButton):
+    def __init__(self, name, help_str):
+        ColorButton.__init__(self, name, help_str)
+        
+    def GetColor(self):
+        return cad.GetCurrentColor()
+        
+    def SetColor(self, c):
+        cad.SetCurrentColor(c)
+        HeeksConfig().WriteInt("CurrentColor", c.ref())
+        self.ribbon.GetParent().graphics_canvas.Refresh()
+
+    
+class BackgroundColorButton(ColorButton):
+    def __init__(self, name, help_str):
+        ColorButton.__init__(self, name, help_str)
+        
+    def GetColor(self):
+        return cad.GetBackgroundColor(self.index)
+        
+    def SetColor(self, c):
+        cad.SetBackgroundColor(self.index, c)
+        HeeksConfig().WriteInt("BackgroundColor" + str(self.index), c.ref())
+        self.ribbon.GetParent().graphics_canvas.Refresh()
 
 
 class Ribbon(RB.RibbonBar):
@@ -133,6 +154,7 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar, "Paste", 'paste', 'Paste items from the clipboard', parent.OnPaste, parent.OnUpdatePaste)
         Ribbon.AddToolBarTool(toolbar, "Delete", 'delete', 'Delete selected items', parent.OnDelete, parent.OnUpdateDelete)
         Ribbon.AddToolBarTool(toolbar, "Select", 'select', 'Select Mode', parent.OnSelectMode)
+        Ribbon.AddToolBarTool(toolbar, "Filter", 'filter', 'Edit theSelection Filter', parent.OnFilter)
 
         main_page.Realize()
 
@@ -147,6 +169,7 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar,'Obrounds', 'obround', 'Draw obrounds', parent.OnLines)
         Ribbon.AddToolBarTool(toolbar,'Polygons', 'pentagon', 'Draw polygons', parent.OnLines)
         Ribbon.AddToolBarTool(toolbar,'Gear', 'gear', 'Add a gear', parent.OnGear)
+        CurrentColorButton('Drawing Color', 'Edit current drawing color').AddToToolbar(toolbar)
         
         panel = RB.RibbonPanel(geom_page, wx.ID_ANY, 'Circles', self.Image('circ3p'))
         toolbar = RB.RibbonButtonBar(panel)
@@ -226,7 +249,8 @@ class Ribbon(RB.RibbonBar):
 
         view_page.Realize()
 
-
+        # Add extra pages before the Options page
+        wx.GetApp().AddExtraRibbonPages(self)
         
         options_page = RB.RibbonPage(self, wx.ID_ANY, 'Options', self.Image('settings'))
         options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
@@ -248,20 +272,16 @@ class Ribbon(RB.RibbonBar):
         
         panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View Colors', self.Image('mag'))
         toolbar = RB.RibbonButtonBar(panel)
-        Ribbon.AddBackgroundColorButton(toolbar, 'Background Color Top', 'Edit top background color')
-        Ribbon.AddBackgroundColorButton(toolbar, 'Background Color Bottom', 'Edit bottom background color')
-        
+        BackgroundColorButton('Background Color Top', 'Edit top background color').AddToToolbar(toolbar)
+        BackgroundColorButton('Background Color Bottom', 'Edit bottom background color').AddToToolbar(toolbar)
+
+
         options_page.Realize()
-
-
                 
         self.Realize()
         
     def AddOnOffButton(toolbar, name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down = None):
         OnOffButton(name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down).AddToToolbar(toolbar)
-        
-    def AddBackgroundColorButton(toolbar, name, help_str):
-        BackgroundColorButton(name, help_str).AddToToolbar(toolbar)
         
     def OnOnOffButton(self):
         pass

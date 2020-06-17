@@ -29,7 +29,6 @@ public:
 	bool operator!= ( const CSketch & rhs ) const { return(! (*this == rhs)); }
 
 	int GetType()const{return SketchType;}
-	long GetMarkingMask()const{return MARKING_FILTER_SKETCH;}
 	const wchar_t* GetTypeString(void)const{return L"Sketch";}
 	const wchar_t* GetIconFilePath();
 	void GetProperties(std::list<Property *> *list);

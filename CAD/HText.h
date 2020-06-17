@@ -27,7 +27,6 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return TextType;}
-	long GetMarkingMask()const{return MARKING_FILTER_TEXT;}
 	void glCommands(bool select, bool marked, bool no_color);
 	bool DrawAfterOthers(){return true;}
 	void GetBox(CBox &box);

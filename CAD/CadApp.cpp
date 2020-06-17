@@ -35,6 +35,7 @@
 #include "HILine.h"
 #include "HText.h"
 #include "HeeksFont.h"
+#include "Filter.h"
 
 CCadApp *theApp = new CCadApp;
 
@@ -2301,7 +2302,7 @@ IRect CCadApp::PointToPickBox(const IPoint& point)
 	return IRect(point.x - 5, theApp->m_current_viewport->GetViewportSize().GetHeight() - point.y - 5, 10, 10);
 }
 
-void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, unsigned int filter, std::list<HeeksObj*> &objects)
+void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects)
 {
 	if (only_if_fully_in){
 		// only select objects which are completely within the window
@@ -2357,7 +2358,7 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 			HeeksObj* object_to_use = NULL;
 			while (object && (object != theApp))
 			{
-				if ((object->GetMarkingMask() & filter) && (object->GetMarkingMask() != 0)){
+				if (filter.CanTypeBePicked(object->GetType())){
 					object_to_use = object;
 				}
 				object = object->m_owner;

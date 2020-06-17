@@ -672,5 +672,6 @@ public:
 
 void CallPythonCallback(PyObject* callback);
 HeeksObj* CreatePyObjectWithName(const std::string& name);
-int RegisterObjectType(std::wstring name, PyObject *callback);
+int RegisterObjectType(std::wstring name, PyObject *callback = NULL, bool add_to_filter = true);
+boost::python::list GetObjectNamesAndTypes(void);
 

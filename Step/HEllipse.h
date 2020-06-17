@@ -35,7 +35,6 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{ return m_type; }
-	long GetMarkingMask()const{return MARKING_FILTER_CIRCLE;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{ return L"Ellipse"; }

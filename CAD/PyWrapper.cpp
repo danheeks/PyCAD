@@ -182,6 +182,7 @@ bool AfterPythonCall(PyObject *main_module)
 
 	static std::map<std::string, PyObject*> xml_read_callbacks;
 	static std::map<std::string, int> custom_object_type_map;
+	static std::map<std::string, int> filter_object_type_map; // same as custom_object_type_map, but with onyl the objects to add to the filter
 	static int next_available_custom_object_type = ObjectMaximumType;
 
 	HeeksObj* CreatePyObjectWithName(const std::string& name)
@@ -208,7 +209,7 @@ bool AfterPythonCall(PyObject *main_module)
 		return object;
 	}
 
-	int RegisterObjectType(std::wstring name, PyObject *callback)
+	int RegisterObjectType(std::wstring name, PyObject *callback, bool add_to_filter)
 	{
 		// registers the Create function to be called in python from CCadApp::CreateObjectOfType
 		// returns the int type stored by CCadApp
@@ -219,6 +220,9 @@ bool AfterPythonCall(PyObject *main_module)
 			// add an entry in map from name to 
 			xml_read_callbacks.insert(std::make_pair(name_c, callback));
 		}
+
+		if (!add_to_filter)
+			return 0;
 
 		std::map<std::string, int>::iterator FindIt = custom_object_type_map.find(name_c);
 
@@ -233,3 +237,28 @@ bool AfterPythonCall(PyObject *main_module)
 
 		return FindIt->second;
 	}
+
+
+	boost::python::list GetObjectNamesAndTypes(void)
+	{
+		boost::python::list return_list;
+
+		// add the built in types
+		return_list.append(boost::python::make_tuple(std::wstring(L"Point"), (int)PointType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Line"), (int)LineType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Arc"), (int)ArcType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Infinite Line"), (int)ILineType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Circle"), (int)CircleType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Sketch"), (int)SketchType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"STL Solid"), (int)StlSolidType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Coordinate System"), (int)CoordinateSystemType));
+		return_list.append(boost::python::make_tuple(std::wstring(L"Text"), (int)TextType));
+
+		// add the custom types
+		for (std::map<std::string, int>::iterator It = custom_object_type_map.begin(); It != custom_object_type_map.end(); It++)
+		{
+			return_list.append(boost::python::make_tuple(It->first, It->second));
+		}
+		return return_list;
+	}
+	

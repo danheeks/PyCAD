@@ -20,7 +20,7 @@ class SelectMode(cad.InputMode):
         self.dragging_moves_objects = True
         self.drag_gripper = None
         self.ctrl_does_rotate = False
-        self.filter = -1
+        self.filter = cad.Filter()
         
     # cad.InputMode's overridden method
     def GetTitle(self):

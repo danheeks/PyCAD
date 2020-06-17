@@ -43,7 +43,6 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return RulerType;}
-	long GetMarkingMask()const{return MARKING_FILTER_RULER;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void KillGLLists(void);
 	void GetBox(CBox &box);

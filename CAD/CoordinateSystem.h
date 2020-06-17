@@ -27,7 +27,6 @@ public:
 
 	// HeeksObj's virtual functions
 	int GetType()const{return CoordinateSystemType;}
-	long GetMarkingMask()const{return MARKING_FILTER_COORDINATE_SYSTEM;}
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{ return L"Coordinate System"; }

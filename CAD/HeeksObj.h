@@ -16,6 +16,7 @@ class GripData;
 class Matrix;
 class Point3d;
 class Line;
+class CFilter;
 
 // NOTE: If adding to this enumeration, please also add the verbose description to the HeeksCADType() routine
 enum{
@@ -43,25 +44,6 @@ enum{
 };
 
 
-
-#define MARKING_FILTER_LINE					0x00000001
-#define MARKING_FILTER_ARC					0x00000002
-#define MARKING_FILTER_ILINE				0x00000004
-#define MARKING_FILTER_CIRCLE				0x00000008
-#define MARKING_FILTER_POINT				0x00000010
-#define MARKING_FILTER_STL_SOLID			0x00000040
-#define MARKING_FILTER_SKETCH				0x00000400
-#define MARKING_FILTER_IMAGE				0x00000800
-#define MARKING_FILTER_COORDINATE_SYSTEM	0x00000800
-#define MARKING_FILTER_TEXT					0x00001000
-#define MARKING_FILTER_DIMENSION			0x00002000
-#define MARKING_FILTER_RULER				0x00004000
-#define MARKING_FILTER_GEAR					0x00100000
-#define MARKING_FILTER_AREA					0x00200000
-#define MARKING_FILTER_UNKNOWN				0x00800000
-
-#define MARKING_FILTER_SKETCH_GROUP			(MARKING_FILTER_SKETCH | MARKING_FILTER_AREA | MARKING_FILTER_CIRCLE)
-
 class HeeksObj{
 public:
 	HeeksObj* m_owner;
@@ -77,7 +59,6 @@ public:
 
 	// virtual functions
 	virtual int GetType()const{return UnknownType;}
-	virtual long GetMarkingMask()const{return MARKING_FILTER_UNKNOWN;}
 	virtual int GetIDGroupType()const{return GetType();}
 	virtual void glCommands(bool select, bool marked, bool no_color){};
 	virtual bool DrawAfterOthers(){return false;}

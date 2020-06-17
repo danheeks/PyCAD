@@ -5,7 +5,6 @@ from TreeCanvas import TreeCanvas
 from InputModeCanvas import InputModeCanvas
 from PropertiesCanvas import PropertiesCanvas
 from ObjPropsCanvas import ObjPropsCanvas
-from Options import Options
 import cad
 import sys
 import os
@@ -16,6 +15,7 @@ import geom
 import Gear
 from Ribbon import Ribbon
 from About import AboutBox
+from FilterDlg import FilterDlg
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
@@ -580,6 +580,11 @@ class Frame(wx.Frame):
     
     def OnSelectMode(self, e):
         cad.SetInputMode(wx.GetApp().select_mode)
+        
+    def OnFilter(self, e):
+        dlg = FilterDlg()
+        if dlg.ShowModal() == wx.ID_OK:
+            dlg.SetFilterFromCheckBoxes()
         
     def OnMagPrevious(self, e):
         self.graphics_canvas.viewport.RestorePreviousViewPoint()
