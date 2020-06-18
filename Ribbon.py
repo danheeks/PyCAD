@@ -5,55 +5,189 @@ from HeeksConfig import HeeksConfig
 
 control_border = 2
 
-class OnOffButton:
+class BitmapChangingButton:
+    def __init__(self, drop_down = None):
+        self.index = None
+        self.toolbar = None
+        self.drop_down = drop_down
+        self.item_id = None
+    
+    def ChangeBitmap(self):
+        try:
+            self.toolbar.SetButtonIcon(self.item_id, self.GetBitmap())
+            self.toolbar.SetButtonText(self.item_id, self.GetName())
+        except AttributeError:
+            self.toolbar.DeleteButton(self.item_id)
+            if self.drop_down != None:
+                self.toolbar.InsertHybridButton(self.index, self.item_id, self.GetName(), self.GetBitmap(), self.GetHelpStr())
+            else:
+                self.toolbar.InsertButton(self.index, self.item_id, self.GetName(), self.GetBitmap(), self.GetHelpStr())
+        
+    def AddToToolbar(self, toolbar):
+        self.toolbar = toolbar
+        self.index = toolbar.GetButtonCount()
+        self.item_id = Ribbon.AddToolBarTool2(toolbar, self.GetName(), self.GetBitmap(), self.GetHelpStr(), self.OnButton, None, self.drop_down)       
+            
+    def OnButton(self, event):
+        self.ChangeBitmap()
+        
+    def GetRibbon(self):
+        return self.toolbar.GetParent().GetParent().GetParent()
+
+    def GetHelpStr(self):
+        return ''
+        
+class RotateUprightButton(BitmapChangingButton):
+    def __init__(self):
+        self.mode = cad.GetRotateUpright()
+        BitmapChangingButton.__init__(self)
+        
+    def OnButton(self, event):
+        self.mode = not self.mode
+        cad.SetRotateUpright(self.mode)
+        # remember config
+        config = HeeksConfig()
+        config.WriteBool("RotateUpright", self.mode)
+        BitmapChangingButton.OnButton(self, event)
+        
+    def GetName(self):
+        return 'Rotate Upright' if self.mode == True else 'Rotate Free'
+    
+    def GetBitmap(self):
+        return self.GetRibbon().Image('rotate upright' if self.mode == True else 'rotate free')
+        
+class ScreenTextButton(BitmapChangingButton):
+    def __init__(self):
+        self.mode = int(cad.GetGraphicsTextMode())
+        BitmapChangingButton.__init__(self, self.OnDropDown)
+        
+    def OnModeChanged(self):
+        cad.SetGraphicsTextMode(cad.GraphicsTextMode(self.mode))
+        # remember config
+        config = HeeksConfig()
+        config.WriteInt("GraphicsTextMode", self.mode)
+        
+    def OnButton(self, event):
+        self.mode += 1
+        if self.mode == 3:
+            self.mode = 0
+        self.OnModeChanged()
+        BitmapChangingButton.OnButton(self, event)
+        
+    def GetName(self):
+        if self.mode == 1: return 'Screen Text Title'
+        if self.mode == 2: return 'Screen Full Help'
+        return 'No Screen Text'
+    
+    def GetBitmap(self):
+        bm = 'screen text none'
+        if self.mode == 1: bm = 'screen text title'
+        elif self.mode == 2: bm = 'screen text full'
+        return self.GetRibbon().Image(bm)
+        
+    def OnDropDown(self, event):
+        menu = wx.Menu()
+        ribbon = self.GetRibbon()
+        recent_id = ribbon.ID_RECENT_FIRST
+        ribbon.Bind(wx.EVT_MENU, self.OnScreenTextMode, menu.Append(recent_id, 'No Screen Text'))
+        ribbon.Bind(wx.EVT_MENU, self.OnScreenTextMode, menu.Append(recent_id + 1, 'Screen Text Title'))
+        ribbon.Bind(wx.EVT_MENU, self.OnScreenTextMode, menu.Append(recent_id + 2, 'Screen Full Help'))
+        event.PopupMenu(menu);
+        
+    def OnScreenTextMode(self, event):
+        self.mode = event.GetId() - self.GetRibbon().ID_RECENT_FIRST
+        self.OnModeChanged()
+        self.ChangeBitmap()
+
+class OnOffButton(BitmapChangingButton):
     def __init__(self, name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down = None):
+        BitmapChangingButton.__init__(self, drop_down)
         self.name = name
         self.bitmap_name = bitmap_name
         self.bitmap_name_off = bitmap_name_off
         self.get_fn = get_fn
         self.set_fn = set_fn
         self.help_str = help_str
-        self.drop_down = drop_down
-        self.index = None
-        
-    def AddToToolbar(self, toolbar):
-        on = self.get_fn()
-        bm = self.bitmap_name if on else self.bitmap_name_off
-        self.index = toolbar.GetButtonCount()
-        Ribbon.AddToolBarTool(toolbar, self.name, bm, self.help_str, self.OnButton, None, self.drop_down)       
+        self.on = self.get_fn()
             
     def OnButton(self, event):
-        on = self.get_fn()
-        on = not on
-        self.set_fn(on)
+        self.on = not self.on
+        self.set_fn(self.on)
 
         # remember config
         config = HeeksConfig()
-        config.WriteBool(self.name, on)
+        config.WriteBool(self.name, self.on)
         
-        bm = self.bitmap_name if on else self.bitmap_name_off
-        toolbar = event.GetBar()
-        button = event.GetButton()
-        ribbon = toolbar.GetParent().GetParent().GetParent()
-        bitmap = ribbon.Image(bm)
-        item_id = toolbar.GetItemId(button)
-        try:
-            toolbar.SetButtonIcon(item_id, bitmap)
-        except AttributeError:
-            toolbar.DeleteButton(item_id)
-            toolbar.InsertButton(self.index, item_id, self.name, bitmap, self.help_str)
+        BitmapChangingButton.OnButton(self, event)
         
-class ColorButton:
+    def GetName(self):
+        return self.name
+    
+    def GetBitmap(self):
+        bm = self.bitmap_name if self.on else self.bitmap_name_off
+        return self.GetRibbon().Image(bm)
+        
+    def GetHelpStr(self):
+        return self.help_str
+            
+class WindowOnOffButton(BitmapChangingButton):
+    def __init__(self, name, bitmap_path):
+        BitmapChangingButton.__init__(self)
+        self.name = name
+        self.index = None
+        self.bitmap_path = bitmap_path
+        
+    def GetAuiManager(self):
+        frame = self.GetRibbon().GetParent()
+        return frame.aui_manager
+    
+    def GetAuiPane(self):
+        return self.GetAuiManager().GetPane(self.name)
+        
+    def IsShown(self):
+        return self.GetAuiPane().IsShown()
+
+    def BitmapName(self):
+        bitmap_name = self.name.lower()
+        if not self.IsShown(): bitmap_name += 'gray'
+        return bitmap_name
+    
+    def GetName(self):
+        return self.name
+    
+    def GetBitmap(self):
+        return self.GetRibbon().Image2(self.bitmap_path + '/' + self.BitmapName() + '.png')
+    
+    def GetHelpStr(self):
+        help_str = 'Hide' if self.IsShown() else 'Show'
+        help_str += ' ' + self.name + ' Window'
+        return help_str
+    
+    def OnButton(self, event):
+        pane_info = self.GetAuiPane()
+        
+        if pane_info.IsOk():
+            shown = not self.IsShown()
+            pane_info.Show(shown)
+            self.GetAuiManager().Update()
+            
+        BitmapChangingButton.OnButton(self, event)
+ 
+        
+class ColorButton(BitmapChangingButton):
     def __init__(self, name, help_str):
+        BitmapChangingButton.__init__(self)
         self.name = name
         self.help_str = help_str
-        self.index = None
-        self.ribbon = None
         
-    def AddToToolbar(self, toolbar):
-        self.index = toolbar.GetButtonCount()
-        self.ribbon = toolbar.GetParent().GetParent().GetParent()
-        Ribbon.AddToolBarTool2(toolbar, self.name, self.ColorBitmap(), self.help_str, self.OnButton)       
+    def GetName(self):
+        return self.name
+    
+    def GetHelpStr(self):
+        return self.help_str
+        
+    def GetBitmap(self):
+        return self.ColorBitmap()
         
     def ColorBitmap(self):
         color = self.GetColor()
@@ -66,20 +200,13 @@ class ColorButton:
         
     def OnButton(self, event):
         self.SelectNewColour()
-        toolbar = event.GetBar()
-        button = event.GetButton()
-        item_id = toolbar.GetItemId(button)
-        try:
-            toolbar.SetButtonIcon(item_id, self.ColorBitmap())
-        except AttributeError:
-            toolbar.DeleteButton(item_id)
-            item = toolbar.InsertButton(self.index, item_id, self.name, self.ColorBitmap(), self.help_str)
+        BitmapChangingButton.OnButton(self, event)
 
     def SelectNewColour(self):
         c = self.GetColor()
         data = wx.ColourData()
         data.SetColour(wx.Colour(c.red, c.green, c.blue))
-        dlg = wx.ColourDialog(self.ribbon, data)
+        dlg = wx.ColourDialog(self.GetRibbon(), data)
         if dlg.ShowModal() == wx.ID_OK:
             # Colour did change.
             self.SetColor(self.wxToCadColor(dlg.GetColourData().GetColour()))
@@ -114,7 +241,7 @@ class BackgroundColorButton(ColorButton):
     def SetColor(self, c):
         cad.SetBackgroundColor(self.index, c)
         HeeksConfig().WriteInt("BackgroundColor" + str(self.index), c.ref())
-        self.ribbon.GetParent().graphics_canvas.Refresh()
+        self.GetRibbon().GetParent().graphics_canvas.Refresh()
 
 
 class Ribbon(RB.RibbonBar):
@@ -203,11 +330,11 @@ class Ribbon(RB.RibbonBar):
         
         panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Snapping', self.Image('endof'))
         toolbar = RB.RibbonButtonBar(panel)
-        Ribbon.AddOnOffButton(toolbar, 'Endof', 'endof', 'endofgray', cad.GetDigitizeEnd, cad.SetDigitizeEnd, 'Snap to end point')
-        Ribbon.AddOnOffButton(toolbar, 'Inters', 'inters', 'intersgray', cad.GetDigitizeInters, cad.SetDigitizeInters, 'Snap to intersection')
-        Ribbon.AddOnOffButton(toolbar, 'Centre', 'centre', 'centregray', cad.GetDigitizeCentre, cad.SetDigitizeCentre, 'Snap to centre')
-        Ribbon.AddOnOffButton(toolbar, 'Midpoint', 'midpoint', 'midpointgray', cad.GetDigitizeMidpoint, cad.SetDigitizeMidpoint, 'Snap to midpoint')
-        Ribbon.AddOnOffButton(toolbar, 'Grid', 'snap', 'snapgray', cad.GetDigitizeSnapToGrid, cad.SetDigitizeSnapToGrid, 'Snap to grid', self.OnSnapDropdown)
+        OnOffButton('Endof', 'endof', 'endofgray', cad.GetDigitizeEnd, cad.SetDigitizeEnd, 'Snap to end point').AddToToolbar(toolbar)
+        OnOffButton('Inters', 'inters', 'intersgray', cad.GetDigitizeInters, cad.SetDigitizeInters, 'Snap to intersection').AddToToolbar(toolbar)
+        OnOffButton('Centre', 'centre', 'centregray', cad.GetDigitizeCentre, cad.SetDigitizeCentre, 'Snap to centre').AddToToolbar(toolbar)
+        OnOffButton('Midpoint', 'midpoint', 'midpointgray', cad.GetDigitizeMidpoint, cad.SetDigitizeMidpoint, 'Snap to midpoint').AddToToolbar(toolbar)
+        OnOffButton('Grid', 'snap', 'snapgray', cad.GetDigitizeSnapToGrid, cad.SetDigitizeSnapToGrid, 'Snap to grid', self.OnSnapDropdown).AddToToolbar(toolbar)
 
         self.geom_page.Realize()
         
@@ -245,10 +372,8 @@ class Ribbon(RB.RibbonBar):
 
         panel = RB.RibbonPanel(view_page, wx.ID_ANY, 'Windows', self.Image('viewrot'))
         toolbar = RB.RibbonButtonBar(panel)
-        self.window_button_index = 0
-        self.AddWindowButton(toolbar, 'Objects')
-        self.AddWindowButton(toolbar, 'Properties')
-        self.AddWindowButton(toolbar, 'Input')
+        for w in wx.GetApp().hideable_windows:
+            WindowOnOffButton(self.GetParent().aui_manager.GetPane(w).name, wx.GetApp().hideable_windows[w]).AddToToolbar(toolbar)
 
         view_page.Realize()
 
@@ -259,19 +384,9 @@ class Ribbon(RB.RibbonBar):
         options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View', self.Image('mag'))
-
-        check = wx.CheckBox(panel, wx.ID_ANY, 'rotate upright')
-        check.SetValue(cad.GetRotateUpright())
-        self.Bind(wx.EVT_CHECKBOX, self.OnRotateUpright, check)
-        combo = wx.ComboBox(panel, choices = ["None", "Input Mode Title", "Full Help"], style = wx.CB_READONLY )
-        combo.Select(cad.GetGraphicsTextMode())
-        self.Bind(wx.EVT_COMBOBOX, self.OnScreenText, combo)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.AddStretchSpacer(1)
-        sizer.Add(check, 0, wx.ALL|wx.EXPAND, 2)
-        self.AddLabelAndControl(panel, sizer, 'Screen Text', combo)
-        sizer.AddStretchSpacer(1)
-        panel.SetSizer(sizer)
+        toolbar = RB.RibbonButtonBar(panel)
+        RotateUprightButton().AddToToolbar(toolbar)
+        ScreenTextButton().AddToToolbar(toolbar)
         
         panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View Colors', self.Image('mag'))
         toolbar = RB.RibbonButtonBar(panel)
@@ -282,12 +397,6 @@ class Ribbon(RB.RibbonBar):
         options_page.Realize()
                 
         self.Realize()
-        
-    def AddOnOffButton(toolbar, name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down = None):
-        OnOffButton(name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down).AddToToolbar(toolbar)
-        
-    def OnOnOffButton(self):
-        pass
         
     def AddWindowButton(self, toolbar, name):
         shown = self.GetParent().aui_manager.GetPane(name).IsShown()
@@ -307,14 +416,16 @@ class Ribbon(RB.RibbonBar):
         sizer_horizontal.Add( control, 1, wx.LEFT + wx.ALIGN_CENTER_VERTICAL, control_border )
         sizer.Add( sizer_horizontal, 0, wx.EXPAND + wx.ALL, control_border )
         return static_label
-        
-        
-    def Image(self, name):
-        image = wx.Image(wx.GetApp().BitmapPath(name))
+    
+    def Image2(self, full_path):
+        image = wx.Image(full_path)
         scale = float(24) / image.GetHeight()
         new_width = float(image.GetWidth()) * scale
         image.Rescale(int(new_width), 24)
         return wx.Bitmap(image)
+        
+    def Image(self, name):
+        return self.Image2(wx.GetApp().BitmapPath(name))
                         
     def MakeNextIDForTool(self, data):
         return wx.ID_ANY

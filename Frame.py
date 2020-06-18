@@ -34,15 +34,15 @@ class Frame(wx.Frame):
         self.properties_canvas = ObjPropsCanvas(self)
         self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(2))
         
-        self.ribbon = Ribbon(self)
-        self.aui_manager.AddPane(self.ribbon, wx.aui.AuiPaneInfo().ToolbarPane().Name('Ribbon').Top().Movable(False).Gripper(False))
-        
         wx.GetApp().RegisterHideableWindow(self.tree_canvas)
         wx.GetApp().RegisterHideableWindow(self.input_mode_canvas)
         wx.GetApp().RegisterHideableWindow(self.properties_canvas)
-        wx.GetApp().RegisterHideableWindow(self.ribbon)
+        #wx.GetApp().RegisterHideableWindow(self.ribbon)
         
-        self.AddExtraWindows()
+        wx.GetApp().AddExtraWindows(self)
+        
+        self.ribbon = Ribbon(self)
+        self.aui_manager.AddPane(self.ribbon, wx.aui.AuiPaneInfo().ToolbarPane().Name('Ribbon').Top().Movable(False).Gripper(False))
 
         perspective = config.Read('AuiPerspective', 'default')
         #if perspective != 'default':
@@ -86,9 +86,6 @@ class Frame(wx.Frame):
         e.Skip()
         self.aui_manager.UnInit()
     
-    def AddExtraWindows(self):
-        pass
-            
     def SetFrameTitle(self):
         s = wx.GetApp().GetAppName() + ' - '
         #s = self.GetTitle() + ' - '

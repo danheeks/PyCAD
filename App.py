@@ -46,7 +46,7 @@ class App(wx.App):
         self.recent_files = []
         self.MAX_RECENT_FILES = 20
         self.filepath = None
-        self.hideable_windows = []
+        self.hideable_windows = {} # map of window:bitmap_path
         self.cad_dir = pycad_dir
         self.bitmap_path = self.cad_dir + '/bitmaps'
         self.inMainLoop = False
@@ -172,11 +172,13 @@ class App(wx.App):
     def RegisterMessageBoxCallback(self):
         cad.RegisterMessageBoxCallback(OnMessageBox)
         
-    def RegisterHideableWindow(self, w):
-        self.hideable_windows.append(w)
+    def RegisterHideableWindow(self, w, bitmap_path = None):
+        if bitmap_path == None:
+            bitmap_path = self.bitmap_path
+        self.hideable_windows[w] = bitmap_path
         
     def RemoveHideableWindow(self, w):
-        self.hideable_windows.remove(w)
+        del self.hideable_windows[w]
         
     def InitCad(self):
         cad.SetInputMode(wx.GetApp().select_mode);
@@ -373,6 +375,9 @@ class App(wx.App):
     
     def IsSolidApp(self):
         return False
+    
+    def AddExtraWindows(self, frame):
+        pass
     
     def GetOptions(self):
         properties = []
