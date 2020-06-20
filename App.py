@@ -458,7 +458,7 @@ class App(wx.App):
             cad.ClearHistory()
             cad.SetLikeNewFile()
             self.filepath = None
-            self.SetFrameTitle()
+            self.frame.SetFrameTitle()
         
     def SaveProject(self, force_dialog = False):
         if self.GetProjectFileName().IsOk():
@@ -585,7 +585,7 @@ class App(wx.App):
                     dot = filepath.rfind('.')
                     if dot != -1:
                         self.filepath = filepath[:dot+1] + '.heeks'
-                self.SetFrameTitle()
+                self.frame.SetFrameTitle()
                 config.Write('ImportDirectory', dialog.GetDirectory())
                 cad.Repaint()
             
