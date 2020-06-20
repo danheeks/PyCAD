@@ -254,12 +254,10 @@ class SolidApp(App):
         Ribbon.AddToolBarTool(toolbar, 'Round', 'fillet', 'Make Edges Rounded', self.OnFillet)
         Ribbon.AddToolBarTool(toolbar, 'Chamfer', 'chamfer', 'Make Edges Chamfered', self.OnChamfer)
 
-        #frame.AddMenuItem('Draw Ellipses', self.OnEllipse, None, 'circles', menu = frame.menuBar.GetMenu(frame.menuBar.FindMenu('&Geometry')))
-
         page.Realize()
         
         Ribbon.AddToolBarTool(ribbon.other_drawing_toolbar, 'Ellipses', 'circles', 'Draw Ellipses', self.OnEllipse)
-        ribbon.geom_page.Realize()        
+        #ribbon.geom_page.Realize()        
         
         
     def OnEllipse(self, e):

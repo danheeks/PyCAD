@@ -181,7 +181,7 @@ class App(wx.App):
         del self.hideable_windows[w]
         
     def InitCad(self):
-        cad.SetInputMode(wx.GetApp().select_mode);
+        cad.SetInputMode(self.select_mode);
         cad.SetResFolder(pycad_dir)
         cad.SetInputModeCallback(OnInputMode)
         
@@ -426,23 +426,23 @@ class App(wx.App):
                 cad.EndHistory()
                 cad.ClearSelection(True)
         elif k == wx.WXK_RETURN:
-            if wx.GetApp().inMainLoop:
-                wx.GetApp().ExitMainLoop()
+            if self.inMainLoop:
+                self.ExitMainLoop()
         elif k == ord('Z'):
             if e.ControlDown():
                 if e.ShiftDown():
-                    self.frame.OnRedo(e)
+                    self.OnRedo(e)
                 else:
-                    self.frame.OnUndo(e)
+                    self.OnUndo(e)
         elif k == ord('X'):
             if e.ControlDown():
-                self.frame.OnCut(e)
+                self.OnCut(e)
         elif k == ord('C'):
             if e.ControlDown():
-                self.frame.OnCopy(e)
+                self.OnCopy(e)
         elif k == ord('V'):
             if e.ControlDown():
-                self.frame.OnPaste(e)
+                self.OnPaste(e)
         else:
             return False
         return True
@@ -454,10 +454,10 @@ class App(wx.App):
         res = self.CheckForModifiedDoc()
         if res != wx.CANCEL:
             cad.Reset()
-            wx.GetApp().OnNewOrOpen(False)
+            self.OnNewOrOpen(False)
             cad.ClearHistory()
             cad.SetLikeNewFile()
-            wx.GetApp().filepath = None
+            self.filepath = None
             self.SetFrameTitle()
         
     def SaveProject(self, force_dialog = False):
@@ -467,7 +467,7 @@ class App(wx.App):
     def CheckForModifiedDoc(self, force_dialog = False):
         # returns wxCANCEL if not OK to continue opening file
         if cad.IsModified():
-            str = 'Save changes to file ' + (wx.GetApp().filepath if wx.GetApp().filepath else 'Untitled')
+            str = 'Save changes to file ' + (self.filepath if self.filepath else 'Untitled')
             res = wx.MessageBox(str, wx.MessageBoxCaptionStr, wx.CANCEL | wx.YES_NO | wx.CENTER | wx.ICON_WARNING)
             if res == wx.CANCEL or res == wx.NO: return res
             if res == wx.YES:
@@ -488,27 +488,27 @@ class App(wx.App):
             cad.Reset()
             if cad.OpenFile(filepath):
                 self.DoFileOpenViewMag()
-                wx.GetApp().OnNewOrOpen(True)
+                self.OnNewOrOpen(True)
                 cad.ClearHistory()
                 cad.SetLikeNewFile()
-                wx.GetApp().filepath = filepath
+                self.filepath = filepath
                 self.frame.SetFrameTitle()
-                wx.GetApp().InsertRecentFileItem(filepath)
-                wx.GetApp().WriteRecentFiles()
+                self.InsertRecentFileItem(filepath)
+                self.WriteRecentFiles()
                 return True
             else:
                 wx.MessageBox('Invalid file type chosen expecting .heeks')
         return True
 
     def OnOpen(self, e):
-        dialog = wx.FileDialog(self, 'Open File', wx.GetApp().GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
+        dialog = wx.FileDialog(self, 'Open File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
             self.OnOpenFilepath(dialog.GetPath())
                     
     def OnOpenRecent(self, e):
-        file_path = wx.GetApp().recent_files[e.GetId() - self.ID_RECENT_FIRST]
+        file_path = self.recent_files[e.GetId() - self.ID_RECENT_FIRST]
         self.OnOpenFilepath(file_path)
         
     def OnUpdateOpenRecent(self, e):
@@ -520,25 +520,25 @@ class App(wx.App):
             self.recent_files_menu.Delete(menu_item)
             
         recent_id = self.ID_RECENT_FIRST
-        for filepath in wx.GetApp().recent_files:
+        for filepath in self.recent_files:
             self.recent_files_menu.Append(recent_id, filepath)
             recent_id += 1
             
     def OnSaveFilepath(self, filepath):
         if cad.SaveFile(filepath):
-            wx.GetApp().filepath = filepath        
+            self.filepath = filepath        
             cad.SetLikeNewFile()
-            self.SetFrameTitle()
-            wx.GetApp().InsertRecentFileItem(filepath)
-            wx.GetApp().WriteRecentFiles()
+            self.frame.SetFrameTitle()
+            self.InsertRecentFileItem(filepath)
+            self.WriteRecentFiles()
             return wx.ID_OK
         return wx.ID_CANCEL
             
     def OnSave(self, e):
-        if wx.GetApp().filepath:
-            return self.OnSaveFilepath(wx.GetApp().filepath)
+        if self.filepath:
+            return self.OnSaveFilepath(self.filepath)
 
-        dialog = wx.FileDialog(self, 'Save File', wx.GetApp().GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.SetFilterIndex(1)
         dialog.CenterOnParent()
         if dialog.ShowModal() == wx.ID_CANCEL:
@@ -549,11 +549,11 @@ class App(wx.App):
         e.Enable(cad.IsModified())            
             
     def OnSaveAs(self, e):
-        if wx.GetApp().filepath:
+        if self.filepath:
             default_directory = ''
-            default_filepath = wx.GetApp().filepath
+            default_filepath = self.filepath
         else:
-            default_directory = wx.GetApp().GetDefaultDir()
+            default_directory = self.GetDefaultDir()
             default_filepath = ''            
         
         dialog = wx.FileDialog(self, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
@@ -573,7 +573,7 @@ class App(wx.App):
                                          
     def OnImport(self, e):
         config = HeeksConfig()
-        default_directory = config.Read('ImportDirectory', wx.GetApp().GetDefaultDir())
+        default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
         dialog = wx.FileDialog(self, 'Import File', default_directory, '', self.GetImportWildcardString())
         dialog.CenterOnParent()
         
@@ -581,10 +581,10 @@ class App(wx.App):
             filepath = dialog.GetPath()
             if cad.Import(filepath):
                 self.DoFileOpenViewMag()
-                if wx.GetApp().filepath == None:
+                if self.filepath == None:
                     dot = filepath.rfind('.')
                     if dot != -1:
-                        wx.GetApp().filepath = filepath[:dot+1] + '.heeks'
+                        self.filepath = filepath[:dot+1] + '.heeks'
                 self.SetFrameTitle()
                 config.Write('ImportDirectory', dialog.GetDirectory())
                 cad.Repaint()
@@ -597,7 +597,7 @@ class App(wx.App):
         
     def OnExport(self, e):
         config = HeeksConfig()
-        default_directory = config.Read('ExportDirectory', wx.GetApp().GetDefaultDir())
+        default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
         print('self.GetExportWildcardString() = ' + str(self.GetExportWildcardString()))
         dialog = wx.FileDialog(self, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.CenterOnParent()
@@ -618,7 +618,7 @@ class App(wx.App):
         dlg.ShowModal()
                 
     def OnPrint(self, e):
-        printDialogData = wx.PrintDialogData(wx.GetApp().printData)
+        printDialogData = wx.PrintDialogData(self.printData)
         printer = wx.Printer(printDialogData)
         self.printout = Printout()
         if printer.Print(self, self.printout, True):
@@ -632,16 +632,16 @@ class App(wx.App):
         self.printout = None
             
     def OnPageSetup(self, e):
-        pageSetupData = wx.GetApp().printData
+        pageSetupData = self.printData
         
-        pageSetupDialog = wx.PageSetupDialog(self, wx.GetApp().pageSetupData)
+        pageSetupDialog = wx.PageSetupDialog(self, self.pageSetupData)
         pageSetupDialog.ShowModal()
         
-        wx.GetApp().printData = pageSetupDialog.GetPageSetupDialogData().GetPrintData()
-        wx.GetApp().pageSetupData = pageSetupDialog.GetPageSetupDialogData()
+        self.printData = pageSetupDialog.GetPageSetupDialogData().GetPrintData()
+        self.pageSetupData = pageSetupDialog.GetPageSetupDialogData()
             
     def OnPrintPreview(self, e):
-        printDialogData = wx.PrintDialogData(wx.GetApp().printData)
+        printDialogData = wx.PrintDialogData(self.printData)
         preview = wx.PrintPreview(Printout(), Printout(), printDialogData)
         if not preview.IsOk():
             preview = None
@@ -654,7 +654,7 @@ class App(wx.App):
     
             
     def OnResetDefaults(self, e):
-        wx.GetApp().RestoreDefaults()
+        self.RestoreDefaults()
         wx.MessageBox('You must restart the application for the settings to be changed')
             
     def OnQuit(self, e):
@@ -753,7 +753,7 @@ class App(wx.App):
         e.Enable(cad.GetNumSelected() > 0)            
     
     def OnSelectMode(self, e):
-        cad.SetInputMode(wx.GetApp().select_mode)
+        cad.SetInputMode(self.select_mode)
         
     def OnFilter(self, e):
         dlg = FilterDlg()
@@ -816,14 +816,14 @@ class App(wx.App):
         if show:
             self.SetMenuBar(None)
             self.windows_visible = {}
-            for w in wx.GetApp().hideable_windows:
+            for w in self.hideable_windows:
                 self.windows_visible[w] = self.aui_manager.GetPane(w).IsShown() and w.IsShown()
                 self.aui_manager.GetPane(w).Show(False)
             self.frame.graphics_canvas.SetFocus()# so escape key works to get out
         else:
             if self.menuBar != None:
                 self.SetMenuBar(self.menuBar)
-            for w in wx.GetApp().hideable_windows:
+            for w in self.hideable_windows:
                 if w in self.windows_visible:
                     visible = self.windows_visible[w]
                     self.aui_manager.GetPane(w).Show(visible)
