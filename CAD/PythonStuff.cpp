@@ -1094,6 +1094,11 @@ void DrawDeleteList(unsigned int display_list)
 	glDeleteLists(display_list, 1);
 }
 
+void RenderScreeTextAt(const wchar_t* str1, double scale, double x, double y, double theta)
+{
+	theApp->render_screen_text_at(str1, scale, x, y, theta);
+}
+
 void AddProperty(Property* property)
 {
 	if (property_list)
@@ -1949,7 +1954,10 @@ void SetCurrentColor(const HeeksColor& color)
 	theApp->current_color = color;
 }
 
-
+bool HeeksObjGetVisible(const HeeksObj& object)
+{
+	return object.m_visible;
+}
 
 
 	BOOST_PYTHON_MODULE(cad) {
@@ -1984,6 +1992,7 @@ void SetCurrentColor(const HeeksColor& color)
 			.def("Add", &ObjListAdd)
 			.def("GetCopyFromObject", &BaseObject::GetCopyFromObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("AddTriangle", &BaseObject::AddTriangle)
+			.def("GetVisible", &HeeksObjGetVisible)
 			;
 
 		boost::python::class_<HeeksObj, boost::noncopyable>("Object")
@@ -2027,6 +2036,7 @@ void SetCurrentColor(const HeeksColor& color)
 			.def("Add", &ObjListAdd)
 			.def("GetOrigin", &ObjGetOrigin)
 			.def("Transform", &HeeksObj::Transform)
+			.def("GetVisible", &HeeksObjGetVisible)
 			;
 
 		boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")
@@ -2498,6 +2508,7 @@ void SetCurrentColor(const HeeksColor& color)
 		boost::python::def("DrawDeleteList", &DrawDeleteList);
 		boost::python::def("DrawEnableLights", &DrawDeleteList);
 		boost::python::def("DrawDisableLights", &DrawDeleteList);
+		boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
 		boost::python::def("AddProperty", AddProperty);
 		boost::python::def("GetObjectFromId", &GetObjectFromId);
 		boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));

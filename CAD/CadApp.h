@@ -70,7 +70,7 @@ private:
 	std::list<HeeksObj*> frozen_selection_removed;
 	Index<unsigned, HeeksObj*> m_name_index;
 
-	void render_screen_text2(const wchar_t* str, bool select, double scale);
+	void render_screen_text2(const wchar_t* str, double scale);
 	void RenderDatumOrCurrentCoordSys();
 
 public:
@@ -295,8 +295,8 @@ public:
 	bool CheckForNOrMore(const std::list<HeeksObj*> &list, int min_num, int type1, int type2, int type3, const std::wstring& msg, const std::wstring& caption);
 	void render_text(const wchar_t* str, bool select, double scale, double blur_scale);
 	bool get_text_size(const wchar_t* str, float* width, float* height);
-	void render_screen_text(const wchar_t* str1, const wchar_t* str2, bool select);
-	void render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta, bool select);
+	void render_screen_text(const wchar_t* str1, const wchar_t* str2);
+	void render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta);
 	void OnInputModeTitleChanged();
 	void OnInputModeHelpTextChanged();
 	void RefreshInputCanvas();

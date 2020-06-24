@@ -1331,7 +1331,7 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 				screen_text2.append(help_str);
 			}
 		}
-		render_screen_text(screen_text1.c_str(), screen_text2.c_str(), false);
+		render_screen_text(screen_text1.c_str(), screen_text2.c_str());
 	}
 }
 
@@ -2180,7 +2180,7 @@ bool CCadApp::get_text_size(const wchar_t* str, float* width, float* height)
 #endif
 }
 
-void CCadApp::render_screen_text2(const wchar_t* str, bool select, double scale)
+void CCadApp::render_screen_text2(const wchar_t* str, double scale)
 {
 	size_t n = wcslen(str);
 
@@ -2197,7 +2197,7 @@ void CCadApp::render_screen_text2(const wchar_t* str, bool select, double scale)
 		j++;
 		if (str[i] == newline || i == n - 1 || j == 1023){
 			buffer[j] = 0;
-			render_text(buffer, select, scale, 0.2);
+			render_text(buffer, false, scale, 0.2);
 			if (str[i] == newline)
 				glTranslated(0.0, -2.2 * scale, 0.0);
 			j = 0;
@@ -2205,7 +2205,7 @@ void CCadApp::render_screen_text2(const wchar_t* str, bool select, double scale)
 	}
 }
 
-void CCadApp::render_screen_text(const wchar_t* str1, const wchar_t* str2, bool select)
+void CCadApp::render_screen_text(const wchar_t* str1, const wchar_t* str2)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -2217,9 +2217,9 @@ void CCadApp::render_screen_text(const wchar_t* str1, const wchar_t* str2, bool 
 	m_current_viewport->GetViewportSize(&w, &h);
 	glTranslated(2.0, h - 1.0, 0.0);
 
-	render_screen_text2(str1, select, 10.0);
+	render_screen_text2(str1, 10.0);
 
-	render_screen_text2(str2, select, 6.12);
+	render_screen_text2(str2, 6.12);
 
 	//Even though this is in reverse order, the different matrices have different stacks, and we want to exit here in the modelview
 	glMatrixMode(GL_PROJECTION);
@@ -2244,7 +2244,7 @@ void CCadApp::DisableBlend()
 	if (!m_antialiasing)glDisable(GL_BLEND);
 }
 
-void CCadApp::render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta, bool select)
+void CCadApp::render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta)
 {
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
@@ -2257,7 +2257,7 @@ void CCadApp::render_screen_text_at(const wchar_t* str1, double scale, double x,
 	glTranslated(x, y, 0.0);
 
 	glRotated(theta, 0, 0, 1);
-	render_screen_text2(str1, select, scale);
+	render_screen_text2(str1, scale);
 
 	//Even though this is in reverse order, the different matrices have different stacks, and we want to exit here in the modelview
 	glMatrixMode(GL_PROJECTION);

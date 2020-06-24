@@ -31,9 +31,13 @@ class Object(cad.BaseObject):
         return cad.BaseObject.GetBaseProperties(self)
         
     def GetBox(self):
-        return self.box
-        #to do
-        #return cad.BaseObject.GetChildrensBox(self)
+        box = geom.Box3D()
+        for object in self.GetChildren():
+            if object.GetVisible():
+                b = object.GetBox()
+                if b:
+                    box.InsertBox(b)
+        return box
         
     def HasEdit(self):
         return False

@@ -187,7 +187,7 @@ class App(wx.App):
         
     def OnInputMode(self):
         self.frame.input_mode_canvas.RemoveAndAddAll()
-        self.frame.graphics_canvas.Refresh()
+        #self.frame.graphics_canvas.Refresh()
         
     def SplitSketch(self):
         new_sketches = self.object.Split()
@@ -501,7 +501,7 @@ class App(wx.App):
         return True
 
     def OnOpen(self, e):
-        dialog = wx.FileDialog(self, 'Open File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
+        dialog = wx.FileDialog(self.frame, 'Open File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING)
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
@@ -538,7 +538,7 @@ class App(wx.App):
         if self.filepath:
             return self.OnSaveFilepath(self.filepath)
 
-        dialog = wx.FileDialog(self, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self.frame, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.SetFilterIndex(1)
         dialog.CenterOnParent()
         if dialog.ShowModal() == wx.ID_CANCEL:
@@ -556,7 +556,7 @@ class App(wx.App):
             default_directory = self.GetDefaultDir()
             default_filepath = ''            
         
-        dialog = wx.FileDialog(self, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self.frame, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.SetFilterIndex(0)
         dialog.CenterOnParent()
         if dialog.ShowModal() != wx.ID_CANCEL:
@@ -599,7 +599,7 @@ class App(wx.App):
         config = HeeksConfig()
         default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
         print('self.GetExportWildcardString() = ' + str(self.GetExportWildcardString()))
-        dialog = wx.FileDialog(self, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self.frame, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
@@ -621,7 +621,7 @@ class App(wx.App):
         printDialogData = wx.PrintDialogData(self.printData)
         printer = wx.Printer(printDialogData)
         self.printout = Printout()
-        if printer.Print(self, self.printout, True):
+        if printer.Print(self.frame, self.printout, True):
             theApp.printData = printer.GetPrintDialogData().GetPrintData()
         else:
             if wx.Printer.GetLastError() == wx.PRINTER_ERROR:
@@ -634,11 +634,11 @@ class App(wx.App):
     def OnPageSetup(self, e):
         pageSetupData = self.printData
         
-        pageSetupDialog = wx.PageSetupDialog(self, self.pageSetupData)
+        pageSetupDialog = wx.PageSetupDialog(self.frame, self.pageSetupData)
         pageSetupDialog.ShowModal()
         
-        self.printData = pageSetupDialog.GetPageSetupDialogData().GetPrintData()
-        self.pageSetupData = pageSetupDialog.GetPageSetupDialogData()
+        self.printData = pageSetupDialog.GetPageSetupData().GetPrintData()
+        self.pageSetupData = pageSetupDialog.GetPageSetupData()
             
     def OnPrintPreview(self, e):
         printDialogData = wx.PrintDialogData(self.printData)
@@ -647,7 +647,7 @@ class App(wx.App):
             preview = None
             wx.MessageBox('There was a problem previewing.\nPerhaps your current printer is not set correctly?', 'Previewing', wx.OK)
 
-        frame = wx.PreviewFrame(preview, self, 'Print Preview', wx.Point(100,100), wx.Size(600, 650))
+        frame = wx.PreviewFrame(preview, self.frame, 'Print Preview', wx.Point(100,100), wx.Size(600, 650))
         frame.Centre(wx.BOTH)
         frame.Initialize()
         frame.Show()
