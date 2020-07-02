@@ -796,6 +796,11 @@ void ObjListAdd(ObjList& objlist, HeeksObj* object)
 	objlist.Add(object, NULL);
 }
 
+void ObjAdd(HeeksObj& obj, HeeksObj* object)
+{
+	obj.Add(object, NULL);
+}
+
 Matrix ObjGetOrigin(HeeksObj& object)
 {
 	Matrix m;
@@ -2032,8 +2037,8 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 			.def("GetStartPoint", &HeeksObjGetStartPoint)
 			.def("GetEndPoint", &HeeksObjGetEndPoint)
 			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("Clear", &ObjListClear)
-			.def("Add", &ObjListAdd)
+			.def("Clear", &HeeksObj::Clear)
+			.def("Add", &ObjAdd)
 			.def("GetOrigin", &ObjGetOrigin)
 			.def("Transform", &HeeksObj::Transform)
 			.def("GetVisible", &HeeksObjGetVisible)
