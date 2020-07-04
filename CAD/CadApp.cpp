@@ -2163,8 +2163,12 @@ void CCadApp::DestroyTransformGLList(){
 
 void CCadApp::render_text(const wchar_t* str, bool select, double scale, double blur_scale)
 {
-	DrawHeeksFontStringAntialiased(Ttc(str), scale, blur_scale, false, true);
-	//DrawHeeksFontString(Ttc(str), scale, false, true);
+	glPushMatrix();
+	double s = scale * 1.6;
+	glScaled(s, s, 1.0);
+	glTranslated(0, -1.0, 0);
+	DrawHeeksFontStringAntialiased(Ttc(str), blur_scale / scale, false, true);
+	glPopMatrix();
 }
 
 bool CCadApp::get_text_size(const wchar_t* str, float* width, float* height)

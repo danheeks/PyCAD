@@ -5,11 +5,8 @@
 #include "../Geom/Geom.h"
 #include "HeeksFontData.h"
 
-void DrawHeeksFontString(const char* str, double scale, bool outline, bool fill)
+float DrawHeeksFontString(const char* str, bool outline, bool fill)
 {
-	glPushMatrix();
-	glTranslated(0, -scale * 1.6, 0);
-	glScaled(scale * 1.6, scale * 1.6, 1.0);
 	int i = 0;
 	int index = 0;
 	int num_c = 0;
@@ -18,7 +15,8 @@ void DrawHeeksFontString(const char* str, double scale, bool outline, bool fill)
 	int tri = 0;
 	int point_index = 0;
 	int num_p = 0;
-	float x_spacing = 0.1f;
+	float x_spacing = 0.16f;
+	float x_translated = 0.0f;
 
 	while (str[i] != 0)
 	{
@@ -58,11 +56,14 @@ void DrawHeeksFontString(const char* str, double scale, bool outline, bool fill)
 				}
 				glEnd();
 			}
-			glTranslated(widths[index] + x_spacing, 0.0, 0.0);
+			float x = widths[index] + x_spacing;
+			glTranslated(x, 0.0, 0.0);
+			x_translated += x;
 		}
 		i++;
 	}
-	glPopMatrix();
+
+	return x_translated;
 }
 
 #define NUM_DITHERS 7
@@ -76,7 +77,7 @@ static double dither_xy[NUM_DITHERS][2] = {
 	{ 0.866, -0.5, },
 };
 
-void DrawHeeksFontStringAntialiased(const char* str, double scale, double blur_scale, bool outline, bool fill)
+void DrawHeeksFontStringAntialiased(const char* str, double blur_scale, bool outline, bool fill)
 {
 	float currentColor[4];
 	glGetFloatv(GL_CURRENT_COLOR, currentColor);
@@ -85,13 +86,17 @@ void DrawHeeksFontStringAntialiased(const char* str, double scale, double blur_s
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	float x = 0.0f;
 	for (int i = 0; i < NUM_DITHERS; i++)
 	{
-		glPushMatrix();
-		glTranslated(dither_xy[i][0] * blur_scale, dither_xy[i][1] * blur_scale, 0.0);
-		DrawHeeksFontString(str, scale, outline, fill);
-		glPopMatrix();
+		double dx = dither_xy[i][0] * blur_scale;
+		double dy = dither_xy[i][1] * blur_scale;
+		glTranslated(dx, dy, 0.0);
+		x = DrawHeeksFontString(str, outline, fill);
+		glTranslatef(-x, 0, 0);
+		glTranslated(-dx, -dy, 0.0);
 	}
+	glTranslatef(x, 0, 0);
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 }

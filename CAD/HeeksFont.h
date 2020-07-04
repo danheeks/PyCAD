@@ -1,5 +1,5 @@
 #pragma once
 
-void DrawHeeksFontString(const char* str, double scale, bool outline, bool fill);
+float DrawHeeksFontString(const char* str, bool outline, bool fill);
 
-void DrawHeeksFontStringAntialiased(const char* str, double scale, double blur_scale, bool outline, bool fill);
+void DrawHeeksFontStringAntialiased(const char* str, double blur_scale, bool outline, bool fill);

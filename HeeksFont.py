@@ -1,5 +1,4 @@
 import geom
-import cad
 import os
 
 POSITION_COLOUR = 'ff70ff'
