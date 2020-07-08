@@ -127,6 +127,7 @@ class SelectMode(cad.InputMode):
                         v.view_point.TurnI(dm)
                 v.need_update = True
                 v.need_refresh = True
+                wx.GetApp().frame.graphics_canvas.Refresh()
             elif event.leftDown:
                 if self.drag_gripper != None:
                     to = cad.Digitize(cad.IPoint(event.x, event.y))

@@ -552,6 +552,12 @@ int PropertyGetInt(Property& property)
 	return property.GetInt();
 }
 
+CBox HeeksObjGetBox(HeeksObj& object)
+{
+    CBox box;
+    object.GetBox(box);
+    return box;
+}
 
 std::wstring HeeksObjGetTitle(const HeeksObj& object)
 {
@@ -1982,7 +1988,7 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 			.def("SetOwner", &ObjectSetOwner)
 			.def("GetFirstChild", &BaseObject::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("GetNextChild", &BaseObject::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("GetChildren", &BaseObjectGetChildren)			
+			.def("GetChildren", &BaseObjectGetChildren)
 			.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
@@ -2013,7 +2019,7 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 			.def("GetColor", &HeeksObjGetColor)
 			.def("HasEdit", &HeeksObjHasEdit)
 			.def("GetTitle", &HeeksObjGetTitle)
-			.def("GetBox", &HeeksObj::GetBox)
+			.def("GetBox", &HeeksObjGetBox)
 			.def("OnGlCommands", &HeeksObj::glCommands)
 			.def("AutoExpand", &HeeksObj::AutoExpand)
 			.def("GetNumChildren", &HeeksObj::GetNumChildren)
@@ -2495,7 +2501,7 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::def("OpenFile", CadOpenFile);
 		boost::python::def("Import", &CadImport, CadImportOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL)));
 		boost::python::def("SaveFile", CadSaveFile);
-		boost::python::def("SaveObjects", SaveObjects);		
+		boost::python::def("SaveObjects", SaveObjects);
 		boost::python::def("DrawTriangle", &DrawTriangle);
 		boost::python::def("DrawEnableLighting", &DrawEnableLighting);
 		boost::python::def("DrawDisableLighting", &DrawDisableLighting);
@@ -2509,7 +2515,7 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::def("GlLineWidth", &GlLineWidth);
 		boost::python::def("DrawNewList", &DrawNewList);
 		boost::python::def("DrawEndList", &DrawEndList);
-		boost::python::def("DrawCallList", &DrawCallList); 
+		boost::python::def("DrawCallList", &DrawCallList);
 		boost::python::def("DrawDeleteList", &DrawDeleteList);
 		boost::python::def("DrawEnableLights", &DrawDeleteList);
 		boost::python::def("DrawDisableLights", &DrawDeleteList);
@@ -2524,7 +2530,7 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::def("GetXmlObject", &GetXmlObject);
 		boost::python::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((boost::python::arg("name"), boost::python::arg("default_value") = std::wstring(L""))));
 		boost::python::def("GetXmlText", &GetXmlText);
-		boost::python::def("SetXmlText", &SetXmlText);		
+		boost::python::def("SetXmlText", &SetXmlText);
 		boost::python::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((boost::python::arg("name"), boost::python::arg("default_value") = false)));
 		boost::python::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0)));
 		boost::python::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0.0)));
@@ -2537,7 +2543,7 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
 		boost::python::def("RegisterOnGLCommands", RegisterOnGLCommands);
 		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
-		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback); 
+		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
 		boost::python::def("SetInputModeCallback", SetInputModeCallback);
 		boost::python::def("RegisterImportFileType", RegisterImportFileType);
 		boost::python::def("RegisterExportFileType", RegisterExportFileType);
@@ -2567,10 +2573,10 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::def("RollForward", RollForward);
 		boost::python::def("DeleteUndoably", DeleteUndoably);
 		boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
-		boost::python::def("CopyUndoably", CopyUndoably); 
+		boost::python::def("CopyUndoably", CopyUndoably);
 		boost::python::def("TransformUndoably", TransformUndoably);
 		boost::python::def("DoUndoable", DoUndoable);
-		boost::python::def("WasModified", WasModified);		
+		boost::python::def("WasModified", WasModified);
 		boost::python::def("ShiftSelect", ShiftSelect);
 		boost::python::def("ChangePropertyString", ChangePropertyString);
 		boost::python::def("ChangePropertyDouble", ChangePropertyDouble);
@@ -2657,10 +2663,10 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
-		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType; 
+		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
 		boost::python::scope().attr("OBJECT_TYPE_GRIPPER") = (int)GripperType;
 		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
-		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType; 
+		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
 		boost::python::scope().attr("OBJECT_TYPE_COORD_SYS") = (int)CoordinateSystemType;
 		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
@@ -2673,5 +2679,5 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
 		boost::python::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
-		
+
 	}

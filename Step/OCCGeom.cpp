@@ -4,6 +4,7 @@
 
 #include <stdafx.h>
 #include "Geom.h"
+#include "HeeksObj.h"
 
 #define GEOM_TOL TOLERANCE
 
@@ -146,8 +147,8 @@ double GetEllipseRotation(const gp_Elips& elips)
 double DistanceToFoci(const gp_Pnt &pnt, const gp_Elips &elips)
 {
    //Returns:
-   // 2*Major_Radius() if pnt is on the ellipse. 
-   //<2*Major_Radius if it is inside 
+   // 2*Major_Radius() if pnt is on the ellipse.
+   //<2*Major_Radius if it is inside
    //>2*Major_Radius if it is outside
 
    //Pnt must be coplaner to the ellipse else it won't work. Right now math computes above for elliptic solids.
@@ -182,7 +183,7 @@ void ClosestPointsLineAndEllipse(const gp_Lin& line, const gp_Elips& elips, std:
 		gp_Vec plane_vec(elips.Location(), plane_point);
 		plane_vec.Normalize();
 		double theta = atan2(plane_vec.Y(),plane_vec.X()) + GetEllipseRotation(elips);
-		
+
 		// project point onto ellipse
 
 		gp_Pnt p(elips.Location().XYZ());
@@ -203,7 +204,7 @@ void ClosestPointsLineAndEllipse(const gp_Lin& line, const gp_Elips& elips, std:
 			plane_vec.Normalize();
 
 			double theta = atan2(plane_vec.Y(),plane_vec.X()) + GetEllipseRotation(elips);
-		
+
 			// project point onto ellipse
 
 			gp_Pnt p(elips.Location().XYZ());
@@ -565,7 +566,7 @@ void TangentCircles(const gp_Circ& c1, const gp_Circ& c2, const gp_Circ& c3, std
 				// A*x + B*y + C*r = D
 				// A*(d - b*y - c*r)/a + B*y + C*r = D
 				// A/a*(d - c*r) + C*r - A/a*b*y + B*y = D
-				// - A/a*b*y + B*y = D - A/a*(d - c*r) - C*r 
+				// - A/a*b*y + B*y = D - A/a*(d - c*r) - C*r
 				// y = (D - A/a*(d - c*r) - C*r)/(B - A/a*b)
 				// y = (D*a - A*(d - c*r) - C*r*a)/(B*a - A*b)
 				// y = (D*a - A*d + A*c*r - C*r*a)/(B*a - A*b)
@@ -1111,7 +1112,7 @@ void extract_transposed(const gp_Trsf& tr, double *m)
 }
 
 gp_Pnt ClosestPointOnPlane(const gp_Pln& pln, const gp_Pnt &p){
-	// returns closest vertex on plane to point pt 
+	// returns closest vertex on plane to point pt
 	gp_Vec n = pln.Axis().Direction().XYZ();
 	gp_Pnt l = pln.Location();
 
@@ -1120,7 +1121,7 @@ gp_Pnt ClosestPointOnPlane(const gp_Pln& pln, const gp_Pnt &p){
 }
 
 gp_Pnt ClosestPointOnLine(const gp_Lin& line, const gp_Pnt &p){
-	// returns closest vertex on line to point pt 
+	// returns closest vertex on line to point pt
 
 	double start_dotp = gp_Vec(line.Location().XYZ()) * line.Direction();
 	double p_dotp = gp_Vec(p.XYZ()) * line.Direction();

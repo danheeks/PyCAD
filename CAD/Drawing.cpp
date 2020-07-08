@@ -11,6 +11,7 @@
 #include "DigitizeMode.h"
 #include "Viewport.h"
 #include "KeyCode.h"
+#include "Undoable.h"
 
 Drawing::Drawing(void): m_getting_position(false), m_inhibit_coordinate_change(false){
 	null_view = new ViewSpecific(0);
@@ -42,7 +43,7 @@ void Drawing::AddToTempObjects(HeeksObj* object)
 
 void Drawing::AddObjectsMade()
 {
-	theApp->AddUndoably(m_temp_object_in_list,((ObjList*)GetOwnerForDrawingObjects()));
+	theApp->AddUndoably(m_temp_object_in_list,GetOwnerForDrawingObjects());
 	if(DragDoneWithXOR())theApp->DrawObjectsOnFront(m_temp_object_in_list, true);
 	m_temp_object_in_list.clear();
 }
@@ -99,7 +100,7 @@ void Drawing::AddPoint()
 			set_previous_direction();
 		}
 	}
-	
+
 	ClearObjectsMade();
 	SetStartPosUndoable(d);
 	theApp->UseDigitiedPointAsReference();
@@ -194,7 +195,7 @@ void Drawing::OnModeChange(void){
 
 HeeksObj* Drawing::GetOwnerForDrawingObjects()
 {
-	return theApp; //Object always needs to be added somewhere
+	return (HeeksObj*)theApp; //Object always needs to be added somewhere
 }
 
 void Drawing::SetView(int v){

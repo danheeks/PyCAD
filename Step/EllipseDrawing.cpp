@@ -244,7 +244,7 @@ bool EllipseDrawing::calculate_item(DigitizedPoint &end){
 
 HeeksObj* EllipseDrawing::GetOwnerForDrawingObjects()
 {
-	return theApp; //Object always needs to be added somewhere
+	return (HeeksObj*)theApp; //Object always needs to be added somewhere
 }
 
 

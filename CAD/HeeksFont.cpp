@@ -1,6 +1,6 @@
 // HeeksFont.cpp
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include "HeeksFont.h"
 #include "../Geom/Geom.h"
 #include "HeeksFontData.h"

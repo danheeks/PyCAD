@@ -5,7 +5,6 @@
 #include <stdafx.h>
 #include "HeeksObj.h"
 #include "tinyxml.h"
-#include "ObjList.h"
 #include "Property.h"
 #include "GripData.h"
 #include "strconv.h"

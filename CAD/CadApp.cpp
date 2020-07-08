@@ -2173,7 +2173,7 @@ void CCadApp::render_text(const wchar_t* str, bool select, double scale, double 
 
 bool CCadApp::get_text_size(const wchar_t* str, float* width, float* height)
 {
-	return false; 
+	return false;
 #if 0
 	std::pair<int, int> size;
 	m_gl_font.GetStringSize(str, &size);

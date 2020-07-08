@@ -4,7 +4,9 @@
 #include "HeeksColor.h"
 #include "App.h"
 #include "Index.h"
+#include "ObjList.h"
 #include <map>
+#include <set>
 
 #define HEEKSCAD_VERSION_MAIN L"2"
 #define HEEKSCAD_VERSION_SUB L"0"
@@ -48,7 +50,7 @@ class Gripper;
 class MainHistory;
 class MouseEvent;
 
-class CCadApp : public CApp
+class CCadApp : public CApp, public ObjList
 //	not really an app, but a class with one global object to put global variables in and also is the list of objects to render
 {
 private:

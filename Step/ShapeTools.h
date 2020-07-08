@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ObjList.h"
+
 class CFace;
 class CEdge;
 

@@ -8,6 +8,7 @@
 #include "KeyCode.h"
 
 class MouseEvent;
+class Property;
 
 enum InputModeType
 {

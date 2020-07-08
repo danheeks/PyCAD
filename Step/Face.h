@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "HeeksObj.h"
+
 class CEdge;
 class CLoop;
 class CShape;

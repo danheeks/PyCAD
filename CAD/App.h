@@ -1,14 +1,15 @@
 // not really an app, but a class with one global object to put global variables in and also is the list of objects to render
 #pragma once
 
-#include "ObjList.h"
-
 class HeeksColor;
 class TiXmlElement;
 class TiXmlNode;
 class DigitizedPoint;
 class CInputMode;
 class IPoint;
+class HeeksObj;
+class Undoable;
+class Property;
 
 enum FileOpenOrImportType
 {
@@ -25,7 +26,7 @@ enum SolidViewMode
 	SolidViewFacesOnly,
 };
 
-class CApp : public ObjList
+class CApp
 	//	not really an app, but a class with one global object to put global variables in and also is the list of objects to render
 	// this class is the base class with virtual functions that can be built into extension modules, the actual functionality happening in CCadApp
 {
@@ -86,5 +87,7 @@ public:
 	virtual HeeksObj* CreateNewPoint(const Point3d& p) = 0;
 	virtual const HeeksColor& GetCurrentColor() = 0;
 	virtual void RegisterOnGLCommands(void(*callbackfunc)()) = 0;
-
+	virtual void GetProperties(std::list<Property *> *list) = 0;
+	virtual void Remove(HeeksObj* object) = 0;
+	virtual std::list<HeeksObj *> GetChildren() const = 0;
 };

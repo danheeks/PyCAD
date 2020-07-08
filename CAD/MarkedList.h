@@ -8,6 +8,7 @@
 
 class Gripper;
 class PointOrWindow;
+#include <set>
 
 class MarkedList{
 private:
