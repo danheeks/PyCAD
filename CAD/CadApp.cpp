@@ -2555,3 +2555,13 @@ void CCadApp::UseDigitiedPointAsReference()
 {
 	m_digitizing->reference_point = m_digitizing->digitized_point;
 }
+
+HeeksObj* CCadApp::GetObjPointer()
+{
+	return this;
+}
+
+ObjList* CCadApp::GetObjListPointer()
+{
+	return this;
+}

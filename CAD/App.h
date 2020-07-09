@@ -10,6 +10,7 @@ class IPoint;
 class HeeksObj;
 class Undoable;
 class Property;
+class ObjList;
 
 enum FileOpenOrImportType
 {
@@ -87,7 +88,6 @@ public:
 	virtual HeeksObj* CreateNewPoint(const Point3d& p) = 0;
 	virtual const HeeksColor& GetCurrentColor() = 0;
 	virtual void RegisterOnGLCommands(void(*callbackfunc)()) = 0;
-	virtual void GetProperties(std::list<Property *> *list) = 0;
-	virtual void Remove(HeeksObj* object) = 0;
-	virtual std::list<HeeksObj *> GetChildren() const = 0;
+	virtual HeeksObj* GetObjPointer() = 0;
+	virtual ObjList* GetObjListPointer() = 0;
 };

@@ -389,7 +389,7 @@ static HeeksObj* Fuse(HeeksObj* s1, HeeksObj* s2){
 static HeeksObj* Common(HeeksObj* s1, HeeksObj* s2){
 	if(s1 == NULL)
 	{
-		theApp->Remove(s2);
+		theApp->GetObjPointer()->Remove(s2);
 		return NULL;
 	}
 

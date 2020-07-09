@@ -128,7 +128,7 @@ void WriteSolids()
 	if (CShape::m_solids_found){
 		std::wstring temp_file = GetTempFolder() + TEMP_FILE_NAME;
 		std::map<int, CShapeData> index_map;
-		std::list<HeeksObj*> objects = theApp->GetChildren();
+		std::list<HeeksObj*> objects = theApp->GetObjPointer()->GetChildren();
 		wprintf(temp_file.c_str());
 		CShape::ExportSolidsFile(objects, temp_file.c_str(), &index_map);
 

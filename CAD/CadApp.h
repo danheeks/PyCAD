@@ -352,6 +352,8 @@ public:
 	const HeeksColor& GetCurrentColor(){ return current_color; }
 	void DrawFront();
 	void EndDrawFront();
+	HeeksObj* GetObjPointer();
+	ObjList* GetObjListPointer();
 };
 
 extern CCadApp* theApp;

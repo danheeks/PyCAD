@@ -283,5 +283,5 @@ void Drawing::OnRender(){
 }
 
 void Drawing::GetProperties(std::list<Property *> *list){
-	theApp->GetProperties(list); // x, y, z
+	theApp->GetObjPointer()->GetProperties(list); // x, y, z
 }
