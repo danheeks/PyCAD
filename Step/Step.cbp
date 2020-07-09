@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Step" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../step" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="0" extension_auto="1" />
+				<Option working_dir="../../PyCAM" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="test.py" />
+				<Option host_application="python3" />
+				<Option run_host_application_in_terminal="1" />
+				<Compiler>
+					<Add option="-fPIC" />
+					<Add option="-g" />
+					<Add option="-DUNICODE" />
+					<Add directory="./" />
+					<Add directory="/usr/include/python3.7m" />
+					<Add directory="../../PyCAD/CAD" />
+					<Add directory="../../PyCAD/Geom" />
+					<Add directory="/usr/local/include/oce" />
+				</Compiler>
+				<Linker>
+					<Add library="/usr/lib/arm-linux-gnueabihf/libpython3.7m.so" />
+					<Add library="/usr/local/lib/libboost_python37.so.1.73.0" />
+					<Add library="GL" />
+					<Add library="GLU" />
+				</Linker>
+			</Target>
+		</Build>
+		<Unit filename="../CAD/DigitizedPoint.cpp" />
+		<Unit filename="../CAD/Drawing.cpp" />
+		<Unit filename="../CAD/EndedObject.cpp" />
+		<Unit filename="../CAD/HeeksColor.cpp" />
+		<Unit filename="../CAD/HeeksObj.cpp" />
+		<Unit filename="../CAD/IdNamedObjList.cpp" />
+		<Unit filename="../CAD/LeftAndRight.cpp" />
+		<Unit filename="../CAD/ObjList.cpp" />
+		<Unit filename="../CAD/Picking.cpp" />
+		<Unit filename="../CAD/Property.cpp" />
+		<Unit filename="../CAD/strconv.cpp" />
+		<Unit filename="../CAD/tinystr.cpp" />
+		<Unit filename="../CAD/tinyxml.cpp" />
+		<Unit filename="../CAD/tinyxmlerror.cpp" />
+		<Unit filename="../CAD/tinyxmlparser.cpp" />
+		<Unit filename="../Geom/Arc.cpp" />
+		<Unit filename="../Geom/Area.cpp" />
+		<Unit filename="../Geom/AreaClipper.cpp" />
+		<Unit filename="../Geom/AreaOrderer.cpp" />
+		<Unit filename="../Geom/AreaPocket.cpp" />
+		<Unit filename="../Geom/Circle.cpp" />
+		<Unit filename="../Geom/Construction.cpp" />
+		<Unit filename="../Geom/Curve.cpp" />
+		<Unit filename="../Geom/Finite.cpp" />
+		<Unit filename="../Geom/Geom.cpp" />
+		<Unit filename="../Geom/Matrix.cpp" />
+		<Unit filename="../Geom/Offset.cpp" />
+		<Unit filename="../Geom/clipper.cpp" />
+		<Unit filename="Cone.cpp" />
+		<Unit filename="ConversionTools.cpp" />
+		<Unit filename="CoordinateSystem.cpp" />
+		<Unit filename="Cuboid.cpp" />
+		<Unit filename="Cylinder.cpp" />
+		<Unit filename="Edge.cpp" />
+		<Unit filename="EllipseDrawing.cpp" />
+		<Unit filename="Face.cpp" />
+		<Unit filename="FaceTools.cpp" />
+		<Unit filename="HEllipse.cpp" />
+		<Unit filename="HSpline.cpp" />
+		<Unit filename="Loop.cpp" />
+		<Unit filename="OCCGeom.cpp" />
+		<Unit filename="PythonStuff.cpp" />
+		<Unit filename="RuledSurface.cpp" />
+		<Unit filename="Settings.cpp" />
+		<Unit filename="Shape.cpp" />
+		<Unit filename="ShapeData.cpp" />
+		<Unit filename="ShapeTools.cpp" />
+		<Unit filename="Solid.cpp" />
+		<Unit filename="SolidTools.cpp" />
+		<Unit filename="Sphere.cpp" />
+		<Unit filename="StepFileObject.cpp" />
+		<Unit filename="Vertex.cpp" />
+		<Unit filename="Wire.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
