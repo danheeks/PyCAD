@@ -51,8 +51,7 @@ public:
 				BeforePythonCall(&main_module, &globals);
 				PyLockGIL lock;
 				try{
-
-					boost::python::detail::method_result result = f();
+					PyEval_CallFunction(f.ptr(), const_cast<char*>("()"));
 					success = AfterPythonCall(main_module);
 					return success;
 				}
@@ -204,7 +203,7 @@ public:
 		PyErr_Clear();
 		return false;
 	}
-	
+
 	bool CallVoidReturn(const char* func, bool b1, bool b2, bool b3)const
 	{
 		bool success = false;
