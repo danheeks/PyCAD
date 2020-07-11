@@ -17,8 +17,11 @@ class SolidApp(App):
     def __init__(self):
         App.__init__(self)
 
-    def GetAppName(self):
+    def GetAppTitle(self):
         return 'Solid CAD ( Computer Aided Design )'
+       
+    def GetAppConfigName(self):
+        return 'HeeksCADSolid'
 
     def RegisterObjectTypes(self):
         step.SetResPath(self.cad_dir)

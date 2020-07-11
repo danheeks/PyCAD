@@ -58,9 +58,13 @@ class App(wx.App):
         sys.stdout = save_out
         sys.stderr = save_err
         
-#    def GetAppName(self):
-#        # override this in your derived App class, if you don't want to use the executable's name as the app's name
-#        return 'Power CAD'
+    def GetAppTitle(self):
+        # The title to appear on the title bar
+        return 'Python-Based CAD Software'
+        
+    def GetAppConfigName(self):
+        # The name of the registry item
+        return 'HeeksCAD'
             
     def OnInit(self):
         self.RegisterMessageBoxCallback()

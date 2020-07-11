@@ -45,8 +45,8 @@ class Frame(wx.Frame):
         self.aui_manager.AddPane(self.ribbon, wx.aui.AuiPaneInfo().ToolbarPane().Name('Ribbon').Top().Movable(False).Gripper(False))
 
         perspective = config.Read('AuiPerspective', 'default')
-        #if perspective != 'default':
-        #    self.aui_manager.LoadPerspective(perspective)
+        if perspective != 'default':
+            self.aui_manager.LoadPerspective(perspective)
         self.ribbon.SetHeightAndImages()
         maximised = config.ReadBool('AuiMaximised', False)
         if maximised:
