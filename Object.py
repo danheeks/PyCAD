@@ -32,11 +32,9 @@ class Object(cad.BaseObject):
 
     def GetBox(self):
         self.box = geom.Box3D()
-#         for object in self.GetChildren():
-#             if object.GetVisible():
-#                 b = object.GetBox()
-#                 if b:
-#                     box.InsertBox(b)
+        for object in self.GetChildren():
+            if object.GetVisible():
+                self.box.InsertBox(object.GetBox())
         return self.box
 
     def HasEdit(self):

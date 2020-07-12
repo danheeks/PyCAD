@@ -578,7 +578,7 @@ class App(wx.App):
     def OnImport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
-        dialog = wx.FileDialog(self, 'Import File', default_directory, '', self.GetImportWildcardString())
+        dialog = wx.FileDialog(self.frame, 'Import File', default_directory, '', self.GetImportWildcardString())
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:

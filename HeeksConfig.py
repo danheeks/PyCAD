@@ -6,7 +6,7 @@ class HeeksConfig(wx.Config):
     def __init__(self, disabled = False):
         global app_name
         if app_name == None:
-            app_name = wx.GetApp().GetAppName()
+            app_name = wx.GetApp().GetAppConfigName()
         wx.Config.__init__(self, app_name)
         self.disabled = disabled
         

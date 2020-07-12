@@ -30,6 +30,43 @@
 					<Add library="/usr/local/lib/libboost_python37.so.1.73.0" />
 					<Add library="GL" />
 					<Add library="GLU" />
+					<Add library="TKBRep" />
+					<Add library="TKIGES" />
+					<Add library="TKShHealing" />
+					<Add library="TKSTEP" />
+					<Add library="TKSTEP209" />
+					<Add library="TKSTEPAttr" />
+					<Add library="TKSTEPBase" />
+					<Add library="TKXSBase" />
+					<Add library="TKShapeSchema" />
+					<Add library="FWOSPlugin" />
+					<Add library="PTKernel" />
+					<Add library="TKBool" />
+					<Add library="TKCAF" />
+					<Add library="TKCDF" />
+					<Add library="TKernel" />
+					<Add library="TKFeat" />
+					<Add library="TKFillet" />
+					<Add library="TKG2d" />
+					<Add library="TKG3d" />
+					<Add library="TKGeomAlgo" />
+					<Add library="TKGeomBase" />
+					<Add library="TKHLR" />
+					<Add library="TKMath" />
+					<Add library="TKOffset" />
+					<Add library="TKPCAF" />
+					<Add library="TKPrim" />
+					<Add library="TKPShape" />
+					<Add library="TKService" />
+					<Add library="TKTopAlgo" />
+					<Add library="TKV3d" />
+					<Add library="TKMesh" />
+					<Add library="TKBO" />
+					<Add library="TKXDESTEP" />
+					<Add library="TKXCAF" />
+					<Add library="TKXCAFSchema" />
+					<Add library="TKLCAF" />
+					<Add library="TKPLCAF" />
 				</Linker>
 			</Target>
 		</Build>

@@ -87,7 +87,7 @@ class Frame(wx.Frame):
         self.aui_manager.UnInit()
     
     def SetFrameTitle(self):
-        s = wx.GetApp().GetAppName() + ' - '
+        s = wx.GetApp().GetAppTitle() + ' - '
         #s = self.GetTitle() + ' - '
         if wx.GetApp().filepath:
             s += wx.GetApp().filepath
