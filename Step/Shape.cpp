@@ -717,7 +717,7 @@ bool CShape::ImportSolidsFile(const wchar_t* filepath, bool undoably, std::map<i
 	// returns true, if suffix handled
 	std::wstring wf(filepath);
 
-	HeeksObj* add_to = (HeeksObj*)theApp;
+	HeeksObj* add_to = theApp->GetObjPointer();
 	if(paste_into)add_to = paste_into;
 
 	if(endsWith(wf, L".stp") || endsWith(wf,L".STP") || endsWith(wf,L".step") || endsWith(wf,L".STEP"))

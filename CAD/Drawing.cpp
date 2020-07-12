@@ -195,7 +195,7 @@ void Drawing::OnModeChange(void){
 
 HeeksObj* Drawing::GetOwnerForDrawingObjects()
 {
-	return (HeeksObj*)theApp; //Object always needs to be added somewhere
+	return theApp->GetObjPointer(); //Object always needs to be added somewhere
 }
 
 void Drawing::SetView(int v){
