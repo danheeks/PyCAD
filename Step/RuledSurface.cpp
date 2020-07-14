@@ -82,7 +82,7 @@ void CreateExtrusionOrRevolution(double height_or_angle, bool solid_if_possible,
 	ConvertToFaceOrWire(objects, faces_or_wires, (fabs(taper_angle_for_extrusion) <= 0.0000001) && solid_if_possible);
 
 	std::list<TopoDS_Shape> new_shapes;
-	Matrix m = theApp->GetDrawMatrix(false);
+	Matrix m = *(theApp->GetDrawMatrix(false));
 	gp_Trsf trsf = make_matrix(m.e);
 	if(revolution_not_extrusion)
 	{

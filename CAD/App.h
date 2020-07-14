@@ -1,6 +1,8 @@
 // not really an app, but a class with one global object to put global variables in and also is the list of objects to render
 #pragma once
 
+#include <list>
+
 class HeeksColor;
 class TiXmlElement;
 class TiXmlNode;
@@ -11,6 +13,8 @@ class HeeksObj;
 class Undoable;
 class Property;
 class ObjList;
+class Matrix;
+class Point3d;
 
 enum FileOpenOrImportType
 {
@@ -48,7 +52,7 @@ public:
 	virtual void AddUndoably(const std::list<HeeksObj*>& list, HeeksObj* owner) = 0;
 	virtual void DeleteUndoably(HeeksObj* object) = 0;
 	virtual void DeleteUndoably(const std::list<HeeksObj*>& list) = 0;
-	virtual Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal) = 0;
+	virtual Matrix* GetDrawMatrix(bool get_the_appropriate_orthogonal) = 0;
 	virtual void DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing = false) = 0;
 	virtual void DrawFront() = 0;
 	virtual CInputMode* GetDigitizing() = 0;

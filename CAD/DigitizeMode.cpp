@@ -134,8 +134,7 @@ static Matrix global_matrix_relative_to_screen;
 static const Matrix& digitizing_matrix(bool calculate = false){
 	if(calculate){
 		if(theApp->digitize_screen){
-			Matrix mat = theApp->GetDrawMatrix(false);
-			Point3d origin = Point3d(0, 0, 0).Transformed(mat);
+			Point3d origin = Point3d(0, 0, 0).Transformed(*(theApp->GetDrawMatrix(false)));
 			Point3d x1 = origin + Point3d(1, 0, 0);
 			Point3d y1 = origin + Point3d(0, 1, 0);
 			Point3d po = origin;
@@ -146,7 +145,7 @@ static const Matrix& digitizing_matrix(bool calculate = false){
 			global_matrix_relative_to_screen = Matrix(origin, Point3d(po, x1).Normalized(), Point3d(po, y1).Normalized());
 		}
 		else{
-			global_matrix_relative_to_screen = theApp->GetDrawMatrix(true);
+			global_matrix_relative_to_screen = *(theApp->GetDrawMatrix(true));
 		}
 	}
 	return global_matrix_relative_to_screen;

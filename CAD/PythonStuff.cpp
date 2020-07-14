@@ -19,6 +19,7 @@
 #include <boost/python.hpp>
 
 #include "../Geom/geometry.h"
+#include "../Geom/Tris.h"
 #include "Viewport.h"
 #include "ViewPoint.h"
 #include "Observer.h"
@@ -1970,6 +1971,61 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 	return object.m_visible;
 }
 
+void HeeksObjSetVisible(HeeksObj& object, bool visible)
+{
+	object.m_visible = visible;
+}
+
+CTris tris_for_HeeksObjGetTris;
+
+static void GetTrisForHeeksObjGetTris(const double* x, const double* n)
+{
+	CTri tri;
+	tri.x[0][0] = x[0];
+	tri.x[0][1] = x[1];
+	tri.x[0][2] = x[2];
+	tri.x[1][0] = x[3];
+	tri.x[1][1] = x[4];
+	tri.x[1][2] = x[5];
+	tri.x[2][0] = x[6];
+	tri.x[2][1] = x[7];
+	tri.x[2][2] = x[8];
+	tris_for_HeeksObjGetTris.m_tris.push_back(tri);
+}
+
+CTris HeeksObjGetTris(HeeksObj& object, double cusp)
+{
+	tris_for_HeeksObjGetTris.m_tris.clear();
+	object.GetTriangles(GetTrisForHeeksObjGetTris, cusp);
+	return tris_for_HeeksObjGetTris;
+}
+
+CSketch* NewSketchFromCurve(const CCurve& curve)
+{
+	CSketch* new_sketch = new CSketch();
+
+	std::list<Span> spans;
+	curve.GetSpans(spans);
+
+	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
+	{
+		Span &span = *It;
+		HeeksObj* new_span = NULL;
+		if (span.m_v.m_type == 0)
+		{
+			new_span = new HLine(Point3d(span.m_p.x, span.m_p.y, 0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0), &theApp->current_color);
+		}
+		else
+		{
+			new_span = new HArc(Point3d(span.m_p.x, span.m_p.y, 0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0), Point3d(0, 0, (span.m_v.m_type > 0)? 1:-1), Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0), &theApp->current_color);
+		}
+
+		new_sketch->Add(new_span, NULL);
+	}
+
+	return new_sketch;
+}
+
 
 	BOOST_PYTHON_MODULE(cad) {
 		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
@@ -2048,6 +2104,8 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 			.def("GetOrigin", &ObjGetOrigin)
 			.def("Transform", &HeeksObj::Transform)
 			.def("GetVisible", &HeeksObjGetVisible)
+			.def("SetVisible", &HeeksObjSetVisible)
+			.def("GetTris", HeeksObjGetTris)
 			;
 
 		boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")
@@ -2658,7 +2716,9 @@ bool HeeksObjGetVisible(const HeeksObj& object)
 		boost::python::def("GetPerspective", GetPerspective);
 		boost::python::def("SetPerspective", SetPerspective);
 		boost::python::def("GetCurrentColor", GetCurrentColor);
-		boost::python::def("SetCurrentColor", SetCurrentColor);
+		boost::python::def("SetCurrentColor", SetCurrentColor); 
+		boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
+
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;

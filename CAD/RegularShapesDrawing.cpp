@@ -48,7 +48,7 @@ bool RegularShapesDrawing::calculate_item(DigitizedPoint &end)
 		AddToTempObjects(new CSketch);
 	}
 
-	Matrix mat = theApp->GetDrawMatrix(true);
+	Matrix mat = *(theApp->GetDrawMatrix(true));
 	Point3d xdir = Point3d(1, 0, 0).Transformed(mat);
 	Point3d ydir = Point3d(0, 1, 0).Transformed(mat);
 	Point3d zdir = Point3d(0, 0, 1).Transformed(mat);

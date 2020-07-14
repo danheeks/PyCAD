@@ -1744,22 +1744,25 @@ void CCadApp::WereRemoved(const std::list<HeeksObj*>& list)
 	SetAsModified();
 }
 
-Matrix CCadApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
+Matrix matrix_for_GetDrawMatrix;
+
+Matrix* CCadApp::GetDrawMatrix(bool get_the_appropriate_orthogonal)
 {
 	if (get_the_appropriate_orthogonal){
 		// choose from the three orthoganal possibilities, the one where it's z-axis closest to the camera direction
 		Point3d vx, vy;
 		m_current_viewport->m_view_point.GetTwoAxes(vx, vy, false, 0);
-		{
-			Point3d o(0, 0, 0);
-			if (m_current_coordinate_system)o = o.Transformed(m_current_coordinate_system->GetMatrix());
-			return Matrix(o, vx, vy);
-		}
+		Point3d o(0, 0, 0);
+		if (m_current_coordinate_system)o = o.Transformed(m_current_coordinate_system->GetMatrix());
+		matrix_for_GetDrawMatrix = Matrix(o, vx, vy);
+	}
+	else
+	{
+		matrix_for_GetDrawMatrix = Matrix();
+		if (m_current_coordinate_system)matrix_for_GetDrawMatrix = m_current_coordinate_system->GetMatrix();
 	}
 
-	Matrix mat;
-	if (m_current_coordinate_system)mat = m_current_coordinate_system->GetMatrix();
-	return mat;
+	return &matrix_for_GetDrawMatrix;
 }
 
 void CCadApp::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing)

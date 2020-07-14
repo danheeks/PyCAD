@@ -130,7 +130,7 @@ public:
 				PyLockGIL lock;
 				try{
 
-					boost::python::detail::method_result result = f(object);
+					boost::python::detail::method_result result = f(boost::ref(object));
 					success = AfterPythonCall(main_module);
 					return success;
 				}

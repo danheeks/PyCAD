@@ -18,7 +18,7 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 	Point3d vx, vy;
 	int plane_mode2 = view_point->GetTwoAxes(vx, vy, false, plane_mode);
 	Point3d datum(0, 0, 0);
-	Matrix orimat = theApp->GetDrawMatrix(false);
+	Matrix orimat = *(theApp->GetDrawMatrix(false));
 	datum = datum.Transformed(orimat);
 	orimat = Matrix(datum, vx, vy);
 	Point3d unit_forward = view_point->forwards_vector().Normalized();
@@ -166,7 +166,7 @@ void GetGridBox(const CViewPoint *view_point, CBox &ext){
 	Point3d vx, vy;
 	view_point->GetTwoAxes(vx, vy, false, 0);
 	Point3d datum(0, 0, 0);
-	Matrix orimat = theApp->GetDrawMatrix(false);
+	Matrix orimat = *(theApp->GetDrawMatrix(false));
 	datum = datum.Transformed(orimat);
 	orimat = Matrix(datum, vx, vy);
 	Plane plane(datum, Point3d(0, 0, 1).Transformed(orimat));
@@ -215,7 +215,7 @@ static void RenderGrid(const CViewPoint *view_point, int plane)
 			Point3d vx, vy;
 			view_point->GetTwoAxes(vx, vy, false, plane);
 			Point3d datum(0, 0, 0);
-			Matrix orimat = theApp->GetDrawMatrix(false);
+			Matrix orimat = *(theApp->GetDrawMatrix(false));
 			datum = datum.Transformed(orimat);
 			orimat = Matrix(datum, vx, vy);
 			Point3d v_up = Point3d(0,0, 1).Transformed(orimat);

@@ -246,7 +246,7 @@ public:
 	void WereModified(const std::list<HeeksObj*>& list);
 	void WereAdded(const std::list<HeeksObj*>& list);
 	void WereRemoved(const std::list<HeeksObj*>& list);
-	virtual Matrix GetDrawMatrix(bool get_the_appropriate_orthogonal);
+	virtual Matrix* GetDrawMatrix(bool get_the_appropriate_orthogonal);
 	void DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing);
 	CInputMode* GetDigitizing();
 	void GetOptions(std::list<Property *> *list);
