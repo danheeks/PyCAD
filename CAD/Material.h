@@ -5,6 +5,7 @@
 #pragma once
 
 #include "HeeksColor.h"
+#include <string.h> // for the memcpy below
 
 class Material{
 public:
