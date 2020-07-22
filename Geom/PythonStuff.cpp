@@ -604,6 +604,18 @@ static std::string CBox__str__(const CBox& self) {
 	return ss.str();
 }
 
+boost::python::object CurveIsACircle(const CCurve& curve, double tol)
+{
+	Circle circle;
+	if (curve.IsACircle(circle, tol))
+	{
+		return boost::python::object(circle);
+	}
+	else
+	{
+		return boost::python::object(); // None
+	}
+}
 
 BOOST_PYTHON_MODULE(geom) {
 	/// class Point
@@ -706,6 +718,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetMaxCutterRadius", &CurveGetMaxCutterRadius)
 		.def("GetBox", &CurveGetBox)///function GetBox///return Box///returns the box that fits round the curve
 		.def("Transform", &CCurve::Transform)
+		.def("IsACircle", CurveIsACircle)
 		
 		;
 
@@ -834,7 +847,16 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("IntersectPlane", &LineIntersectPlane)
 		;
 
-	
+	///class Circle
+	bp::class_<Circle>("Circle")
+		.def(bp::init<Circle>())
+		.def(bp::init<const Point&, double>())
+		.def(bp::init<const Point&, const Point&>())
+		.def(bp::init<const Point&, const Point&, const Point&>())
+		.def("Transform", &LineTransform)
+		.def_readwrite("c", &Circle::pc)
+		.def_readwrite("radius", &Circle::radius)
+		;
 
 	/// class Stl
 	/// a collection of triangles, usually read in from an stl file

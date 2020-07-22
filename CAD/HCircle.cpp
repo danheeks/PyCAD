@@ -236,7 +236,7 @@ void HCircle::WriteToXML(TiXmlElement *element)
 	element->SetDoubleAttribute("ax", m_axis.x);
 	element->SetDoubleAttribute("ay", m_axis.y);
 	element->SetDoubleAttribute("az", m_axis.z);
-	WriteToXML(element);
+	ExtrudedObj<IdNamedObj>::WriteToXML(element);
 }
 
 void HCircle::ReadFromXML(TiXmlElement* element)

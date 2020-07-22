@@ -1467,3 +1467,45 @@ void tangential_arc(const Point &p0, const Point &p1, const Point &v0, Point &c,
 		}
 	}
 }
+
+bool CCurve::IsACircle(Circle& circle, double tol)const
+{
+	std::list<Span> spans;
+	GetSpans(spans);
+
+	Span* longest_arc_span = NULL;
+	double longest_length = 0.0;
+
+	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
+	{
+		Span &span = *It;
+		if (span.m_v.m_type)
+		{
+			double length = span.Length();
+			if ((longest_arc_span == NULL) || (length > longest_length))
+			{
+				longest_arc_span = &span;
+				longest_length = span.Length();
+			}
+		}
+	}
+
+	if (longest_arc_span == NULL)
+		return false;
+
+	Circle c(longest_arc_span->m_p, longest_arc_span->m_v.m_c);
+
+	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
+	{
+		Span &span = *It;
+		if (!c.PointIsOn(span.MidParam(0.0), tol))
+			return false;
+		if (!c.PointIsOn(span.MidParam(0.5), tol))
+			return false;
+		if (!c.PointIsOn(span.MidParam(1.0), tol))
+			return false;
+	}
+
+	circle = c;
+	return true;
+}

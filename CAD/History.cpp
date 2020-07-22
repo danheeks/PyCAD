@@ -148,7 +148,8 @@ History::~History(void)
 	for(;; It--)
 	{
 		Undoable *u = *It;
-		delete u;
+		if (u->CanBeDeleted())
+			delete u;
 		if(It == m_undoables.begin())break;
 	}
 }

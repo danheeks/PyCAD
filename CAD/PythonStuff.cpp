@@ -50,6 +50,7 @@
 #include "GripperSelTransform.h"
 #include "CoordinateSystem.h"
 #include "Filter.h"
+#include "RegularShapesDrawing.h"
 
 void OnExit()
 {
@@ -739,6 +740,24 @@ void SetILineDrawing()
 	theApp->SetInputMode(&line_strip);
 }
 
+void SetRectanglesDrawing()
+{
+	regular_shapes_drawing.m_mode = RectanglesRegularShapeMode;
+	theApp->SetInputMode(&regular_shapes_drawing);
+}
+
+void SetObroundsDrawing()
+{
+	regular_shapes_drawing.m_mode = ObroundRegularShapeMode;
+	theApp->SetInputMode(&regular_shapes_drawing);
+}
+
+void SetPolygonsDrawing()
+{
+	regular_shapes_drawing.m_mode = PolygonsRegularShapeMode;
+	theApp->SetInputMode(&regular_shapes_drawing);
+}
+
 HeeksObj* NewPoint(const Point3d& p)
 {
 	HPoint* point = new HPoint(p, &theApp->current_color);
@@ -1402,6 +1421,11 @@ public:
 	{
 		CallVoidReturn("RollBack");
 	}
+
+	bool CanBeDeleted()
+	{
+		return false;
+	}
 };
 
 
@@ -1779,13 +1803,13 @@ void EndDrawing()
 	theApp->RestoreInputMode();
 }
 
-boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool one_of_each, const CFilter &filter)
+boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, bool just_top_level)
 {
 	window.MakePositive();
 
 	boost::python::list olist;
 	std::list<HeeksObj*> objects;
-	theApp->GetObjectsInWindow(window, only_if_fully_in, one_of_each, filter, objects);
+	theApp->GetObjectsInWindow(window, only_if_fully_in, one_of_each, filter, objects, just_top_level);
 	for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
 	{
 		HeeksObj* object = *It;
@@ -2662,6 +2686,9 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
 		boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
 		boost::python::def("SetILineDrawing", SetILineDrawing);
+		boost::python::def("SetRectanglesDrawing", SetRectanglesDrawing);
+		boost::python::def("SetObroundsDrawing", SetObroundsDrawing);
+		boost::python::def("SetPolygonsDrawing", SetPolygonsDrawing);
 		boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("PyIncref", PyIncref);

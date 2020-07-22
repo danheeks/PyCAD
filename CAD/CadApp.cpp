@@ -2309,12 +2309,12 @@ IRect CCadApp::PointToPickBox(const IPoint& point)
 	return IRect(point.x - 5, theApp->m_current_viewport->GetViewportSize().GetHeight() - point.y - 5, 10, 10);
 }
 
-void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects)
+void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects, bool just_top_level_item)
 {
 	if (only_if_fully_in){
 		// only select objects which are completely within the window
 		std::list<HeeksObj*> objects_in_window;
-		GetObjectsInWindow(window, false, one_of_each, filter, objects_in_window);
+		GetObjectsInWindow(window, false, one_of_each, filter, objects_in_window, just_top_level_item);
 		std::set<HeeksObj*> obj_set;
 		for (std::list<HeeksObj*>::iterator It = objects_in_window.begin(); It != objects_in_window.end(); It++)
 			obj_set.insert(*It);
@@ -2342,7 +2342,7 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 		for (int i = 0; i < 4; i++)
 		{
 			std::list<HeeksObj*> objects_in_strip;
-			GetObjectsInWindow(strip_boxes[i], false, one_of_each, filter, objects_in_strip);
+			GetObjectsInWindow(strip_boxes[i], false, one_of_each, filter, objects_in_strip, just_top_level_item);
 			for (std::list<HeeksObj*>::iterator It = objects_in_strip.begin(); It != objects_in_strip.end(); It++)
 				obj_set.erase(*It);
 		}
@@ -2363,28 +2363,37 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 		{
 			HeeksObj* object = *It;
 			HeeksObj* object_to_use = NULL;
-			while (object && (object != theApp))
+			while (true)
 			{
+				if (!just_top_level_item)
+					object_to_use = NULL;
+
 				if (filter.CanTypeBePicked(object->GetType())){
 					object_to_use = object;
 				}
-				object = object->m_owner;
-			}
-			if (object_to_use)
-			{
-				if (one_of_each)
+
+				object = object->m_owner; // move up to object's parent
+				bool continue_in_loop = (object && (object != theApp));
+
+				if (object_to_use && (!just_top_level_item || !continue_in_loop))
 				{
-					int t = object_to_use->GetType();
-					if (types_already_added.find(t) == types_already_added.end())
+					if (one_of_each)
+					{
+						int t = object_to_use->GetType();
+						if (types_already_added.find(t) == types_already_added.end())
+						{
+							objects.push_back(object_to_use);
+							types_already_added.insert(t);
+						}
+					}
+					else
 					{
 						objects.push_back(object_to_use);
-						types_already_added.insert(t);
 					}
 				}
-				else
-				{
-					objects.push_back(object_to_use);
-				}
+
+				if (!continue_in_loop)
+					break;
 			}
 		}
 	}

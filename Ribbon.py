@@ -295,9 +295,9 @@ class Ribbon(RB.RibbonBar):
         panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Sketches', self.Image('lines'))
         toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(toolbar,'Lines', 'lines', 'Draw a sketch with lines and arcs', app.OnLines)
-        Ribbon.AddToolBarTool(toolbar,'Rectangles', 'rect', 'Draw rectangles', app.OnLines)
-        Ribbon.AddToolBarTool(toolbar,'Obrounds', 'obround', 'Draw obrounds', app.OnLines)
-        Ribbon.AddToolBarTool(toolbar,'Polygons', 'pentagon', 'Draw polygons', app.OnLines)
+        Ribbon.AddToolBarTool(toolbar,'Rectangles', 'rect', 'Draw rectangles', app.OnRectangles)
+        Ribbon.AddToolBarTool(toolbar,'Obrounds', 'obround', 'Draw obrounds', app.OnObrounds)
+        Ribbon.AddToolBarTool(toolbar,'Polygons', 'pentagon', 'Draw polygons', app.OnPolygons)
         Ribbon.AddToolBarTool(toolbar,'Gear', 'gear', 'Add a gear', app.OnGear)
         CurrentColorButton('Drawing Color', 'Edit current drawing color').AddToToolbar(toolbar)
         

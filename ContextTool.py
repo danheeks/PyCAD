@@ -26,6 +26,26 @@ class ContextTool:
     def GetTools(self):
         return []
         
+    def IsEnabled(self):
+        return True
+        
+class ObjectTitleTool(ContextTool):
+    def __init__(self, object):
+        self.object = object
+        ContextTool.__init__(self)
+
+    def BitmapPath(self):
+        return self.object.GetIconFilePath()
+
+    def BitmapSize(self):
+        return 16
+    
+    def GetTitle(self):
+        return self.object.GetTitle()
+        
+    def IsEnabled(self):
+        return False
+        
 class ContextToolList(ContextTool):
     def __init__(self, title):
         ContextTool.__init__(self)

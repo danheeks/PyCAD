@@ -63,7 +63,7 @@ class SelectMode(cad.InputMode):
             self.highlighted_objects = []
             
             if self.dragging_moves_objects:
-                objects = cad.ObjectsUnderWindow(cad.IRect(event.x, event.y), False, True, self.filter)
+                objects = cad.ObjectsUnderWindow(cad.IRect(event.x, event.y), False, True, self.filter, True)
                 for object in objects:
                     if object.GetType() == cad.OBJECT_TYPE_GRIPPER:
                         wx.GetApp().GetViewport().DrawFront()
@@ -84,12 +84,12 @@ class SelectMode(cad.InputMode):
                 only_if_fully_in = True
                 if self.window_box.width < 0:
                     only_if_fully_in = False
-                objects = cad.ObjectsUnderWindow(self.window_box, only_if_fully_in, False, self.filter)
+                objects = cad.ObjectsUnderWindow(self.window_box, only_if_fully_in, False, self.filter, True)
                 for object in objects: cad.Select(object)
                 self.window_box = None
             elif self.button_down_point != None:
                 # select one object
-                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter)
+                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
                 if len(objects) > 0:
                     object = objects[0]
                     
@@ -139,7 +139,7 @@ class SelectMode(cad.InputMode):
                         if cad.GetNumSelected() > 0:
                             objects = cad.GetSelectedObjects()
                         else:
-                            objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter)
+                            objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
                             for object in objects:
                                 cad.Select(object)
 

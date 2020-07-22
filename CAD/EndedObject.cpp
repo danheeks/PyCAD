@@ -81,12 +81,10 @@ void EndedObject::WriteToXML(TiXmlElement *element)
 
 void EndedObject::ReadFromXML(TiXmlElement* pElem)
 {
-	HeeksColor c;
-
 	// get the attributes
 	int att_col;
 	double x;
-	if(pElem->Attribute("col", &att_col))c = HeeksColor((long)att_col);
+	if(pElem->Attribute("col", &att_col))color = HeeksColor((long)att_col);
 	if(pElem->Attribute("sx", &x))A.x = x;
 	if(pElem->Attribute("sy", &x))A.y = x;
 	if(pElem->Attribute("sz", &x))A.z = x;

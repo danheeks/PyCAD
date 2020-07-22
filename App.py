@@ -224,10 +224,6 @@ class App(wx.App):
         if type == cad.OBJECT_TYPE_SKETCH:
             if self.object.GetNumChildren() > 1:
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
-
-        if type == cad.OBJECT_TYPE_SKETCH:
-            if self.object.GetNumChildren() > 1:
-                tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
                 
         if len(tools)>0:
             tools.append(None) # a separator
@@ -241,17 +237,21 @@ class App(wx.App):
         return tools
         
     def GetTools(self, x, y, control_pressed):
-        objects = cad.ObjectsUnderWindow(cad.IRect(x, y), False, True, self.select_mode.filter)
+        self.frame.graphics_canvas.SetCurrent(self.frame.graphics_canvas.context)
+        objects = cad.ObjectsUnderWindow(cad.IRect(x, y), False, True, self.select_mode.filter, False)
         global tools
         tools = []
         make_container = len(objects)>1
         for object in objects:
+            object_tools = self.GetObjectTools(object, control_pressed)
             if make_container:
                 tool_list = ContextTool.ObjectToolList(object)
-                tool_list.tools += self.GetObjectTools(object, control_pressed)
+                tool_list.tools += object_tools
                 tools.append(tool_list)
             else:
-                tools += self.GetObjectTools(object, control_pressed)
+                tools.append(ContextTool.ObjectTitleTool(object))# object name with icon
+                tools.append(None) # separator
+                tools += object_tools
             
         return tools
     
@@ -293,6 +293,8 @@ class App(wx.App):
                 item = wx.MenuItem(menu, wx.ID_ANY, tool.GetTitle())        
                 self.SetMenuItemBitmap(item, tool)
                 self.Bind(wx.EVT_MENU, tool.Run, menu.Append(item))     
+                if not tool.IsEnabled():
+                    menu.Enable(item.GetId(), False)
         
     def GetDropDownTools(self, x, y, control_pressed):
         self.tool_index_list = [] # list of tool and index pairs
@@ -602,14 +604,12 @@ class App(wx.App):
     def OnExport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
-        print('self.GetExportWildcardString() = ' + str(self.GetExportWildcardString()))
         dialog = wx.FileDialog(self.frame, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
             path = dialog.GetPath()
             suffix = self.GetPathSuffix(path)
-            print('suffix = ' + suffix)
             if suffix == 'svg':
                 import Svg
                 Svg.Export(path)
@@ -845,6 +845,15 @@ class App(wx.App):
         
     def OnLines(self, e):
         cad.SetLineArcDrawing()
+        
+    def OnRectangles(self, e):
+        cad.SetRectanglesDrawing()
+        
+    def OnObrounds(self, e):
+        cad.SetObroundsDrawing()
+        
+    def OnPolygons(self, e):
+        cad.SetPolygonsDrawing()
         
     def OnCircles3p(self, e):
         cad.SetCircles3pDrawing()
