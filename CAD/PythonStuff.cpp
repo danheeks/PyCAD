@@ -35,6 +35,7 @@
 #include "HArc.h"
 #include "HPoint.h"
 #include "HText.h"
+#include "HCircle.h"
 #include "InputMode.h"
 #include "MagDragWindow.h"
 #include "ViewRotating.h"
@@ -764,6 +765,26 @@ HeeksObj* NewPoint(const Point3d& p)
 	return point;
 }
 
+HeeksObj* NewLine(const Point3d& p0, const Point3d& p1)
+{
+	return new HLine(p0, p1, &theApp->current_color);
+}
+
+HeeksObj* NewArc(const Point3d &a, const Point3d &b, const Point3d &axis, const Point3d &c)
+{
+	return new HArc(a, b, axis, c, &theApp->current_color);
+}
+
+HeeksObj* NewCircle(const Point3d &c, const Point3d& axis, double radius)
+{
+	return new HCircle(c, axis, radius, &theApp->current_color);
+}
+
+HeeksObj* NewSketch()
+{
+	return new CSketch();
+}
+
 HeeksObj* NewText(const std::wstring &value)
 {
 	return new HText(Matrix(), value, &theApp->current_color, 0, 0);
@@ -1477,6 +1498,18 @@ boost::python::list GetSelectedObjects() {
 	return slist;
 }
 
+static CFilter selection_types_found;
+CFilter* GetSelectionTypes()
+{
+	selection_types_found.Clear();
+	for (std::list<HeeksObj *>::iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++)
+	{
+		HeeksObj* object = *It;
+		selection_types_found.AddType(object->GetType());
+	}
+	return &selection_types_found;
+}
+
 boost::python::list GetSelectionProperties()
 {
 	std::list<Property *> list;
@@ -1586,6 +1619,16 @@ void RollForward()
 void DeleteUndoably(HeeksObj *object)
 {
 	theApp->DeleteUndoably(object);
+}
+
+void DeleteObjectsUndoably(boost::python::list &list)
+{
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	return theApp->DeleteUndoably(o_list);
 }
 
 void CopyUndoably(HeeksObj* object, HeeksObj* copy_object)
@@ -2342,7 +2385,8 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::class_<CFilter>("Filter")
 			.def("Clear", &CFilter::Clear)
 			.def("AddType", &CFilter::AddType)
-			.def("CanTypeBePicked", &CFilter::CanTypeBePicked)
+			.def("IsTypeInFilter", &CFilter::IsTypeInFilter)
+			.def("Size", &CFilter::Size)
 			;
 
 		boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
@@ -2634,6 +2678,7 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("SetResFolder", SetResFolder);
 		boost::python::def("MessageBox", CadMessageBox);
 		boost::python::def("GetSelectedObjects", GetSelectedObjects);
+		boost::python::def("GetSelectionTypes", GetSelectionTypes, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetNumSelected", GetNumSelected);
 		boost::python::def("GetObjects", GetObjects);
 		boost::python::def("ObjectMarked", ObjectMarked);
@@ -2654,6 +2699,7 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("RollBack", RollBack);
 		boost::python::def("RollForward", RollForward);
 		boost::python::def("DeleteUndoably", DeleteUndoably);
+		boost::python::def("DeleteObjectsUndoably", DeleteObjectsUndoably);
 		boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
 		boost::python::def("CopyUndoably", CopyUndoably);
 		boost::python::def("TransformUndoably", TransformUndoably);
@@ -2690,6 +2736,10 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("SetObroundsDrawing", SetObroundsDrawing);
 		boost::python::def("SetPolygonsDrawing", SetPolygonsDrawing);
 		boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewLine", NewLine, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewArc", NewArc, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewCircle", NewCircle, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewSketch", NewSketch, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("PyIncref", PyIncref);
 		boost::python::def("GetNextID", GetNextID);
@@ -2743,8 +2793,9 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("GetPerspective", GetPerspective);
 		boost::python::def("SetPerspective", SetPerspective);
 		boost::python::def("GetCurrentColor", GetCurrentColor);
-		boost::python::def("SetCurrentColor", SetCurrentColor); 
+		boost::python::def("SetCurrentColor", SetCurrentColor);
 		boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
 
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;

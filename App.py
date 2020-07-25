@@ -237,7 +237,9 @@ class App(wx.App):
         return tools
         
     def GetTools(self, x, y, control_pressed):
-        self.frame.graphics_canvas.SetCurrent(self.frame.graphics_canvas.context)
+        self.frame.graphics_canvas.SetCurrent(self.frame.graphics_canvas.context)# should be somewhere else, but for now fixes a problem
+        
+        # get object tools
         objects = cad.ObjectsUnderWindow(cad.IRect(x, y), False, True, self.select_mode.filter, False)
         global tools
         tools = []
@@ -250,10 +252,57 @@ class App(wx.App):
                 tools.append(tool_list)
             else:
                 tools.append(ContextTool.ObjectTitleTool(object))# object name with icon
-                tools.append(None) # separator
                 tools += object_tools
             
         return tools
+    
+    def GetSelectionFilterTools(self, filter):
+        # get tools for the selection given filter
+        tools = []
+
+        if filter.Size() > 0:
+            tools.append(ContextTool.CADContextTool('Delete Marked Items', 'delete', self.DeleteMarkedList))
+                
+        if self.SketchChildTypeInFilter(filter):
+            tools.append(ContextTool.CADContextTool('Make to Sketch', 'makesketch', self.MakeToSketch))
+
+        if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH):
+            tools.append(ContextTool.CADContextTool('Combine sketches', 'sketchjoin', cad.CombineSelectedSketches))
+        
+        first_coord_sys = None
+        second_coord_sys = None
+        
+        for object in cad.GetSelectedObjects():
+            if object.GetType() == cad.OBJECT_TYPE_COORD_SYS:
+                if first_coord_sys == None: first_coord_sys = object
+                elif second_coord_sys == None: second_coord_sys = object
+
+        return tools
+    
+    def GetSelectionTools(self):
+        return self.GetSelectionFilterTools(cad.GetSelectionTypes())
+    
+    def SketchChildTypeInFilter(self, filter):
+        if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH_LINE): return True
+        if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH_ARC): return True
+        return False
+    
+    def DeleteMarkedList(self):
+        cad.DeleteObjectsUndoably(cad.GetSelectedObjects())
+        
+    def MakeToSketch(self):
+        objects_to_delete = []
+        sketch = cad.NewSketch()
+        
+        for object in cad.GetSelectedObjects():
+            t = object.GetType()
+            if self.ObjectCanBeSketchChild(object):
+                new_object = object.MakeACopy()
+                objects_to_delete.append(object)
+                sketch.Add(new_object)
+                
+        cad.AddUndoably(sketch)
+        cad.DeleteObjectsUndoably(objects_to_delete)
     
     def AddPointToDrawing(self):
         cad.AddDrawingPoint()
@@ -297,9 +346,16 @@ class App(wx.App):
                     menu.Enable(item.GetId(), False)
         
     def GetDropDownTools(self, x, y, control_pressed):
-        self.tool_index_list = [] # list of tool and index pairs
         tools = self.GetTools(x, y, control_pressed)
-        #tools += cad.GetSelectedItemsTools(marked_object, new_point, True)
+
+        # add a separator
+        if len(tools) > 0 and tools[-1] != None:
+            tools.append(None) # separator
+        
+        # add selection tools
+        tools += self.GetSelectionTools()
+        
+        #cad.GetSelectedItemsTools(marked_object, new_point, True)
         #GenerateIntersectionMenuOptions( f_list );
         #self.AddToolListWithSeparator(tools, cad.GetInputMode().GetTools())
         
@@ -434,6 +490,7 @@ class App(wx.App):
         elif k == wx.WXK_RETURN:
             if self.inMainLoop:
                 self.ExitMainLoop()
+                self.Repaint()
         elif k == ord('Z'):
             if e.ControlDown():
                 if e.ShiftDown():
@@ -452,6 +509,11 @@ class App(wx.App):
         else:
             return False
         return True
+    
+    def Repaint(self):
+        print('repaint#')
+        self.frame.graphics_canvas.Update()
+        self.frame.graphics_canvas.Refresh()
     
     def AddExtraRibbonPages(self, ribbon):
         pass

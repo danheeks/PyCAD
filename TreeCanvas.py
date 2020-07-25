@@ -1,6 +1,7 @@
 import wx
 import cad
 import os
+import ContextTool
 
 ButtonTypePlus = 1
 ButtonTypeMinus = 2
@@ -249,18 +250,33 @@ class TreeCanvas(wx.ScrolledCanvas):
             if self.dragging:
                 self.dragging = False
             else:
-                if self.clicked_object:
-                    tools = wx.GetApp().GetObjectTools(self.clicked_object, True)
-                    menu = wx.Menu()
-                    for tool in tools:
-                        wx.GetApp().AddToolToListAndMenu(tool, menu)
-                    self.PopupMenu(menu, event.GetPosition())
+                tools = self.GetDropDownTools(event.ControlDown())
+                menu = wx.Menu()
+                for tool in tools:
+                    wx.GetApp().AddToolToListAndMenu(tool, menu)
+                self.PopupMenu(menu, event.GetPosition())
 
         if event.LeftDClick():
              if self.clicked_object:
                  wx.GetApp().EditUndoably(self.clicked_object)
 
         event.Skip()
+        
+        
+    def GetDropDownTools(self, control_pressed):
+        tools = []
+
+        if self.clicked_object:
+            tools.append(ContextTool.ObjectTitleTool(self.clicked_object))# object name with icon
+            tools += wx.GetApp().GetObjectTools(self.clicked_object, control_pressed, from_tree_canvas = True)
+
+        # add a separator
+        if len(tools) > 0 and tools[-1] != None:
+            tools.append(None) # separator
+            
+        tools += wx.GetApp().GetSelectionTools()
+                
+        return tools
     
     def IsExpanded(self, object):
         if object.AutoExpand():

@@ -15,12 +15,15 @@ HSpline::HSpline(const HSpline &s):EndedObject(){
 	operator=(s);
 }
 
-HSpline::HSpline(const Geom_BSplineCurve &s, const HeeksColor* col):EndedObject(){
-	m_spline = Handle(Geom_BSplineCurve)::DownCast(s.Copy());	
+HSpline::HSpline() : EndedObject(){
+}
+
+HSpline::HSpline(const Geom_BSplineCurve &s, const HeeksColor* col) :EndedObject(){
+	m_spline = Handle(Geom_BSplineCurve)::DownCast(s.Copy());
 	gp_Pnt p;
 	m_spline->D0(m_spline->FirstParameter(), p);
 	A = G2P(p);
-	m_spline->D0(m_spline->LastParameter() , p);
+	m_spline->D0(m_spline->LastParameter(), p);
 	B = G2P(p);
 	SetColor(*col);
 }

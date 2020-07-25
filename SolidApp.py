@@ -9,6 +9,7 @@ from NiceTextCtrl import LengthCtrl
 from NiceTextCtrl import DoubleCtrl
 from Ribbon import RB
 from Ribbon import Ribbon
+import ContextTool
     
 def ImportSTEPFile():
     step.ImportSTEPFile(cad.GetFilePathForImportExport())
@@ -30,6 +31,8 @@ class SolidApp(App):
         cad.RegisterOnEndXmlWrite(step.WriteSolids)
         step.SetStepFileObjectType(cad.RegisterObjectType("STEP_file", step.CreateStepFileObject, add_to_filter = False))
         step.SetSolidType(cad.RegisterObjectType("Solid", None))
+        step.SetEllipseType(cad.RegisterObjectType("Ellipse", step.CreateEllipse))
+        step.SetSplineType(cad.RegisterObjectType("Spline", step.CreateSpline))
         cad.RegisterImportFileType("step", ImportSTEPFile)
         cad.RegisterImportFileType("stp", ImportSTEPFile)
         
@@ -266,3 +269,18 @@ class SolidApp(App):
     def OnEllipse(self, e):
         step.SetEllipseDrawing()
 
+    def GetSelectionFilterTools(self, filter):
+        tools = App.GetSelectionFilterTools(self, filter)
+        
+        objects = cad.GetSelectedObjects()
+                
+        if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH) or self.SketchChildTypeInFilter(filter):
+            tools.append(ContextTool.CADContextTool('Sketch to Face', 'la2face', step.SketchToFace))
+        
+        return tools
+
+    def SketchChildTypeInFilter(self, filter):
+        if App.SketchChildTypeInFilter(self, filter): return True
+        if filter.IsTypeInFilter(step.GetEllipseType()): return True
+        if filter.IsTypeInFilter(step.GetSplineType()): return True
+        return False

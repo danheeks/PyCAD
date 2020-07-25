@@ -393,6 +393,52 @@ bool ConvertSketchToFaceOrWire(HeeksObj* object, std::list<TopoDS_Shape> &face_o
 	return true;
 }
 
+void SketchToFace()
+{
+	std::list< std::vector<TopoDS_Edge> > individual_edges;
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+	std::list<HeeksObj*>::const_iterator It;
+	for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++){
+		HeeksObj* object = *It;
+		int t = object->GetType();
+		if (t == SketchType)
+		{
+			std::list<TopoDS_Shape> faces;
+			if (ConvertSketchToFaceOrWire(object, faces, true))
+			{
+				for (std::list<TopoDS_Shape>::iterator It2 = faces.begin(); It2 != faces.end(); It2++)
+				{
+					TopoDS_Shape& face = *It2;
+					theApp->AddUndoably(new CFace(TopoDS::Face(face)), NULL, NULL);
+				}
+			}
+		}
+		if (t == LineType || t == ArcType || t == CircleType || t == HEllipse::m_type || t == HSpline::m_type)
+		{
+			if (!ConvertSketchToEdges(object, individual_edges))return;
+		}
+	}
+
+	for (std::list< std::vector<TopoDS_Edge> >::iterator It = individual_edges.begin(); It != individual_edges.end(); It++)
+	{
+		std::vector<TopoDS_Edge> &edges = *It;
+		if (edges.size() > 0)
+		{
+			SortEdges(edges);
+			std::list<TopoDS_Shape> faces;
+			if (ConvertEdgesToFaceOrWire(edges, faces, true))
+			{
+				for (std::list<TopoDS_Shape>::iterator It2 = faces.begin(); It2 != faces.end(); It2++)
+				{
+					TopoDS_Shape& face = *It2;
+					theApp->AddUndoably(new CFace(TopoDS::Face(face)), NULL, NULL);
+				}
+			}
+		}
+	}
+}
+
 bool ConvertFaceToSketch2(const TopoDS_Face& face, HeeksObj* sketch, double deviation)
 {
 	// given a face, this adds lines and arcs to the given sketch

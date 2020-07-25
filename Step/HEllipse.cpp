@@ -19,10 +19,13 @@ HEllipse::HEllipse(const HEllipse &e){
 	operator=(e);
 }
 
-HEllipse::HEllipse(const gp_Elips &e, const HeeksColor* col):color(*col){
+HEllipse::HEllipse(){
+}
+
+HEllipse::HEllipse(const gp_Elips &e, const HeeksColor* col) :color(*col){
 	C = e.Location();
 	m_start = 0;
-	m_end = 2*M_PI;
+	m_end = 2 * M_PI;
 	SetEllipse(e);
 }
 
@@ -376,29 +379,27 @@ void HEllipse::WriteToXML(TiXmlElement *element)
 
 void HEllipse::ReadFromXML(TiXmlElement *pElem)
 {
-	double axis[3];
-	double maj = 0.0;
-	double min = 0.0;
-	double rot = 0;
-	double start=0;
-	double end=2*M_PI;
-	HeeksColor c;
-	gp_Pnt p0(1,0,0), p1(0,1,0), centre(0,0,0);
-
+	m_xdir = gp_Dir(0, 1, 0);
+	double zdir[3] = { 0, 0, 1 };
 	int att_col;
 	double x;
-	if(pElem->Attribute("col", &att_col))c = HeeksColor((long)att_col);
-	pElem->Attribute("maj", &maj);
-	pElem->Attribute("min", &min);
-	pElem->Attribute("rot", &rot);
-	pElem->Attribute("start", &start);
-	pElem->Attribute("end", &end);
-	if(pElem->Attribute("ax", &x))axis[0] = x;
-	if(pElem->Attribute("ay", &x))axis[1] = x;
-	if(pElem->Attribute("az", &x))axis[2] = x;
-	if(pElem->Attribute("cx", &x))centre.SetX(x);
-	if(pElem->Attribute("cy", &x))centre.SetY(x);
-	if(pElem->Attribute("cz", &x))centre.SetZ(x);
+	if(pElem->Attribute("col", &att_col))color = HeeksColor((long)att_col);
+	pElem->Attribute("maj", &m_majr);
+	pElem->Attribute("min", &m_minr);
+	if (pElem->Attribute("rot", &m_rot))
+	{
+		// set x axis from rotation
+		m_xdir.Rotate(gp_Ax1(gp_Pnt(0, 0, 0), gp_Dir(0, 0, 1)), m_rot);
+	}
+	pElem->Attribute("start", &m_start);
+	pElem->Attribute("end", &m_end);
+	pElem->Attribute("ax", &zdir[0]);
+	pElem->Attribute("ay", &zdir[1]);
+	pElem->Attribute("az", &zdir[2]);
+	m_zdir = gp_Dir(zdir[0], zdir[1], zdir[2]);
+	if(pElem->Attribute("cx", &x))C.SetX(x);
+	if(pElem->Attribute("cy", &x))C.SetY(x);
+	if(pElem->Attribute("cz", &x))C.SetZ(x);
 
 	else
 	{
@@ -408,7 +409,7 @@ void HEllipse::ReadFromXML(TiXmlElement *pElem)
 			HeeksObj* object = theApp->ReadXMLElement(pElem2);
 			if(object->GetType() == PointType)
 			{
-				centre = P2G(((HPoint*)object)->m_p);
+				C = P2G(((HPoint*)object)->m_p);
 				delete object;
 				break;
 			}
@@ -416,8 +417,6 @@ void HEllipse::ReadFromXML(TiXmlElement *pElem)
 		}
 	}
 
-	this->SetEllipse(gp_Elips(gp_Ax2(centre, gp_Dir(make_vector(axis))), maj, min));
-	this->SetRotation(rot);
 	HeeksObj::ReadFromXML(pElem);
 }
 

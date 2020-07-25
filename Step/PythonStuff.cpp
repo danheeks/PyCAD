@@ -36,6 +36,9 @@
 #include "App.h"
 #include "RuledSurface.h"
 #include "EllipseDrawing.h"
+#include "HEllipse.h"
+#include "HSpline.h"
+#include "ConversionTools.h"
 
 std::wstring step_dir;
 
@@ -58,6 +61,9 @@ HeeksObj* CreateFaceObject(){ return new CFace(); }
 HeeksObj* CreateLoopObject(){ return new CLoop(); }
 HeeksObj* CreateSolidObject(){ return new CSolid(); }
 HeeksObj* CreateWireObject(){ return new CWire(); }
+HeeksObj* CreateEllipse(){ return new HEllipse(); }
+HeeksObj* CreateSpline(){ return new HSpline(); }
+
 
 HeeksObj* NewSphere()
 {
@@ -94,12 +100,16 @@ void SetFaceType(int type){ CFace::m_type = type; }
 void SetLoopType(int type){ CLoop::m_type = type; }
 void SetSolidType(int type){ CSolid::m_type = type; }
 void SetWireType(int type){ CWire::m_type = type; }
+void SetEllipseType(int type){ HEllipse::m_type = type; }
+void SetSplineType(int type){ HSpline::m_type = type; }
 int GetVertexType(){ return HVertex::m_type; }
 int GetEdgeType(){ return CEdge::m_type; }
 int GetFaceType(){ return CFace::m_type; }
 int GetLoopType(){ return CLoop::m_type; }
 int GetSolidType(){ return CSolid::m_type; }
 int GetWireType(){ return CWire::m_type; }
+int GetEllipseType(){ return HEllipse::m_type; }
+int GetSplineType(){ return HSpline::m_type; }
 
 void CreateSweepPy(boost::python::list &list, HeeksObj* profile, const HeeksColor& color)
 {
@@ -167,6 +177,8 @@ void SetEllipseDrawing()
 		boost::python::def("CreateLoopObject", CreateLoopObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("CreateSolidObject", CreateSolidObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("CreateWireObject", CreateWireObject, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("CreateEllipse", CreateEllipse, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("CreateSpline", CreateSpline, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewSphere", NewSphere, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewCyl", NewCyl, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewCone", NewCone, boost::python::return_value_policy<boost::python::reference_existing_object>());
@@ -178,12 +190,16 @@ void SetEllipseDrawing()
 		boost::python::def("SetLoopType", SetLoopType);
 		boost::python::def("SetSolidType", SetSolidType);
 		boost::python::def("SetWireType", SetWireType);
+		boost::python::def("SetEllipseType", SetEllipseType);
+		boost::python::def("SetSplineType", SetSplineType);
 		boost::python::def("GetVertexType", GetVertexType);
 		boost::python::def("GetEdgeType", GetEdgeType);
 		boost::python::def("GetFaceType", GetFaceType);
 		boost::python::def("GetLoopType", GetLoopType);
 		boost::python::def("GetSolidType", GetSolidType);
 		boost::python::def("GetWireType", GetWireType);
+		boost::python::def("GetEllipseType", GetEllipseType);
+		boost::python::def("GetSplineType", GetSplineType);
 		boost::python::def("WriteSolids", WriteSolids);
 		boost::python::def("CreateRuledSurface", PickCreateRuledSurface);
 		boost::python::def("CreateExtrusion", CreateExtrusionOrRevolution);
@@ -193,6 +209,7 @@ void SetEllipseDrawing()
 		boost::python::def("FuseShapes", FuseShapes);
 		boost::python::def("CommonShapes", CommonShapes);
 		boost::python::def("FilletOrChamferEdges", FilletOrChamferEdges);
-		boost::python::def("SetEllipseDrawing", SetEllipseDrawing);
+		boost::python::def("SetEllipseDrawing", SetEllipseDrawing); 
+		boost::python::def("SketchToFace", SketchToFace);
 	}
 	

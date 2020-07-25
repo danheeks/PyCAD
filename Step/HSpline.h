@@ -12,6 +12,7 @@ public:
 	static int m_type;
 
 	~HSpline(void);
+	HSpline();
 	HSpline(const Geom_BSplineCurve &s, const HeeksColor* col);
 	HSpline(const Handle_Geom_BSplineCurve s, const HeeksColor* col);
 	HSpline(const std::list<gp_Pnt> &points, const HeeksColor* col);

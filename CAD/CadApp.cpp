@@ -181,6 +181,7 @@ void CCadApp::RestoreInputMode()
 		m_previous_input_mode->OnModeChange();
 		input_mode_object = m_previous_input_mode;
 		RefreshInputCanvas();
+		Repaint();
 		m_previous_input_mode = NULL;
 	}
 }
@@ -2368,7 +2369,7 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 				if (!just_top_level_item)
 					object_to_use = NULL;
 
-				if (filter.CanTypeBePicked(object->GetType())){
+				if (filter.IsTypeInFilter(object->GetType())){
 					object_to_use = object;
 				}
 

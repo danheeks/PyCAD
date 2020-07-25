@@ -12,8 +12,9 @@ public:
 	CFilter(){}
 	void Clear(){ m_types.clear(); }
 	void AddType(int type){ m_types.insert(type); }
-	bool CanTypeBePicked(int type)const{
+	bool IsTypeInFilter(int type)const{
 		if (m_types.size() == 0)return true;
 		return (m_types.find(type) != m_types.end());
 	}
+	unsigned int Size(){return m_types.size();}
 };

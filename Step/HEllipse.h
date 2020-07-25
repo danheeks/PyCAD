@@ -21,8 +21,9 @@ public:
 	static int m_type;
 
 	~HEllipse(void);
+	HEllipse();
 	HEllipse(const gp_Elips &c, const HeeksColor* col);
-	HEllipse(const gp_Elips &c, double start, double end,const HeeksColor* col);
+	HEllipse(const gp_Elips &c, double start, double end, const HeeksColor* col);
 	HEllipse(const HEllipse &c);
 
 	const HEllipse& operator=(const HEllipse &c);

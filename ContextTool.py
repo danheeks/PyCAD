@@ -116,7 +116,7 @@ class DeleteTool(ContextTool):
         return "delete"
 
     def Run(self, event):
-        cad.DeleteUndoably(self.object)       
+        cad.DeleteUndoably(self.object)    
         
 class CADContextTool(ContextTool):
     def __init__(self, title, bitmap_name, method):

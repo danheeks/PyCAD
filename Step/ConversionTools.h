@@ -15,3 +15,4 @@ extern HeeksObj* SplitArcsIntoLittleLines(HeeksObj* sketch);
 extern bool ConvertSketchToEdges(HeeksObj *object, std::list< std::vector<TopoDS_Edge> > &edges);
 extern TopoDS_Wire EdgesToWire(const std::vector<TopoDS_Edge> &edges);
 extern bool SketchToWires(HeeksObj* sketch, std::list<TopoDS_Wire> &wire_list);
+extern void SketchToFace();
