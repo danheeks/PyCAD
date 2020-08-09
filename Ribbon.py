@@ -228,7 +228,7 @@ class CurrentColorButton(ColorButton):
     def SetColor(self, c):
         cad.SetCurrentColor(c)
         HeeksConfig().WriteInt("CurrentColor", c.ref())
-        self.ribbon.GetParent().graphics_canvas.Refresh()
+        self.GetRibbon().GetParent().graphics_canvas.Refresh()
 
     
 class BackgroundColorButton(ColorButton):
