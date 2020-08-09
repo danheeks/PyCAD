@@ -981,11 +981,15 @@ void CCurve::SpanIntersections(const Span& s, std::list<Point> &pts)const
 	}
 }
 
-bool CCurve::GetMaxCutterRadius(double &radius)const
+bool CCurve::GetMaxCutterRadius(double &radius, bool outside)const
 {
-	// assuming anti-clockwise for outer curve, clockwise for inside curve
 	bool max_rad_found = false;
 	double max_rad = 0.0;
+	bool clockwise = this->IsClockwise();
+
+	int type_to_check = 1;
+	if (clockwise)type_to_check = -type_to_check;
+	if (outside)type_to_check = -type_to_check;
 
 	std::list<Span> spans;
 	GetSpans(spans);
@@ -999,7 +1003,7 @@ bool CCurve::GetMaxCutterRadius(double &radius)const
 	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
 	{
 		Span &span = *It;
-		if (span.m_v.m_type == -1)
+		if (span.m_v.m_type == type_to_check)
 		{
 			if (!max_rad_found || (span.GetRadius() < max_rad))
 			{
@@ -1476,10 +1480,12 @@ bool CCurve::IsACircle(Circle& circle, double tol)const
 	Span* longest_arc_span = NULL;
 	double longest_length = 0.0;
 
+	int valid_type = this->IsClockwise() ? -1 : 1;
+
 	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
 	{
 		Span &span = *It;
-		if (span.m_v.m_type)
+		if (span.m_v.m_type == valid_type)
 		{
 			double length = span.Length();
 			if ((longest_arc_span == NULL) || (length > longest_length))
@@ -1488,6 +1494,8 @@ bool CCurve::IsACircle(Circle& circle, double tol)const
 				longest_length = span.Length();
 			}
 		}
+		else
+			return false; // they must all be of the type wanted
 	}
 
 	if (longest_arc_span == NULL)

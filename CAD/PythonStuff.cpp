@@ -300,9 +300,9 @@ bool CadOpenFile(std::wstring fp)
 	return theApp->OpenFile(fp.c_str(), false);
 }
 
-void CadImport(const std::wstring &filepath, HeeksObj* paste_into = NULL)
+bool CadImport(const std::wstring &filepath, HeeksObj* paste_into = NULL)
 {
-	theApp->OpenFile(filepath.c_str(), true, paste_into);
+	return theApp->OpenFile(filepath.c_str(), true, paste_into);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(CadImportOverloads, CadImport, 1, 2)
@@ -811,6 +811,13 @@ Point3d HeeksObjGetEndPoint(HeeksObj& object)
 	return p;
 }
 
+Point3d HeeksObjGetCentrePoint(HeeksObj& object)
+{
+	Point3d p(0, 0, 0);
+	object.GetCentrePoint(p);
+	return p;
+}
+
 std::wstring PropertyGetShortString(Property& p)
 {
 	return std::wstring(p.GetShortString());
@@ -1077,6 +1084,29 @@ void DrawDisableLighting()
 	glDisable(GL_LIGHTING);
 }
 
+GLfloat save_depth_range[2];
+
+void DrawEnableDepthTesting()
+{
+	glDepthRange(save_depth_range[0], save_depth_range[1]);
+}
+
+void DrawDisableDepthTesting()
+{
+	glGetFloatv(GL_DEPTH_RANGE, save_depth_range);
+	glDepthRange(0, 0);
+}
+
+void DrawEnableCullFace()
+{
+	glEnable(GL_CULL_FACE);
+}
+
+void DrawDisableCullFace()
+{
+	glDisable(GL_CULL_FACE);
+}
+
 void DrawLine(double x0, double x1, double x2, double x3, double x4, double x5)
 {
 	BeginLines();
@@ -1087,6 +1117,11 @@ void DrawLine(double x0, double x1, double x2, double x3, double x4, double x5)
 void DrawColor(const HeeksColor& col)
 {
 	col.glColor();
+}
+
+void DrawTranslate(double x, double y, double z)
+{
+	glTranslated(x, y, z);
 }
 
 static unsigned char cross16[32] = { 0x80, 0x01, 0x40, 0x02, 0x20, 0x04, 0x10, 0x08, 0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80, 0x01, 0x80, 0x02, 0x40, 0x04, 0x20, 0x08, 0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01 };
@@ -2094,6 +2129,98 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 }
 
 
+CSketch* NewSketchFromArea(const CArea& area)
+{
+	CSketch* new_sketch = new CSketch();
+
+	for (std::list<CCurve>::const_iterator CIt = area.m_curves.begin(); CIt != area.m_curves.end(); CIt++)
+	{
+		const CCurve& curve = *CIt;
+		std::list<Span> spans;
+		curve.GetSpans(spans);
+
+		for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
+		{
+			Span &span = *It;
+			HeeksObj* new_span = NULL;
+			if (span.m_v.m_type == 0)
+			{
+				new_span = new HLine(Point3d(span.m_p.x, span.m_p.y, 0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0), &theApp->current_color);
+			}
+			else
+			{
+				new_span = new HArc(Point3d(span.m_p.x, span.m_p.y, 0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0), Point3d(0, 0, (span.m_v.m_type > 0) ? 1 : -1), Point3d(span.m_v.m_c.x, span.m_v.m_c.y, 0), &theApp->current_color);
+			}
+
+			new_sketch->Add(new_span, NULL);
+		}
+	}
+
+	return new_sketch;
+}
+
+void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_depth)
+{
+	CArea area = SketchGetArea(sketch);
+	area.Reorder();
+	for (std::list<CCurve>::iterator It = area.m_curves.begin(); It != area.m_curves.end(); It++)
+	{
+		CCurve& curve = *It;
+		curve.UnFitArcs();
+	}
+	CTris tris;
+	area.GetTriangles(tris);
+
+	glBegin(GL_TRIANGLES);
+
+	// top layer
+	glNormal3f(0.0f, 0.0f, 1.0f);
+	for (std::list<CTri>::iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
+	{
+		CTri& tri = *It;
+		glVertex3f(tri.x[0][0], tri.x[0][1], start_depth);
+		glVertex3f(tri.x[1][0], tri.x[1][1], start_depth);
+		glVertex3f(tri.x[2][0], tri.x[2][1], start_depth);
+	}
+
+	// walls
+	for (std::list<CCurve>::iterator It = area.m_curves.begin(); It != area.m_curves.end(); It++)
+	{
+		CCurve& curve = *It;
+		CVertex* prev_vt = NULL;
+		for (std::list<CVertex>::iterator VIt = curve.m_vertices.begin(); VIt != curve.m_vertices.end(); VIt++)
+		{
+			CVertex& vt = *VIt;
+			if (prev_vt)
+			{
+				Point norm = ~(prev_vt->m_p - vt.m_p);
+				glNormal3d(norm.x, norm.y, 0);
+				glVertex3f(prev_vt->m_p.x, prev_vt->m_p.y, final_depth);
+				glVertex3f(vt.m_p.x, vt.m_p.y, final_depth);
+				glVertex3f(vt.m_p.x, vt.m_p.y, start_depth);
+				glVertex3f(prev_vt->m_p.x, prev_vt->m_p.y, final_depth);
+				glVertex3f(vt.m_p.x, vt.m_p.y, start_depth);
+				glVertex3f(prev_vt->m_p.x, prev_vt->m_p.y, start_depth);
+			}
+			prev_vt = &vt;
+		}
+	}
+
+	// bottom layer
+	glNormal3f(0.0f, 0.0f, -1.0f);
+	for (std::list<CTri>::iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
+	{
+		CTri& tri = *It;
+		glVertex3f(tri.x[0][0], tri.x[0][1], final_depth);
+		glVertex3f(tri.x[2][0], tri.x[2][1], final_depth);
+		glVertex3f(tri.x[1][0], tri.x[1][1], final_depth);
+	}
+
+	glEnd();
+}
+
+
+
 	BOOST_PYTHON_MODULE(cad) {
 		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
 			.def(boost::python::init<int>())
@@ -2165,6 +2292,9 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 			.def("SetStartPoint", &HeeksObj::SetStartPoint)
 			.def("GetStartPoint", &HeeksObjGetStartPoint)
 			.def("GetEndPoint", &HeeksObjGetEndPoint)
+			.def("SetEndPoint", &HeeksObj::SetEndPoint)
+			.def("GetCentrePoint", &HeeksObjGetCentrePoint)
+			.def("SetCentrePoint", &HeeksObj::SetCentrePoint)
 			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			.def("Clear", &HeeksObj::Clear)
 			.def("Add", &ObjAdd)
@@ -2245,6 +2375,7 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 			.def("ReOrderSketch", &CSketch::ReOrderSketch)
 			.def("GetCurve", &SketchGetCurve)
 			.def("GetArea", &SketchGetArea)
+			.def("RenderAsExtrusion", &RenderSketchAsExtrusion)
 			;
 
 		boost::python::class_<HPoint, boost::python::bases<IdNamedObj> >("Point", boost::python::no_init)
@@ -2631,8 +2762,13 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("DrawTriangle", &DrawTriangle);
 		boost::python::def("DrawEnableLighting", &DrawEnableLighting);
 		boost::python::def("DrawDisableLighting", &DrawDisableLighting);
+		boost::python::def("DrawEnableDepthTesting", &DrawEnableDepthTesting);
+		boost::python::def("DrawDisableDepthTesting", &DrawDisableDepthTesting);
+		boost::python::def("DrawEnableCullFace", &DrawEnableCullFace);
+		boost::python::def("DrawDisableCullFace", &DrawDisableCullFace);
 		boost::python::def("DrawLine", &DrawLine);
 		boost::python::def("DrawColor", &DrawColor);
+		boost::python::def("DrawTranslate", &DrawTranslate);
 		boost::python::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
 		boost::python::def("BeginTriangles", &BeginTriangles);
 		boost::python::def("BeginLines", &BeginLines);
@@ -2795,6 +2931,7 @@ CSketch* NewSketchFromCurve(const CCurve& curve)
 		boost::python::def("GetCurrentColor", GetCurrentColor);
 		boost::python::def("SetCurrentColor", SetCurrentColor);
 		boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewSketchFromArea", NewSketchFromArea, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
 
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;

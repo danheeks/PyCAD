@@ -122,6 +122,11 @@ void ImportSTEPFile(const std::wstring& filepath)
 	CShape::ImportSolidsFile(filepath.c_str(), false);
 }
 
+void ExportSTEPFile(const std::wstring& filepath)
+{
+	CShape::ExportSolidsFile(theApp->GetObjListPointer()->GetChildren(), filepath.c_str());
+}
+
 void WriteSolids()
 {
 	// write a step file for all the solids

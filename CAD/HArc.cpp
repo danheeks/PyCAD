@@ -467,6 +467,11 @@ bool HArc::GetCentrePoint(Point3d &pos)
 	return true;
 }
 
+void HArc::SetCentrePoint(const Point3d &pos)
+{
+	C = pos;
+}
+
 bool HArc::GetAxis(Point3d &pos)
 {
 	pos = m_axis;

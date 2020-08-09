@@ -172,6 +172,7 @@
     <ClInclude Include="..\Geom\Circle.h" />
     <ClInclude Include="..\Geom\clipper.hpp" />
     <ClInclude Include="..\Geom\Curve.h" />
+    <ClInclude Include="..\Geom\earcut.h" />
     <ClInclude Include="..\Geom\Geom.h" />
     <ClInclude Include="..\Geom\geometry.h" />
     <ClInclude Include="..\Geom\Point.h" />

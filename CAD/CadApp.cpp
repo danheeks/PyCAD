@@ -1142,6 +1142,11 @@ bool CCadApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* obje
 	std::wstring wf(filepath);
 	lowerCase(wf);
 
+	std::wstring extension(filepath);
+	int offset = extension.rfind('.');
+	if (offset > 0) extension.erase(0, offset + 1);
+	lowerCase(extension);
+
 	if (endsWith(wf, L".heeks") || endsWith(wf, L".xml"))
 	{
 		SaveXMLFile(*objects, filepath);
@@ -1166,8 +1171,9 @@ bool CCadApp::SaveFile(const wchar_t *filepath, const std::list<HeeksObj*>* obje
 	{
 		SavePyFile(*objects, filepath);
 	}
-	else
+	else if (!PythonExportFile(extension.c_str(), filepath))
 	{
+		// error
 		std::wstring str = std::wstring(L"Invalid file type chosen ") + filepath;
 		DoMessageBox(str.c_str());
 		return false;

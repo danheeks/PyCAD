@@ -647,7 +647,8 @@ class App(wx.App):
         
         if dialog.ShowModal() == wx.ID_OK:
             filepath = dialog.GetPath()
-            if cad.Import(filepath):
+            res = cad.Import(filepath)
+            if res:
                 self.DoFileOpenViewMag()
                 if self.filepath == None:
                     dot = filepath.rfind('.')

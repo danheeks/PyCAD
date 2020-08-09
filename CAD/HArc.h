@@ -35,6 +35,7 @@ public:
 	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	bool GetCentrePoint(Point3d &pos);
+	void SetCentrePoint(const Point3d &pos);
 	bool GetAxis(Point3d &);
 	bool GetRadius(double &);
 	void Reverse();

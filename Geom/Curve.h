@@ -113,7 +113,7 @@ public:
 	void SpanIntersections(const Span& s, std::list<Point> &pts)const;
 	void CurveIntersections(const CCurve& c, std::list<Point> &pts)const;
 	void Transform(const Matrix& matrix);
-	bool GetMaxCutterRadius(double &radius)const;
+	bool GetMaxCutterRadius(double &radius, bool outside)const;
 	bool IsACircle(Circle& circle, double tol)const;
 };
 

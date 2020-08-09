@@ -60,10 +60,20 @@ bool EndedObject::GetStartPoint(Point3d &pos)
 	return true;
 }
 
+void EndedObject::SetStartPoint(const Point3d &pos)
+{
+	A = pos;
+}
+
 bool EndedObject::GetEndPoint(Point3d &pos)
 {
 	pos = B;
 	return true;
+}
+
+void EndedObject::SetEndPoint(const Point3d &pos)
+{
+	B = pos;
 }
 
 void EndedObject::WriteToXML(TiXmlElement *element)

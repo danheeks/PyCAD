@@ -1,6 +1,7 @@
 from App import App
 from HeeksConfig import HeeksConfig
 import step
+import geom
 import cad
 import wx
 from HDialog import HDialog
@@ -13,6 +14,10 @@ import ContextTool
     
 def ImportSTEPFile():
     step.ImportSTEPFile(cad.GetFilePathForImportExport())
+    
+def ExportSTEPFile():
+    print('export step')
+    step.ExportSTEPFile(cad.GetFilePathForImportExport())
 
 class SolidApp(App):
     def __init__(self):
@@ -35,6 +40,8 @@ class SolidApp(App):
         step.SetSplineType(cad.RegisterObjectType("Spline", step.CreateSpline))
         cad.RegisterImportFileType("step", ImportSTEPFile)
         cad.RegisterImportFileType("stp", ImportSTEPFile)
+        cad.RegisterExportFileType("step", ExportSTEPFile)
+        cad.RegisterExportFileType("stp", ExportSTEPFile)        
         
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = App.GetObjectTools(self, object, control_pressed, from_tree_canvas)
@@ -44,6 +51,12 @@ class SolidApp(App):
     
     def IsSolidApp(self):
         return True
+            
+    def GetImportWildcardString(self):
+        return App.GetImportWildcardString(self) + '|STEP files|*.step;*.STEP'
+
+    def GetExportWildcardString(self):
+        return App.GetExportWildcardString(self) + '|STEP files|*.step;*.STEP'
     
     def AddObjectFromButton(self, new_object):
         cad.StartHistory()
@@ -205,6 +218,20 @@ class SolidApp(App):
         cad.StartHistory()
         step.CommonShapes()
         cad.EndHistory()
+        
+    def OnShadow(self, event):
+        if not self.CheckForNumberOrMore(1, [step.GetSolidType()], 'Pick one or more solids to make a shadow sketch from', 'Shadow Sketch of Solids'):
+            return
+        cad.StartHistory()
+        for object in cad.GetSelectedObjects():
+            stl = object.GetTris(0.1)
+            mat = geom.Matrix()
+            shadow = stl.Shadow(mat, False)
+            shadow.Reorder()
+            sketch = cad.NewSketchFromArea(shadow)
+            cad.AddUndoably(sketch)
+        cad.EndHistory()
+        
 
     def OnFillet(self, event):
         if not self.CheckForNumberOrMore(1, [step.GetEdgeType()], 'Pick one or more edges to add a fillet to', 'Edge Fillet'):
@@ -254,6 +281,7 @@ class SolidApp(App):
         Ribbon.AddToolBarTool(toolbar, 'Cut', 'subtract', 'Cut solid with solids', self.OnSubtract)
         Ribbon.AddToolBarTool(toolbar, 'Fuse', 'fuse', 'Join solids', self.OnFuse)
         Ribbon.AddToolBarTool(toolbar, 'Common', 'common', 'Leave intersection of solids', self.OnCommon)
+        Ribbon.AddToolBarTool(toolbar, 'Shadow', 'shadow', 'Make shadow sketch of solid', self.OnShadow)
 
         panel = RB.RibbonPanel(page, wx.ID_ANY, 'Edge Modifiers', ribbon.Image('subtract'))
         toolbar = RB.RibbonButtonBar(panel)

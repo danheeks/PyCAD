@@ -7,6 +7,8 @@
 
 #include "Curve.h"
 
+class CTris;
+
 enum PocketMode
 {
 	SpiralPocketMode,
@@ -74,6 +76,7 @@ public:
 	void InsideCurves(const CCurve& curve, std::list<CCurve> &curves_inside)const;
 	CArea Swept(const Point& vector)const;
 	void Transform(const Matrix& matrix);
+	void GetTriangles(CTris& tris);
 };
 
 enum eOverlapType

@@ -332,10 +332,10 @@ boost::python::list CurveIntersections(const CCurve& c1, const CCurve& c2) {
 	return plist;
 }
 
-boost::python::object CurveGetMaxCutterRadius(const CCurve& c)
+boost::python::object CurveGetMaxCutterRadius(const CCurve& c, bool outside)
 {
 	double radius;
-	if (c.GetMaxCutterRadius(radius))
+	if (c.GetMaxCutterRadius(radius, outside))
 	{
 		return boost::python::object(radius);
 	}

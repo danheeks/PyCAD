@@ -80,7 +80,9 @@ public:
 	virtual bool GetStartPoint(Point3d &pos){ return false; }
 	virtual void SetStartPoint(const Point3d &pos){}
 	virtual bool GetEndPoint(Point3d &pos){ return false; }
+	virtual void SetEndPoint(const Point3d &pos){}
 	virtual bool GetCentrePoint(Point3d &pos){ return false; }
+	virtual void SetCentrePoint(const Point3d &pos){}
 	virtual bool GetAxis(Point3d &){ return false; }
 	virtual bool GetRadius(double &){ return false; }
 	virtual int GetCentrePoints(Point3d &pos, Point3d &pos2){ if (GetCentrePoint(pos))return 1; return 0; }

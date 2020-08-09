@@ -5,8 +5,11 @@
 
 #include "Area.h"
 #include "AreaOrderer.h"
+#include "earcut.h"
+#include "Tris.h"
 
 #include <map>
+#include <array>
 
 double CArea::m_accuracy = 0.01;
 double CArea::m_units = 1.0;
@@ -762,5 +765,56 @@ void CArea::Transform(const Matrix& matrix)
 	{
 		CCurve &curve = *It;
 		curve.Transform(matrix);
+	}
+}
+
+void CArea::GetTriangles(CTris& tris)
+{
+	// color in the area
+	// The number type to use for tessellation
+	using Coord = double;
+
+	// The index type. Defaults to uint32_t, but you can also pass uint16_t if you know that your
+	// data won't have more than 65536 vertices.
+	using N = uint32_t;
+
+	// Create array
+	using Point = std::array<Coord, 2>;
+	std::vector<std::vector<Point>> polygon;
+	std::vector<Point> points;
+
+	for (std::list<CCurve>::iterator It = m_curves.begin(); It != m_curves.end(); It++)
+	{
+		CCurve& curve = *It;
+		polygon.push_back({});
+		for (std::list<CVertex>::iterator VIt = curve.m_vertices.begin(); VIt != curve.m_vertices.end(); VIt++)
+		{
+			CVertex& vt = *VIt;
+			polygon.back().push_back({ vt.m_p.x, vt.m_p.y });
+			points.push_back({ vt.m_p.x, vt.m_p.y });
+		}
+	}
+
+	// Run tessellation
+	// Returns array of indices that refer to the vertices of the input polygon.
+	// e.g: the index 6 would refer to {25, 75} in this example.
+	// Three subsequent indices form a triangle. Output triangles are clockwise.
+	std::vector<N> indices = mapbox::earcut<N>(polygon);
+
+	for (N i = 0; i < indices.size(); i++)
+	{
+		CTri tri;
+		tri.x[0][0] = (float)points[indices[i]][0];
+		tri.x[0][1] = (float)points[indices[i]][1];
+		tri.x[0][2] = 0.0f;
+		i++;
+		tri.x[1][0] = (float)points[indices[i]][0];
+		tri.x[1][1] = (float)points[indices[i]][1];
+		tri.x[1][2] = 0.0f;
+		i++;
+		tri.x[2][0] = (float)points[indices[i]][0];
+		tri.x[2][1] = (float)points[indices[i]][1];
+		tri.x[2][2] = 0.0f;
+		tris.m_tris.push_back(tri);
 	}
 }
