@@ -3,7 +3,7 @@
 #include <boost/python.hpp>
 #include "PyBaseObject.h"
 #include "strconv.h"
-
+#include "GripData.h"
 
 std::wstring str_for_base_object;
 HeeksColor color_for_base_object;
@@ -91,6 +91,48 @@ void BaseObject::GetProperties(std::list<Property *> *list)
 		ObjList::GetProperties(list);
 }
 
+static std::list<GripData>* gripper_list;
+
+void BaseObject::GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof)
+{
+	gripper_list = list;
+	if (!CallVoidReturn("GetGrippers", just_for_endof))
+		ObjList::GetGripperPositionsTransformed(list, just_for_endof);
+}
+
+Point3d Stretch_point;
+Point3d Stretch_shift;
+
+Point3d GetStretchPoint()
+{
+	return Stretch_point;
+}
+
+Point3d GetStretchShift()
+{
+	return Stretch_shift;
+
+}
+
+bool BaseObject::Stretch(const Point3d &p, const Point3d &shift, void* data)
+{
+	Stretch_point = p;
+	Stretch_shift = shift;
+	if (!CallVoidReturn("Stretch"))
+		return ObjList::Stretch(p, shift, data);
+	return false;
+}
+
+void BaseObject::Transform(const Matrix &m)
+{
+	if (!CallVoidReturn("Transform", m))
+		ObjList::Transform(m);
+}
+
+void AddGripper(GripData& gripper)
+{
+	gripper_list->push_back(gripper);
+}
 
 void BaseObject::GetBox(CBox &box)
 {

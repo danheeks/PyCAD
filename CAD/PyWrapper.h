@@ -89,6 +89,32 @@ public:
 		return false;
 	}
 
+	bool CallVoidReturn(const char* func, const Matrix& mat)const
+	{
+		bool success = false;
+		if (boost::python::override f = this->get_override(func)){
+
+			if (PyErr_Occurred()){
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else{
+
+				BeforePythonCall(&main_module, &globals);
+				PyLockGIL lock;
+				try{
+
+					boost::python::detail::method_result result = f(mat);
+					success = AfterPythonCall(main_module);
+					return success;
+				}
+				catch (const boost::python::error_already_set&){}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return false;
+	}
+
 	bool CallVoidReturn(const char* func, const HeeksColor& c)const
 	{
 		bool success = false;

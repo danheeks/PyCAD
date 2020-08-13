@@ -24,6 +24,9 @@ public:
 	void SetColor(const HeeksColor &col);
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetProperties(std::list<Property *> *list);
+	void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
+	void Transform(const Matrix &m);
 	void GetBox(CBox &box);
 	void KillGLLists();
 	void WriteToXML(TiXmlElement *element);
@@ -47,3 +50,6 @@ public:
 
 
 void AddProperty(Property* property);
+void AddGripper(GripData& gripper);
+Point3d GetStretchPoint();
+Point3d GetStretchShift();

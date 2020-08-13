@@ -16,14 +16,11 @@ import geom
 import Gear
 from About import AboutBox
 from FilterDlg import FilterDlg
+import HImage
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
-
-
-
-
-
+wx_image_extensions = ['bmp','png','jpeg','jpg','gif','pcx','pnm','tif','tga','iff','xpm','ico','cur','ani'] # couldn't find GetHandlers in wxpython
 
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
@@ -38,6 +35,12 @@ tools = []
 save_filter_for_StartPickObjects = 0
 save_just_one_for_EndPickObjects = False
 save_mode_for_EndPickObjects = None
+
+def CreateImage(): return HImage.HImage()
+
+def ImportImageFile():
+    image = HImage.HImage(cad.GetFilePathForImportExport())
+    cad.AddUndoably(image)
 
 class App(wx.App):
     def __init__(self):
@@ -74,6 +77,8 @@ class App(wx.App):
         self.printData = wx.PrintData()
         self.pageSetupData = wx.PageSetupDialogData(self.printData)
             
+        wx.InitAllImageHandlers()
+        
         config = HeeksConfig()
         
         width = config.ReadInt('MainFrameWidth', -1);
@@ -112,7 +117,10 @@ class App(wx.App):
         return True
     
     def RegisterObjectTypes(self):
-        pass
+        HImage.type = cad.RegisterObjectType("Image", CreateImage)
+        global wx_image_extensions
+        for ext in wx_image_extensions:
+            cad.RegisterImportFileType(ext, ImportImageFile)
     
     def OnNewOrOpen(self, open):
         pass
@@ -631,10 +639,19 @@ class App(wx.App):
             self.OnSaveFilepath(dialog.GetPath())
             
     def GetImportWildcardString(self):
-        imageExtStr = '' # to do, get image extensions from wx
-        imageExtStr2 = '' # to do, get image extensions from wx
-        registeredExtensions = '' # to do, this will be extensions added by child apps
-        return 'Known Files' + ' |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF;*.stl' + imageExtStr + registeredExtensions + '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|Picture files (' + imageExtStr2 + ')|' + imageExtStr
+        global wx_image_extensions
+        imageExtStr = ''
+        imageExtStr2 = ''
+        for ext in wx_image_extensions:
+            if imageExtStr:
+                imageExtStr += ';'
+            imageExtStr += '*.'
+            imageExtStr += ext
+            if imageExtStr2:
+                imageExtStr2 += ' '
+            imageExtStr2 += '*.'
+            imageExtStr2 += ext
+        return 'Known Files' + ' |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF;*.stl' + imageExtStr + '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|Picture files (' + imageExtStr2 + ')|' + imageExtStr
 
     def GetExportWildcardString(self):
         return 'Known Files |*.stl;*.dxf;*.cpp;*.py;*.obj|STL files (*.stl)|*.stl|DXF files (*.dxf)|*.dxf|CPP files (*.cpp)|*.cpp|OpenCAMLib python files (*.py)|*.py|Wavefront .obj files (*.obj)|*.obj'

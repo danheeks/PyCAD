@@ -1181,6 +1181,195 @@ void DrawDeleteList(unsigned int display_list)
 	glDeleteLists(display_list, 1);
 }
 
+void DrawEnableLights()
+{
+	glEnable(GL_LIGHTING);
+}
+
+void DrawDisableLights()
+{
+	glDisable(GL_LIGHTING);
+}
+
+bool GetBufferBuffer(PyObject* bufobj, Py_buffer &view)
+{
+
+	/* Attempt to extract buffer information from it */
+	if (PyObject_GetBuffer(bufobj, &view,
+		PyBUF_ANY_CONTIGUOUS | PyBUF_FORMAT) == -1)
+	{
+		return false;
+	}
+
+	if (view.ndim != 1)
+	{
+		PyErr_SetString(PyExc_TypeError, "Expected a 1-dimensional array");
+		PyBuffer_Release(&view);
+		return false;
+	}
+
+	/* Check the type of items in the array */
+	if (strcmp(view.format, "B") != 0)
+	{
+		PyErr_SetString(PyExc_TypeError, "Expected an array of doubles");
+		PyBuffer_Release(&view);
+		return false;
+	}
+
+	return true;
+}
+
+boost::python::tuple GenTexture(boost::python::object buffer, boost::python::object alphaBuffer, int imageWidth, int imageHeight, bool hasAlpha)
+{
+	// pass an image buffer from wx.Image.GetData
+
+	// returns a tuple ( texture_number, newWidth )
+
+	Py_buffer view, alphaView;
+	GLubyte *bitmapData, *alphaData;
+	if (!GetBufferBuffer(buffer.ptr(), view))
+		return boost::python::make_tuple(0, 0);
+	bitmapData = (GLubyte *)view.buf;
+
+	if (hasAlpha)
+	{
+		if (!GetBufferBuffer(alphaBuffer.ptr(), alphaView))
+			return boost::python::make_tuple(0, 0);
+		alphaData = (GLubyte *)alphaView.buf;
+	}
+
+	//unsigned char* data_buf = (unsigned char*)view.buf;
+	//int size = (int)view.len;
+
+	float power_of_two_that_gives_correct_width = std::log((float)(imageWidth)) / std::log(2.0f);
+	float power_of_two_that_gives_correct_height = std::log((float)(imageHeight)) / std::log(2.0f);
+	int newWidth = (int)std::pow(2.0, (int)(std::ceil(power_of_two_that_gives_correct_width)));
+	{
+		int newHeight = (int)std::pow(2.0, (int)(std::ceil(power_of_two_that_gives_correct_height)));
+		if (newHeight > newWidth)
+			newWidth = newHeight;
+	}
+
+	int bytesPerPixel = hasAlpha ? 4 : 3;
+	int image_size = imageWidth * imageHeight * bytesPerPixel;
+
+	GLuint texture_number;
+	glGenTextures(1, &texture_number);
+	glBindTexture(GL_TEXTURE_2D, texture_number);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	GLubyte	*imageData;
+	int imageSize = newWidth * newWidth * bytesPerPixel;
+	imageData = (GLubyte *)malloc(imageSize);
+
+	int rev_val = imageHeight - 1;
+
+	for (int y = 0; y<newWidth; y++)
+	{
+		for (int x = 0; x<newWidth; x++)
+		{
+
+			if (x<(imageWidth) && y<(imageHeight)){
+				imageData[(x + y*newWidth)*bytesPerPixel + 0] =
+					bitmapData[(x + (rev_val - y)*(imageWidth))*3 + 0];
+
+				imageData[(x + y*newWidth)*bytesPerPixel + 1] =
+					bitmapData[(x + (rev_val - y)*(imageWidth))*3 + 1];
+
+				imageData[(x + y*newWidth)*bytesPerPixel + 2] =
+					bitmapData[(x + (rev_val - y)*(imageWidth))*3 + 2];
+
+				if (hasAlpha) imageData[(x + y*newWidth)*bytesPerPixel + 3] =
+					alphaData[x + (rev_val - y)*(imageWidth)];
+			}
+			else
+			{
+
+				imageData[(x + y*newWidth)*bytesPerPixel + 0] = 0;
+				imageData[(x + y*newWidth)*bytesPerPixel + 1] = 0;
+				imageData[(x + y*newWidth)*bytesPerPixel + 2] = 0;
+				if (hasAlpha) imageData[(x + y*newWidth)*bytesPerPixel + 3] = 0;
+			}
+
+		}//next
+	}//next
+
+
+	glTexImage2D(GL_TEXTURE_2D,
+		0,
+		hasAlpha ? 4 : 3,
+		newWidth,
+		newWidth,
+		0,
+		hasAlpha ? GL_RGBA : GL_RGB,
+		GL_UNSIGNED_BYTE,
+		imageData);
+
+	free(imageData);
+
+	// set texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // GL_LINEAR
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // GL_LINEAR
+
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+	return boost::python::make_tuple(texture_number, newWidth);
+}
+
+
+#define LOTS_OF_QUADS
+
+void DrawImageQuads(int width, int height, int textureWidth, unsigned int texture_number, const Point3d &bottom_left, const Point3d &bottom_right, const Point3d &top_right, const Point3d &top_left, bool no_color, bool marked)
+{
+	if (!no_color){
+		glColor4ub(255, 255, 255, 255);
+		if (texture_number){
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, texture_number);
+		}
+	}
+
+	glBegin(GL_QUADS);
+
+#ifdef LOTS_OF_QUADS
+	double x_step = (double)width / 20;
+	double y_step = (double)height / 20;
+
+	for (double i = 0; i<width; i += x_step){
+		for (double j = 0; j<height; j += y_step){
+			int xy[4][2] = { { i, j }, { i + x_step, j }, { i + x_step, j + y_step }, { i, j + y_step } };
+
+			for (int k = 0; k < 4; k++)
+			{
+				Point3d p5 = bottom_left + (bottom_right - bottom_left) * (double)xy[k][0] / (double)width;
+				Point3d p6 = top_left + (top_right - top_left) * (double)xy[k][0] / (double)width;
+				Point3d vt = p5 + (p6 - p5) * (double)xy[k][1] / (double)height;
+
+				glTexCoord2f((float)xy[k][0] / textureWidth, (float)xy[k][1] / textureWidth);
+				glVertex3dv(vt.getBuffer());
+			}
+
+		}
+	}
+#else
+	glTexCoord2f(0, 0);
+	glVertex3dv(m_x[0]);
+	glTexCoord2f((float)width / textureWidth, 0);
+	glVertex3dv(m_x[1]);
+	glTexCoord2f((float)width / textureWidth, (float)height / textureHeight);
+	glVertex3dv(m_x[2]);
+	glTexCoord2f(0, (float)height / textureHeight);
+	glVertex3dv(m_x[3]);
+#endif
+
+	glEnd();
+
+	if (!no_color){
+		glDisable(GL_TEXTURE_2D);
+	}
+}
+
 void RenderScreeTextAt(const wchar_t* str1, double scale, double x, double y, double theta)
 {
 	theApp->render_screen_text_at(str1, scale, x, y, theta);
@@ -1521,6 +1710,11 @@ static boost::shared_ptr<PropertyStringReadOnly> initPropertyStringReadOnly(cons
 static boost::shared_ptr<HPoint> initHPoint(const Point3d& p)
 {
 	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp->current_color));
+}
+
+static boost::shared_ptr<GripData> initGripData(const Point3d& p, EnumGripperType t, int alternative_icon)
+{
+	return boost::shared_ptr<GripData>(new GripData(t, p, NULL, false, alternative_icon));
 }
 
 boost::python::list GetSelectedObjects() {
@@ -2243,6 +2437,7 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 			.def("CanAdd", &HeeksObj::CanAdd)
 			.def("CanAddTo", &HeeksObj::CanAddTo)
 			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
+			.def("CanBeCopied", &HeeksObj::CanBeCopied)
 			.def("OneOfAKind", &BaseObject::OneOfAKind_default)
 			.def("CopyFrom", &ObjListCopyFrom)
 			.def("GetProperties", &HeeksObjGetProperties)
@@ -2310,6 +2505,26 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 			.def("OnGripperGrabbed", &Gripper::OnGripperGrabbed)
 			.def("OnGripperMoved", &Gripper::OnGripperMoved)
 			.def("OnGripperReleased", &Gripper::OnGripperReleased)
+			;
+
+		boost::python::class_<GripData>("GripData", boost::python::no_init)
+			.def("__init__", boost::python::make_constructor(&initGripData))
+			;
+
+		boost::python::enum_<EnumGripperType>("GripperType")
+			.value("Translate", GripperTypeTranslate)
+			.value("Rotate", GripperTypeRotate)
+			.value("RotateObject", GripperTypeRotateObject)
+			.value("RotateObjectXY", GripperTypeRotateObjectXY)
+			.value("RotateObjectXZ", GripperTypeRotateObjectXZ)
+			.value("RotateObjectYZ", GripperTypeRotateObjectYZ)
+			.value("Scale", GripperTypeScale)
+			.value("ObjectScaleX", GripperTypeObjectScaleX)
+			.value("ObjectScaleY", GripperTypeObjectScaleY)
+			.value("ObjectScaleZ", GripperTypeObjectScaleZ)
+			.value("ObjectScaleXY", GripperTypeObjectScaleXY)
+			.value("Angle", GripperTypeAngle)
+			.value("Stretch", GripperTypeStretch)
 			;
 
 		boost::python::class_<HeeksColor>("Color")
@@ -2779,8 +2994,10 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("DrawEndList", &DrawEndList);
 		boost::python::def("DrawCallList", &DrawCallList);
 		boost::python::def("DrawDeleteList", &DrawDeleteList);
-		boost::python::def("DrawEnableLights", &DrawDeleteList);
-		boost::python::def("DrawDisableLights", &DrawDeleteList);
+		boost::python::def("DrawEnableLights", &DrawEnableLights);
+		boost::python::def("DrawDisableLights", &DrawDisableLights);
+		boost::python::def("GenTexture", &GenTexture);
+		boost::python::def("DrawImageQuads", DrawImageQuads);
 		boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
 		boost::python::def("AddProperty", AddProperty);
 		boost::python::def("GetObjectFromId", &GetObjectFromId);
@@ -2862,6 +3079,7 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
 		boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("GetDragGripper", GetDragGripper, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("AddGripper", AddGripper);
 		boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
 		boost::python::def("AddDrawingPoint", AddDrawingPoint);
 		boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
@@ -2933,7 +3151,8 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("NewSketchFromArea", NewSketchFromArea, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
-
+		boost::python::def("GetStretchPoint", GetStretchPoint);
+		boost::python::def("GetStretchShift", GetStretchShift);
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
