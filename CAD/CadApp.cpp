@@ -2412,9 +2412,6 @@ void CCadApp::ColorPickLowestObjects(IRect window, bool single_picking, std::lis
 	// window, width and height must be positive
 	// single picking means we only want one object in the list; the best object
 
-	//IRect is in window coordinates, so y = 0 is a the top of the screen
-	window.y = m_current_viewport->GetViewportSize().y - (window.y + window.height);
-
 	glDrawBuffer(GL_BACK);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glDisable(GL_BLEND);

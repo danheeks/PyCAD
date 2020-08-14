@@ -89,7 +89,8 @@ class SelectMode(cad.InputMode):
                 self.window_box = None
             elif self.button_down_point != None:
                 # select one object
-                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
+                v = wx.GetApp().GetViewport()
+                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, v.GetHeight() - self.button_down_point.y), False, True, self.filter, True)
                 if len(objects) > 0:
                     object = objects[0]
                     
@@ -139,7 +140,8 @@ class SelectMode(cad.InputMode):
                         if cad.GetNumSelected() > 0:
                             objects = cad.GetSelectedObjects()
                         else:
-                            objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
+                            v = wx.GetApp().GetViewport()
+                            objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, v.GetHeight() - self.button_down_point.y), False, True, self.filter, True)
                             for object in objects:
                                 cad.Select(object)
 
