@@ -1119,6 +1119,11 @@ void DrawColor(const HeeksColor& col)
 	col.glColor();
 }
 
+void DrawContrastBlackOrWhite()
+{
+	theApp->glColorEnsuringContrast(HeeksColor(0, 0, 0));
+}
+
 void DrawTranslate(double x, double y, double z)
 {
 	glTranslated(x, y, z);
@@ -1152,6 +1157,11 @@ void DrawSymbol(int type, double x, double y, double z)
 void glVertexPoint3d(const Point3d& p)
 {
 	glVertex3dv(p.getBuffer());
+}
+
+void glVertexPoint2d(const Point& p)
+{
+	glVertex2dv(&p.x);
 }
 
 void GlLineWidth(int width)
@@ -1378,6 +1388,47 @@ void DrawImageQuads(int width, int height, int textureWidth, unsigned int textur
 	}
 }
 
+void DrawTris(const CTris& tris, bool with_normals)
+{
+	glBegin(GL_TRIANGLES);
+	for (std::list<CTri>::const_iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
+	{
+		const CTri& tri = *It;
+		if (with_normals)
+		{
+			Point3d p0 = Point3d(tri.x[0][0], tri.x[0][1], tri.x[0][2]);
+			Point3d p1 = Point3d(tri.x[1][0], tri.x[1][1], tri.x[1][2]);
+			Point3d p2 = Point3d(tri.x[2][0], tri.x[2][1], tri.x[2][2]);
+			Point3d v0 = p1 - p0;
+			Point3d v1 = p2 - p0;
+			Point3d norm = v0^v1;
+			norm.normalise();
+			glNormal3dv(norm.getBuffer());
+		}
+		glVertex3fv(tri.x[0]);
+		glVertex3fv(tri.x[1]);
+		glVertex3fv(tri.x[2]);
+	}
+	glEnd();
+}
+
+void DrawMultMatrix(const Matrix& mat)
+{
+	double m[16];
+	mat.GetTransposed(m);
+	glMultMatrixd(m);
+}
+
+void DrawPushMatrix()
+{
+	glPushMatrix();
+}
+
+void DrawPopMatrix()
+{
+	glPopMatrix();
+}
+
 void RenderScreeTextAt(const wchar_t* str1, double scale, double x, double y, double theta)
 {
 	theApp->render_screen_text_at(str1, scale, x, y, theta);
@@ -1541,6 +1592,74 @@ double GetXmlFloat(const std::wstring &name, double default_value = 0)
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlFloatOverloads, GetXmlFloat, 1, 2)
+
+Matrix GetXmlMatrix(const std::wstring &name, const Matrix* default_value = NULL)
+{
+	if (theApp->m_cur_xml_element == NULL)
+	{	
+		if (default_value)return *default_value;
+		return Matrix();
+	}
+
+	const char* cname = Ttc(name.c_str());
+	size_t length = strlen(cname);
+	char* elename = (char*)malloc(length + 3);
+	memcpy(elename, cname, length);
+	char* e0 = &elename[length];
+	char* e1 = &elename[length + 1];
+	elename[length + 2] = 0;
+
+	Matrix return_matrix;
+	double* ele = return_matrix.e;
+
+	for (int j = 0; j < 4; j++)
+	{
+		*e0 = '0' + j;
+		for (int i = 0; i < 4; i++)
+		{
+			*e1 = '0' + i;
+			if (theApp->m_cur_xml_element->Attribute(elename, ele) == NULL)
+			{
+				if (default_value)return *default_value;
+				return Matrix();
+			}
+			ele++;
+		}
+	}
+
+	return_matrix.IsUnit(); // set flags
+	return_matrix.IsMirrored();
+
+	return return_matrix;
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlMatrixOverloads, GetXmlMatrix, 1, 2)
+
+
+void SetXmlMatrix(const std::wstring &name, const Matrix& m)
+{
+	const char* cname = Ttc(name.c_str());
+	size_t length = strlen(cname);
+	char* elename = (char*)malloc(length + 3);
+	memcpy(elename, cname, length);
+	char* e0 = &elename[length];
+	char* e1 = &elename[length + 1];
+	elename[length + 2] = 0;
+	const double* ele = m.e;
+
+	for (int j = 0; j < 4; j++)
+	{
+		*e0 = '0' + j;
+		for (int i = 0; i < 4; i++)
+		{
+			*e1 = '0' + i;
+			theApp->m_cur_xml_element->SetDoubleAttribute(elename, *ele);
+			ele++;
+		}
+	}
+}
+
+
 
 void ReturnFromXmlChild()
 {
@@ -2991,12 +3110,14 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("DrawDisableCullFace", &DrawDisableCullFace);
 		boost::python::def("DrawLine", &DrawLine);
 		boost::python::def("DrawColor", &DrawColor);
+		boost::python::def("DrawContrastBlackOrWhite", &DrawContrastBlackOrWhite);
 		boost::python::def("DrawTranslate", &DrawTranslate);
 		boost::python::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
 		boost::python::def("BeginTriangles", &BeginTriangles);
 		boost::python::def("BeginLines", &BeginLines);
 		boost::python::def("EndLinesOrTriangles", &EndLinesOrTriangles);
 		boost::python::def("GlVertex", &glVertexPoint3d);
+		boost::python::def("GlVertex2D", &glVertexPoint2d);
 		boost::python::def("GlLineWidth", &GlLineWidth);
 		boost::python::def("DrawNewList", &DrawNewList);
 		boost::python::def("DrawEndList", &DrawEndList);
@@ -3006,6 +3127,10 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("DrawDisableLights", &DrawDisableLights);
 		boost::python::def("GenTexture", &GenTexture);
 		boost::python::def("DrawImageQuads", DrawImageQuads);
+		boost::python::def("DrawTris", DrawTris);
+		boost::python::def("DrawMultMatrix", DrawMultMatrix);
+		boost::python::def("DrawPushMatrix", DrawPushMatrix);
+		boost::python::def("DrawPopMatrix", DrawPopMatrix);
 		boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
 		boost::python::def("AddProperty", AddProperty);
 		boost::python::def("GetObjectFromId", &GetObjectFromId);
@@ -3021,6 +3146,8 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((boost::python::arg("name"), boost::python::arg("default_value") = false)));
 		boost::python::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0)));
 		boost::python::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0.0)));
+		boost::python::def("GetXmlMatrix", &GetXmlMatrix, GetXmlMatrixOverloads((boost::python::arg("name"), boost::python::arg("default_value") = NULL)));
+		boost::python::def("SetXmlMatrix", SetXmlMatrix);
 		boost::python::def("ReturnFromXmlChild", ReturnFromXmlChild);
 		boost::python::def("GetFirstXmlChild", GetFirstXmlChild);
 		boost::python::def("GetNextXmlChild", GetNextXmlChild);

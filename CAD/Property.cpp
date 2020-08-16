@@ -5,6 +5,7 @@
 #include <stdafx.h>
 
 #include "Property.h"
+#include "CoordinateSystem.h"
 
 Property::Property(const Property& rhs) : m_editable(false), m_highlighted(false), m_object(NULL)
 {
@@ -153,8 +154,6 @@ void PropertyPnt(std::list<Property *> *list, HeeksObj* object, Point3d* pnt)
 }
 
 
-#if 0
-to do
 class PropertyTrsfBase :public Property{
 protected:
 	Matrix* m_trsf;
@@ -165,43 +164,43 @@ public:
 class PropertyLengthTrsfPosX :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfPosX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
+	PropertyLengthTrsfPosX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"x", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetX(t.x + value); m_trsf->SetTranslationPart(t); }
-	double GetDouble(void)const{ return  m_trsf->TranslationPart().x; }
+	void Set(double value){ m_trsf->SetX(value); }
+	double GetDouble(void)const{ return  m_trsf->GetX(); }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfPosX(*this); }
 };
 
 class PropertyLengthTrsfPosY :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfPosY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
+	PropertyLengthTrsfPosY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"y", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetY(t.y + value); m_trsf->SetTranslationPart(t); }
-	double GetDouble(void)const{ return  m_trsf->TranslationPart().y; }
+	void Set(double value){ m_trsf->SetY(value); }
+	double GetDouble(void)const{ return  m_trsf->GetY(); }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfPosY(*this); }
 };
 
 class PropertyLengthTrsfPosZ :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfPosZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
+	PropertyLengthTrsfPosZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"z", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ gp_XYZ t = m_trsf->TranslationPart(); t.SetZ(t.z + value); m_trsf->SetTranslationPart(t); }
-	double GetDouble(void)const{ return  m_trsf->TranslationPart().z; }
+	void Set(double value){ m_trsf->SetZ(value); }
+	double GetDouble(void)const{ return  m_trsf->GetZ(); }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfPosZ(*this); }
 };
 
 class PropertyLengthTrsfXDirX :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfXDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
+	PropertyLengthTrsfXDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"x", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetX(value); *m_trsf = Matrix(d, x, y);  }
+	void Set(double value){ Point3d d(0,0,0); d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.x = value; *m_trsf = Matrix(d, x, y);  }
 	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirX(*this); }
 };
@@ -209,10 +208,10 @@ public:
 class PropertyLengthTrsfXDirY :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfXDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
+	PropertyLengthTrsfXDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"y", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetY(value); *m_trsf = Matrix(d, x, y); }
+	void Set(double value){ Point3d d(0,0,0); d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.y = value; *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirY(*this); }
 };
@@ -220,10 +219,10 @@ public:
 class PropertyLengthTrsfXDirZ :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfXDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
+	PropertyLengthTrsfXDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"z", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.SetZ(value); *m_trsf = Matrix(d, x, y); }
+	void Set(double value){ Point3d d(0,0,0); d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); x.z = value; *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d x(1, 0, 0);  x.Transform(*m_trsf); return x.z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfXDirZ(*this); }
 };
@@ -231,10 +230,10 @@ public:
 class PropertyLengthTrsfYDirX :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfYDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("x"), trsf){ }
+	PropertyLengthTrsfYDirX(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"x", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetX(value); *m_trsf = Matrix(d, x, y); }
+	void Set(double value){ Point3d d(0, 0, 0); d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.x = value; *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d y(0,1,0);  y.Transform(*m_trsf); return y.x; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirX(*this); }
 };
@@ -242,10 +241,10 @@ public:
 class PropertyLengthTrsfYDirY :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfYDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("y"), trsf){ }
+	PropertyLengthTrsfYDirY(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"y", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetY(value); *m_trsf = Matrix(d, x, y); }
+	void Set(double value){ Point3d d(0, 0, 0); d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.y = value; *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.y; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirY(*this); }
 };
@@ -253,21 +252,21 @@ public:
 class PropertyLengthTrsfYDirZ :public PropertyTrsfBase
 {
 public:
-	PropertyLengthTrsfYDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, _("z"), trsf){ }
+	PropertyLengthTrsfYDirZ(HeeksObj* object, Matrix *trsf) :PropertyTrsfBase(object, L"z", trsf){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ Point3d d; d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.SetZ(value); *m_trsf = Matrix(d, x, y); }
+	void Set(double value){ Point3d d(0, 0, 0); d.Transform(*m_trsf); Point3d x(1, 0, 0);  x.Transform(*m_trsf); Point3d y(1, 0, 0); y.Transform(*m_trsf); y.z = value; *m_trsf = Matrix(d, x, y); }
 	double GetDouble(void)const{ Point3d y(0, 1, 0);  y.Transform(*m_trsf); return y.z; }
 	Property* MakeACopy()const{ return new PropertyLengthTrsfYDirZ(*this); }
 };
 
-static const std::wstring angle_titles[3] = { _("vertical angle"), _("horizontal angle"), _("twist angle") };
+static const std::wstring angle_titles[3] = { L"vertical angle", L"horizontal angle", L"twist angle" };
 
 class PropertyDoubleTrsfAngle :public PropertyTrsfBase
 {
 	int m_type;
 public:
-	PropertyDoubleTrsfAngle(HeeksObj* object, Matrix* trsf, int type) :PropertyTrsfBase(object, angle_titles[type], trsf), m_type(type){}
+	PropertyDoubleTrsfAngle(HeeksObj* object, Matrix* trsf, int type) :PropertyTrsfBase(object, angle_titles[type].c_str(), trsf), m_type(type){}
 	// Property's virtual functions
 	int get_property_type(){ return DoublePropertyType; }
 	Property* MakeACopy()const{ return new PropertyDoubleTrsfAngle(*this); }
@@ -283,13 +282,13 @@ public:
 		switch (m_type)
 		{
 		case 0:
-			vertical_angle = value * M_PI / 180;
+			vertical_angle = value * PI / 180;
 			break;
 		case 1:
-			horizontal_angle = value * M_PI / 180;
+			horizontal_angle = value * PI / 180;
 			break;
 		default:
-			twist_angle = value * M_PI / 180;
+			twist_angle = value * PI / 180;
 			break;
 		}
 		Point3d dx, dy;
@@ -306,11 +305,11 @@ public:
 		switch (m_type)
 		{
 		case 0:
-			return vertical_angle / M_PI * 180;
+			return vertical_angle / PI * 180;
 		case 1:
-			return horizontal_angle / M_PI * 180;
+			return horizontal_angle / PI * 180;
 		default:
-			return twist_angle / M_PI * 180;
+			return twist_angle / PI * 180;
 		}
 	}
 };
@@ -347,20 +346,11 @@ PropertyList* PropertyTrsfYDir(HeeksObj* object, const wchar_t* title, Matrix* t
 PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, Matrix* trsf)
 {
 	PropertyList* p = new PropertyList(title);
-	p->m_list.push_back(PropertyTrsfPnt(object, _("position"), trsf));
-	p->m_list.push_back(PropertyTrsfXDir(object, _("x axis"), trsf));
-	p->m_list.push_back(PropertyTrsfYDir(object, _("y axis"), trsf));
+	p->m_list.push_back(PropertyTrsfPnt(object, L"position", trsf));
+	p->m_list.push_back(PropertyTrsfXDir(object, L"x axis", trsf));
+	p->m_list.push_back(PropertyTrsfYDir(object, L"y axis", trsf));
 	p->m_list.push_back(new PropertyDoubleTrsfAngle(object, trsf, 0));
 	p->m_list.push_back(new PropertyDoubleTrsfAngle(object, trsf, 1));
 	p->m_list.push_back(new PropertyDoubleTrsfAngle(object, trsf, 2));
 	return p;
 }
-
-#else
-
-PropertyList* PropertyTrsf(HeeksObj* object, const wchar_t* title, Matrix* trsf)
-{
-	return new PropertyList(L"to do ");
-}
-
-#endif

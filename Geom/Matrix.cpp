@@ -526,6 +526,14 @@
 
 	Matrix UnitMatrix;					// a global unit matrix
 
+	ostream & operator<<(ostream &os, const Matrix &m)
+	{
+		os << "Matrix[";
+		for (int i = 0; i < 16; i++)
+			os << m.e[i] << ",";
+		return os << "]";
+	}
+
 	 void Point3d::arbitrary_axes(Point3d& x, Point3d& y)const{
 		// arbitrary axis algorithm - acad method of generating an arbitrary but
 		// consistant set of axes from a single normal ( z )
@@ -575,3 +583,10 @@
 		 normal.Normalize();
 		 d = Point3d(0, 0, 0) * normal;
 	 }
+
+	 double Matrix::GetX()const{ return e[3]; }
+	 double Matrix::GetY()const{ return e[7]; }
+	 double Matrix::GetZ()const{ return e[11]; }
+	 void Matrix::SetX(double value){ e[3] = value; }
+	 void Matrix::SetY(double value){ e[7] = value; }
+	 void Matrix::SetZ(double value){ e[11] = value; }

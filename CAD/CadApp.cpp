@@ -2177,7 +2177,8 @@ void CCadApp::render_text(const wchar_t* str, bool select, double scale, double 
 	double s = scale * 1.6;
 	glScaled(s, s, 1.0);
 	glTranslated(0, -1.0, 0);
-	DrawHeeksFontStringAntialiased(Ttc(str), blur_scale / scale, false, true);
+	if (select)DrawHeeksFontString(Ttc(str), false, true);
+	else DrawHeeksFontStringAntialiased(Ttc(str), blur_scale / scale, false, true);
 	glPopMatrix();
 }
 

@@ -37,6 +37,7 @@ save_just_one_for_EndPickObjects = False
 save_mode_for_EndPickObjects = None
 
 def CreateImage(): return HImage.HImage()
+def CreateGear(): return Gear.Gear()
 
 def ImportImageFile():
     image = HImage.HImage(cad.GetFilePathForImportExport())
@@ -118,6 +119,7 @@ class App(wx.App):
     
     def RegisterObjectTypes(self):
         HImage.type = cad.RegisterObjectType("Image", CreateImage)
+        Gear.type = cad.RegisterObjectType("Gear", CreateGear)
         global wx_image_extensions
         for ext in wx_image_extensions:
             cad.RegisterImportFileType(ext, ImportImageFile)
@@ -698,7 +700,7 @@ class App(wx.App):
             config.Write('ExportDirectory', dialog.GetDirectory())
             
     def OnAbout(self, e):
-        dlg = AboutBox(self)
+        dlg = AboutBox(self.frame)
         dlg.ShowModal()
                 
     def OnPrint(self, e):
@@ -863,7 +865,7 @@ class App(wx.App):
         self.frame.graphics_canvas.viewport.ClearViewpoints()
         self.frame.graphics_canvas.viewport.view_point.SetView(unitY, unitZ, 6)
         self.frame.graphics_canvas.viewport.StoreViewPoint()
-        self.Refresh()
+        self.frame.graphics_canvas.Refresh()
         
     def OnMagXY(self, e):
         self.OnMagAxes(geom.Point3D(0,1,0), geom.Point3D(0,0,1))
@@ -924,35 +926,43 @@ class App(wx.App):
         self.frame.graphics_canvas.Refresh()
         
     def OnLines(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetLineArcDrawing()
         
     def OnRectangles(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetRectanglesDrawing()
         
     def OnObrounds(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetObroundsDrawing()
         
     def OnPolygons(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetPolygonsDrawing()
         
     def OnCircles3p(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetCircles3pDrawing()
         
     def OnCircles2p(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetCircles2pDrawing()
         
     def OnCircles1p(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetCircle1pDrawing()
         
     def OnILine(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetILineDrawing()
         
     def OnPoints(self, e):
+        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetInputMode(point_drawing)
         
     def OnGear(self, e):
         gear = Gear.Gear(1.0, 12)
-        self.gears.append(gear)
         cad.AddUndoably(gear, None, None)
         
     def OnText(self, e):

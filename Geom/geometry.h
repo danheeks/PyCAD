@@ -180,10 +180,19 @@ public:
 	bool	GetScale(double& sx) const;								// get scale from matrix (true if uniform scale)
 	void	GetRotation(double& ax, double& ay, double& az) const;	// get rotation from matrix
 
+	double GetX()const;
+	double GetY()const;
+	double GetZ()const;
+	void SetX(double value);
+	void SetY(double value);
+	void SetZ(double value);
+
 	Matrix	Inverse()const;											// inverts this matrix
 };
 
 extern Matrix UnitMatrix;		// a Unit Matrix
+
+ostream & operator<<(ostream &os, const Matrix &);
 
 
 #define INVALID_POINT	Point(9.9999999e50, 0)

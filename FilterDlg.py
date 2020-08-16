@@ -7,14 +7,13 @@ class FilterDlg(HDialog):
         HDialog.__init__(self, title = 'Filter')
 
         self.names_and_types = cad.GetObjectNamesAndTypes()
-        print(len( self.names_and_types ))
         self.check_boxes = []
 
         sizerMain = wx.BoxSizer(wx.VERTICAL)
         for name, type in cad.GetObjectNamesAndTypes():
             check_box = wx.CheckBox(self, wx.ID_ANY, name)
             self.check_boxes.append((check_box, type))
-            if wx.GetApp().select_mode.filter.CanTypeBePicked(type):
+            if wx.GetApp().select_mode.filter.IsTypeInFilter(type):
                 check_box.SetValue(True)
             sizerMain.Add(check_box, 0, wx.ALL, 2)
             

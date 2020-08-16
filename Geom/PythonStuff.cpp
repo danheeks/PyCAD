@@ -604,6 +604,12 @@ static std::string CBox__str__(const CBox& self) {
 	return ss.str();
 }
 
+static std::string Matrix__str__(const Matrix& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
 boost::python::object CurveIsACircle(const CCurve& curve, double tol)
 {
 	Circle circle;
@@ -785,6 +791,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("WriteDxf", static_cast< void(*)(const CArea& area, const std::string& dxf_file_path) >(&WriteDxfFile))///function WriteDxf///writes a dxf file///params string filepath
 		.def("Swept", &CArea::Swept)
 		.def("Transform", &CArea::Transform)
+		.def("GetTriangles", &CArea::GetTriangles)
 		;
 
 	///class Matrix
@@ -801,7 +808,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Translate", static_cast< void (Matrix::*)(const Point3d&) >(&Matrix::Translate))
 		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale))
 		.def("Scale3", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Scale))
-		;
+		.def("__str__", Matrix__str__);
+	;
 
 	///class Point3d
 	bp::class_<Point3d>("Point3D")
