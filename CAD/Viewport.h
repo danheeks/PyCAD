@@ -44,6 +44,8 @@ public:
 	void WidthAndHeightChanged(int w, int h){ m_w = w; m_h = h; }
 	IPoint GetViewportSize(){ return IPoint(m_w, m_h); }
 	void GetViewportSize(int *w, int *h){ *w = m_w; *h = m_h; }
+	int GetWidth(){ return m_w; }
+	int GetHeight(){ return m_h; }
 	void OnMouseEvent(MouseEvent& event);
 	void OnMagExtents(bool rotate, int margin);
 	void WindowMag(IRect &window_box);

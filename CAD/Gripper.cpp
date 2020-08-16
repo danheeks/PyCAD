@@ -31,7 +31,7 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 
 	if (theApp->m_dragging_moves_objects)
 	{
-		if (select && 0)
+		if (select && false)
 		{
 			double s = 5.0 / theApp->GetPixelScale();
 			double p[8][3] = {

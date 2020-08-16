@@ -30,7 +30,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{ return L"Coordinate System"; }
-	const wchar_t* GetXMLTypeString(void){ return L"CoordinateSystem"; }
+	const wchar_t* GetXMLTypeString(void)const{ return L"CoordinateSystem"; }
 	const wchar_t* GetShortString(void)const{return m_title.c_str();}
 	bool CanEditString(void)const{return true;}
 	void OnEditString(const wchar_t* str);

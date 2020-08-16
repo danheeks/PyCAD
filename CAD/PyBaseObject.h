@@ -31,6 +31,7 @@ public:
 	void KillGLLists();
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement *element);
+	const wchar_t* GetXMLTypeString()const;
 	bool UsesID();
 	HeeksObj* MakeACopy()const;
 	void CopyFrom(const HeeksObj* object);

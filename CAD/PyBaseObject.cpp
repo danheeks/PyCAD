@@ -161,6 +161,15 @@ void BaseObject::ReadFromXML(TiXmlElement *element)
 	CallVoidReturn("ReadXml");
 }
 
+const wchar_t* BaseObject::GetXMLTypeString()const
+{
+	std::pair<bool, std::string> result = CallReturnString("GetXMLTypeString");
+	if (result.first)
+		return Ctt(result.second.c_str());
+	return ObjList::GetXMLTypeString();
+}
+
+
 HeeksObj* BaseObject::MakeACopy()const
 {
 	std::pair<bool, HeeksObj*> result = CallReturnHeeksObj("MakeACopy");

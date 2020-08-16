@@ -220,6 +220,11 @@ public:
 		CallVoidReturn("OnMouse", event);
 	}
 
+	void OnRender()
+	{
+		CallVoidReturn("OnRender");
+	}
+
 };
 
 class DrawingWrap : public Drawing, public cad_wrapper<Drawing>

@@ -123,7 +123,7 @@ public:
 	virtual double Area()const{ return 0.0; }
 	virtual void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const{};
 	virtual void WriteXML(TiXmlNode *root);
-	virtual const wchar_t* GetXMLTypeString(){ return GetTypeString(); } // default is to use the GetTypeString, but Coordinate System's type doesn't has a space in it in the XML.
+	virtual const wchar_t* GetXMLTypeString()const{ return GetTypeString(); } // default is to use the GetTypeString, but Coordinate System's type doesn't has a space in it in the XML.
 	virtual bool AddOnlyChildrenOnReadXML(){ return false; }
 	virtual void WriteToXML(TiXmlElement *element);
 	virtual void ReadFromXML(TiXmlElement* element);

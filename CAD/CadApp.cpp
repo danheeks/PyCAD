@@ -36,6 +36,7 @@
 #include "HText.h"
 #include "HeeksFont.h"
 #include "Filter.h"
+#include "Gripper.h"
 
 CCadApp *theApp = new CCadApp;
 
@@ -1318,6 +1319,7 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	if (m_hidden_for_drag.size() == 0 || !m_show_grippers_on_drag)m_marked_list->GrippersGLCommands(false, false);
 
 	// draw the input mode text on the top
@@ -2418,6 +2420,8 @@ void CCadApp::ColorPickLowestObjects(IRect window, bool single_picking, std::lis
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
 
+	window.y = m_current_viewport->GetHeight() - window.y - window.height;
+
 	m_current_viewport->SetViewport();
 	m_current_viewport->m_view_point.SetProjection(true);
 	m_current_viewport->m_view_point.SetModelview();
@@ -2438,9 +2442,10 @@ void CCadApp::ColorPickLowestObjects(IRect window, bool single_picking, std::lis
 
 	theApp->glCommands(true, false, true);
 
+	glDisable(GL_DEPTH_TEST);
+
 	m_marked_list->GrippersGLCommands(true, true);
 
-	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glDisable(GL_COLOR_MATERIAL);

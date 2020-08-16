@@ -16,6 +16,7 @@ class SelectMode(cad.InputMode):
         self.window_box = None
         self.mouse_move_highlighting = False
         self.highlighted_objects = []
+        self.highlight_color = cad.Color(0,255,0)
         self.prompt_when_doing_a_main_loop = ''
         self.dragging_moves_objects = True
         self.drag_gripper = None
@@ -45,6 +46,11 @@ class SelectMode(cad.InputMode):
 
         return s
     
+    def OnRender(self):
+        for object in self.highlighted_objects:
+            cad.DrawColor(self.highlight_color)
+            object.OnGlCommands(False, False, True)
+            
     def OnMouse(self, event):
         left_and_right_pressed, event_used = self.left_and_right.LeftAndRightPressed(event)
         
@@ -73,6 +79,7 @@ class SelectMode(cad.InputMode):
                         self.grip_to = geom.Point3D(self.grip_from)
                         self.drag_gripper.OnGripperGrabbed(True, self.grip_from)
                         wx.GetApp().GetViewport().EndDrawFront()
+                        break
         elif event.LeftUp():
             if self.drag_gripper:
                 self.grip_to = cad.Digitize(cad.IPoint(event.x, event.y))
@@ -89,8 +96,7 @@ class SelectMode(cad.InputMode):
                 self.window_box = None
             elif self.button_down_point != None:
                 # select one object
-                v = wx.GetApp().GetViewport()
-                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, v.GetHeight() - self.button_down_point.y), False, True, self.filter, True)
+                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
                 if len(objects) > 0:
                     object = objects[0]
                     
@@ -140,8 +146,7 @@ class SelectMode(cad.InputMode):
                         if cad.GetNumSelected() > 0:
                             objects = cad.GetSelectedObjects()
                         else:
-                            v = wx.GetApp().GetViewport()
-                            objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, v.GetHeight() - self.button_down_point.y), False, True, self.filter, True)
+                            objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
                             for object in objects:
                                 cad.Select(object)
 
@@ -156,17 +161,18 @@ class SelectMode(cad.InputMode):
                             self.drag_gripper.OnGripperMoved(self.grip_from, self.grip_to)
                             return
                         
-                    if self.window_box != None and self.mouse_move_highlighting:
-                        pass
-                    
                     if not self.just_one:
                         v = wx.GetApp().GetViewport()
                         v.SetXOR()
                         if self.window_box:
                             v.DrawWindow(self.window_box, True) # undraw the window
-                        self.window_box = cad.IRect(self.button_down_point.x, v.GetHeight() - self.button_down_point.y, event.x - self.button_down_point.x, self.button_down_point.y - event.y)
+                        self.window_box = cad.IRect(self.button_down_point.x, self.button_down_point.y, event.x - self.button_down_point.x, event.y - self.button_down_point.y)
                         v.DrawWindow(self.window_box, True) # draw the window
                         v.EndXOR()
+            else:
+                if self.window_box == None and self.mouse_move_highlighting:
+                    self.highlighted_objects = cad.ObjectsUnderWindow(cad.IRect(event.x, event.y), False, True, self.filter, True)                        
+                    wx.GetApp().frame.graphics_canvas.Refresh()
             self.CurrentPoint = cad.IPoint(event.x, event.y)
             
         if event.GetWheelRotation() != 0:

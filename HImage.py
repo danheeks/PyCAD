@@ -23,7 +23,7 @@ class HImage(Object):
         return wx.GetApp().cad_dir + '/icons/picture.png'
 
     def GetTypeString(self):
-        return "Picture"
+        return "Image"
     
     def GetTitle(self):
         return 'Picture - ' + self.filepath
@@ -91,7 +91,7 @@ class HImage(Object):
         self.top_left.Transform(mat)
             
     def WriteXml(self):
-        cad.SetXmlValue('filepath', self.filepath)
+        cad.SetXmlValue('filepath', self.filepath.replace('\\','/'))
         cad.SetXmlValue('x00', self.bottom_left.x)
         cad.SetXmlValue('x01', self.bottom_left.y)
         cad.SetXmlValue('x02', self.bottom_left.z)
