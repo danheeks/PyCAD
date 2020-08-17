@@ -278,7 +278,7 @@ public:
 		x.Transform(*m_trsf);
 		y.Transform(*m_trsf);
 		d.Transform(*m_trsf);
-		CoordinateSystem::AxesToAngles(x, y, vertical_angle, horizontal_angle, twist_angle);
+		Matrix::AxesToAngles(x, y, vertical_angle, horizontal_angle, twist_angle);
 		switch (m_type)
 		{
 		case 0:
@@ -292,7 +292,7 @@ public:
 			break;
 		}
 		Point3d dx, dy;
-		CoordinateSystem::AnglesToAxes(vertical_angle, horizontal_angle, twist_angle, dx, dy);
+		Matrix::AnglesToAxes(vertical_angle, horizontal_angle, twist_angle, dx, dy);
 		*m_trsf = Matrix(d, dx, dy);
 	}
 	double GetDouble(void)const{
@@ -301,7 +301,7 @@ public:
 		Point3d y(0, 1, 0);
 		x.Transform(*m_trsf);
 		y.Transform(*m_trsf);
-		CoordinateSystem::AxesToAngles(x, y, vertical_angle, horizontal_angle, twist_angle);
+		Matrix::AxesToAngles(x, y, vertical_angle, horizontal_angle, twist_angle);
 		switch (m_type)
 		{
 		case 0:

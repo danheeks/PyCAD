@@ -188,7 +188,12 @@ public:
 	void SetZ(double value);
 
 	Matrix	Inverse()const;											// inverts this matrix
+
+	static void AxesToAngles(const Point3d &x, const Point3d &y, double &v_angle, double &h_angle, double &t_angle);
+	static void AnglesToAxes(const double &v_angle, const double &h_angle, const double &t_angle, Point3d &x, Point3d &y);
 };
+
+
 
 extern Matrix UnitMatrix;		// a Unit Matrix
 

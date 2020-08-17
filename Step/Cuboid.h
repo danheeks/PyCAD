@@ -32,7 +32,7 @@ public:
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 	void OnApplyProperties();
 	bool GetScaleAboutMatrix(double *m);
-	bool Stretch(const double *p, const double* shift, void* data);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	bool DescendForUndo(){return false;}
 	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
 

@@ -118,10 +118,10 @@ bool CCuboid::GetScaleAboutMatrix(double *m)
 	return true;
 }
 
-bool CCuboid::Stretch(const double *p, const double* shift, void* data)
+bool CCuboid::Stretch(const Point3d &p, const Point3d &shift, void* data)
 {
-	gp_Pnt vp = make_point(p);
-	gp_Vec vshift = make_vector(shift);
+	gp_Pnt vp = make_point(&p.x);
+	gp_Vec vshift = make_vector(&shift.x);
 
 	gp_Pnt o = m_pos.Location();
 	gp_Dir z_dir = m_pos.XDirection() ^ m_pos.YDirection();

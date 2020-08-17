@@ -521,7 +521,6 @@ class App(wx.App):
         return True
     
     def Repaint(self):
-        print('repaint#')
         self.frame.graphics_canvas.Update()
         self.frame.graphics_canvas.Refresh()
     

@@ -89,7 +89,9 @@ void GripperSelTransform::OnGripperReleased(const Point3d & from, const Point3d 
 
 	theApp->StartHistory();
 
-	for (std::list<HeeksObj *>::iterator It = theApp->m_marked_list->list().begin(); It != theApp->m_marked_list->list().end(); It++)
+	std::list<HeeksObj *> copy_marked_list = theApp->m_marked_list->list();
+
+	for (std::list<HeeksObj *>::iterator It = copy_marked_list.begin(); It != copy_marked_list.end(); It++)
 	{
 		HeeksObj* object = *It;
 		if ( object == m_gripper_parent && m_data.m_type > GripperTypeScale )

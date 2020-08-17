@@ -49,8 +49,6 @@ public:
 
 	static void RenderArrow();
 	static void RenderDatum(bool bright, bool solid); // render a coordinate system at 0, 0, 0
-	static void AxesToAngles(const Point3d &x, const Point3d &y, double &v_angle, double &h_angle, double &t_angle);
-	static void AnglesToAxes(const double &v_angle, const double &h_angle, const double &t_angle, Point3d &x, Point3d &y);
 	//static void GetAx2Properties(std::list<Property *> *list, Point3d& a, HeeksObj* object);
 	bool PickFrom3Points();
 	bool PickFrom1Point();

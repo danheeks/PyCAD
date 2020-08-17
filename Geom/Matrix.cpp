@@ -590,3 +590,72 @@
 	 void Matrix::SetX(double value){ e[3] = value; }
 	 void Matrix::SetY(double value){ e[7] = value; }
 	 void Matrix::SetZ(double value){ e[11] = value; }
+
+
+
+
+// code for AxesToAngles copied from http://tog.acm.org/GraphicsGems/gemsiv/euler_angle/EulerAngles.c
+
+#define EulSafe	     "\000\001\002\000"
+#define EulNext	     "\001\002\000\001"
+#define EulGetOrd(ord,i,j,k,n,s,f) {unsigned o=ord;f=o&1;o>>=1;s=o&1;o>>=1;n=o&1;o>>=1;i=EulSafe[o&3];j=EulNext[i+n];k=EulNext[i+1-n];}
+#define EulOrd(i,p,r,f)	   (((((((i)<<1)+(p))<<1)+(r))<<1)+(f))
+#define EulOrdZXZs    EulOrd(2,0,1,0)
+
+//static
+void Matrix::AxesToAngles(const Point3d &x, const Point3d &y, double &v_angle, double &h_angle, double &t_angle)
+{
+	double M[4][4];
+	Matrix(Point3d(0, 0, 0), x, y).Get(M[0]);
+	int order = EulOrdZXZs;
+
+    int i,j,k,n,s,f;
+    EulGetOrd(order,i,j,k,n,s,f);
+    if (s==1) {
+	double sy = sqrt(M[i][j]*M[i][j] + M[i][k]*M[i][k]);
+	if (sy > 16 * 1.192092896e-07F) {
+	    t_angle = atan2(M[i][j], M[i][k]);
+	    v_angle = atan2(sy, M[i][i]);
+	    h_angle = atan2(M[j][i], -M[k][i]);
+	} else {
+	    t_angle = atan2(-M[j][k], M[j][j]);
+	    v_angle = atan2(sy, M[i][i]);
+	    h_angle = 0;
+	}
+    } else {
+	double cy = sqrt(M[i][i]*M[i][i] + M[j][i]*M[j][i]);
+	if (cy > 16 * 2.2204460492503131e-016) {
+	    t_angle = atan2(M[k][j], M[k][k]);
+	    v_angle = atan2(-M[k][i], cy);
+	    h_angle = atan2(M[j][i], M[i][i]);
+	} else {
+	    t_angle = atan2(-M[j][k], M[j][j]);
+	    v_angle = atan2(-M[k][i], cy);
+	    h_angle = 0;
+	}
+    }
+    if (n==1) {t_angle = -t_angle; v_angle = - v_angle; h_angle = -h_angle;}
+    if (f==1) {double t = t_angle; t_angle = h_angle; h_angle = t;}
+}
+
+//static
+void Matrix::AnglesToAxes(const double &v_angle, const double
+&h_angle, const double &t_angle, Point3d &x, Point3d &y)
+{
+#if 0
+	to do
+	Matrix zmat1;
+	zmat1.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(0, 0, 1)), t_angle);
+
+	Matrix xmat;
+	xmat.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(1, 0, 0)), v_angle);
+
+	Matrix zmat2;
+	zmat2.SetRotation(gp_Ax1(Point3d(0, 0, 0), Point3d(0, 0, 1)), h_angle);
+
+	Matrix mat = zmat2 * xmat * zmat1;
+
+	x = Point3d(1, 0, 0).Transformed(mat);
+	y = Point3d(0, 1, 0).Transformed(mat);
+#endif
+} 
