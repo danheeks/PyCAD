@@ -242,7 +242,25 @@ class BackgroundColorButton(ColorButton):
         cad.SetBackgroundColor(self.index, c)
         HeeksConfig().WriteInt("BackgroundColor" + str(self.index), c.ref())
         self.GetRibbon().GetParent().graphics_canvas.Refresh()
+        
+class GrayedButton:
+    def __init__(self, name, bitmap_path, help_str, on_button):
+        self.index = None
+        self.toolbar = None
+        self.item_id = None
+        self.name = name
+        self.bitmap_path = bitmap_path
+        self.help_str = help_str
+        self.on_button = on_button
+        
+    def AddToToolbar(self, toolbar):
+        self.toolbar = toolbar
+        self.index = toolbar.GetButtonCount()
+        ribbon = toolbar.GetParent().GetParent().GetParent()
+        self.item_id = Ribbon.AddToolBarTool2(toolbar, self.name, ribbon.Image(self.bitmap_path), self.help_str, self.on_button)       
 
+    def Enable(self, enable = True):
+        self.toolbar.EnableButton(self.item_id, enable)
 
 class Ribbon(RB.RibbonBar):
     next_id = 0
