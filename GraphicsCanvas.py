@@ -86,6 +86,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             self.tools.append(tool)
 
     def OnMouse(self, event):
+        self.SetCurrent(self.context)
         e = Mouse.MouseEventFromWx(event)
         
         if event.RightDown():

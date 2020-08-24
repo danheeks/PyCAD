@@ -776,8 +776,16 @@ bool CShape::ImportSolidsFile(const wchar_t* filepath, bool undoably, std::map<i
 
 		Standard_CString aFileName = (Standard_CString) (Ttc(filepath));
 
+		int status = IFSelect_RetVoid;
 		IGESControl_Reader Reader;
-		int status = Reader.ReadFile( aFileName );
+		try
+		{
+			status = Reader.ReadFile(aFileName);
+		}
+		catch (...)
+		{
+			return false;
+		}
 
 		if ( status == IFSelect_RetDone )
 		{

@@ -211,6 +211,16 @@ class App(wx.App):
             cad.AddUndoably(sketch, self.object.GetOwner(), None)
         cad.EndHistory()
         
+    def FitArcs(self):
+        sketch = self.object
+        sketch.__class__ = cad.Sketch
+        curve = sketch.GetCurve()
+        curve.FitArcs()
+        cad.StartHistory()
+        cad.DeleteUndoably(self.object)
+        cad.AddUndoably(cad.NewSketchFromCurve(curve))
+        cad.EndHistory()        
+        
     def CopyUndoably(self, object, copy_with_new_data):
         copy_undoable = CopyObjectUndoable(object, copy_with_new_data)
         cad.PyIncref(copy_undoable)
@@ -234,6 +244,7 @@ class App(wx.App):
         if type == cad.OBJECT_TYPE_SKETCH:
             if self.object.GetNumChildren() > 1:
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
+                tools.append(ContextTool.CADContextTool("Fit Arcs", "fitarcs", self.FitArcs))
                 
         if len(tools)>0:
             tools.append(None) # a separator
@@ -1036,6 +1047,24 @@ class App(wx.App):
 
     def BitmapPath(self, name):
         return self.bitmap_path + '/'+ name + '.png'
+    
+    def OnLeftClick(self, event):
+        # select one object
+        objects = cad.ObjectsUnderWindow(cad.IRect(self.select_mode.button_down_point.x, self.select_mode.button_down_point.y), False, True, self.select_mode.filter, True)
+        if len(objects) > 0:
+            object = objects[0]
+            
+            if event.controlDown:
+                if cad.ObjectMarked(object):
+                    cad.Unselect(object, True)
+                else:
+                    cad.Select(object)
+            else:
+                cad.ClearSelection(True)
+                cad.Select(object)
+        else:
+            cad.ClearSelection(True)
+
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

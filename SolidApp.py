@@ -12,12 +12,11 @@ from Ribbon import RB
 from Ribbon import Ribbon
 import ContextTool
     
-def ImportSTEPFile():
-    step.ImportSTEPFile(cad.GetFilePathForImportExport())
+def ImportSolidsFile():
+    step.ImportSolidsFile(cad.GetFilePathForImportExport())
     
-def ExportSTEPFile():
-    print('export step')
-    step.ExportSTEPFile(cad.GetFilePathForImportExport())
+def ExportSolidsFile():
+    step.ExportSolidsFile(cad.GetFilePathForImportExport())
 
 class SolidApp(App):
     def __init__(self):
@@ -38,10 +37,14 @@ class SolidApp(App):
         step.SetSolidType(cad.RegisterObjectType("Solid", None))
         step.SetEllipseType(cad.RegisterObjectType("Ellipse", step.CreateEllipse))
         step.SetSplineType(cad.RegisterObjectType("Spline", step.CreateSpline))
-        cad.RegisterImportFileType("step", ImportSTEPFile)
-        cad.RegisterImportFileType("stp", ImportSTEPFile)
-        cad.RegisterExportFileType("step", ExportSTEPFile)
-        cad.RegisterExportFileType("stp", ExportSTEPFile)        
+        cad.RegisterImportFileType("step", ImportSolidsFile)
+        cad.RegisterImportFileType("stp", ImportSolidsFile)
+        cad.RegisterImportFileType("iges", ImportSolidsFile)
+        cad.RegisterImportFileType("igs", ImportSolidsFile)
+        cad.RegisterExportFileType("step", ExportSolidsFile)
+        cad.RegisterExportFileType("stp", ExportSolidsFile)        
+        cad.RegisterExportFileType("iges", ExportSolidsFile)
+        cad.RegisterExportFileType("igs", ExportSolidsFile)        
         
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = App.GetObjectTools(self, object, control_pressed, from_tree_canvas)

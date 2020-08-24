@@ -13,5 +13,5 @@ public:
 };
 
 void WriteSolids();
-void ImportSTEPFile(const std::wstring& filepath);
-void ExportSTEPFile(const std::wstring& filepath);
+void ImportSolidsFile(const std::wstring& filepath);
+void ExportSolidsFile(const std::wstring& filepath);

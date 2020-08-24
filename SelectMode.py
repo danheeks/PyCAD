@@ -95,21 +95,7 @@ class SelectMode(cad.InputMode):
                 for object in objects: cad.Select(object)
                 self.window_box = None
             elif self.button_down_point != None:
-                # select one object
-                objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
-                if len(objects) > 0:
-                    object = objects[0]
-                    
-                    if event.controlDown:
-                        if cad.ObjectMarked(object):
-                            cad.Unselect(object, True)
-                        else:
-                            cad.Select(object)
-                    else:
-                        cad.ClearSelection(True)
-                        cad.Select(object)
-                else:
-                    cad.ClearSelection(True)
+                wx.GetApp().OnLeftClick(event)
             if self.just_one and wx.GetApp().inMainLoop and cad.GetNumSelected() > 0:
                 wx.GetApp().ExitMainLoop()
             else:

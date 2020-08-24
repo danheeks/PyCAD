@@ -204,8 +204,8 @@ void SetEllipseDrawing()
 		boost::python::def("CreateRuledSurface", PickCreateRuledSurface);
 		boost::python::def("CreateExtrusion", CreateExtrusionOrRevolution);
 		boost::python::def("CreateSweep", CreateSweepPy);
-		boost::python::def("ImportSTEPFile", ImportSTEPFile);
-		boost::python::def("ExportSTEPFile", ExportSTEPFile);
+		boost::python::def("ImportSolidsFile", ImportSolidsFile);
+		boost::python::def("ExportSolidsFile", ExportSolidsFile);
 		boost::python::def("CutShapes", CutShapes);
 		boost::python::def("FuseShapes", FuseShapes);
 		boost::python::def("CommonShapes", CommonShapes);

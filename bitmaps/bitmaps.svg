@@ -6002,9 +6002,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.9999999"
-     inkscape:cx="348.07605"
-     inkscape:cy="325.72654"
+     inkscape:zoom="11.313708"
+     inkscape:cx="670.74544"
+     inkscape:cy="799.03144"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -12228,6 +12228,32 @@
          id="path6412-3"
          d="m 429.31257,704.61327 c -10.625,-0.125 -20.86485,5.08818 -20.9375,12.8125 -0.0647,6.87725 7.74984,13.1875 20.125,13.1875 11.6875,0 21.55586,-5.00006 21.625,-12.8125 0.0625,-7.0625 -10.1875,-13.0625 -20.8125,-13.1875 z m 6.1875,13 c -0.0238,2.6238 -12.59699,2.66869 -12.5625,-0.125 0.0381,-3.0862 12.58874,-2.76411 12.5625,0.125 z"
          style="opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </g>
+    <g
+       id="g6448"
+       inkscape:export-xdpi="289.49365"
+       inkscape:export-ydpi="289.49365">
+      <path
+         inkscape:export-ydpi="45.74511"
+         inkscape:export-xdpi="45.74511"
+         inkscape:export-filename="C:\Users\Dan\HeeksCAD\icons\sketch.png"
+         sodipodi:nodetypes="ccssssccssssc"
+         id="path24188-6"
+         d="m 656.04435,263.5795 4.01127,1.55806 5.5156,-14.36829 c 0.94305,-3.28029 6.34298,-2.19639 4.91508,2.0312 l -3,7.85269 c -3.97994,12.37913 11.57773,13.93261 13.55805,4.92634 l 5,-14 -4.15857,-1.63172 -5.36829,14.29463 c -1.3878,3.82186 -6.20959,2.1632 -4.76776,-1.81022 l 3,-8.14732 c 3.36721,-9.22211 -8.33088,-15.69155 -13.70538,-4.70537 z"
+         style="fill:#d0d0d0;fill-opacity:1;fill-rule:evenodd;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path6428"
+         d="m 661.3826,248.77377 c 3.1692,-9.76018 17.38429,-4.24781 13.86742,5.06824 -1.5952,-0.21959 -3.58025,-0.83483 -4.71339,-1.36871 1.08957,-3.5158 -3.63258,-4.9192 -4.75758,-1.9192 -0.94822,-0.22617 -4.39645,-1.78033 -4.39645,-1.78033 z"
+         style="opacity:1;vector-effect:none;fill:#0909f7;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path6428-5"
+         d="m 680.78976,266.26262 c -3.0672,9.79271 -17.33903,4.42895 -13.91955,-4.92327 1.59741,0.20293 3.58877,0.79743 4.72742,1.31945 -1.05283,3.52697 3.6837,4.88103 4.77734,1.86946 0.95053,0.21626 4.41479,1.73436 4.41479,1.73436 z"
+         style="opacity:1;vector-effect:none;fill:#0909f7;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
   </g>
 </svg>
