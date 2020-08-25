@@ -1249,7 +1249,8 @@ boost::python::tuple GenTexture(boost::python::object buffer, boost::python::obj
 	// returns a tuple ( texture_number, newWidth )
 
 	Py_buffer view, alphaView;
-	GLubyte *bitmapData, *alphaData;
+	GLubyte *bitmapData = NULL;
+	GLubyte *alphaData = NULL;
 	if (!GetBufferBuffer(buffer.ptr(), view))
 		return boost::python::make_tuple(0, 0);
 	bitmapData = (GLubyte *)view.buf;
@@ -1274,7 +1275,6 @@ boost::python::tuple GenTexture(boost::python::object buffer, boost::python::obj
 	}
 
 	int bytesPerPixel = hasAlpha ? 4 : 3;
-	int image_size = imageWidth * imageHeight * bytesPerPixel;
 
 	GLuint texture_number;
 	glGenTextures(1, &texture_number);
@@ -1361,13 +1361,13 @@ void DrawImageQuads(int width, int height, int textureWidth, unsigned int textur
 
 	for (double i = 0; i<width; i += x_step){
 		for (double j = 0; j<height; j += y_step){
-			int xy[4][2] = { { i, j }, { i + x_step, j }, { i + x_step, j + y_step }, { i, j + y_step } };
+			double xy[4][2] = { { i, j }, { i + x_step, j }, { i + x_step, j + y_step }, { i, j + y_step } };
 
 			for (int k = 0; k < 4; k++)
 			{
-				Point3d p5 = bottom_left + (bottom_right - bottom_left) * (double)xy[k][0] / (double)width;
-				Point3d p6 = top_left + (top_right - top_left) * (double)xy[k][0] / (double)width;
-				Point3d vt = p5 + (p6 - p5) * (double)xy[k][1] / (double)height;
+				Point3d p5 = bottom_left + (bottom_right - bottom_left) * xy[k][0] / width;
+				Point3d p6 = top_left + (top_right - top_left) * xy[k][0] / width;
+				Point3d vt = p5 + (p6 - p5) * xy[k][1] / height;
 
 				glTexCoord2f((float)xy[k][0] / textureWidth, (float)xy[k][1] / textureWidth);
 				glVertex3dv(vt.getBuffer());
@@ -1601,7 +1601,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(GetXmlFloatOverloads, GetXmlFloat, 1, 2)
 Matrix GetXmlMatrix(const std::wstring &name, const Matrix* default_value = NULL)
 {
 	if (theApp->m_cur_xml_element == NULL)
-	{	
+	{
 		if (default_value)return *default_value;
 		return Matrix();
 	}
