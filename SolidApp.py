@@ -35,6 +35,8 @@ class SolidApp(App):
         cad.RegisterOnEndXmlWrite(step.WriteSolids)
         step.SetStepFileObjectType(cad.RegisterObjectType("STEP_file", step.CreateStepFileObject, add_to_filter = False))
         step.SetSolidType(cad.RegisterObjectType("Solid", None))
+        step.SetFaceType(cad.RegisterObjectType("Face", None))
+        step.SetEdgeType(cad.RegisterObjectType("Edge", None))
         step.SetEllipseType(cad.RegisterObjectType("Ellipse", step.CreateEllipse))
         step.SetSplineType(cad.RegisterObjectType("Spline", step.CreateSpline))
         cad.RegisterImportFileType("step", ImportSolidsFile)
@@ -48,10 +50,22 @@ class SolidApp(App):
         
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = App.GetObjectTools(self, object, control_pressed, from_tree_canvas)
-#        if object.GetType() == Profile.type:
-#            tools.append(CamContextTool.CamObjectContextTool(object, "Add Tags", "addtag", self.AddTags))
+        t = object.GetType()
+        if t == step.GetEdgeType():
+            tools.append(ContextTool.CADObjectContextTool(object, "Blend", "fillet", self.BlendEdge))
+            tools.append(ContextTool.CADObjectContextTool(object, "Chamfer", "chamfer", self.ChamferEdge))
         return tools
     
+    def BlendEdge(self, object):
+        cad.ClearSelection()
+        cad.Select(object)
+        self.OnFillet(None)
+
+    def ChamferEdge(self, object):
+        cad.ClearSelection()
+        cad.Select(object)
+        self.OnChamfer(None)
+
     def IsSolidApp(self):
         return True
             
@@ -241,7 +255,8 @@ class SolidApp(App):
             return
         config = HeeksConfig()
         rad = config.ReadFloat('EdgeBlendRadius', 2.0)
-        if self.InputLength('Enter Blend Radius', 'Radius', rad):
+        rad = self.InputLength('Enter Blend Radius', 'Radius', rad)
+        if rad:
             cad.StartHistory()
             step.FilletOrChamferEdges(rad, False)
             config.WriteFloat('EdgeBlendRadius', rad)
@@ -253,7 +268,8 @@ class SolidApp(App):
             return
         config = HeeksConfig()
         rad = config.ReadFloat('EdgeChamferDist', 2.0)
-        if self.InputLength('Enter Chamfer Distance', 'Distance', rad):
+        rad = self.InputLength('Enter Chamfer Distance', 'Distance', rad)
+        if rad:
             cad.StartHistory()
             step.FilletOrChamferEdges(rad, True)
             config.WriteFloat('EdgeChamferDist', rad)

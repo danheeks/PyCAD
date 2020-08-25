@@ -201,7 +201,7 @@ class App(wx.App):
         
     def OnInputMode(self):
         self.frame.input_mode_canvas.RemoveAndAddAll()
-        #self.frame.graphics_canvas.Refresh()
+        self.frame.graphics_canvas.Refresh()
         
     def SplitSketch(self):
         new_sketches = self.object.Split()
@@ -406,7 +406,7 @@ class App(wx.App):
         global save_just_one_for_EndPickObjects
         global save_mode_for_EndPickObjects
         save_mode_for_EndPickObjects = cad.GetInputMode()
-        self.select_mode.prompt_when_doing_a_main_loop = str
+        self.select_mode.prompt = str
         save_just_one_for_EndPickObjects = self.select_mode.just_one
         self.select_mode.just_one = just_one
         cad.SetInputMode(self.select_mode)
@@ -418,6 +418,7 @@ class App(wx.App):
         global save_just_one_for_EndPickObjects
         global save_mode_for_EndPickObjects
         self.select_mode.filter = save_filter_for_StartPickObjects
+        self.select_mode.prompt = ''
         self.select_mode.just_one = save_just_one_for_EndPickObjects
         cad.SetInputMode(save_mode_for_EndPickObjects)
         
@@ -441,7 +442,7 @@ class App(wx.App):
         save_mode = cad.GetInputMode()
         digitizing = cad.GetDigitizing()
         digitizing.wants_to_exit_main_loop = False
-        digitizing.m_prompt_when_doing_a_main_loop = title
+        digitizing.prompt = title
         cad.SetInputMode(digitizing)
         
         self.OnRun()
@@ -478,8 +479,12 @@ class App(wx.App):
                     break
                 
         if num_found < min_num:
-            wx.MessageBox(msg, caption)
-            return False
+            filter = cad.Filter()
+            for t in types: filter.AddType(t)
+            objects = self.PickObjects(msg, filter, False)
+            if cad.GetNumSelected() < min_num:
+                wx.MessageBox(msg)
+                return False
         return True
 
     def InputLength(self, prompt, name, value):
@@ -497,7 +502,7 @@ class App(wx.App):
         value_control.SetFocus()
         if dlg.ShowModal() == wx.ID_OK:
             return value_control.GetValue()
-        return value
+        return None
         
     def OnKeyDown(self, e):
         k = e.GetKeyCode()

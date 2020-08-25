@@ -133,3 +133,11 @@ class CADContextTool(ContextTool):
     
     def Run(self, event):
         self.method()
+
+class CADObjectContextTool(CADContextTool):
+    def __init__(self, object, title, bitmap_name, method):
+        CADContextTool.__init__(self, title, bitmap_name, method)
+        self.object = object
+        
+    def Run(self, event):
+        self.method(self.object)

@@ -17,7 +17,7 @@ class SelectMode(cad.InputMode):
         self.mouse_move_highlighting = False
         self.highlighted_objects = []
         self.highlight_color = cad.Color(0,255,0)
-        self.prompt_when_doing_a_main_loop = ''
+        self.prompt = ''
         self.dragging_moves_objects = True
         self.drag_gripper = None
         self.ctrl_does_rotate = False
@@ -25,7 +25,7 @@ class SelectMode(cad.InputMode):
         
     # cad.InputMode's overridden method
     def GetTitle(self):
-        return self.prompt_when_doing_a_main_loop if wx.GetApp().inMainLoop else 'Select Mode'
+        return self.prompt if self.prompt else 'Select Mode'
     
     def GetHelpText(self):
         s = 'Left button for selecting objects\n( with Ctrl key for extra objects)\n( with Shift key for similar objects)\nDrag with left button to window select'

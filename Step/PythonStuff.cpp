@@ -157,10 +157,13 @@ void SetEllipseDrawing()
 
 	BOOST_PYTHON_MODULE(step) {
 
-		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init)
+		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init);
+		boost::python::class_<CSolid, boost::python::bases<CShape>, boost::noncopyable >("Solid", boost::python::no_init);
+		boost::python::class_<CFace, boost::python::bases<HeeksObj>, boost::noncopyable >("Face", boost::python::no_init);
+		boost::python::class_<CEdge, boost::python::bases<HeeksObj>, boost::noncopyable >("Edge", boost::python::no_init)
+			.def("Blend", &CEdge::Blend)
 			;
-		boost::python::class_<CSolid, boost::python::bases<CShape>, boost::noncopyable >("Solid", boost::python::no_init)
-			;
+
 		boost::python::class_<CCuboid, boost::python::bases<CSolid>, boost::noncopyable >("Cuboid", boost::python::no_init)
 			.def_readwrite("width", &CCuboid::m_x)
 			.def_readwrite("height", &CCuboid::m_y)

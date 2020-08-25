@@ -31,7 +31,7 @@ static std::wstring digitize_title_coords_string;
 const wchar_t* DigitizeMode::GetTitle()
 {
 	{
-		digitize_title_coords_string = m_prompt_when_doing_a_main_loop;
+		digitize_title_coords_string = prompt;
 		std::wstring xy_str;
 		digitize_title_coords_string.append(L"\n");
 

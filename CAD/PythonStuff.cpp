@@ -3050,7 +3050,7 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::class_<DigitizeMode, boost::python::bases<CInputMode> >("DigitizeMode", boost::python::no_init)
 			.def_readwrite("digitized_point", &DigitizeMode::digitized_point)
 			.def_readwrite("reference_point", &DigitizeMode::reference_point)
-			.def_readwrite("m_prompt_when_doing_a_main_loop", &DigitizeMode::m_prompt_when_doing_a_main_loop)
+			.def_readwrite("prompt", &DigitizeMode::prompt)
 			.def_readwrite("wants_to_exit_main_loop", &DigitizeMode::wants_to_exit_main_loop)
 			;
 

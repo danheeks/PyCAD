@@ -13,6 +13,7 @@ public:
 	void Clear(){ m_types.clear(); }
 	void AddType(int type){ m_types.insert(type); }
 	bool IsTypeInFilter(int type)const{
+		if (type == 0)return false;
 		if (m_types.size() == 0)return true;
 		return (m_types.find(type) != m_types.end());
 	}

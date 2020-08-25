@@ -20,7 +20,7 @@ private:
 public:
 	DigitizedPoint digitized_point;
 	DigitizedPoint reference_point;	// the last point the operator explicitly defined (as opposed to mouse movements over the graphics canvas)
-	std::wstring m_prompt_when_doing_a_main_loop;
+	std::wstring prompt;
 	bool wants_to_exit_main_loop;
 
 	DigitizeMode();
