@@ -8,14 +8,12 @@ from ObjPropsCanvas import ObjPropsCanvas
 from Ribbon import Ribbon
 from HeeksConfig import HeeksConfig
 
-
 class Frame(wx.Frame):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
         wx.Frame.__init__(self, parent, id, '', pos, size, style, name)
 
         config = HeeksConfig()
         self.aui_manager = None
-        self.windows_visible = {}
         
         self.SetIcon(wx.Icon(wx.GetApp().cad_dir + "/heekscad.png", wx.BITMAP_TYPE_PNG))
         
@@ -34,15 +32,15 @@ class Frame(wx.Frame):
         self.properties_canvas = ObjPropsCanvas(self)
         self.aui_manager.AddPane(self.properties_canvas, wx.aui.AuiPaneInfo().Name('Properties').Caption('Properties').Left().BestSize(wx.Size(300,200)).Position(2))
         
-        wx.GetApp().RegisterHideableWindow(self.tree_canvas)
-        wx.GetApp().RegisterHideableWindow(self.input_mode_canvas)
-        wx.GetApp().RegisterHideableWindow(self.properties_canvas)
-        #wx.GetApp().RegisterHideableWindow(self.ribbon)
-        
         wx.GetApp().AddExtraWindows(self)
         
         self.ribbon = Ribbon(self)
         self.aui_manager.AddPane(self.ribbon, wx.aui.AuiPaneInfo().ToolbarPane().Name('Ribbon').Top().Movable(False).Gripper(False))
+        
+        wx.GetApp().RegisterHideableWindow(self.tree_canvas)
+        wx.GetApp().RegisterHideableWindow(self.input_mode_canvas)
+        wx.GetApp().RegisterHideableWindow(self.properties_canvas)
+        wx.GetApp().RegisterHideableWindow(self.ribbon)
 
         perspective = config.Read('AuiPerspective', 'default')
         if perspective != 'default':

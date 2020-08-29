@@ -155,6 +155,17 @@ void SetEllipseDrawing()
 	theApp->SetInputMode(&ellipse_drawing);
 }
 
+void SetShowFaceNormals(bool value)
+{
+	CSettings::showFaceNormals = value;
+}
+
+bool GetShowFaceNormals()
+{
+	return CSettings::showFaceNormals;
+}
+
+
 	BOOST_PYTHON_MODULE(step) {
 
 		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init);
@@ -215,5 +226,7 @@ void SetEllipseDrawing()
 		boost::python::def("FilletOrChamferEdges", FilletOrChamferEdges);
 		boost::python::def("SetEllipseDrawing", SetEllipseDrawing); 
 		boost::python::def("SketchToFace", SketchToFace);
+		boost::python::def("SetShowFaceNormals", SetShowFaceNormals);
+		boost::python::def("GetShowFaceNormals", GetShowFaceNormals);
 	}
 	

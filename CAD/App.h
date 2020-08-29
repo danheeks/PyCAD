@@ -95,4 +95,6 @@ public:
 	virtual void RegisterOnGLCommands(void(*callbackfunc)()) = 0;
 	virtual HeeksObj* GetObjPointer() = 0;
 	virtual ObjList* GetObjListPointer() = 0;
+	virtual bool GetDatumSolid() = 0;
+	virtual void RenderArrow() = 0;
 };

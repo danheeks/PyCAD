@@ -80,6 +80,7 @@ public:
 	void MakeSureMarkingGLListExists();
 	void KillMarkingGLList();
 	void UpdateMarkingGLList(bool marked, bool no_color);
+	void RenderNormalArrow();
 };
 
 #if 0

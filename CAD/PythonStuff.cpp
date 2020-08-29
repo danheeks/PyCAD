@@ -1829,6 +1829,17 @@ int ViewportGetWidth(CViewport& viewport)
 	return viewport.GetViewportSize().GetWidth();
 }
 
+void ViewportDrawWindow(CViewport& viewport, IRect &rect, bool allow_extra_bits)
+{
+	IRect r2;
+	r2.x = rect.x;
+	r2.y = viewport.GetHeight() - rect.y - rect.height;
+	r2.width = rect.width;
+	r2.height = rect.height;
+
+	return viewport.DrawWindow(r2, allow_extra_bits);
+}
+
 static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, const HeeksColor* color)
 {
 	return boost::shared_ptr<CStlSolid>(new CStlSolid(title.c_str(), color));
@@ -2545,6 +2556,15 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 	glEnd();
 }
 
+bool GetAntialiasing(void)
+{
+	return theApp->m_antialiasing;
+}
+
+void SetAntialiasing(bool value)
+{
+	theApp->m_antialiasing = value;
+}
 
 
 	BOOST_PYTHON_MODULE(cad) {
@@ -2799,7 +2819,7 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 			.def("EndXOR", &CViewport::EndXOR)
 			.def("DrawFront", &CViewport::DrawFront)
 			.def("EndDrawFront", &CViewport::EndDrawFront)
-			.def("DrawWindow", &CViewport::DrawWindow)
+			.def("DrawWindow", ViewportDrawWindow)
 			.def("OnWheelRotation", &CViewport::OnWheelRotation)
 			.def_readwrite("need_update", &CViewport::m_need_update)
 			.def_readwrite("need_refresh", &CViewport::m_need_refresh)
@@ -3293,6 +3313,8 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
 		boost::python::def("GetStretchPoint", GetStretchPoint);
 		boost::python::def("GetStretchShift", GetStretchShift);
+		boost::python::def("GetAntialiasing", GetAntialiasing);
+		boost::python::def("SetAntialiasing", SetAntialiasing);
 		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;

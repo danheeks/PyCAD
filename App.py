@@ -17,6 +17,7 @@ import Gear
 from About import AboutBox
 from FilterDlg import FilterDlg
 import HImage
+from Ribbon import RB
 
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
@@ -147,7 +148,8 @@ class App(wx.App):
         cad.SetBackgroundColor(0, cad.Color(config.ReadInt("BackgroundColor0", cad.Color(230, 255, 255).ref())))
         cad.SetBackgroundColor(1, cad.Color(config.ReadInt("BackgroundColor1", cad.Color(255, 255, 255).ref())))
         cad.SetCurrentColor(cad.Color(config.ReadInt("CurrentColor", cad.Color(0, 0, 0).ref())))
-        
+        cad.SetAntialiasing(config.ReadBool('Antialiasing', False))
+        cad.SetShowDatum(config.ReadBool('ShowDatum', True))
 
     def GetDefaultDir(self):
         default_directory = os.getcwd()
@@ -542,6 +544,38 @@ class App(wx.App):
     
     def AddExtraRibbonPages(self, ribbon):
         pass
+    
+    def AddOptionsRibbonPanels(self, ribbon):
+        panel = RB.RibbonPanel(ribbon.options_page, wx.ID_ANY, 'View', ribbon.Image('mag'), style=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
+        combo = wx.ComboBox(panel, choices = ["None", "Input Mode Title", "Full Help"], style = wx.CB_READONLY )
+        combo.Select(cad.GetGraphicsTextMode())
+        self.Bind(wx.EVT_COMBOBOX, ribbon.OnScreenText, combo)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.AddStretchSpacer(1)
+        ribbon.AddLabelAndControl(panel, sizer, 'Screen Text', combo)
+        sizer.AddStretchSpacer(1)
+        panel.SetSizer(sizer)
+        
+        panel = RB.RibbonPanel(ribbon.options_page, wx.ID_ANY, 'View', ribbon.Image('mag'))
+        self.view_toolbar = RB.RibbonButtonBar(panel)
+        from Ribbon import ScreenTextButton
+        from Ribbon import ModeButton
+        ScreenTextButton().AddToToolbar(self.view_toolbar)
+        ModeButton( cad.GetRotateUpright, cad.SetRotateUpright, 'rotate upright', 'rotate free', "RotateUpright", 'Rotate Upright', 'Rotate Free').AddToToolbar(self.view_toolbar)
+        ModeButton( cad.GetAntialiasing, cad.SetAntialiasing, 'smoothed', 'pixelated', "Antialiasing", 'Smoothed', 'Pixelated', 'Lines are drawn with antialiasing', 'Lines are drawn withput antialiasing').AddToToolbar(self.view_toolbar)
+        ModeButton( cad.GetShowDatum, cad.SetShowDatum, 'showdatum', 'hidedatum', "ShowDatum", 'Hide Datum', 'Show Datum', 'Showing the Datum', 'Not Showing the Datum').AddToToolbar(self.view_toolbar)
+        
+        panel = RB.RibbonPanel(ribbon.options_page, wx.ID_ANY, 'View Colors', ribbon.Image('mag'))
+        toolbar = RB.RibbonButtonBar(panel)
+        from Ribbon import BackgroundColorButton
+        BackgroundColorButton('Background Color Top', 'Edit top background color').AddToToolbar(toolbar)
+        BackgroundColorButton('Background Color Bottom', 'Edit bottom background color').AddToToolbar(toolbar)
+        
+    def OnAntialiasing(self, event):
+        cad.SetAntialiasing(event.IsChecked())
+        config = HeeksConfig()
+        config.WriteBool('Antialiasing', cad.GetAntialiasing())
+        self.frame.graphics_canvas.Refresh()
         
     def OnNew(self, e):
         res = self.CheckForModifiedDoc()
@@ -915,22 +949,19 @@ class App(wx.App):
         
     def ShowFullScreen(self, show, style = wx.FULLSCREEN_ALL):
         if show:
-            self.SetMenuBar(None)
             self.windows_visible = {}
             for w in self.hideable_windows:
-                self.windows_visible[w] = self.aui_manager.GetPane(w).IsShown() and w.IsShown()
-                self.aui_manager.GetPane(w).Show(False)
+                self.windows_visible[w] = self.frame.aui_manager.GetPane(w).IsShown() and w.IsShown()
+                self.frame.aui_manager.GetPane(w).Show(False)
             self.frame.graphics_canvas.SetFocus()# so escape key works to get out
         else:
-            if self.menuBar != None:
-                self.SetMenuBar(self.menuBar)
             for w in self.hideable_windows:
                 if w in self.windows_visible:
                     visible = self.windows_visible[w]
-                    self.aui_manager.GetPane(w).Show(visible)
+                    self.frame.aui_manager.GetPane(w).Show(visible)
             
-        res = super().ShowFullScreen(show, style)
-        self.aui_manager.Update()
+        res = self.frame.ShowFullScreen(show, style)
+        self.frame.aui_manager.Update()
         return res
         
     def OnFullScreen(self, e):

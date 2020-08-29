@@ -173,6 +173,12 @@ void CShape::glCommands(bool select, bool marked, bool no_color)
 		{
 			CFace* f = (CFace*)object;
 			f->MakeSureMarkingGLListExists();
+
+			if (CSettings::showFaceNormals)
+			{
+				f->RenderNormalArrow();
+			}
+
 		}
 
 		if(!m_face_gl_list)

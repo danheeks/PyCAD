@@ -40,6 +40,31 @@ CFace::CFace(const TopoDS_Face &face):m_topods_face(face), m_temp_attr(0){
 CFace::~CFace(){
 }
 
+void CFace::RenderNormalArrow()
+{
+	// render a normal for this face
+	gp_Pnt pos;
+	gp_Dir n = GetMiddleNormal(&pos);
+	Point3d o = G2P(pos);
+	Point3d vz = D2P(n);
+	Point3d vx, vy;
+	vz.arbitrary_axes(vx, vy);
+	Matrix mat(o, vx, vy);
+	double m[16];
+	mat.GetTransposed(m);
+	double s = 30.0 / theApp->GetPixelScale();
+	glPushMatrix();
+	glMultMatrixd(m);
+	glEnable(GL_LIGHTING);
+	glShadeModel(GL_SMOOTH);
+	Material(HeeksColor(128, 128, 255)).glMaterial(1.0);
+	glScaled(s, s, s);
+	theApp->RenderArrow();
+	glShadeModel(GL_FLAT);
+	glDisable(GL_LIGHTING);
+	glPopMatrix();
+}
+
 void CFace::glCommands(bool select, bool marked, bool no_color){
 	bool owned_by_solid = false;
 	if(GetParentBody()) {

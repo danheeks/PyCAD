@@ -27,6 +27,11 @@ class SolidApp(App):
        
     def GetAppConfigName(self):
         return 'HeeksCADSolid'
+    
+    def LoadConfig(self):
+        App.LoadConfig(self)
+        config = HeeksConfig()
+        step.SetShowFaceNormals(config.ReadBool('ShowFaceNormals', False))
 
     def RegisterObjectTypes(self):
         step.SetResPath(self.cad_dir)
@@ -310,8 +315,19 @@ class SolidApp(App):
         page.Realize()
         
         Ribbon.AddToolBarTool(ribbon.other_drawing_toolbar, 'Ellipses', 'circles', 'Draw Ellipses', self.OnEllipse)
-        #ribbon.geom_page.Realize()        
         
+    def AddOptionsRibbonPanels(self, ribbon):
+        App.AddOptionsRibbonPanels(self, ribbon)
+        
+        from Ribbon import ModeButton
+        ModeButton( step.GetShowFaceNormals, step.SetShowFaceNormals, 'showfacenormals', 'hidefacenormals', "ShowFaceNormals", 'Show Face Normals', 'Hide Face Normals').AddToToolbar(self.view_toolbar)
+       
+    def OnFaceNormalCheck(self, e):
+        config = HeeksConfig()
+        step.SetShowFaceNormals(not step.GetShowFaceNormals())
+        self.FaceNormalCheck.SetValue(step.GetShowFaceNormals())
+        config.WriteBool('ShowFaceNormals', step.GetShowFaceNormals())
+        self.frame.graphics_canvas.Refresh()
         
     def OnEllipse(self, e):
         step.SetEllipseDrawing()

@@ -36,25 +36,37 @@ class BitmapChangingButton:
 
     def GetHelpStr(self):
         return ''
-        
-class RotateUprightButton(BitmapChangingButton):
-    def __init__(self):
-        self.mode = cad.GetRotateUpright()
+    
+class ModeButton(BitmapChangingButton):
+    def __init__(self, getter, setter, bitmap_on, bitmap_off, config_str, on_name, off_name, on_help = '', off_help = ''):
+        self.getter = getter
+        self.setter = setter
+        self.bitmap_on = bitmap_on
+        self.bitmap_off = bitmap_off
+        self.config_str = config_str
+        self.on_name = on_name
+        self.off_name = off_name
+        self.on_help = on_help
+        self.off_help = off_help
+        self.mode = self.getter()
         BitmapChangingButton.__init__(self)
         
     def OnButton(self, event):
         self.mode = not self.mode
-        cad.SetRotateUpright(self.mode)
+        self.setter(self.mode)
         # remember config
         config = HeeksConfig()
-        config.WriteBool("RotateUpright", self.mode)
+        config.WriteBool(self.config_str, self.mode)
         BitmapChangingButton.OnButton(self, event)
         
     def GetName(self):
-        return 'Rotate Upright' if self.mode == True else 'Rotate Free'
+        return self.on_name if self.mode == True else self.off_name
     
     def GetBitmap(self):
-        return self.GetRibbon().Image('rotate upright' if self.mode == True else 'rotate free')
+        return self.GetRibbon().Image(self.bitmap_on if self.mode == True else self.bitmap_off)
+
+    def GetHelpStr(self):
+        return self.on_help if self.mode == True else self.off_help
         
 class ScreenTextButton(BitmapChangingButton):
     def __init__(self):
@@ -80,9 +92,9 @@ class ScreenTextButton(BitmapChangingButton):
         return 'No Screen Text'
     
     def GetBitmap(self):
-        bm = 'screen text none'
-        if self.mode == 1: bm = 'screen text title'
-        elif self.mode == 2: bm = 'screen text full'
+        bm = 'empty'
+        if self.mode == 1: bm = 'title'
+        elif self.mode == 2: bm = 'fulltext'
         return self.GetRibbon().Image(bm)
         
     def OnDropDown(self, event):
@@ -398,21 +410,10 @@ class Ribbon(RB.RibbonBar):
         # Add extra pages before the Options page
         wx.GetApp().AddExtraRibbonPages(self)
         
-        options_page = RB.RibbonPage(self, wx.ID_ANY, 'Options', self.Image('settings'))
-        options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.options_page = RB.RibbonPage(self, wx.ID_ANY, 'Options', self.Image('settings'))
+        self.options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
-        panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View', self.Image('mag'))
-        toolbar = RB.RibbonButtonBar(panel)
-        RotateUprightButton().AddToToolbar(toolbar)
-        ScreenTextButton().AddToToolbar(toolbar)
-        
-        panel = RB.RibbonPanel(options_page, wx.ID_ANY, 'View Colors', self.Image('mag'))
-        toolbar = RB.RibbonButtonBar(panel)
-        BackgroundColorButton('Background Color Top', 'Edit top background color').AddToToolbar(toolbar)
-        BackgroundColorButton('Background Color Bottom', 'Edit bottom background color').AddToToolbar(toolbar)
-
-
-        options_page.Realize()
+        wx.GetApp().AddOptionsRibbonPanels(self)
                 
         self.Realize()
         

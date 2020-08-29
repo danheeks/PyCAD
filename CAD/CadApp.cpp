@@ -2587,3 +2587,8 @@ ObjList* CCadApp::GetObjListPointer()
 {
 	return this;
 }
+
+void CCadApp::RenderArrow()
+{
+	CoordinateSystem::RenderArrow();
+}

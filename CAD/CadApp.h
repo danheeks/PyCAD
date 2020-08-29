@@ -354,6 +354,8 @@ public:
 	void EndDrawFront();
 	HeeksObj* GetObjPointer();
 	ObjList* GetObjListPointer();
+	bool GetDatumSolid(){ return m_datum_coords_system_solid_arrows; }
+	void RenderArrow();
 };
 
 extern CCadApp* theApp;
