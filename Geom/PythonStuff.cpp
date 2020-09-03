@@ -8,7 +8,6 @@
 #include "Point.h"
 #include "AreaDxf.h"
 #include "geometry.h"
-#include "Solid.h"
 #include "Tris.h"
 #include "HeeksGeomDxf.h"
 #include "Box.h"
@@ -378,12 +377,18 @@ boost::python::list CTrisGetMachiningAreas(const CTris& tris)
 	return plist;
 }
 
-Point3d LineIntersectPlane(const Line& line, const Plane& plane)
+boost::python::object LineIntersectPlane(const Line& line, const Plane& plane)
 {
 	Point3d intof;
 	double t;
-	plane.Intof(line, intof, t);
-	return intof;
+	if (plane.Intof(line, intof, t))
+	{
+		return boost::python::object(intof);
+	}
+	else
+	{
+		return boost::python::object(); // None
+	}
 }
 
 void CTrisAddTriangle(CTris& tris, const Point3d& p0, const Point3d& p1, const Point3d& p2)
@@ -456,17 +461,6 @@ static bool get_fitarcs()
 	return CArea::m_fit_arcs;
 }
 
-#ifdef OPEN_CASCADE_INCLUDED
-
-CBox SolidGetBox(const CSolid& solid)
-{
-	CBox box;
-	solid.GetBox(box);
-	return box;
-}
-
-#endif
-
 CBox CTrisGetBox(const CTris& solid)
 {
 	CBox box;
@@ -494,85 +488,6 @@ void CTrisProject(const CTris& solid, const CArea& area, const std::string& dxf_
 		dxf_writer.WriteLine(line.p0.getBuffer(), e.getBuffer(), "0");
 	}
 }
-
-
-#ifdef OPEN_CASCADE_INCLUDED
-
-static Standard_Boolean TriangleIsValid(const Point3d& P1, const Point3d& P2, const Point3d& P3)
-{
-	Point3d V1(P1, P2);								// V1=(P1,P2)
-	Point3d V2(P2, P3);								// V2=(P2,P3)
-	Point3d V3(P3, P1);								// V3=(P3,P1)
-
-	if ((V1.SquareMagnitude() > 1.e-10) && (V2.SquareMagnitude() > 1.e-10) && (V3.SquareMagnitude() > 1.e-10))
-	{
-		V1.Cross(V2);								// V1 = Normal	
-		if (V1.SquareMagnitude() > 1.e-10)
-			return Standard_True;
-		else
-			return Standard_False;
-	}
-	else
-		return Standard_False;
-
-}
-
-CTris* CSolidMakeStl(const CSolid& solid, double deviation)
-{
-	CTris* new_tris = new CTris;
-
-	BRepTools::Clean(solid.GetShape());
-	BRepMesh_IncrementalMesh(solid.GetShape(), deviation);
-
-	for (TopExp_Explorer explorer(solid.GetShape(), TopAbs_FACE); explorer.More(); explorer.Next())
-	{
-		TopoDS_Face face = TopoDS::Face(explorer.Current());
-
-		CTri tri;
-
-		// Get triangulation
-		TopLoc_Location L;
-		Handle_Poly_Triangulation facing = BRep_Tool::Triangulation(face, L);
-		Matrix tr = L;
-
-		if (facing.IsNull()){
-		}
-		else
-		{
-			Poly_Connect pc(facing);
-			{
-				const TColgp_Array1OfPnt& Nodes = facing->Nodes();
-				const Poly_Array1OfTriangle& triangles = facing->Triangles();
-				Standard_Integer nnn = facing->NbTriangles();					// nnn : nombre de triangles
-				Standard_Integer nt, n1, n2, n3 = 0;						// nt  : triangle courant
-				// ni  : sommet i du triangle courant
-				for (nt = 1; nt <= nnn; nt++)
-				{
-					if (face.Orientation() == TopAbs_REVERSED)			// si la face est "reversed"
-						triangles(nt).Get(n1, n3, n2);						// le triangle est n1,n3,n2
-					else
-						triangles(nt).Get(n1, n2, n3);						// le triangle est n1,n2,n3
-
-					if (TriangleIsValid(Nodes(n1), Nodes(n2), Nodes(n3)))
-					{
-						Point3d v1 = Nodes(n1).Transformed(tr);
-						Point3d v2 = Nodes(n2).Transformed(tr);
-						Point3d v3 = Nodes(n3).Transformed(tr);
-
-						float x[9] = { v1.X(), v1.Y(), v1.Z(), v2.X(), v2.Y(), v2.Z(), v3.X(), v3.Y(), v3.Z() };
-						new_tris->AddTri(x);
-					}
-				}
-			}
-		}
-
-	}
-
-	return new_tris;
-
-}
-
-#endif
 
 static std::string Point__str__(const Point& self) {
 	std::ostringstream ss;
@@ -624,319 +539,282 @@ boost::python::object CurveIsACircle(const CCurve& curve, double tol)
 }
 
 BOOST_PYTHON_MODULE(geom) {
-	/// class Point
-	/// a 2D point, with x and y values, which can also be used as a vector
-	bp::class_<Point>("Point", "2D Point can be used as a vector too.") 
-        .def(bp::init<double, double>()) /// function Point///params float x, float y/// make a new Point from x and y values///return Point
-        .def(bp::init<Point>())
-        .def(bp::other<double>() * bp::self)
-        .def(bp::self * bp::other<double>())//, "returns a Point with x and y multiplied by the by the multiplier\nyou can also do multiplication the other way round; p2 = 3.0 * p\nreturn Point")
-        .def(bp::self / bp::other<double>())/// function / ///params float divider/// returns a Point with x and y divided by the by the divider///return Point
-        .def(bp::self * bp::other<Point>())/// function *///params Point p2/// returns the dot product of this point and p2///return float
-        .def(bp::self - bp::other<Point>())/// function - ///params Point p2/// returns a Point wit:///x = this points x - p2.x///y = this points y - p2.y///you can also use "-" to return the Point with (-x, -y)///return Point
-        .def(bp::self + bp::other<Point>())/// function + ///params Point p2/// returns a Point with:///x = this points x + p2.x///y = this points y + p2.y///return Point
-        .def(bp::self ^ bp::other<Point>())/// function ^///params Point p2/// returns the 2D cross product of this point and p2///return float
-        .def(bp::self == bp::other<Point>())/// function ==///params Point p2/// returns true if x == p2.x and y == p2.y///return Boolean
-        .def(bp::self != bp::other<Point>())/// function !=///params Point p2/// returns true if x != p2.x or y != p2.y///return Boolean
-        .def(-bp::self)
-        .def(~bp::self)/// function ~/// returns a vector 90 degrees to the left of this one///return Point
-        .def("Dist", &Point::dist) /// function Dist /// return float/// params Point p2 /// returns the distance to another point
-        .def("Length", &Point::length) /// function Length /// return float///returns the length of the vector
-        .def("Normalize", &Point::normalize) /// function Normalize /// makes the vector into a unit vector /// this will leave a (0, 0) vector as it is///returns the length before operation///return float
-		.def("Rotate", static_cast< void (Point::*)(double, double) >(&Point::Rotate)) /// function Rotate///params float cosa, float sina /// rotates the vector about (0,0) given cosine and sine of the angle
-		.def("Rotate", static_cast< void (Point::*)(double) >(&Point::Rotate)) /// function Rotate///params float angle/// rotates the vector about (0,0) by given angle ( in radians )
-		.def("Transform", &Point::Transform)/// function Transform///params Matrix m/// transforms the point by the matrix
-        .def_readwrite("x", &Point::x)/// variable x///type float/// the x value of the point
-        .def_readwrite("y", &Point::y)/// variable y///type float/// the y value of the point
-		.def("__str__", Point__str__);
 
-	/// class Vertex
-	/// a Curve has a list of these///it can have type 0, 1, -1 for line, ccw arc, cw arc, and a centre point
-	bp::class_<CVertex>("Vertex") 
-        .def(bp::init<CVertex>())
-        .def(bp::init<int, Point, Point>())/// function Vertex///params int type, Point p, Point c/// make a new Vertex with type, end point and center point/// type 0 = line, 1 = ccw arc, -1 = cw arc
-        .def(bp::init<Point>())/// function Vertex///params Point p/// make a new Vertex with end point/// adds a point
-        .def(bp::init<int, Point, Point, int>())
-        .def_readwrite("type", &CVertex::m_type)/// variable type///type int///0 - line///1 - ccw arc///-1 - cw arc
-        .def_readwrite("p", &CVertex::m_p)/// variable p///type Point///the end point of the span
-        .def_readwrite("c", &CVertex::m_c)/// variable p///type Point///the center point of the span, for arcs
-        .def_readwrite("user_data", &CVertex::m_user_data)
+	bp::docstring_options local_docstring_options(true, true, false); // This will enable user-defined docstrings and python signatures, while disabling the C++ signatures
+
+	bp::class_<Point>("Point", "Point((float)x, (float)y)\n\n2D Point\nCan also be used as a vector"
+		"\nTo make a vector from p1 to p2, use v = p2 - p1"
+		"\nUse p1 * p2 for dot product"
+		"\nUse p1 ^ p2 for cross product"
+		"\nUse ~p to return a vector at 90 degrees to the left of p")
+		.def(bp::init<double, double>())
+		.def(bp::init<Point>())
+		.def(bp::other<double>() * bp::self)
+		.def(bp::self * bp::other<double>())
+		.def(bp::self / bp::other<double>())
+		.def(bp::self * bp::other<Point>())
+		.def(bp::self - bp::other<Point>())
+		.def(bp::self + bp::other<Point>())
+		.def(bp::self ^ bp::other<Point>())
+		.def(bp::self == bp::other<Point>())
+		.def(bp::self != bp::other<Point>())
+		.def(-bp::self)
+		.def(~bp::self)
+		.def("Dist", &Point::dist, bp::args("p2"), "returns the distance between this point and p2")
+		.def("Length", &Point::length, "returns the length of the vector")
+		.def("Normalize", &Point::normalize, "makes the vector into a unit vector\nthis will leave a (0, 0) vector as it is\nreturns the (float)length before operation")
+		.def("Rotate", static_cast<void (Point::*)(double, double)>(&Point::Rotate), bp::args("cosa, sina"), "rotates the vector about (0,0) given cosine and sine of the angle")
+		.def("Rotate", static_cast<void (Point::*)(double)>(&Point::Rotate), bp::args("angle"), "rotates the vector about (0,0) by given angle ( in radians )")
+		.def("Transform", &Point::Transform, bp::args("m"), "transforms the point by the matrix")
+		.def_readwrite("x", &Point::x, "the x value of the point")
+		.def_readwrite("y", &Point::y, "the y value of the point")
+		.def("__str__", Point__str__);
+	;
+
+	bp::class_<CVertex>("Vertex", "Vertex((int)type, (Point)p, (Point)c) make a new Vertex with type, end point and center point; type 0 = line, 1 = ccw arc, -1 = cw arc"
+		"Vertex((Point)p) make a Vertex with end point")
+		.def(bp::init<CVertex>())
+		.def(bp::init<int, Point, Point>())
+		.def(bp::init<Point>())
+		.def(bp::init<int, Point, Point, int>())
+		.def_readwrite("type", &CVertex::m_type, "0 - line, 1 - ccw arc, -1 - cw arc")
+		.def_readwrite("p", &CVertex::m_p, "the end point of the span")
+		.def_readwrite("c", &CVertex::m_c, "the center point of the span, for arcs")
+		.def_readwrite("user_data", &CVertex::m_user_data)
 		.def("__str__", CVertex__str__);
 	;
 
-	/// class Span
-	/// this is just a Vertex with a start point, which defines a Span
-	/// and provides functions to work on it
-	/// but these are not stored in a Curve ( Curve stores a list of Vertex objects )
-	/// You can use curve.GetSpans() to get a list of these from a curve.
-	bp::class_<Span>("Span") 
-        .def(bp::init<Span>())
-        .def(bp::init<Point, CVertex, bool>())///function Span///params Point p, Vertex v, Boolean start_span///return Span///makes a new Span with a start point, an end Vertex, and a flag set to True if this is the start span of a curve
-		.def("NearestPoint", static_cast< Point (Span::*)(const Point& p)const >(&Span::NearestPoint))///function NearestPoint///params Point p///return Point///returns the nearest point on this span to the given point
-		.def("NearestPoint", &SpanNearestPoint)///function NearestPoint///params Span s2///return Point///return float///returns nearest point on this span to span s2 and returns the distance of that point to s2
+	bp::class_<Span>("Span", "Span((Point)p, (Vertex)v, (bool)start_span\n\nA Span has start Point and a Vertex\nThese re not stored in a Curve ( Curve stores a list of Vertex objects )\nYou can use curve.GetSpans() to get a list of these from a curve")
+		.def(bp::init<Span>())
+		.def(bp::init<Point, CVertex, bool>())
+		.def("NearestPoint", static_cast<Point(Span::*)(const Point& p)const>(&Span::NearestPoint), bp::args("p"), "returns the nearest point on this span to the given point")
+		.def("NearestPoint", &SpanNearestPoint, bp::args("s2"), "returns tuple (nearest point on this span to span s2, distance of that point to s2)")
 		.def("GetBox", &Span::GetBox, "returns the box that fits round the span")
-		.def("IncludedAngle", &Span::IncludedAngle)/// function IncludedAngle///return float///returns the included angle of the arc, 1 for ccw, -1 for cw
-		.def("GetArea", &Span::GetArea)
-		.def("On", &SpanOn)/// function On///params Point p///returns True if point lies on span, else False
-		.def("MidPerim", &Span::MidPerim)///function MidPerim///return Point///params float param///returns the point, which is the given fraction ( of the span ) along the span
-		.def("MidParam", &Span::MidParam)///function MidParam///return Point///params float perim///returns the point, which is the given distance along the span
-		.def("Length", &Span::Length)///function Length///return float///returns the length of the span
-		.def("GetVector", &Span::GetVector)///function GetVector///returns the tangential vector ( the vector pointing in the direction of travel )///at the given fraction along the span///return Point///params float
-		.def("Intersect", &spanIntersect)///function Intersect///return list///params Span s2///returns a list of intersection points between this span and s2///ordered along this span
-		.def("GetRadius", &Span::GetRadius)
-        .def_readwrite("p", &Span::m_p)///variable p///type Point///the start point of this span
-		.def_readwrite("v", &Span::m_v)///variable v///type Vertex///the Vertex describing the span type, end and center
+		.def("IncludedAngle", &Span::IncludedAngle, "returns the included angle of the arc in radians, + for ccw, - for cw")
+		.def("GetArea", &Span::GetArea, "returns the area under the span to the X axis")
+		.def("On", &SpanOn, bp::args("p"), "returns True if point lies on span, else False")
+		.def("MidPerim", &Span::MidPerim, bp::args("param"), "returns the point which is the given fraction ( of the span ) along the span")
+		.def("MidParam", &Span::MidParam, bp::args("perim"), "returns the point, which is the given distance along the span")
+		.def("Length", &Span::Length, bp::args("p"), "returns the length of the span")
+		.def("GetVector", &Span::GetVector, "returns the tangential vector ( the vector pointing in the direction of travel )\nat the given fraction along the span")
+		.def("Intersect", &spanIntersect, bp::args("s2"), "returns a list of intersection points between this span and s2\nordered along this span")
+		.def("GetRadius", &Span::GetRadius, "returns the radius of the arc, or 0.0 if it's a line")
+		.def_readwrite("p", &Span::m_p, "the start point of this span")
+		.def_readwrite("v", &Span::m_v, "the Vertex describing the span type, end and center")
 		.def("__str__", Span__str__);
 	;
 
-	/// class Curve
-	/// defined by a list of Vertex objects
-	/// if you want a closed curve, you need to add a point at the end that is at the same place as the start point
-	bp::class_<CCurve>("Curve", "this is a curve") 
-        .def(bp::init<CCurve>())///function Curve///return Curve///makes a new blank Curve
-        .def("GetVertices", &getVertices)///function GetVertices///return list///returns the list of Vertex objects
-        .def("Append",&CCurve::append)///function Append///params Vertex v///adds a Vertex to the list of vertices
-        .def("Append",&append_point)///function Append///params Point p///adds a Point to the list of vertices ( makes a Vertex from it )
-        .def("Text", &print_curve)///function Text///for debugging, prints a text definition of the Curve
-		.def("NearestPoint", static_cast< Point (CCurve::*)(const Point& p)const >(&CCurve::NearestPoint))///function NearestPoint///params Point p///return Point///returns the nearest point on the curve to the given point
-		.def("NearestPoint", &nearest_point_to_curve)///function NearestPoint///params Curve c///return Point///return float///returns the nearest point on the curve to the given point and returns the distance of it to this curve
-		.def("Reverse", &CCurve::Reverse)///function Reverse///reverses this curve
-		.def("NumVertices", &num_vertices)///function NumVertices///return float///returns the number of vertices; quicker than getting the list of vertices
-		.def("FirstVertex", &FirstVertex)///function FirstVertex///return Vertex///returns the first vertex
-		.def("LastVertex", &LastVertex)///function LastVertex///return Vertex///returns the last vertex
-		.def("GetArea", &CCurve::GetArea)///function GetArea///return float///returns the area enclosed by the curve
-		.def("IsClockwise", &CCurve::IsClockwise)///function IsClockwise///returns True if this curve is closed and clockwise
-		.def("IsClosed", &CCurve::IsClosed)///function IsClosed///returns True if this curve is closed
-        .def("ChangeStart",&CCurve::ChangeStart)///function ChangeStart///params Point p///changes the start of this curve, keeps it closed if it was closed
-        .def("ChangeEnd",&CCurve::ChangeEnd)///function ChangeEnd///params Point p///changes the end point of this curve, doesn't keep closed kurves closed
-        .def("Offset",&CCurve::Offset)///function Offset///params float leftwards_value///offsets the curve by given amount to the left, keeps closed curves closed
-        .def("OffsetForward",&CCurve::OffsetForward)
-        .def("GetSpans",&getCurveSpans)///function GetSpans///return list///makes and returns a list of Span objects
-        .def("GetFirstSpan",&getFirstCurveSpan)///function GetFirstSpan///return Span///returns a Span for the start of the curve
-        .def("GetLastSpan",&getLastCurveSpan)///function GetLastSpan///return Span///returns a Span for the end of the curve
-        .def("Break",&CCurve::Break)///function Break///inserts a Point at given point
-        .def("Perim",&CCurve::Perim)///function Perim///return float///returns the length of the curve ( its perimeter )
-        .def("PerimToPoint",&CCurve::PerimToPoint)///function PerimToPoint///return Point///params float p///returns the Point at the given distance around the Curve
-        .def("PointToPerim",&CCurve::PointToPerim)///function PointToPerim///return float///params Point p///returns the distance around the Curve at the given Point
-		.def("FitArcs",&CCurve::FitArcs)///function FitArcs///replaces little lines with arcs where possible
-        .def("UnFitArcs",&CCurve::UnFitArcs)///function UnFitArcs///replaces arcs with lots of little lines
-        .def("Intersections",&CurveIntersections)///function Intersections///return list///params Curve c2///returns a list of all the intersections between this Curve and the given Curve///ordered along this Curve
-		.def("GetMaxCutterRadius", &CurveGetMaxCutterRadius)
-		.def("GetBox", &CurveGetBox)///function GetBox///return Box///returns the box that fits round the curve
-		.def("Transform", &CCurve::Transform)
-		.def("IsACircle", CurveIsACircle)
-		
-		;
+	bp::class_<CCurve>("Curve", "Curve()\n\ndefined by a list of Vertex objects\nif you want a closed curve, you need to add a point at the end that is at the same place as the start point") 
+        .def(bp::init<CCurve>())
+        .def("GetVertices", &getVertices, "returns the list of Vertex objects")
+		.def("Append", &CCurve::append, bp::args("v"), "adds a Vertex to the list of vertices")
+		.def("Append", &append_point, bp::args("p"), "adds a Point to the list of vertices ( makes a Vertex from it )")
+        .def("Text", &print_curve, "for debugging, prints a text definition of the Curve")
+		.def("NearestPoint", static_cast< Point(CCurve::*)(const Point& p)const >(&CCurve::NearestPoint), bp::args("p"), "returns the nearest point on the curve to the given point")
+		.def("NearestPoint", &nearest_point_to_curve, bp::args("c2"), "returns the nearest point on the curve to the given curve, c2, and returns the distance of it to this curve")
+		.def("Reverse", &CCurve::Reverse, "reverses this curve")
+		.def("NumVertices", &num_vertices, "returns the number of vertices; quicker than getting the list of vertices")
+		.def("FirstVertex", &FirstVertex, "returns the first vertex")
+		.def("LastVertex", &LastVertex, "returns the last vertex")
+		.def("GetArea", &CCurve::GetArea, "returns the area enclosed by the curve")
+		.def("IsClockwise", &CCurve::IsClockwise, "returns True if this curve is closed and clockwise, else False")
+		.def("IsClosed", &CCurve::IsClosed, "returns True if this curve is closed, else False")
+		.def("ChangeStart", &CCurve::ChangeStart, bp::args("p"), "changes the start of this curve, keeps it closed if it was closed")
+		.def("ChangeEnd", &CCurve::ChangeEnd, bp::args("p"), "changes the end point of this curve, doesn't keep closed kurves closed")
+		.def("Offset", &CCurve::Offset, bp::args("leftwards_value"), "offsets the curve by given amount to the left, keeps closed curves closed")
+		.def("OffsetForward", &CCurve::OffsetForward, bp::args("forwards_value", "refit_arcs"), "for drag-knife compensation")
+        .def("GetSpans",&getCurveSpans, "returns a list of Span objects")
+        .def("GetFirstSpan",&getFirstCurveSpan, "returns a Span for the start of the curve")
+        .def("GetLastSpan",&getLastCurveSpan, "returns a Span for the end of the curve")
+		.def("Break", &CCurve::Break, bp::args("p"), "inserts a Point at given point")
+        .def("Perim",&CCurve::Perim, "returns the length of the curve ( its perimeter )")
+		.def("PerimToPoint", &CCurve::PerimToPoint, bp::args("perim"), "returns the Point at the given distance around the Curve")
+		.def("PointToPerim", &CCurve::PointToPerim, bp::args("p"), "returns the distance around the Curve at the given Point")
+		.def("FitArcs",&CCurve::FitArcs, "replaces little lines with arcs where possible")
+        .def("UnFitArcs",&CCurve::UnFitArcs, "replaces arcs with lots of little lines")
+		.def("Intersections", &CurveIntersections, bp::args("c2"), "returns a list of all the intersections between this Curve and the given Curve\nordered along this Curve")
+		.def("GetMaxCutterRadius", &CurveGetMaxCutterRadius, bp::args("outside"), "returns the biggest cutter radius that would cut the curve without leaving material in the corner\nreturns None if any size cutter would be ok")
+		.def("GetBox", &CurveGetBox, "returns the box that fits round the curve")
+		.def("Transform", &CCurve::Transform, bp::args("m"), "transforms the curve by the matrix\na curve is only 2D though, so don't rotate in 3D")
+		.def("IsACircle", CurveIsACircle, bp::args("tol"), "returns True if all the spans are arcs of the same direction and fit the same circle\n to given tolerance")
+	;
 
-	/// class Box
-	/// a 2D box used for returning the extents of a Span or Curve
-	bp::class_<CBox2D>("Box") 
+	bp::class_<CBox2D>("Box", "Box((Point)minxy, (Point)maxxy)\n\na 2D box used for returning the extents of a Span or Curve") 
         .def(bp::init<CBox2D>())
 		.def(bp::init<const Point&, const Point&>())
-		.def("MinX", &CBox2D::MinX)///function MinX///return float///returns the minimum x value
-		.def("MaxX", &CBox2D::MaxX)///function MaxX///return float///returns the maximum x value
-		.def("MinY", &CBox2D::MinY)///function MinY///return float///returns the minimum y value
-		.def("MaxY", &CBox2D::MaxY)///function MaxY///return float///returns the maximum y value
-		.def("Width", &CBox2D::Width)
-		.def("Height", &CBox2D::Height)
-		.def("InsertPoint", static_cast< void(CBox2D::*)(const Point&) >(&CBox2D::Insert))
-		.def("InsertBox", static_cast< void(CBox2D::*)(const CBox2D&) >(&CBox2D::Insert))
-		.def_readwrite("minxy", &CBox2D::m_minxy)
-		.def_readwrite("maxxy", &CBox2D::m_maxxy)
+		.def("MinX", &CBox2D::MinX, "returns the minimum x value")
+		.def("MaxX", &CBox2D::MaxX, "returns the maximum x value")
+		.def("MinY", &CBox2D::MinY, "returns the minimum y value")
+		.def("MaxY", &CBox2D::MaxY, "returns the maximum y value")
+		.def("Width", &CBox2D::Width, "returns the width of the box in the X axis")
+		.def("Height", &CBox2D::Height, "returns the height of the box in the Y axis")
+		.def("InsertPoint", static_cast< void(CBox2D::*)(const Point&) >(&CBox2D::Insert), bp::args("p"), "makes the box bigger to include the given point")
+		.def("InsertBox", static_cast< void(CBox2D::*)(const CBox2D&) >(&CBox2D::Insert), bp::args("b2"), "makes the box bigger to include the given box")
+		.def_readwrite("minxy", &CBox2D::m_minxy, "the X, Y coordinate of the bottom left of the box")
+		.def_readwrite("maxxy", &CBox2D::m_maxxy, "the X, Y coordinate of the top right of the box")
+		.def_readwrite("valid", &CBox2D::m_valid, "if False, the box is empty and all the other values are invalid")
 		;
 
-	/// class Box3D
-	/// a 3D box used for returning the extents of a Solid
-	bp::class_<CBox>("Box3D")
+	bp::class_<CBox>("Box3D", "Box3D((float)minx, (float)miny, (float)minz, (float)maxx, (float)maxy, (float)maxz)\n\na 3D box used for returning the extents of a Solid")
 		.def(bp::init<CBox>())
 		.def(bp::init<double, double, double, double, double, double>())
-		.def("MinX", &CBox::MinX)///function MinX///return float///returns the minimum x value
-		.def("MaxX", &CBox::MaxX)///function MaxX///return float///returns the maximum x value
-		.def("MinY", &CBox::MinY)///function MinY///return float///returns the minimum y value
-		.def("MaxY", &CBox::MaxY)///function MaxY///return float///returns the maximum y value
-		.def("MinZ", &CBox::MinZ)///function MinZ///return float///returns the minimum z value
-		.def("MaxZ", &CBox::MaxZ)///function MaxZ///return float///returns the maximum z value
-		.def("InsertBox", static_cast< void (CBox::*)(const CBox&) >(&CBox::Insert))///function Insert
-		.def("InsertPoint", static_cast< void (CBox::*)(double, double, double) >(&CBox::Insert))///function Insert
-		.def("Center", &CBoxCenter)
-		.def("Radius", &CBox::Radius)
-		.def_readwrite("valid", &CBox::m_valid)
-		.def("Width", &CBox::Width)
-		.def("Height", &CBox::Height)
-		.def("Depth", &CBox::Depth)
+		.def("MinX", &CBox::MinX, "returns the minimum x value")
+		.def("MaxX", &CBox::MaxX, "returns the maximum x value")
+		.def("MinY", &CBox::MinY, "returns the minimum y value")
+		.def("MaxY", &CBox::MaxY, "returns the maximum y value")
+		.def("MinZ", &CBox::MinZ, "returns the minimum z value")
+		.def("MaxZ", &CBox::MaxZ, "returns the maximum z value")
+		.def("InsertBox", static_cast< void (CBox::*)(const CBox&) >(&CBox::Insert), bp::args("b2"), "makes the box bigger to include the given box")
+		.def("InsertPoint", static_cast< void (CBox::*)(double, double, double) >(&CBox::Insert), bp::args("p"), "makes the box bigger to include the given point")
+		.def("Center", &CBoxCenter, "returns the Point3D at the mid X,Y,Z")
+		.def("Radius", &CBox::Radius, "returns the radius of a sphere that would enclose the box exactly if centres at Center()")
+		.def_readwrite("valid", &CBox::m_valid, "if False, the box is empty and all the other values are invalid")
+		.def("Width", &CBox::Width, "returns the width of the box in the X axis")
+		.def("Height", &CBox::Height, "returns the height of the box in the Y axis")
+		.def("Depth", &CBox::Depth, "returns the depth of the box in the Z axis")
 		.def("__str__", CBox__str__);
 	;
 
-	/// class Area
-	/// a list of Curve objects that can represent an area with optional islands
-	bp::class_<CArea>("Area") 
+	bp::class_<CArea>("Area", "Area()\n\n a list of Curve objects that can represent an area with optional islands")
         .def(bp::init<CArea>())///function Area///makes an new empty Area///return Area
-        .def("GetCurves", &getCurves)///function GetCurves///return list///returns the list of Curve objects
-        .def("Append",&CArea::append)///function Append///params Curve c///adds a curve to the area///you must add outside curves first, followed by island curves///you must make sure your outside curves are anti-clockwise and island curves clockwise, or use Reorder function ( see below )
-        .def("Subtract",&CArea::Subtract)///function Subtract///params Area a2///cuts a2 away from this area
-        .def("Intersect",&CArea::Intersect)///function Intersect///params Area a2///leaves the area that is common to both this area and a2
-        .def("Union",&CArea::Union)///function Union///params Area a2///joins a2 to this area
-        .def("Offset",&CArea::Offset)///function Offset///params float inwards_value///offset the area inwards by the value///use a negative value to offset outwards///this can change the number of curves of the area///when you offset too far there will be no curves left
-        .def("FitArcs",&CArea::FitArcs)///function FitArcs///replaces little lines with arcs where possible
-        .def("Text", &print_area)///function Text///for debugging, prints a text definition of the Area
-		.def("NumCurves", &CArea::num_curves)///function NumCurves///return int///returns the number of curves in this area
-		.def("NearestPoint", &CArea::NearestPoint)///function NearestPoint///return Point///params Point p///returns the nearest point on this areas curves to the given point
-		.def("GetBox", &AreaGetBox)///function GetBox///return Box///returns the box that fits round the area
-		.def("Reorder", &CArea::Reorder)///function Reorder///This will reorder and reverse the curves where necessary
-		.def("Split", &SplitArea)///function Split///return list///splits up the area, where it has multiple outside curves and makes a list of separate areas///if no splitting occurs the list contains a copy of this area
-		.def("InsideCurves", &InsideCurves)
-		.def("Thicken", &CArea::Thicken)///function Thicken///replaces the area with united obrounds with given radius around each span///params float radius
-        .def("Intersections",&AreaIntersections)///function Intersections///return list///params Curve c///returns a list of intersection points with this area and the given curve///ordered along the given curve
-		.def("GetArea", &AreaGetArea)///function GetArea///return float///returns the area enclosed by the area
-		.def("WriteDxf", static_cast< void(*)(const CArea& area, const std::string& dxf_file_path) >(&WriteDxfFile))///function WriteDxf///writes a dxf file///params string filepath
-		.def("Swept", &CArea::Swept)
-		.def("Transform", &CArea::Transform)
-		.def("GetTriangles", &CArea::GetTriangles)
+        .def("GetCurves", &getCurves, "returns the list of Curve objects")
+		.def("Append", &CArea::append, bp::args("c"), "adds a curve to the area\nyou must add outside curves first, followed by island curves\nyou must make sure your outside curves are anti-clockwise and island curves clockwise\nor use Reorder function")
+		.def("Subtract", &CArea::Subtract, bp::args("a2"), "cuts a2 away from this area")
+		.def("Intersect", &CArea::Intersect, bp::args("a2"), "leaves the area that is common to both this area and a2")
+		.def("Union", &CArea::Union, bp::args("a2"), "joins a2 to this area")
+		.def("Offset", &CArea::Offset, bp::args("inwards_value"), "offset the area inwards by the value\nuse a negative value to offset outwards\nthis can change the number of curves of the area\nwhen you offset too far inwards there will be no curves left")
+        .def("FitArcs",&CArea::FitArcs, "replaces little lines with arcs where possible. to tolerance set by set_accuracy")
+        .def("Text", &print_area, "for debugging, prints a text definition of the Area")
+		.def("NumCurves", &CArea::num_curves, "returns the number of curves in this area")
+		.def("NearestPoint", &CArea::NearestPoint, bp::args("p"), "returns the nearest point on this area's curves to the given point")
+		.def("GetBox", &AreaGetBox, "returns the (Box)box that fits round the area")
+		.def("Reorder", &CArea::Reorder, "This reorders and reverses the curves where necessary")
+		.def("Split", &SplitArea, "splits up the area, where it has multiple outside curves and makes a list of separate areas\nif no splitting occurs the list contains a copy of this area")
+		.def("InsideCurves", &InsideCurves, bp::args("c"), "chops up the given curve with this area\nreturns a list of new curves which are the sections inside the area")
+		.def("Thicken", &CArea::Thicken, bp::args("radius"), "replaces the area with united obrounds with given radius around each span")
+		.def("Intersections", &AreaIntersections, bp::args("c"), "returns a list of intersection points with this area and the given curve\nordered along the given curve")
+		.def("GetArea", &AreaGetArea, "returns the (float)area enclosed by the area")
+		.def("WriteDxf", static_cast< void(*)(const CArea& area, const std::string& dxf_file_path) >(&WriteDxfFile), bp::args("filepath"), "writes a dxf file with this area in")
+		.def("Swept", &CArea::Swept, bp::args("v"), "returns an area that is this area swept along the given vector")
+		.def("Transform", &CArea::Transform, bp::args("m"), "transforms this area by the matrix\nan area is only 2D though, so don't rotate in 3D")
+		.def("GetTriangles", &CArea::GetTriangles, "fills a Stl object with triangles that fill this area")
 		;
 
-	///class Matrix
-	/// defines a 4x4 transformation matrix
-	bp::class_<Matrix > ("Matrix")
+	bp::class_<Matrix > ("Matrix", "Matrix((Point)o, (Point)x_vector, (Point)y_vector)\nMatrix([list of 16 floats])\n\ndefines a 4x4 transformation matrix")
         .def(bp::init<Matrix>())
 		.def("__init__", bp::make_constructor(&matrix3point_constructor))
-		.def("__init__", bp::make_constructor(&matrix_constructor))///function Matrix///return Matrix///params list values///makes a Matrix from a list of 16 floats
-	    .def("TransformedPoint", &transformed_point)///function TransformedPoint///return float///return float///return float///params float x, float y, float z///transforms a 3D point by the matrix/// given x, y, z vlaues///returns x, y, z
-		.def("Multiply", &Matrix::Multiply)///function Multiply///params Matrix m///transforms this matrix by the given one
-		.def("Inverse", &Matrix::Inverse)///function Inverse
-		.def("Rotate", &MatrixRotate)
-		.def("RotateAxis", &MatrixRotateAxis)
-		.def("Translate", static_cast< void (Matrix::*)(const Point3d&) >(&Matrix::Translate))
-		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale))
-		.def("Scale3", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Scale))
+		.def("__init__", bp::make_constructor(&matrix_constructor))
+		.def("TransformedPoint", &transformed_point, bp::args("x", "y", "z"), "transforms a 3D point by the matrix given x, y, z values\nreturns x, y, z")
+		.def("Multiply", &Matrix::Multiply, bp::args("m2"), "transforms this matrix by the given one")
+		.def("Inverse", &Matrix::Inverse, "returns a Matrix which is the inverse of this matrix\nthe matrix which reverts the effect of this matrix")
+		.def("Rotate", &MatrixRotate, bp::args("angle"), "rotates this matrix by the given angle in radians around the z axis anti-clockwise")
+		.def("RotateAxis", &MatrixRotateAxis, bp::args("angle", "axis"), "rotates this matrix by the given angle in radians around the given axis anti-clockwise\nwhen looking backwards along the given vector")
+		.def("Translate", static_cast< void (Matrix::*)(const Point3d&) >(&Matrix::Translate), bp::args("shift"), "translates this matrix by the given shift vector")
+		.def("Scale", static_cast< void (Matrix::*)(double) >(&Matrix::Scale), bp::args("value"), "scales the vector uniformly about 0, 0, 0 by the given scale factor")
+		.def("Scale3", static_cast< void (Matrix::*)(double, double, double) >(&Matrix::Scale), bp::args("x", "y", "z"), "scales the vector differentially about 0, 0, 0 by the given scale factors")
 		.def("__str__", Matrix__str__);
 	;
 
-	///class Point3d
-	bp::class_<Point3d>("Point3D")
+	bp::class_<Point3d>("Point3D", "Point((float)x, (float)y, (float)z)\n\n3D Point\nCan also be used as a vector"
+		"\nTo make a vector from p1 to p2, use v = p2 - p1"
+		"\nUse p1 * p2 for dot product"
+		"\nUse p1 ^ p2 for cross product")
 		.def(bp::init<Point3d>())
-		.def(bp::init<double, double, double>())///function Point3d///params float x, float y, float z///return Point3d///makes a new Point3d with given x, y, z values
-		.def("Transform", &Point3dTransform)
-		.def("Transformed", &Point3d::Transformed)
-		.def_readwrite("x", &Point3d::x)
-		.def_readwrite("y", &Point3d::y)
-		.def_readwrite("z", &Point3d::z)
-		.def(bp::self * bp::other<double>())/// function *///params float multiplier/// returns a Point with x and y multiplied by the by the multiplier///you can also do multiplication the other way round; p2 = 3.0 * p///return Point
-		.def(bp::self / bp::other<double>())/// function / ///params float divider/// returns a Point with x and y divided by the by the divider///return Point
-		.def(bp::self * bp::other<Point3d>())/// function *///params Point p2/// returns the dot product of this point and p2///return float
-		.def(bp::self - bp::other<Point3d>())/// function - ///params Point p2/// returns a Point wit:///x = this points x - p2.x///y = this points y - p2.y///you can also use "-" to return the Point with (-x, -y)///return Point
-		.def(bp::self + bp::other<Point3d>())/// function + ///params Point p2/// returns a Point with:///x = this points x + p2.x///y = this points y + p2.y///return Point
-		.def(bp::self ^ bp::other<Point3d>())/// function ^///params Point p2/// returns the 2D cross product of this point and p2///return float
-		.def(bp::self == bp::other<Point3d>())/// function ==///params Point p2/// returns true if x == p2.x and y == p2.y///return Boolean
-		.def(bp::self != bp::other<Point3d>())/// function !=///params Point p2/// returns true if x != p2.x or y != p2.y///return Boolean
+		.def(bp::init<double, double, double>())
+		.def("Transform", &Point3dTransform, bp::args("m"), "transforms the point by the matrix")
+		.def("Transformed", &Point3d::Transformed, bp::args("m"), "returns a Point3D transformed by the matrix")
+		.def_readwrite("x", &Point3d::x, "the x value of the point")
+		.def_readwrite("y", &Point3d::y, "the y value of the point")
+		.def_readwrite("z", &Point3d::z, "the z value of the point")
+		.def(bp::self * bp::other<double>())
+		.def(bp::self / bp::other<double>())
+		.def(bp::self * bp::other<Point3d>())
+		.def(bp::self - bp::other<Point3d>())
+		.def(bp::self + bp::other<Point3d>())
+		.def(bp::self ^ bp::other<Point3d>())
+		.def(bp::self == bp::other<Point3d>())
+		.def(bp::self != bp::other<Point3d>())
 		.def(-bp::self)
-		.def("Normalized", &Point3d::Normalized)
-		.def("Dist", &Point3d::Dist)
-		.def("Length", &Point3d::magnitude)
-		.def("ArbitraryAxes", &ArbitraryAxes)
+		.def("Normalized", &Point3d::Normalized, "returns a vector which is this vector scaled to a unit vector\nfor a (0, 0, 0) vector, this will return Point3D(0, 0, 0)")
+		.def("Dist", &Point3d::Dist, bp::args("p2"), "returns the distance between this point and p2")
+		.def("Length", &Point3d::magnitude, "returns the length of the vector")
+		.def("ArbitraryAxes", &ArbitraryAxes, "returns a tuple of (x_axis, y_axis) unit vectors, which have the same relationship to this vector\nas x-axis and y-axis have to z-axis")
 		.def("__str__", Point3d__str__);
 	;
 
-	///class Plane
-	bp::class_<Plane>("Plane")
+	bp::class_<Plane>("Plane", "Plane((Point)point_on_plane, (Point)normal_vector)\n\nAn infinite plane")
 		.def(bp::init<Plane>())
 		.def("__init__", bp::make_constructor(&plane_constructor))
-		.def("Intof", &PlaneIntofPlane)
-		.def_readwrite("normal", &Plane::normal)
+		.def("Intof", &PlaneIntofPlane, bp::args("pl2"), "if the two planes intersect this returns the Line of intersection, else returns None")
+		.def_readwrite("normal", &Plane::normal, "unit vector normal to plane")
+		.def_readwrite("d", &Plane::d, "distance of plane to origin\nuse normal * d to get a point on the plane")
 		;
 
-	///class Line
-	bp::class_<Line>("Line")
+	bp::class_<Line>("Line", "Line((Point3D)p1, (Point3D)p2) - an infinite line through p1 and p2")
 		.def(bp::init<Line>())
 		.def(bp::init<const Point3d &, const Point3d &>())
-		.def(bp::init<const Point3d &, const Point3d &>())
-		.def("Transform", &LineTransform)
-		.def_readwrite("p", &Line::p0)
-		.def_readwrite("v", &Line::v)
-		.def("IntersectPlane", &LineIntersectPlane)
+		.def("Transform", &LineTransform, bp::args("m"), "transforms this Line by the matrix")
+		.def_readwrite("p", &Line::p0, "the point on the line")
+		.def_readwrite("v", &Line::v, "the vector along the line")
+		.def("IntersectPlane", &LineIntersectPlane, bp::args("pl"), "returns the intersection (Point3D)point of this line with given plane, if intersection exists\nelse returns None")
 		;
 
-	///class Circle
-	bp::class_<Circle>("Circle")
+	bp::class_<Circle>("Circle", "Circle((Point)center, (float)radius - circle with given center point and radius"
+		"\nCircle((Point)point_on_circle, (Point)center) - circle with given point on circle and center point"
+		"\nCircle((Point)p1, (Point)p2, (Point)p3) - circle through 3 points")
 		.def(bp::init<Circle>())
 		.def(bp::init<const Point&, double>())
 		.def(bp::init<const Point&, const Point&>())
 		.def(bp::init<const Point&, const Point&, const Point&>())
-		.def("Transform", &LineTransform)
-		.def_readwrite("c", &Circle::pc)
-		.def_readwrite("radius", &Circle::radius)
+		.def("Transform", &LineTransform, bp::args("m"), "transforms this Circle by the matrix")
+		.def_readwrite("c", &Circle::pc, "center point of the circle")
+		.def_readwrite("radius", &Circle::radius, "radius of the circle")
 		;
 
-	/// class Stl
-	/// a collection of triangles, usually read in from an stl file
-	bp::class_<CTris>("Stl")
-		.def(bp::init<CTris>())///function Stl///makes a new empty Stl
-		.def(bp::init<const std::wstring&>())///function Stl///params string stl_file_path///makes a Stl by reading an stl file
-		.def("MakeSection", &CTris::MakeSection)///function MakeSection///params Point s, Point e, dxf_file_path///makes a dxf file with a drawing of the section through this solid/// using the given line to cut it
-		.def("WriteStl", &CTris::WriteStl)///function WriteStl///params string stl_file_path///makes a stl file for this solid
-		.def("BooleanCut", &CTris::BooleanCut, bp::return_value_policy<bp::manage_new_object>())
-		.def("BooleanUnion", &CTris::BooleanUnion, bp::return_value_policy<bp::manage_new_object>())
-		.def("BooleanCommon", &CTris::BooleanCommon, bp::return_value_policy<bp::manage_new_object>())
-		.def("SplitTriangles", &CTris::SplitTriangles)
-		.def("Shadow", &CTris::Shadow2Mat)
-		.def("Project", &CTrisProject)
-		.def("Transform", &CTris::Transform)
-		.def("GetBox", &CTrisGetBox)
-		.def("NumTris", &CTrisNumTris)
-		.def("GetMachiningAreas", &CTrisGetMachiningAreas)
-		.def("Add", &CTrisAddTriangle)
-		.def("GetFlattenedSurface", &CTris::GetFlattenedSurface, bp::return_value_policy<bp::manage_new_object>())
-		.def("GetTrianglesAsCurveList", &GetTrianglesAsCurveList)
+	bp::class_<CTris>("Stl", "Stl() - empty collection of triangles\nStl(file_path) - collection of triangles read in from an .stl file")
+		.def(bp::init<CTris>())
+		.def(bp::init<const std::wstring&>())
+		.def("MakeSection", &CTris::MakeSection, bp::args("s", "e", "dxf_file_path"), "makes a dxf file with a drawing of the section through this solid/nusing the given line to cut it")
+		.def("WriteStl", &CTris::WriteStl, bp::args("stl_file_path"), "writes an stl file for this solid")
+		.def("BooleanCut", &CTris::BooleanCut, bp::return_value_policy<bp::manage_new_object>(), bp::args("stl2"), "returns a new Stl object which is this Stl cut by the given Stl")
+		.def("BooleanUnion", &CTris::BooleanUnion, bp::return_value_policy<bp::manage_new_object>(), bp::args("stl2"), "returns a new Stl object which is this Stl united with the given Stl")
+		.def("BooleanCommon", &CTris::BooleanCommon, bp::return_value_policy<bp::manage_new_object>(), bp::args("stl2"), "returns a new Stl object which is common volume between this Stl and the given Stl")
+		.def("SplitTriangles", &CTris::SplitTriangles, bp::arg("s2"), "intersects this Stl with the given Stl")
+		.def("Shadow", &CTris::Shadow2Mat, bp::args("m", "just_up_allowed"), "returns an Area representing the shadow of this Stl object\nif just_up_allowed is true, then ignore downward facing triangles")
+		.def("Project", &CTrisProject, bp::args("area", "dxf_file_path"), "writes a dxf file with the given Area projected down onto the Stl object")
+		.def("Transform", &CTris::Transform, bp::args("m"), "transforms this Stl by the matrix")
+		.def("GetBox", &CTrisGetBox, "returns the (Box3D)box that fits round the area")
+		.def("NumTris", &CTrisNumTris, "returns the number of triangles in this Stl")
+		.def("GetMachiningAreas", &CTrisGetMachiningAreas, "joins up triangles of the same FaceFlatType and returns a list of MachiningArea objects")
+		.def("Add", &CTrisAddTriangle, bp::args("p1", "p2", "p3"), "Add a triangles given 3 Point3D objects")
+		.def("GetFlattenedSurface", &CTris::GetFlattenedSurface, bp::return_value_policy<bp::manage_new_object>(), "returns a new Stl with all the triangles unfolded into a flat shape")
+		.def("GetTrianglesAsCurveList", &GetTrianglesAsCurveList, "returns a list of Curve objects, each one being a closed triangle")
 		.def(bp::self += bp::other<CTris>())
 		;
 
-#ifdef OPEN_CASCADE_INCLUDED
-
-	/// class Solid
-	/// a solid model, read in from an step file
-	bp::class_<CSolid>("Solid")
-		.def(bp::init<CSolid>())///function Solid///makes a new empty Solid
-		.def(bp::init<CArea, double>())///function Solid///params Area area, double thickness///makes a new Solid extruded from an Area by the given thickness
-		.def(bp::init<CCurve, double>())///function Solid///params Curve curve, double thickness///makes a new Solid extruded from an Curve by the given thickness
-		.def(bp::init<const std::wstring&>())///function Solid///params string step_file_path///makes a Solid by reading an step file
-		.def("WriteStep", &CSolid::WriteStep)///function WriteStep///params string step_file_path///makes a step file for this solid
-		.def("BooleanCut", &CSolid::BooleanCut, bp::return_value_policy<bp::manage_new_object>())
-		.def("BooleanUnion", &CSolid::BooleanUnion, bp::return_value_policy<bp::manage_new_object>())
-		.def("BooleanCommon", &CSolid::BooleanCommon, bp::return_value_policy<bp::manage_new_object>())
-		.def("Translate", &CSolid::Translate)
-		.def("Transform", &CSolid::Transform)
-		.def("GetBox", &SolidGetBox)
-		.def("MakeStl", &CSolidMakeStl, bp::return_value_policy<bp::manage_new_object>())
-		.def("IsNull", &CSolid::IsNull)
-		;
-
-#endif
-
-	bp::enum_<FaceFlatType>("FaceFlatType")
+	bp::enum_<FaceFlatType>("FaceFlatType", "face type for MachiningArea")
 		.value("Flat", FaceFlatTypeFlat)
 		.value("UpButNotFlat", FaceFlatTypeUpButNotFlat)
 		.value("Down", FaceFlatTypeDown)
 		;
 
-	/// class MachiningArea
-	bp::class_<CMachiningArea>("MachiningArea")
+	bp::class_<CMachiningArea>("MachiningArea", "MachiningArea() - empty MachiningArea\n\nUse Stl.GetMachiningAreas() to get a list of these from an Stl")
 		.def(bp::init<CMachiningArea>())
-		.def_readwrite("area", &CMachiningArea::m_area)
-		.def_readwrite("top", &CMachiningArea::m_top)
-		.def_readwrite("bottom", &CMachiningArea::m_bottom)
-		.def_readwrite("face_type", &CMachiningArea::m_face_type)
+		.def_readwrite("area", &CMachiningArea::m_area, "Area - 2D area of all the similar triangles joined together")
+		.def_readwrite("top", &CMachiningArea::m_top, "z height of the top of the machining area")
+		.def_readwrite("bottom", &CMachiningArea::m_bottom, "z height of the bottom of the machining area")
+		.def_readwrite("face_type", &CMachiningArea::m_face_type, "see FaceFlatType")
 	;
-
-	/// endclass
 
     bp::def("set_units", set_units, "function called set_units", bp::args("units"));
     bp::def("get_units", get_units);
-    bp::def("AreaFromDxf", AreaFromDxf);///function AreaFromDxf///return Area///params str filepath///creates an Area from a dxf file
-    bp::def("TangentialArc", TangentialArc);///function TangentialArc /// return Point /// return int/// params Point p0, Point p1, Point v0///given start point, end point and start vector/// returns the center point and span type
-	bp::def("oct_ele_count", get_oct_ele_count);
-	bp::def("set_tolerance", set_tolerance);
-	bp::def("get_tolerance", get_tolerance);
-	bp::def("set_accuracy", set_accuracy);
-	bp::def("get_accuracy", get_accuracy);
-	bp::def("set_fitarcs", set_fitarcs);
-	bp::def("get_fitarcs", get_fitarcs);
+    bp::def("AreaFromDxf", AreaFromDxf, bp::args("filepath"), "returns an Area created from a dxf file");
+	bp::def("TangentialArc", TangentialArc, bp::args("p1", "p2", "v"), "given start point, end point and start vector\nreturns the center point and span type");
+	bp::def("oct_ele_count", get_oct_ele_count, "just for debugging");
+	bp::def("set_tolerance", set_tolerance, "set the tolerance used for various geometry things like comparing tow points");
+	bp::def("get_tolerance", get_tolerance, "get the tolerance used for various geometry things like comparing tow points");
+	bp::def("set_accuracy", set_accuracy, "set the tolerance used for fitting arcs");
+	bp::def("get_accuracy", get_accuracy, "get the tolerance used for fitting arcs");
+	bp::def("set_fitarcs", set_fitarcs, "set to True if Area.FitArcs() is to be called automatically for boolean Area operations and Offset");
+	bp::def("get_fitarcs", get_fitarcs, "see set_fitarcs for description");
 }

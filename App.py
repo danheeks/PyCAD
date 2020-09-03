@@ -546,16 +546,6 @@ class App(wx.App):
         pass
     
     def AddOptionsRibbonPanels(self, ribbon):
-        panel = RB.RibbonPanel(ribbon.options_page, wx.ID_ANY, 'View', ribbon.Image('mag'), style=RB.RIBBON_PANEL_NO_AUTO_MINIMISE)
-        combo = wx.ComboBox(panel, choices = ["None", "Input Mode Title", "Full Help"], style = wx.CB_READONLY )
-        combo.Select(cad.GetGraphicsTextMode())
-        self.Bind(wx.EVT_COMBOBOX, ribbon.OnScreenText, combo)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.AddStretchSpacer(1)
-        ribbon.AddLabelAndControl(panel, sizer, 'Screen Text', combo)
-        sizer.AddStretchSpacer(1)
-        panel.SetSizer(sizer)
-        
         panel = RB.RibbonPanel(ribbon.options_page, wx.ID_ANY, 'View', ribbon.Image('mag'))
         self.view_toolbar = RB.RibbonButtonBar(panel)
         from Ribbon import ScreenTextButton

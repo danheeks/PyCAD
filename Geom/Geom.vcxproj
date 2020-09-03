@@ -96,7 +96,6 @@
     <ClCompile Include="OctTree.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
-    <ClCompile Include="Solid.cpp" />
     <ClCompile Include="Tris.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -119,7 +118,6 @@
     <ClInclude Include="OctTree.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="PythonStuff.h" />
-    <ClInclude Include="Solid.h" />
     <ClInclude Include="Tris.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

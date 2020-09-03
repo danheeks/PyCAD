@@ -2567,773 +2567,775 @@ void SetAntialiasing(bool value)
 }
 
 
-	BOOST_PYTHON_MODULE(cad) {
-		boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
-			.def(boost::python::init<int>())
-			.def("GetIDGroupType", &BaseObject::GetIDGroupType)
-			.def("GetIconFilePath", &BaseObjectGetIconFilePath)
-			.def("GetTitle", &BaseObjectGetTitle)
-			.def("GetID", &BaseObject::GetID)
-			.def("SetID", &BaseObject::SetID)
-			.def("GetIndex", &BaseObjectGetIndex)
-			.def("KillGLLists", &BaseObject::KillGLLists)
-			.def("GetColor", &BaseObjectGetColor)
-			.def("AutoExpand", &BaseObject::AutoExpand)
-			.def("GetNumChildren", &BaseObject::GetNumChildren)
-			.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("SetOwner", &ObjectSetOwner)
-			.def("GetFirstChild", &BaseObject::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("GetNextChild", &BaseObject::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("GetChildren", &BaseObjectGetChildren)
-			.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
-			.def("CanAdd", &HeeksObj::CanAdd)
-			.def("CanAddTo", &HeeksObj::CanAddTo)
-			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
-			.def("CanBeCopied", &HeeksObj::CanBeCopied)
-			.def("OneOfAKind", &BaseObject::OneOfAKind_default)
-			.def("CopyFrom", &ObjListCopyFrom)
-			.def("GetProperties", &HeeksObjGetProperties)
-			.def("GetBaseProperties", &HeeksObjGetBaseProperties)
-			.def("GetChildrensBox", &ObjListGetBox)
-			.def("ReadObjectXml", &HeeksObjReadObjectXml)
-			.def("Clear", &ObjListClear)
-			.def("Add", &ObjListAdd)
-			.def("GetCopyFromObject", &BaseObject::GetCopyFromObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("AddTriangle", &BaseObject::AddTriangle)
-			.def("GetVisible", &HeeksObjGetVisible)
-			;
+BOOST_PYTHON_MODULE(cad) {
 
-		boost::python::class_<HeeksObj, boost::noncopyable>("Object")
-			.def(boost::python::init<HeeksObj>())
-			.def("GetType", &HeeksObj::GetType)
-			.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
-			.def("GetTypeString", HeeksObjGetTypeString)
-			.def("GetIconFilePath", &HeeksObjGetIconFilePath)
-			.def("GetID", &HeeksObj::GetID)
-			.def("SetID", &HeeksObj::SetID)
-			.def("GetIndex", &HeeksObjGetIndex)
-			.def("KillGLLists", &HeeksObj::KillGLLists)
-			.def("GetColor", &HeeksObjGetColor)
-			.def("HasEdit", &HeeksObjHasEdit)
-			.def("GetTitle", &HeeksObjGetTitle)
-			.def("GetBox", &HeeksObjGetBox)
-			.def("OnGlCommands", &HeeksObj::glCommands)
-			.def("AutoExpand", &HeeksObj::AutoExpand)
-			.def("GetNumChildren", &HeeksObj::GetNumChildren)
-			.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("SetOwner", &ObjectSetOwner)
-			.def("GetFirstChild", &HeeksObj::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("GetNextChild", &HeeksObj::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("CanAdd", &HeeksObj::CanAdd)
-			.def("CanAddTo", &HeeksObj::CanAddTo)
-			.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
-			.def("OneOfAKind", &HeeksObj::OneOfAKind)
-			.def("CanBeCopied", &HeeksObj::CanBeCopied)
-			.def("CopyFrom", &HeeksObj::CopyFrom)
-			.def("ReadXml", &HeeksObjReadFromXML)
-			.def("ReadObjectXml", &HeeksObjReadObjectXml)
-			.def("WriteXml", &HeeksObjWriteToXML)
-			.def("WriteObjectXml", &HeeksObjWriteObjectToXML)
-			.def("GetProperties", &HeeksObjGetProperties)
-			.def("GetLines", &HeeksObjGetLines)
-			.def("SetStartPoint", &HeeksObj::SetStartPoint)
-			.def("GetStartPoint", &HeeksObjGetStartPoint)
-			.def("GetEndPoint", &HeeksObjGetEndPoint)
-			.def("SetEndPoint", &HeeksObj::SetEndPoint)
-			.def("GetCentrePoint", &HeeksObjGetCentrePoint)
-			.def("SetCentrePoint", &HeeksObj::SetCentrePoint)
-			.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("Clear", &HeeksObj::Clear)
-			.def("Add", &ObjAdd)
-			.def("GetOrigin", &ObjGetOrigin)
-			.def("Transform", &HeeksObj::Transform)
-			.def("GetVisible", &HeeksObjGetVisible)
-			.def("SetVisible", &HeeksObjSetVisible)
-			.def("GetTris", HeeksObjGetTris)
-			;
+	boost::python::docstring_options local_docstring_options(true, true, false); // This will enable user-defined docstrings and python signatures, while disabling the C++ signatures
 
-		boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")
-			.def(boost::python::init<Gripper>())
-			.def("OnGripperGrabbed", &Gripper::OnGripperGrabbed)
-			.def("OnGripperMoved", &Gripper::OnGripperMoved)
-			.def("OnGripperReleased", &Gripper::OnGripperReleased)
-			;
+	boost::python::class_<BaseObject, boost::noncopyable >("BaseObject", "derive your custom CAD objects from this")
+		.def(boost::python::init<int>())
+		.def("GetIDGroupType", &BaseObject::GetIDGroupType)
+		.def("GetIconFilePath", &BaseObjectGetIconFilePath)
+		.def("GetTitle", &BaseObjectGetTitle)
+		.def("GetID", &BaseObject::GetID)
+		.def("SetID", &BaseObject::SetID)
+		.def("GetIndex", &BaseObjectGetIndex)
+		.def("KillGLLists", &BaseObject::KillGLLists)
+		.def("GetColor", &BaseObjectGetColor)
+		.def("AutoExpand", &BaseObject::AutoExpand)
+		.def("GetNumChildren", &BaseObject::GetNumChildren)
+		.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("SetOwner", &ObjectSetOwner)
+		.def("GetFirstChild", &BaseObject::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("GetNextChild", &BaseObject::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("GetChildren", &BaseObjectGetChildren)
+		.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
+		.def("CanAdd", &HeeksObj::CanAdd)
+		.def("CanAddTo", &HeeksObj::CanAddTo)
+		.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
+		.def("CanBeCopied", &HeeksObj::CanBeCopied)
+		.def("OneOfAKind", &BaseObject::OneOfAKind_default)
+		.def("CopyFrom", &ObjListCopyFrom)
+		.def("GetProperties", &HeeksObjGetProperties)
+		.def("GetBaseProperties", &HeeksObjGetBaseProperties)
+		.def("GetChildrensBox", &ObjListGetBox)
+		.def("ReadObjectXml", &HeeksObjReadObjectXml)
+		.def("Clear", &ObjListClear)
+		.def("Add", &ObjListAdd)
+		.def("GetCopyFromObject", &BaseObject::GetCopyFromObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("AddTriangle", &BaseObject::AddTriangle)
+		.def("GetVisible", &HeeksObjGetVisible)
+		;
 
-		boost::python::class_<GripData>("GripData", boost::python::no_init)
-			.def("__init__", boost::python::make_constructor(&initGripData))
-			;
+	boost::python::class_<HeeksObj, boost::noncopyable>("Object")
+		.def(boost::python::init<HeeksObj>())
+		.def("GetType", &HeeksObj::GetType)
+		.def("GetIDGroupType", &HeeksObj::GetIDGroupType)
+		.def("GetTypeString", HeeksObjGetTypeString)
+		.def("GetIconFilePath", &HeeksObjGetIconFilePath)
+		.def("GetID", &HeeksObj::GetID)
+		.def("SetID", &HeeksObj::SetID)
+		.def("GetIndex", &HeeksObjGetIndex)
+		.def("KillGLLists", &HeeksObj::KillGLLists)
+		.def("GetColor", &HeeksObjGetColor)
+		.def("HasEdit", &HeeksObjHasEdit)
+		.def("GetTitle", &HeeksObjGetTitle)
+		.def("GetBox", &HeeksObjGetBox)
+		.def("OnGlCommands", &HeeksObj::glCommands)
+		.def("AutoExpand", &HeeksObj::AutoExpand)
+		.def("GetNumChildren", &HeeksObj::GetNumChildren)
+		.def("GetOwner", &ObjectGetOwner, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("SetOwner", &ObjectSetOwner)
+		.def("GetFirstChild", &HeeksObj::GetFirstChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("GetNextChild", &HeeksObj::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("CanAdd", &HeeksObj::CanAdd)
+		.def("CanAddTo", &HeeksObj::CanAddTo)
+		.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
+		.def("OneOfAKind", &HeeksObj::OneOfAKind)
+		.def("CanBeCopied", &HeeksObj::CanBeCopied)
+		.def("CopyFrom", &HeeksObj::CopyFrom)
+		.def("ReadXml", &HeeksObjReadFromXML)
+		.def("ReadObjectXml", &HeeksObjReadObjectXml)
+		.def("WriteXml", &HeeksObjWriteToXML)
+		.def("WriteObjectXml", &HeeksObjWriteObjectToXML)
+		.def("GetProperties", &HeeksObjGetProperties)
+		.def("GetLines", &HeeksObjGetLines)
+		.def("SetStartPoint", &HeeksObj::SetStartPoint)
+		.def("GetStartPoint", &HeeksObjGetStartPoint)
+		.def("GetEndPoint", &HeeksObjGetEndPoint)
+		.def("SetEndPoint", &HeeksObj::SetEndPoint)
+		.def("GetCentrePoint", &HeeksObjGetCentrePoint)
+		.def("SetCentrePoint", &HeeksObj::SetCentrePoint)
+		.def("MakeACopy", &HeeksObj::MakeACopy, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("Clear", &HeeksObj::Clear)
+		.def("Add", &ObjAdd)
+		.def("GetOrigin", &ObjGetOrigin)
+		.def("Transform", &HeeksObj::Transform)
+		.def("GetVisible", &HeeksObjGetVisible)
+		.def("SetVisible", &HeeksObjSetVisible)
+		.def("GetTris", HeeksObjGetTris)
+		;
 
-		boost::python::enum_<EnumGripperType>("GripperType")
-			.value("Translate", GripperTypeTranslate)
-			.value("Rotate", GripperTypeRotate)
-			.value("RotateObject", GripperTypeRotateObject)
-			.value("RotateObjectXY", GripperTypeRotateObjectXY)
-			.value("RotateObjectXZ", GripperTypeRotateObjectXZ)
-			.value("RotateObjectYZ", GripperTypeRotateObjectYZ)
-			.value("Scale", GripperTypeScale)
-			.value("ObjectScaleX", GripperTypeObjectScaleX)
-			.value("ObjectScaleY", GripperTypeObjectScaleY)
-			.value("ObjectScaleZ", GripperTypeObjectScaleZ)
-			.value("ObjectScaleXY", GripperTypeObjectScaleXY)
-			.value("Angle", GripperTypeAngle)
-			.value("Stretch", GripperTypeStretch)
-			;
+	boost::python::class_<Gripper, boost::python::bases<HeeksObj>, boost::noncopyable>("Gripper")
+		.def(boost::python::init<Gripper>())
+		.def("OnGripperGrabbed", &Gripper::OnGripperGrabbed)
+		.def("OnGripperMoved", &Gripper::OnGripperMoved)
+		.def("OnGripperReleased", &Gripper::OnGripperReleased)
+		;
 
-		boost::python::class_<HeeksColor>("Color")
-			.def(boost::python::init<HeeksColor>())
-			.def(boost::python::init<unsigned char, unsigned char, unsigned char>())
-			.def(boost::python::init<long>())
-			.def_readwrite("red", &HeeksColor::red)
-			.def_readwrite("green", &HeeksColor::green)
-			.def_readwrite("blue", &HeeksColor::blue)
-			.def("ref", &HeeksColor::COLORREF_color)
-			.def("SetGlColor", &HeeksColor::glColor)
-			;
+	boost::python::class_<GripData>("GripData", boost::python::no_init)
+		.def("__init__", boost::python::make_constructor(&initGripData))
+		;
 
-		boost::python::class_<Material>("Material")
-			.def(boost::python::init<Material>())
-			.def(boost::python::init<const HeeksColor&>())
-			.def("glMaterial", &Material::glMaterial)
-			;
+	boost::python::enum_<EnumGripperType>("GripperType")
+		.value("Translate", GripperTypeTranslate)
+		.value("Rotate", GripperTypeRotate)
+		.value("RotateObject", GripperTypeRotateObject)
+		.value("RotateObjectXY", GripperTypeRotateObjectXY)
+		.value("RotateObjectXZ", GripperTypeRotateObjectXZ)
+		.value("RotateObjectYZ", GripperTypeRotateObjectYZ)
+		.value("Scale", GripperTypeScale)
+		.value("ObjectScaleX", GripperTypeObjectScaleX)
+		.value("ObjectScaleY", GripperTypeObjectScaleY)
+		.value("ObjectScaleZ", GripperTypeObjectScaleZ)
+		.value("ObjectScaleXY", GripperTypeObjectScaleXY)
+		.value("Angle", GripperTypeAngle)
+		.value("Stretch", GripperTypeStretch)
+		;
 
-		boost::python::class_<PropertyWrap, boost::noncopyable >("Property")
-			.def(boost::python::init<int, std::wstring, HeeksObj*>())
-			.def("GetType", &Property::get_property_type)
-			.def("GetTitle", &PropertyGetShortString)
-			.def("GetString", &PropertyGetString)
-			.def("GetDouble", &Property::GetDouble)
-			.def("GetInt", &Property::GetInt)
-			.def("GetBool", &Property::GetBool)
-			.def("GetColor", &PropertyGetColor)
-			.def("GetChoices", &PropertyGetChoices)
-			.def_readwrite("editable", &PropertyWrap::m_editable)
-			.def_readwrite("object", &PropertyWrap::m_object)
-			.def("GetProperties", &PropertyGetProperties)
-			;
+	boost::python::class_<HeeksColor>("Color")
+		.def(boost::python::init<HeeksColor>())
+		.def(boost::python::init<unsigned char, unsigned char, unsigned char>())
+		.def(boost::python::init<long>())
+		.def_readwrite("red", &HeeksColor::red)
+		.def_readwrite("green", &HeeksColor::green)
+		.def_readwrite("blue", &HeeksColor::blue)
+		.def("ref", &HeeksColor::COLORREF_color)
+		.def("SetGlColor", &HeeksColor::glColor)
+		;
 
-		boost::python::class_<ObjList, boost::python::bases<HeeksObj>, boost::noncopyable>("ObjList")
-			.def(boost::python::init<ObjList>())
-			.def("ReadXml", &ObjListReadFromXML)
-			.def("WriteXml", &ObjListWriteToXML)
-			.def("CopyFrom", &ObjListCopyFrom)
-			.def("GetChildrensBox", &ObjListGetBox)
-			;
+	boost::python::class_<Material>("Material")
+		.def(boost::python::init<Material>())
+		.def(boost::python::init<const HeeksColor&>())
+		.def("glMaterial", &Material::glMaterial)
+		;
 
-		boost::python::class_<IdNamedObj, boost::python::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
-			.def(boost::python::init<IdNamedObj>())
-			;
+	boost::python::class_<PropertyWrap, boost::noncopyable >("Property")
+		.def(boost::python::init<int, std::wstring, HeeksObj*>())
+		.def("GetType", &Property::get_property_type)
+		.def("GetTitle", &PropertyGetShortString)
+		.def("GetString", &PropertyGetString)
+		.def("GetDouble", &Property::GetDouble)
+		.def("GetInt", &Property::GetInt)
+		.def("GetBool", &Property::GetBool)
+		.def("GetColor", &PropertyGetColor)
+		.def("GetChoices", &PropertyGetChoices)
+		.def_readwrite("editable", &PropertyWrap::m_editable)
+		.def_readwrite("object", &PropertyWrap::m_object)
+		.def("GetProperties", &PropertyGetProperties)
+		;
 
-		boost::python::class_<IdNamedObjList, boost::python::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
-			.def(boost::python::init<IdNamedObjList>())
-			;
+	boost::python::class_<ObjList, boost::python::bases<HeeksObj>, boost::noncopyable>("ObjList")
+		.def(boost::python::init<ObjList>())
+		.def("ReadXml", &ObjListReadFromXML)
+		.def("WriteXml", &ObjListWriteToXML)
+		.def("CopyFrom", &ObjListCopyFrom)
+		.def("GetChildrensBox", &ObjListGetBox)
+		;
 
-		boost::python::class_<CSketch, boost::python::bases<IdNamedObjList>, boost::noncopyable>("Sketch")
-			.def(boost::python::init<CSketch>())
-			.def("GetStartPoint", &SketchGetStartPoint)
-			.def("GetEndPoint", &SketchGetEndPoint)
-			.def("IsCircle", &CSketch::IsCircle)
-			.def("IsClosed", &CSketch::IsClosed)
-			.def("HasMultipleSketches", &CSketch::HasMultipleSketches)
-			.def("Split", &SketchSplit)
-			.def("GetCircleDiameter", &SketchGetCircleDiameter)
-			.def("GetCircleCentre", &SketchGetCircleCentre)
-			.def("WriteDxf", &SketchWriteDXF)
-			.def("GetSketchOrder", &CSketch::GetSketchOrder)
-			.def("ReOrderSketch", &CSketch::ReOrderSketch)
-			.def("GetCurve", &SketchGetCurve)
-			.def("GetArea", &SketchGetArea)
-			.def("RenderAsExtrusion", &RenderSketchAsExtrusion)
-			;
+	boost::python::class_<IdNamedObj, boost::python::bases<HeeksObj>, boost::noncopyable>("IdNamedObj")
+		.def(boost::python::init<IdNamedObj>())
+		;
 
-		boost::python::class_<HPoint, boost::python::bases<IdNamedObj> >("Point", boost::python::no_init)
-			.def("__init__", boost::python::make_constructor(&initHPoint))
+	boost::python::class_<IdNamedObjList, boost::python::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
+		.def(boost::python::init<IdNamedObjList>())
+		;
+
+	boost::python::class_<CSketch, boost::python::bases<IdNamedObjList>, boost::noncopyable>("Sketch")
+		.def(boost::python::init<CSketch>())
+		.def("GetStartPoint", &SketchGetStartPoint)
+		.def("GetEndPoint", &SketchGetEndPoint)
+		.def("IsCircle", &CSketch::IsCircle)
+		.def("IsClosed", &CSketch::IsClosed)
+		.def("HasMultipleSketches", &CSketch::HasMultipleSketches)
+		.def("Split", &SketchSplit)
+		.def("GetCircleDiameter", &SketchGetCircleDiameter)
+		.def("GetCircleCentre", &SketchGetCircleCentre)
+		.def("WriteDxf", &SketchWriteDXF)
+		.def("GetSketchOrder", &CSketch::GetSketchOrder)
+		.def("ReOrderSketch", &CSketch::ReOrderSketch)
+		.def("GetCurve", &SketchGetCurve)
+		.def("GetArea", &SketchGetArea)
+		.def("RenderAsExtrusion", &RenderSketchAsExtrusion)
+		;
+
+	boost::python::class_<HPoint, boost::python::bases<IdNamedObj> >("Point", boost::python::no_init)
+		.def("__init__", boost::python::make_constructor(&initHPoint))
 //			.def_readwrite("p", &HPoint::m_p)
-			;
+		;
 
-		boost::python::class_<CStlSolid, boost::python::bases<HeeksObj> >("StlSolid")
-			.def(boost::python::init<CStlSolid>())
-			.def("__init__", boost::python::make_constructor(&initStlSolid))
-			.def(boost::python::init<const std::wstring&>())// load a stl solid from a filepath
-			.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
-			.def("NumTriangles", StlSolidNumTriangles)
-			;
+	boost::python::class_<CStlSolid, boost::python::bases<HeeksObj> >("StlSolid")
+		.def(boost::python::init<CStlSolid>())
+		.def("__init__", boost::python::make_constructor(&initStlSolid))
+		.def(boost::python::init<const std::wstring&>())// load a stl solid from a filepath
+		.def("WriteSTL", &StlSolidWriteSTL) ///function WriteSTL///params float tolerance, string filepath///writes an STL file for the body to the given tolerance
+		.def("NumTriangles", StlSolidNumTriangles)
+		;
 
-		boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property> >("PropertyCheck", boost::python::no_init);
-		boost::python::class_<PropertyChoice, boost::python::bases<Property> >("PropertyChoice", boost::python::no_init);
-		boost::python::class_<PropertyColor, boost::python::bases<Property> >("PropertyColor", boost::python::no_init);
-		boost::python::class_<PropertyDouble, boost::python::bases<Property> >("PropertyDouble", boost::python::no_init);
-		boost::python::class_<PropertyDoubleScaled, boost::python::bases<Property> >("PropertyDoubleScaled", boost::python::no_init);
-		boost::python::class_<PropertyLengthScaled, boost::python::bases<PropertyDoubleScaled> >("PropertyLengthScaled", boost::python::no_init);
-		boost::python::class_<PropertyDoubleLimited, boost::python::bases<PropertyDouble> >("PropertyDoubleLimited", boost::python::no_init);
-		boost::python::class_<PropertyString, boost::python::bases<Property> >("PropertyString", boost::python::no_init);
-		boost::python::class_<PropertyStringReadOnly, boost::python::bases<Property> >("PropertyStringReadOnly", boost::python::no_init)
-			.def("__init__", boost::python::make_constructor(&initPropertyStringReadOnly))
-			;
-		boost::python::class_<PropertyFile, boost::python::bases<PropertyString> >("PropertyFile", boost::python::no_init);
-		boost::python::class_<PropertyInt, boost::python::bases<Property> >("PropertyInt", boost::python::no_init);
-		boost::python::class_<PropertyLength, boost::python::bases<PropertyDouble> >("PropertyLength", boost::python::no_init);
-		boost::python::class_<PropertyLengthWithKillGLLists, boost::python::bases<PropertyLength> >("PropertyLengthWithKillGLLists", boost::python::no_init);
-		boost::python::class_<PropertyList, boost::python::bases<Property> >("PropertyList", boost::python::no_init);
-		boost::python::class_<PropertyObjectTitle, boost::python::bases<Property> >("PropertyObjectTitle", boost::python::no_init);
-		boost::python::class_<PropertyObjectColor, boost::python::bases<Property> >("PropertyObjectColor", boost::python::no_init);
+	boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property> >("PropertyCheck", boost::python::no_init);
+	boost::python::class_<PropertyChoice, boost::python::bases<Property> >("PropertyChoice", boost::python::no_init);
+	boost::python::class_<PropertyColor, boost::python::bases<Property> >("PropertyColor", boost::python::no_init);
+	boost::python::class_<PropertyDouble, boost::python::bases<Property> >("PropertyDouble", boost::python::no_init);
+	boost::python::class_<PropertyDoubleScaled, boost::python::bases<Property> >("PropertyDoubleScaled", boost::python::no_init);
+	boost::python::class_<PropertyLengthScaled, boost::python::bases<PropertyDoubleScaled> >("PropertyLengthScaled", boost::python::no_init);
+	boost::python::class_<PropertyDoubleLimited, boost::python::bases<PropertyDouble> >("PropertyDoubleLimited", boost::python::no_init);
+	boost::python::class_<PropertyString, boost::python::bases<Property> >("PropertyString", boost::python::no_init);
+	boost::python::class_<PropertyStringReadOnly, boost::python::bases<Property> >("PropertyStringReadOnly", boost::python::no_init)
+		.def("__init__", boost::python::make_constructor(&initPropertyStringReadOnly))
+		;
+	boost::python::class_<PropertyFile, boost::python::bases<PropertyString> >("PropertyFile", boost::python::no_init);
+	boost::python::class_<PropertyInt, boost::python::bases<Property> >("PropertyInt", boost::python::no_init);
+	boost::python::class_<PropertyLength, boost::python::bases<PropertyDouble> >("PropertyLength", boost::python::no_init);
+	boost::python::class_<PropertyLengthWithKillGLLists, boost::python::bases<PropertyLength> >("PropertyLengthWithKillGLLists", boost::python::no_init);
+	boost::python::class_<PropertyList, boost::python::bases<Property> >("PropertyList", boost::python::no_init);
+	boost::python::class_<PropertyObjectTitle, boost::python::bases<Property> >("PropertyObjectTitle", boost::python::no_init);
+	boost::python::class_<PropertyObjectColor, boost::python::bases<Property> >("PropertyObjectColor", boost::python::no_init);
 
-		boost::python::class_<Undoable, boost::noncopyable>("Undoable", boost::python::no_init);
+	boost::python::class_<Undoable, boost::noncopyable>("Undoable", boost::python::no_init);
 
-		boost::python::class_<UndoableWrap, boost::noncopyable >("BaseUndoable");
+	boost::python::class_<UndoableWrap, boost::noncopyable >("BaseUndoable");
 
-		boost::python::class_<PropertyChangeString, boost::python::bases<Undoable> >("PropertyChangeString", boost::python::no_init).def(boost::python::init<const std::wstring&, Property*>());
-		boost::python::class_<PropertyChangeDouble, boost::python::bases<Undoable> >("PropertyChangeDouble", boost::python::no_init).def(boost::python::init<const double&, Property*>());
-		boost::python::class_<PropertyChangeLength, boost::python::bases<Undoable> >("PropertyChangeLength", boost::python::no_init).def(boost::python::init<const double&, Property*>());
-		boost::python::class_<PropertyChangeInt, boost::python::bases<Undoable> >("PropertyChangeInt", boost::python::no_init).def(boost::python::init<const int&, Property*>());
-		boost::python::class_<PropertyChangeColor, boost::python::bases<Undoable> >("PropertyChangeColor", boost::python::no_init).def(boost::python::init<const HeeksColor&, Property*>());
-		boost::python::class_<PropertyChangeChoice, boost::python::bases<Undoable> >("PropertyChangeChoice", boost::python::no_init).def(boost::python::init<const int&, Property*>());
-		boost::python::class_<PropertyChangeCheck, boost::python::bases<Undoable> >("PropertyChangeCheck", boost::python::no_init).def(boost::python::init<const bool&, Property*>());
+	boost::python::class_<PropertyChangeString, boost::python::bases<Undoable> >("PropertyChangeString", boost::python::no_init).def(boost::python::init<const std::wstring&, Property*>());
+	boost::python::class_<PropertyChangeDouble, boost::python::bases<Undoable> >("PropertyChangeDouble", boost::python::no_init).def(boost::python::init<const double&, Property*>());
+	boost::python::class_<PropertyChangeLength, boost::python::bases<Undoable> >("PropertyChangeLength", boost::python::no_init).def(boost::python::init<const double&, Property*>());
+	boost::python::class_<PropertyChangeInt, boost::python::bases<Undoable> >("PropertyChangeInt", boost::python::no_init).def(boost::python::init<const int&, Property*>());
+	boost::python::class_<PropertyChangeColor, boost::python::bases<Undoable> >("PropertyChangeColor", boost::python::no_init).def(boost::python::init<const HeeksColor&, Property*>());
+	boost::python::class_<PropertyChangeChoice, boost::python::bases<Undoable> >("PropertyChangeChoice", boost::python::no_init).def(boost::python::init<const int&, Property*>());
+	boost::python::class_<PropertyChangeCheck, boost::python::bases<Undoable> >("PropertyChangeCheck", boost::python::no_init).def(boost::python::init<const bool&, Property*>());
 
-		boost::python::class_<CApp, boost::python::bases<ObjList>, boost::noncopyable>("App", boost::python::no_init);
+	boost::python::class_<CApp, boost::python::bases<ObjList>, boost::noncopyable>("App", boost::python::no_init);
 
-		boost::python::class_<CViewPoint>("ViewPoint", boost::python::no_init)
-			.def("SetView", &CViewPoint::SetView)
-			.def("Unproject", &CViewPoint::glUnproject)
-			.def("ShiftI", &CViewPoint::ShiftI)
-			.def("TurnI", &CViewPoint::TurnI)
-			.def("TurnVerticalI", &CViewPoint::TurnVerticalI)
-			.def("Rightwards", &CViewPoint::rightwards_vector)
-			.def("Forwards", &CViewPoint::forwards_vector)
-			.def_readwrite("lens_point", &CViewPoint::m_lens_point)
-			.def_readwrite("target_point", &CViewPoint::m_target_point)
-			.def_readwrite("vertical", &CViewPoint::m_vertical)
-			;
+	boost::python::class_<CViewPoint>("ViewPoint", boost::python::no_init)
+		.def("SetView", &CViewPoint::SetView)
+		.def("Unproject", &CViewPoint::glUnproject)
+		.def("ShiftI", &CViewPoint::ShiftI)
+		.def("TurnI", &CViewPoint::TurnI)
+		.def("TurnVerticalI", &CViewPoint::TurnVerticalI)
+		.def("Rightwards", &CViewPoint::rightwards_vector)
+		.def("Forwards", &CViewPoint::forwards_vector)
+		.def_readwrite("lens_point", &CViewPoint::m_lens_point)
+		.def_readwrite("target_point", &CViewPoint::m_target_point)
+		.def_readwrite("vertical", &CViewPoint::m_vertical)
+		;
 
-		boost::python::class_<CViewport>("Viewport")
-			.def(boost::python::init<int, int>())
-			.def("glCommands", &CViewport::glCommands)
-			.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
-			.def("OnMouseEvent", &CViewport::OnMouseEvent)
-			.def("OnMagExtents", &CViewport::OnMagExtents)
-			.def("RestorePreviousViewPoint", &CViewport::RestorePreviousViewPoint)
-			.def("ClearViewpoints", &CViewport::ClearViewpoints)
-			.def("StoreViewPoint", &CViewport::StoreViewPoint)
-			.def("GetHeight", &ViewportGetHeight)
-			.def("GetWidth", &ViewportGetWidth)
-			.def("SetXOR", &CViewport::SetXOR)
-			.def("EndXOR", &CViewport::EndXOR)
-			.def("DrawFront", &CViewport::DrawFront)
-			.def("EndDrawFront", &CViewport::EndDrawFront)
-			.def("DrawWindow", ViewportDrawWindow)
-			.def("OnWheelRotation", &CViewport::OnWheelRotation)
-			.def_readwrite("need_update", &CViewport::m_need_update)
-			.def_readwrite("need_refresh", &CViewport::m_need_refresh)
-			.def_readwrite("orthogonal", &CViewport::m_orthogonal)
-			.def_readwrite("view_point", &CViewport::m_view_point)
-			;
+	boost::python::class_<CViewport>("Viewport")
+		.def(boost::python::init<int, int>())
+		.def("glCommands", &CViewport::glCommands)
+		.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
+		.def("OnMouseEvent", &CViewport::OnMouseEvent)
+		.def("OnMagExtents", &CViewport::OnMagExtents)
+		.def("RestorePreviousViewPoint", &CViewport::RestorePreviousViewPoint)
+		.def("ClearViewpoints", &CViewport::ClearViewpoints)
+		.def("StoreViewPoint", &CViewport::StoreViewPoint)
+		.def("GetHeight", &ViewportGetHeight)
+		.def("GetWidth", &ViewportGetWidth)
+		.def("SetXOR", &CViewport::SetXOR)
+		.def("EndXOR", &CViewport::EndXOR)
+		.def("DrawFront", &CViewport::DrawFront)
+		.def("EndDrawFront", &CViewport::EndDrawFront)
+		.def("DrawWindow", ViewportDrawWindow)
+		.def("OnWheelRotation", &CViewport::OnWheelRotation)
+		.def_readwrite("need_update", &CViewport::m_need_update)
+		.def_readwrite("need_refresh", &CViewport::m_need_refresh)
+		.def_readwrite("orthogonal", &CViewport::m_orthogonal)
+		.def_readwrite("view_point", &CViewport::m_view_point)
+		;
 
-		boost::python::enum_<MouseEventType>("MouseEventType")
-		.value("MouseEventNull", MouseEventNull)
-		.value("MouseEventLeftDown", MouseEventLeftDown)
-		.value("MouseEventLeftUp", MouseEventLeftUp)
-		.value("MouseEventLeftDClick", MouseEventLeftDClick)
-		.value("MouseEventRightDown", MouseEventRightDown)
-		.value("MouseEventRightUp", MouseEventRightUp)
-		.value("MouseEventMiddleDown", MouseEventMiddleDown)
-		.value("MouseEventMiddleUp", MouseEventMiddleUp)
-		.value("MouseEventMovingOrDragging", MouseEventMovingOrDragging)
-		.value("MouseEventWheelRotation", MouseEventWheelRotation)
-			;
+	boost::python::enum_<MouseEventType>("MouseEventType")
+	.value("MouseEventNull", MouseEventNull)
+	.value("MouseEventLeftDown", MouseEventLeftDown)
+	.value("MouseEventLeftUp", MouseEventLeftUp)
+	.value("MouseEventLeftDClick", MouseEventLeftDClick)
+	.value("MouseEventRightDown", MouseEventRightDown)
+	.value("MouseEventRightUp", MouseEventRightUp)
+	.value("MouseEventMiddleDown", MouseEventMiddleDown)
+	.value("MouseEventMiddleUp", MouseEventMiddleUp)
+	.value("MouseEventMovingOrDragging", MouseEventMovingOrDragging)
+	.value("MouseEventWheelRotation", MouseEventWheelRotation)
+		;
 
-		boost::python::class_<MouseEvent>("MouseEvent")
-			.def(boost::python::init<MouseEvent>())
-			.def("LeftDown", &MouseEvent::LeftDown)
-			.def("LeftUp", &MouseEvent::LeftUp)
-			.def("LeftDClick", &MouseEvent::LeftDClick)
-			.def("RightDown", &MouseEvent::RightDown)
-			.def("RightUp", &MouseEvent::RightUp)
-			.def("MiddleDown", &MouseEvent::MiddleDown)
-			.def("MiddleUp", &MouseEvent::MiddleUp)
-			.def("Moving", &MouseEvent::Moving)
-			.def("GetWheelRotation", &MouseEvent::GetWheelRotation)
-			.def_readwrite("event_type", &MouseEvent::m_event_type)
-			.def_readwrite("x", &MouseEvent::m_x)
-			.def_readwrite("y", &MouseEvent::m_y)
-			.def_readwrite("leftDown", &MouseEvent::m_leftDown)
-			.def_readwrite("middleDown", &MouseEvent::m_middleDown)
-			.def_readwrite("rightDown", &MouseEvent::m_rightDown)
-			.def_readwrite("controlDown", &MouseEvent::m_controlDown)
-			.def_readwrite("shiftDown", &MouseEvent::m_shiftDown)
-			.def_readwrite("altDown", &MouseEvent::m_altDown)
-			.def_readwrite("metaDown", &MouseEvent::m_metaDown)
-			.def_readwrite("wheelRotation", &MouseEvent::m_wheelRotation)
-			.def_readwrite("wheelDelta", &MouseEvent::m_wheelDelta)
-			.def_readwrite("linesPerAction", &MouseEvent::m_linesPerAction)
-			;
+	boost::python::class_<MouseEvent>("MouseEvent")
+		.def(boost::python::init<MouseEvent>())
+		.def("LeftDown", &MouseEvent::LeftDown)
+		.def("LeftUp", &MouseEvent::LeftUp)
+		.def("LeftDClick", &MouseEvent::LeftDClick)
+		.def("RightDown", &MouseEvent::RightDown)
+		.def("RightUp", &MouseEvent::RightUp)
+		.def("MiddleDown", &MouseEvent::MiddleDown)
+		.def("MiddleUp", &MouseEvent::MiddleUp)
+		.def("Moving", &MouseEvent::Moving)
+		.def("GetWheelRotation", &MouseEvent::GetWheelRotation)
+		.def_readwrite("event_type", &MouseEvent::m_event_type)
+		.def_readwrite("x", &MouseEvent::m_x)
+		.def_readwrite("y", &MouseEvent::m_y)
+		.def_readwrite("leftDown", &MouseEvent::m_leftDown)
+		.def_readwrite("middleDown", &MouseEvent::m_middleDown)
+		.def_readwrite("rightDown", &MouseEvent::m_rightDown)
+		.def_readwrite("controlDown", &MouseEvent::m_controlDown)
+		.def_readwrite("shiftDown", &MouseEvent::m_shiftDown)
+		.def_readwrite("altDown", &MouseEvent::m_altDown)
+		.def_readwrite("metaDown", &MouseEvent::m_metaDown)
+		.def_readwrite("wheelRotation", &MouseEvent::m_wheelRotation)
+		.def_readwrite("wheelDelta", &MouseEvent::m_wheelDelta)
+		.def_readwrite("linesPerAction", &MouseEvent::m_linesPerAction)
+		;
 
-		boost::python::class_<IPoint>("IPoint")
-			.def(boost::python::init<int, int>())
-			.def_readwrite("x", &IPoint::x)
-			.def_readwrite("y", &IPoint::y)
-			;
-		boost::python::class_<IRect>("IRect")
-			.def(boost::python::init<int, int, int, int>())
-			.def(boost::python::init<int, int>())
-			.def_readwrite("x", &IRect::x)
-			.def_readwrite("y", &IRect::y)
-			.def_readwrite("width", &IRect::width)
-			.def_readwrite("height", &IRect::height)
-			;
+	boost::python::class_<IPoint>("IPoint")
+		.def(boost::python::init<int, int>())
+		.def_readwrite("x", &IPoint::x)
+		.def_readwrite("y", &IPoint::y)
+		;
+	boost::python::class_<IRect>("IRect")
+		.def(boost::python::init<int, int, int, int>())
+		.def(boost::python::init<int, int>())
+		.def_readwrite("x", &IRect::x)
+		.def_readwrite("y", &IRect::y)
+		.def_readwrite("width", &IRect::width)
+		.def_readwrite("height", &IRect::height)
+		;
 
-		boost::python::class_<CFilter>("Filter")
-			.def("Clear", &CFilter::Clear)
-			.def("AddType", &CFilter::AddType)
-			.def("IsTypeInFilter", &CFilter::IsTypeInFilter)
-			.def("Size", &CFilter::Size)
-			;
+	boost::python::class_<CFilter>("Filter")
+		.def("Clear", &CFilter::Clear)
+		.def("AddType", &CFilter::AddType)
+		.def("IsTypeInFilter", &CFilter::IsTypeInFilter)
+		.def("Size", &CFilter::Size)
+		;
 
-		boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
-			.def(boost::python::init<ObserverWrap>())
-			;
+	boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
+		.def(boost::python::init<ObserverWrap>())
+		;
 
-		boost::python::enum_<KeyCode>("KeyCode")
-			.value("None", K_NONE)
-			.value("ControlA", K_CONTROL_A)
-			.value("ControlB", K_CONTROL_B)
-			.value("ControlC", K_CONTROL_C)
-			.value("ControlD", K_CONTROL_D)
-			.value("ControlE", K_CONTROL_E)
-			.value("ControlF", K_CONTROL_F)
-			.value("ControlG", K_CONTROL_G)
-			.value("ControlH", K_CONTROL_H)
-			.value("ControlI", K_CONTROL_I)
-			.value("ControlJ", K_CONTROL_J)
-			.value("ControlK", K_CONTROL_K)
-			.value("ControlL", K_CONTROL_L)
-			.value("ControlM", K_CONTROL_M)
-			.value("ControlN", K_CONTROL_N)
-			.value("ControlO", K_CONTROL_O)
-			.value("ControlP", K_CONTROL_P)
-			.value("ControlQ", K_CONTROL_Q)
-			.value("ControlR", K_CONTROL_R)
-			.value("ControlS", K_CONTROL_S)
-			.value("ControlT", K_CONTROL_T)
-			.value("ControlU", K_CONTROL_U)
-			.value("ControlV", K_CONTROL_V)
-			.value("ControlW", K_CONTROL_W)
-			.value("ControlX", K_CONTROL_X)
-			.value("ControlY", K_CONTROL_Y)
-			.value("ControlZ", K_CONTROL_Z)
-			.value("Back", K_BACK)
-			.value("Tab", K_TAB)
-			.value("Return", K_RETURN)
-			.value("Escape", K_ESCAPE)
-			.value("Space", K_SPACE)
-			.value("Delete", K_DELETE)
-			.value("Start", K_START)
-			.value("LButton", K_LBUTTON)
-			.value("RButton", K_RBUTTON)
-			.value("Cancel", K_CANCEL)
-			.value("MButton", K_MBUTTON)
-			.value("Clear", K_CLEAR)
-			.value("Shift", K_SHIFT)
-			.value("Alt", K_ALT)
-			.value("Control", K_CONTROL)
-			.value("Menu", K_MENU)
-			.value("Pause", K_PAUSE)
-			.value("Capital", K_CAPITAL)
-			.value("End", K_END)
-			.value("Home", K_HOME)
-			.value("Left", K_LEFT)
-			.value("Up", K_UP)
-			.value("Right", K_RIGHT)
-			.value("Down", K_DOWN)
-			.value("Select", K_SELECT)
-			.value("Print", K_PRINT)
-			.value("Execute", K_EXECUTE)
-			.value("Sanpshot", K_SNAPSHOT)
-			.value("Insert", K_INSERT)
-			.value("Help", K_HELP)
-			.value("Numpad0", K_NUMPAD0)
-			.value("Numpad1", K_NUMPAD1)
-			.value("Numpad2", K_NUMPAD2)
-			.value("Numpad3", K_NUMPAD3)
-			.value("Numpad4", K_NUMPAD4)
-			.value("Numpad5", K_NUMPAD5)
-			.value("Numpad6", K_NUMPAD6)
-			.value("Numpad7", K_NUMPAD7)
-			.value("Numpad8", K_NUMPAD8)
-			.value("Numpad9", K_NUMPAD9)
-			.value("Multiply", K_MULTIPLY)
-			.value("Add", K_ADD)
-			.value("Separator", K_SEPARATOR)
-			.value("Subtract", K_SUBTRACT)
-			.value("Decimal", K_DECIMAL)
-			.value("Divide", K_DIVIDE)
-			.value("F1", K_F1)
-			.value("F2", K_F2)
-			.value("F3", K_F3)
-			.value("F4", K_F4)
-			.value("F5", K_F5)
-			.value("F6", K_F6)
-			.value("F7", K_F7)
-			.value("F8", K_F8)
-			.value("F9", K_F9)
-			.value("F10", K_F10)
-			.value("F11", K_F11)
-			.value("F12", K_F12)
-			.value("F13", K_F13)
-			.value("F14", K_F14)
-			.value("F15", K_F15)
-			.value("F16", K_F16)
-			.value("F17", K_F17)
-			.value("F18", K_F18)
-			.value("F19", K_F19)
-			.value("F20", K_F20)
-			.value("F21", K_F21)
-			.value("F22", K_F22)
-			.value("F23", K_F23)
-			.value("F24", K_F24)
-			.value("Numlock", K_NUMLOCK)
-			.value("Scroll", K_SCROLL)
-			.value("PageUp", K_PAGEUP)
-			.value("PageDown", K_PAGEDOWN)
-			.value("NumpadSpace", K_NUMPAD_SPACE)
-			.value("NumpadTab", K_NUMPAD_TAB)
-			.value("NumpadEnter", K_NUMPAD_ENTER)
-			.value("NumpadF1", K_NUMPAD_F1)
-			.value("NumpadF2", K_NUMPAD_F2)
-			.value("NumpadF3", K_NUMPAD_F3)
-			.value("NumpadF4", K_NUMPAD_F4)
-			.value("NumpadHome", K_NUMPAD_HOME)
-			.value("NumpadLeft", K_NUMPAD_LEFT)
-			.value("NumpadUp", K_NUMPAD_UP)
-			.value("NumpadRight", K_NUMPAD_RIGHT)
-			.value("NumpadDown", K_NUMPAD_DOWN)
-			.value("NumpadPageUp", K_NUMPAD_PAGEUP)
-			.value("NumpadPageDown", K_NUMPAD_PAGEDOWN)
-			.value("NumpadEnd", K_NUMPAD_END)
-			.value("NumpadBegin", K_NUMPAD_BEGIN)
-			.value("NumpadInsert", K_NUMPAD_INSERT)
-			.value("NumpadDelete", K_NUMPAD_DELETE)
-			.value("NumpadEqual", K_NUMPAD_EQUAL)
-			.value("NumpadMultiply", K_NUMPAD_MULTIPLY)
-			.value("NumpadAdd", K_NUMPAD_ADD)
-			.value("NumpadSeparator", K_NUMPAD_SEPARATOR)
-			.value("NumpadSubtract", K_NUMPAD_SUBTRACT)
-			.value("NumpadDecimal", K_NUMPAD_DECIMAL)
-			.value("NumpadDivide", K_NUMPAD_DIVIDE)
-			.value("WindowsLeft", K_WINDOWS_LEFT)
-			.value("WindowsRight", K_WINDOWS_RIGHT)
-			.value("WindowsMenu", K_WINDOWS_MENU)
-			.value("RawControl", K_RAW_CONTROL)
-			.value("Command", K_COMMAND)
-			.value("Special1", K_SPECIAL1)
-			.value("Special2", K_SPECIAL2)
-			.value("Special3", K_SPECIAL3)
-			.value("Special4", K_SPECIAL4)
-			.value("Special5", K_SPECIAL5)
-			.value("Special6", K_SPECIAL6)
-			.value("Special7", K_SPECIAL7)
-			.value("Special8", K_SPECIAL8)
-			.value("Special9", K_SPECIAL9)
-			.value("Special10", K_SPECIAL10)
-			.value("Special11", K_SPECIAL11)
-			.value("Special12", K_SPECIAL12)
-			.value("Special13", K_SPECIAL13)
-			.value("Special14", K_SPECIAL14)
-			.value("Special15", K_SPECIAL15)
-			.value("Special16", K_SPECIAL16)
-			.value("Special17", K_SPECIAL17)
-			.value("Special18", K_SPECIAL18)
-			.value("Special19", K_SPECIAL19)
-			.value("Special20", K_SPECIAL20)
-			;
+	boost::python::enum_<KeyCode>("KeyCode")
+		.value("None", K_NONE)
+		.value("ControlA", K_CONTROL_A)
+		.value("ControlB", K_CONTROL_B)
+		.value("ControlC", K_CONTROL_C)
+		.value("ControlD", K_CONTROL_D)
+		.value("ControlE", K_CONTROL_E)
+		.value("ControlF", K_CONTROL_F)
+		.value("ControlG", K_CONTROL_G)
+		.value("ControlH", K_CONTROL_H)
+		.value("ControlI", K_CONTROL_I)
+		.value("ControlJ", K_CONTROL_J)
+		.value("ControlK", K_CONTROL_K)
+		.value("ControlL", K_CONTROL_L)
+		.value("ControlM", K_CONTROL_M)
+		.value("ControlN", K_CONTROL_N)
+		.value("ControlO", K_CONTROL_O)
+		.value("ControlP", K_CONTROL_P)
+		.value("ControlQ", K_CONTROL_Q)
+		.value("ControlR", K_CONTROL_R)
+		.value("ControlS", K_CONTROL_S)
+		.value("ControlT", K_CONTROL_T)
+		.value("ControlU", K_CONTROL_U)
+		.value("ControlV", K_CONTROL_V)
+		.value("ControlW", K_CONTROL_W)
+		.value("ControlX", K_CONTROL_X)
+		.value("ControlY", K_CONTROL_Y)
+		.value("ControlZ", K_CONTROL_Z)
+		.value("Back", K_BACK)
+		.value("Tab", K_TAB)
+		.value("Return", K_RETURN)
+		.value("Escape", K_ESCAPE)
+		.value("Space", K_SPACE)
+		.value("Delete", K_DELETE)
+		.value("Start", K_START)
+		.value("LButton", K_LBUTTON)
+		.value("RButton", K_RBUTTON)
+		.value("Cancel", K_CANCEL)
+		.value("MButton", K_MBUTTON)
+		.value("Clear", K_CLEAR)
+		.value("Shift", K_SHIFT)
+		.value("Alt", K_ALT)
+		.value("Control", K_CONTROL)
+		.value("Menu", K_MENU)
+		.value("Pause", K_PAUSE)
+		.value("Capital", K_CAPITAL)
+		.value("End", K_END)
+		.value("Home", K_HOME)
+		.value("Left", K_LEFT)
+		.value("Up", K_UP)
+		.value("Right", K_RIGHT)
+		.value("Down", K_DOWN)
+		.value("Select", K_SELECT)
+		.value("Print", K_PRINT)
+		.value("Execute", K_EXECUTE)
+		.value("Sanpshot", K_SNAPSHOT)
+		.value("Insert", K_INSERT)
+		.value("Help", K_HELP)
+		.value("Numpad0", K_NUMPAD0)
+		.value("Numpad1", K_NUMPAD1)
+		.value("Numpad2", K_NUMPAD2)
+		.value("Numpad3", K_NUMPAD3)
+		.value("Numpad4", K_NUMPAD4)
+		.value("Numpad5", K_NUMPAD5)
+		.value("Numpad6", K_NUMPAD6)
+		.value("Numpad7", K_NUMPAD7)
+		.value("Numpad8", K_NUMPAD8)
+		.value("Numpad9", K_NUMPAD9)
+		.value("Multiply", K_MULTIPLY)
+		.value("Add", K_ADD)
+		.value("Separator", K_SEPARATOR)
+		.value("Subtract", K_SUBTRACT)
+		.value("Decimal", K_DECIMAL)
+		.value("Divide", K_DIVIDE)
+		.value("F1", K_F1)
+		.value("F2", K_F2)
+		.value("F3", K_F3)
+		.value("F4", K_F4)
+		.value("F5", K_F5)
+		.value("F6", K_F6)
+		.value("F7", K_F7)
+		.value("F8", K_F8)
+		.value("F9", K_F9)
+		.value("F10", K_F10)
+		.value("F11", K_F11)
+		.value("F12", K_F12)
+		.value("F13", K_F13)
+		.value("F14", K_F14)
+		.value("F15", K_F15)
+		.value("F16", K_F16)
+		.value("F17", K_F17)
+		.value("F18", K_F18)
+		.value("F19", K_F19)
+		.value("F20", K_F20)
+		.value("F21", K_F21)
+		.value("F22", K_F22)
+		.value("F23", K_F23)
+		.value("F24", K_F24)
+		.value("Numlock", K_NUMLOCK)
+		.value("Scroll", K_SCROLL)
+		.value("PageUp", K_PAGEUP)
+		.value("PageDown", K_PAGEDOWN)
+		.value("NumpadSpace", K_NUMPAD_SPACE)
+		.value("NumpadTab", K_NUMPAD_TAB)
+		.value("NumpadEnter", K_NUMPAD_ENTER)
+		.value("NumpadF1", K_NUMPAD_F1)
+		.value("NumpadF2", K_NUMPAD_F2)
+		.value("NumpadF3", K_NUMPAD_F3)
+		.value("NumpadF4", K_NUMPAD_F4)
+		.value("NumpadHome", K_NUMPAD_HOME)
+		.value("NumpadLeft", K_NUMPAD_LEFT)
+		.value("NumpadUp", K_NUMPAD_UP)
+		.value("NumpadRight", K_NUMPAD_RIGHT)
+		.value("NumpadDown", K_NUMPAD_DOWN)
+		.value("NumpadPageUp", K_NUMPAD_PAGEUP)
+		.value("NumpadPageDown", K_NUMPAD_PAGEDOWN)
+		.value("NumpadEnd", K_NUMPAD_END)
+		.value("NumpadBegin", K_NUMPAD_BEGIN)
+		.value("NumpadInsert", K_NUMPAD_INSERT)
+		.value("NumpadDelete", K_NUMPAD_DELETE)
+		.value("NumpadEqual", K_NUMPAD_EQUAL)
+		.value("NumpadMultiply", K_NUMPAD_MULTIPLY)
+		.value("NumpadAdd", K_NUMPAD_ADD)
+		.value("NumpadSeparator", K_NUMPAD_SEPARATOR)
+		.value("NumpadSubtract", K_NUMPAD_SUBTRACT)
+		.value("NumpadDecimal", K_NUMPAD_DECIMAL)
+		.value("NumpadDivide", K_NUMPAD_DIVIDE)
+		.value("WindowsLeft", K_WINDOWS_LEFT)
+		.value("WindowsRight", K_WINDOWS_RIGHT)
+		.value("WindowsMenu", K_WINDOWS_MENU)
+		.value("RawControl", K_RAW_CONTROL)
+		.value("Command", K_COMMAND)
+		.value("Special1", K_SPECIAL1)
+		.value("Special2", K_SPECIAL2)
+		.value("Special3", K_SPECIAL3)
+		.value("Special4", K_SPECIAL4)
+		.value("Special5", K_SPECIAL5)
+		.value("Special6", K_SPECIAL6)
+		.value("Special7", K_SPECIAL7)
+		.value("Special8", K_SPECIAL8)
+		.value("Special9", K_SPECIAL9)
+		.value("Special10", K_SPECIAL10)
+		.value("Special11", K_SPECIAL11)
+		.value("Special12", K_SPECIAL12)
+		.value("Special13", K_SPECIAL13)
+		.value("Special14", K_SPECIAL14)
+		.value("Special15", K_SPECIAL15)
+		.value("Special16", K_SPECIAL16)
+		.value("Special17", K_SPECIAL17)
+		.value("Special18", K_SPECIAL18)
+		.value("Special19", K_SPECIAL19)
+		.value("Special20", K_SPECIAL20)
+		;
 
-		boost::python::class_<InputModeWrap, boost::noncopyable >("InputMode")
-			.def(boost::python::init<InputModeWrap>())
-			.def("GetTitle", &InputModeGetTitle)
-			.def("GetType", &CInputMode::GetType)
-			.def("GetProperties", &InputModeGetProperties)
-			.def("OnKeyDown", &CInputMode::OnKeyDown)
-			.def("OnKeyUp", &CInputMode::OnKeyUp)
-			;
+	boost::python::class_<InputModeWrap, boost::noncopyable >("InputMode")
+		.def(boost::python::init<InputModeWrap>())
+		.def("GetTitle", &InputModeGetTitle)
+		.def("GetType", &CInputMode::GetType)
+		.def("GetProperties", &InputModeGetProperties)
+		.def("OnKeyDown", &CInputMode::OnKeyDown)
+		.def("OnKeyUp", &CInputMode::OnKeyUp)
+		;
 
-		boost::python::enum_<DigitizeType>("DigitizeType")
-			.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
-			.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
-			.value("DIGITIZE_INTER_TYPE", DigitizeIntersType)
-			.value("DIGITIZE_MIDPOINT_TYPE", DigitizeMidpointType)
-			.value("DIGITIZE_CENTRE_TYPE", DigitizeCentreType)
-			.value("DIGITIZE_SCREEN_TYPE", DigitizeScreenType)
-			.value("DIGITIZE_COORDS_TYPE", DigitizeCoordsType)
-			.value("DIGITIZE_NEAREST_TYPE", DigitizeNearestType)
-			.value("DIGITIZE_TANGENT_TYPE", DigitizeTangentType)
-			.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
-			;
+	boost::python::enum_<DigitizeType>("DigitizeType")
+		.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
+		.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
+		.value("DIGITIZE_INTER_TYPE", DigitizeIntersType)
+		.value("DIGITIZE_MIDPOINT_TYPE", DigitizeMidpointType)
+		.value("DIGITIZE_CENTRE_TYPE", DigitizeCentreType)
+		.value("DIGITIZE_SCREEN_TYPE", DigitizeScreenType)
+		.value("DIGITIZE_COORDS_TYPE", DigitizeCoordsType)
+		.value("DIGITIZE_NEAREST_TYPE", DigitizeNearestType)
+		.value("DIGITIZE_TANGENT_TYPE", DigitizeTangentType)
+		.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
+		;
 
-		boost::python::class_<DigitizeMode, boost::python::bases<CInputMode> >("DigitizeMode", boost::python::no_init)
-			.def_readwrite("digitized_point", &DigitizeMode::digitized_point)
-			.def_readwrite("reference_point", &DigitizeMode::reference_point)
-			.def_readwrite("prompt", &DigitizeMode::prompt)
-			.def_readwrite("wants_to_exit_main_loop", &DigitizeMode::wants_to_exit_main_loop)
-			;
+	boost::python::class_<DigitizeMode, boost::python::bases<CInputMode> >("DigitizeMode", boost::python::no_init)
+		.def_readwrite("digitized_point", &DigitizeMode::digitized_point)
+		.def_readwrite("reference_point", &DigitizeMode::reference_point)
+		.def_readwrite("prompt", &DigitizeMode::prompt)
+		.def_readwrite("wants_to_exit_main_loop", &DigitizeMode::wants_to_exit_main_loop)
+		;
 
-		boost::python::enum_<SketchOrderType>("SketchOrderType")
-			.value("SketchOrderTypeUnknown", SketchOrderTypeUnknown)
-			.value("SketchOrderTypeEmpty", SketchOrderTypeEmpty)
-			.value("SketchOrderTypeOpen", SketchOrderTypeOpen)
-			.value("SketchOrderTypeReverse", SketchOrderTypeReverse)
-			.value("SketchOrderTypeBad", SketchOrderTypeBad)
-			.value("SketchOrderTypeReOrder", SketchOrderTypeReOrder)
-			.value("SketchOrderTypeCloseCW", SketchOrderTypeCloseCW)
-			.value("SketchOrderTypeCloseCCW", SketchOrderTypeCloseCCW)
-			.value("SketchOrderTypeMultipleCurves", SketchOrderTypeMultipleCurves)
-			.value("SketchOrderHasCircles", SketchOrderHasCircles)
-			.value("MaxSketchOrderTypes", MaxSketchOrderTypes)
-			;
+	boost::python::enum_<SketchOrderType>("SketchOrderType")
+		.value("SketchOrderTypeUnknown", SketchOrderTypeUnknown)
+		.value("SketchOrderTypeEmpty", SketchOrderTypeEmpty)
+		.value("SketchOrderTypeOpen", SketchOrderTypeOpen)
+		.value("SketchOrderTypeReverse", SketchOrderTypeReverse)
+		.value("SketchOrderTypeBad", SketchOrderTypeBad)
+		.value("SketchOrderTypeReOrder", SketchOrderTypeReOrder)
+		.value("SketchOrderTypeCloseCW", SketchOrderTypeCloseCW)
+		.value("SketchOrderTypeCloseCCW", SketchOrderTypeCloseCCW)
+		.value("SketchOrderTypeMultipleCurves", SketchOrderTypeMultipleCurves)
+		.value("SketchOrderHasCircles", SketchOrderHasCircles)
+		.value("MaxSketchOrderTypes", MaxSketchOrderTypes)
+		;
 
-		boost::python::enum_<GraphicsTextMode>("GraphicsTextMode")
-			.value("None", GraphicsTextModeNone)
-			.value("InputTitle", GraphicsTextModeInputTitle)
-			.value("FullHelp", GraphicsTextModeWithHelp)
-			;
+	boost::python::enum_<GraphicsTextMode>("GraphicsTextMode")
+		.value("None", GraphicsTextModeNone)
+		.value("InputTitle", GraphicsTextModeInputTitle)
+		.value("FullHelp", GraphicsTextModeWithHelp)
+		;
 
-		boost::python::enum_<BackgroundMode>("BackgroundMode")
-			.value("OneColor", BackgroundModeOneColor)
-			.value("TwoColors", BackgroundModeTwoColors)
-			.value("TwoColorsLeftToRight", BackgroundModeTwoColorsLeftToRight)
-			.value("FourColors", BackgroundModeFourColors)
-			.value("SkyDome", BackgroundModeSkyDome)
-			;
+	boost::python::enum_<BackgroundMode>("BackgroundMode")
+		.value("OneColor", BackgroundModeOneColor)
+		.value("TwoColors", BackgroundModeTwoColors)
+		.value("TwoColorsLeftToRight", BackgroundModeTwoColorsLeftToRight)
+		.value("FourColors", BackgroundModeFourColors)
+		.value("SkyDome", BackgroundModeSkyDome)
+		;
 
-		boost::python::class_<DigitizedPoint>("DigitizedPoint")
-			.def(boost::python::init<DigitizedPoint>())
-			.def_readwrite("point", &DigitizedPoint::m_point)
-			.def_readwrite("type", &DigitizedPoint::m_type)
-			;
+	boost::python::class_<DigitizedPoint>("DigitizedPoint")
+		.def(boost::python::init<DigitizedPoint>())
+		.def_readwrite("point", &DigitizedPoint::m_point)
+		.def_readwrite("type", &DigitizedPoint::m_type)
+		;
 
-		boost::python::class_<DrawingWrap, boost::python::bases<CInputMode>, boost::noncopyable >("Drawing")
-			.def(boost::python::init<DrawingWrap>())
-			.def("AddPoint", &Drawing::AddPoint)
-			.def("CalculateItem", &DrawingWrap::calculate_item)
-			.def("IsAnAddLevel", &DrawingWrap::is_an_add_level)
-			.def("NumberOfSteps", &DrawingWrap::number_of_steps)
-			.def("TempObject", &DrawingWrap::TempObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
-			.def("ClearObjectsMade", &DrawingWrap::ClearObjectsMade)
-			.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
-			;
-		boost::python::class_<LineArcDrawing, boost::python::bases<Drawing> >("LineArcDrawing", boost::python::no_init);
+	boost::python::class_<DrawingWrap, boost::python::bases<CInputMode>, boost::noncopyable >("Drawing")
+		.def(boost::python::init<DrawingWrap>())
+		.def("AddPoint", &Drawing::AddPoint)
+		.def("CalculateItem", &DrawingWrap::calculate_item)
+		.def("IsAnAddLevel", &DrawingWrap::is_an_add_level)
+		.def("NumberOfSteps", &DrawingWrap::number_of_steps)
+		.def("TempObject", &DrawingWrap::TempObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
+		.def("ClearObjectsMade", &DrawingWrap::ClearObjectsMade)
+		.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
+		;
+	boost::python::class_<LineArcDrawing, boost::python::bases<Drawing> >("LineArcDrawing", boost::python::no_init);
 
-		boost::python::def("OnExit", OnExit);
-		boost::python::def("Reset", CadReset);
-		boost::python::def("OpenFile", CadOpenFile);
-		boost::python::def("Import", &CadImport, CadImportOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL)));
-		boost::python::def("SaveFile", CadSaveFile);
-		boost::python::def("SaveObjects", SaveObjects);
-		boost::python::def("DrawTriangle", &DrawTriangle);
-		boost::python::def("DrawEnableLighting", &DrawEnableLighting);
-		boost::python::def("DrawDisableLighting", &DrawDisableLighting);
-		boost::python::def("DrawEnableDepthTesting", &DrawEnableDepthTesting);
-		boost::python::def("DrawDisableDepthTesting", &DrawDisableDepthTesting);
-		boost::python::def("DrawEnableCullFace", &DrawEnableCullFace);
-		boost::python::def("DrawDisableCullFace", &DrawDisableCullFace);
-		boost::python::def("DrawLine", &DrawLine);
-		boost::python::def("DrawColor", &DrawColor);
-		boost::python::def("DrawContrastBlackOrWhite", &DrawContrastBlackOrWhite);
-		boost::python::def("DrawTranslate", &DrawTranslate);
-		boost::python::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
-		boost::python::def("BeginTriangles", &BeginTriangles);
-		boost::python::def("BeginLines", &BeginLines);
-		boost::python::def("EndLinesOrTriangles", &EndLinesOrTriangles);
-		boost::python::def("GlVertex", &glVertexPoint3d);
-		boost::python::def("GlVertex2D", &glVertexPoint2d);
-		boost::python::def("GlLineWidth", &GlLineWidth);
-		boost::python::def("DrawNewList", &DrawNewList);
-		boost::python::def("DrawEndList", &DrawEndList);
-		boost::python::def("DrawCallList", &DrawCallList);
-		boost::python::def("DrawDeleteList", &DrawDeleteList);
-		boost::python::def("DrawEnableLights", &DrawEnableLights);
-		boost::python::def("DrawDisableLights", &DrawDisableLights);
-		boost::python::def("GenTexture", &GenTexture);
-		boost::python::def("DrawImageQuads", DrawImageQuads);
-		boost::python::def("DrawTris", DrawTris);
-		boost::python::def("DrawMultMatrix", DrawMultMatrix);
-		boost::python::def("DrawPushMatrix", DrawPushMatrix);
-		boost::python::def("DrawPopMatrix", DrawPopMatrix);
-		boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
-		boost::python::def("AddProperty", AddProperty);
-		boost::python::def("GetObjectFromId", &GetObjectFromId);
-		boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));
-		boost::python::def("GetObjectNamesAndTypes", GetObjectNamesAndTypes);
-		boost::python::def("SetXmlValue", SetXmlValue);
-		boost::python::def("BeginXmlChild", BeginXmlChild);
-		boost::python::def("EndXmlChild", EndXmlChild);
-		boost::python::def("GetXmlObject", &GetXmlObject);
-		boost::python::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((boost::python::arg("name"), boost::python::arg("default_value") = std::wstring(L""))));
-		boost::python::def("GetXmlText", &GetXmlText);
-		boost::python::def("SetXmlText", &SetXmlText);
-		boost::python::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((boost::python::arg("name"), boost::python::arg("default_value") = false)));
-		boost::python::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0)));
-		boost::python::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0.0)));
-		boost::python::def("GetXmlMatrix", &GetXmlMatrix, GetXmlMatrixOverloads((boost::python::arg("name"), boost::python::arg("default_value") = NULL)));
-		boost::python::def("SetXmlMatrix", SetXmlMatrix);
-		boost::python::def("ReturnFromXmlChild", ReturnFromXmlChild);
-		boost::python::def("GetFirstXmlChild", GetFirstXmlChild);
-		boost::python::def("GetNextXmlChild", GetNextXmlChild);
-		boost::python::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL, boost::python::arg("paste_before") = NULL)));
-		boost::python::def("RegisterOnEndXmlWrite", RegisterOnEndXmlWrite);
-		boost::python::def("RegisterObserver", RegisterObserver);
-		boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
-		boost::python::def("RegisterOnGLCommands", RegisterOnGLCommands);
-		boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
-		boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
-		boost::python::def("SetInputModeCallback", SetInputModeCallback);
-		boost::python::def("RegisterImportFileType", RegisterImportFileType);
-		boost::python::def("RegisterExportFileType", RegisterExportFileType);
-		boost::python::def("GetFilePathForImportExport", GetFilePathForImportExport);
-		boost::python::def("GetResFolder", GetResFolder);
-		boost::python::def("SetResFolder", SetResFolder);
-		boost::python::def("MessageBox", CadMessageBox);
-		boost::python::def("GetSelectedObjects", GetSelectedObjects);
-		boost::python::def("GetSelectionTypes", GetSelectionTypes, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("GetNumSelected", GetNumSelected);
-		boost::python::def("GetObjects", GetObjects);
-		boost::python::def("ObjectMarked", ObjectMarked);
-		boost::python::def("Select", &Select, SelectOverloads(	(boost::python::arg("object"),	boost::python::arg("CallOnChanged") = NULL)));
-		boost::python::def("Unselect", Unselect);
-		boost::python::def("ClearSelection", &ClearSelection, ClearSelectionOverloads(boost::python::arg("CallOnChanged") = false));
-		boost::python::def("GetSelectionProperties", GetSelectionProperties);
-		boost::python::def("SetMarkNewlyAddedObjects", SetMarkNewlyAddedObjects);
-		boost::python::def("GetMarkNewlyAddedObjects", GetMarkNewlyAddedObjects);
-		boost::python::def("GetViewUnits", GetViewUnits);
-		boost::python::def("SetViewUnits", SetViewUnits);
-		boost::python::def("GetApp", GetApp, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("StartHistory", StartHistory);
-		boost::python::def("EndHistory", EndHistory);
-		boost::python::def("ClearHistory", ClearHistory);
-		boost::python::def("IsModified", IsModified);
-		boost::python::def("SetLikeNewFile", SetLikeNewFile);
-		boost::python::def("RollBack", RollBack);
-		boost::python::def("RollForward", RollForward);
-		boost::python::def("DeleteUndoably", DeleteUndoably);
-		boost::python::def("DeleteObjectsUndoably", DeleteObjectsUndoably);
-		boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
-		boost::python::def("CopyUndoably", CopyUndoably);
-		boost::python::def("TransformUndoably", TransformUndoably);
-		boost::python::def("DoUndoable", DoUndoable);
-		boost::python::def("WasModified", WasModified);
-		boost::python::def("ShiftSelect", ShiftSelect);
-		boost::python::def("ChangePropertyString", ChangePropertyString);
-		boost::python::def("ChangePropertyDouble", ChangePropertyDouble);
-		boost::python::def("ChangePropertyLength", ChangePropertyLength);
-		boost::python::def("ChangePropertyInt", ChangePropertyInt);
-		boost::python::def("ChangePropertyChoice", ChangePropertyChoice);
-		boost::python::def("ChangePropertyColor", ChangePropertyColor);
-		boost::python::def("ChangePropertyCheck", ChangePropertyCheck);
-		boost::python::def("GetUnits", GetUnits);
-		boost::python::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
-		boost::python::def("GetMagnification", GetMagnification, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("GetViewRotating", GetViewRotating, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("GetViewZooming", GetViewZooming, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("GetViewPanning", GetViewPanning, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("GetDigitizing", GetDigitizing, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("SetInputMode", SetInputMode);
-		boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("RestoreInputMode", RestoreInputMode);
-		boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
-		boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("GetDragGripper", GetDragGripper, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("AddGripper", AddGripper);
-		boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
-		boost::python::def("AddDrawingPoint", AddDrawingPoint);
-		boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
-		boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
-		boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
-		boost::python::def("SetILineDrawing", SetILineDrawing);
-		boost::python::def("SetRectanglesDrawing", SetRectanglesDrawing);
-		boost::python::def("SetObroundsDrawing", SetObroundsDrawing);
-		boost::python::def("SetPolygonsDrawing", SetPolygonsDrawing);
-		boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("NewLine", NewLine, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("NewArc", NewArc, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("NewCircle", NewCircle, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("NewSketch", NewSketch, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("PyIncref", PyIncref);
-		boost::python::def("GetNextID", GetNextID);
-		boost::python::def("GetDrawSelect", GetDrawSelect);
-		boost::python::def("GetDrawMarked", GetDrawMarked);
-		boost::python::def("CanUndo", CanUndo);
-		boost::python::def("CanRedo", CanRedo);
-		boost::python::def("EndDrawing", EndDrawing);
-		boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
-		boost::python::def("Digitize", Digitize);
-		boost::python::def("GetDigitizeEnd", GetDigitizeEnd);
-		boost::python::def("SetDigitizeEnd", SetDigitizeEnd);
-		boost::python::def("GetDigitizeInters", GetDigitizeInters);
-		boost::python::def("SetDigitizeInters", SetDigitizeInters);
-		boost::python::def("GetDigitizeCentre", GetDigitizeCentre);
-		boost::python::def("SetDigitizeCentre", SetDigitizeCentre);
-		boost::python::def("GetDigitizeMidpoint", GetDigitizeMidpoint);
-		boost::python::def("SetDigitizeMidpoint", SetDigitizeMidpoint);
-		boost::python::def("GetDigitizeNearest", GetDigitizeNearest);
-		boost::python::def("SetDigitizeNearest", SetDigitizeNearest);
-		boost::python::def("GetDigitizeCoords", GetDigitizeCoords);
-		boost::python::def("SetDigitizeCoords", SetDigitizeCoords);
-		boost::python::def("GetDigitizeTangent", GetDigitizeTangent);
-		boost::python::def("SetDigitizeTangent", SetDigitizeTangent);
-		boost::python::def("GetDigitizeSnapToGrid", GetDigitizeSnapToGrid);
-		boost::python::def("SetDigitizeSnapToGrid", SetDigitizeSnapToGrid);
-		boost::python::def("GetDigitizeGridSize", GetDigitizeGridSize);
-		boost::python::def("SetDigitizeGridSize", SetDigitizeGridSize);
-		boost::python::def("GetBackgroundColor", GetBackgroundColor);
-		boost::python::def("SetBackgroundColor", SetBackgroundColor);
-		boost::python::def("GetBackgroundMode", GetBackgroundMode);
-		boost::python::def("SetBackgroundMode", SetBackgroundMode);
-		boost::python::def("GetRotateUpright", GetRotateUpright);
-		boost::python::def("SetRotateUpright", SetRotateUpright);
-		boost::python::def("GetGraphicsTextMode", GetGraphicsTextMode);
-		boost::python::def("SetGraphicsTextMode", SetGraphicsTextMode);
-		boost::python::def("GetReverseZooming", GetReverseZooming);
-		boost::python::def("SetReverseZooming", SetReverseZooming);
-		boost::python::def("GetShowDatum", GetShowDatum);
-		boost::python::def("SetShowDatum", SetShowDatum);
-		boost::python::def("GetDatumSolid", GetDatumSolid);
-		boost::python::def("SetDatumSolid", SetDatumSolid);
-		boost::python::def("GetDatumSize", GetDatumSize);
-		boost::python::def("SetDatumSize", SetDatumSize);
-		boost::python::def("GetDatumSizeIsPixelsNotMm", GetDatumSizeIsPixelsNotMm);
-		boost::python::def("SetDatumSizeIsPixelsNotMm", SetDatumSizeIsPixelsNotMm);
-		boost::python::def("GetShowRuler", GetShowRuler);
-		boost::python::def("SetShowRuler", SetShowRuler);
-		boost::python::def("GetGridMode", GetGridMode);
-		boost::python::def("SetGridMode", SetGridMode);
-		boost::python::def("GetPerspective", GetPerspective);
-		boost::python::def("SetPerspective", SetPerspective);
-		boost::python::def("GetCurrentColor", GetCurrentColor);
-		boost::python::def("SetCurrentColor", SetCurrentColor);
-		boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("NewSketchFromArea", NewSketchFromArea, boost::python::return_value_policy<boost::python::reference_existing_object>());
-		boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
-		boost::python::def("GetStretchPoint", GetStretchPoint);
-		boost::python::def("GetStretchShift", GetStretchShift);
-		boost::python::def("GetAntialiasing", GetAntialiasing);
-		boost::python::def("SetAntialiasing", SetAntialiasing);
-		boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
-		boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
-		boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
-		boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
-		boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
-		boost::python::scope().attr("OBJECT_TYPE_GRIPPER") = (int)GripperType;
-		boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
-		boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
-		boost::python::scope().attr("OBJECT_TYPE_COORD_SYS") = (int)CoordinateSystemType;
-		boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_LONG_STRING") = (int)LongStringPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_DOUBLE") = (int)DoublePropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_LENGTH") = (int)LengthPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_INT") = (int)IntPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_CHOICE") = (int)ChoicePropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_COLOR") = (int)ColorPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
-		boost::python::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
-
-	}
+	boost::python::def("OnExit", OnExit);
+	boost::python::def("Reset", CadReset);
+	boost::python::def("OpenFile", CadOpenFile);
+	boost::python::def("Import", &CadImport, CadImportOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL)));
+	boost::python::def("SaveFile", CadSaveFile);
+	boost::python::def("SaveObjects", SaveObjects);
+	boost::python::def("DrawTriangle", &DrawTriangle);
+	boost::python::def("DrawEnableLighting", &DrawEnableLighting);
+	boost::python::def("DrawDisableLighting", &DrawDisableLighting);
+	boost::python::def("DrawEnableDepthTesting", &DrawEnableDepthTesting);
+	boost::python::def("DrawDisableDepthTesting", &DrawDisableDepthTesting);
+	boost::python::def("DrawEnableCullFace", &DrawEnableCullFace);
+	boost::python::def("DrawDisableCullFace", &DrawDisableCullFace);
+	boost::python::def("DrawLine", &DrawLine);
+	boost::python::def("DrawColor", &DrawColor);
+	boost::python::def("DrawContrastBlackOrWhite", &DrawContrastBlackOrWhite);
+	boost::python::def("DrawTranslate", &DrawTranslate);
+	boost::python::def("DrawSymbol", &DrawSymbol, "Use glBitmap to draw a symbol of a limit collection of types at the given position");
+	boost::python::def("BeginTriangles", &BeginTriangles);
+	boost::python::def("BeginLines", &BeginLines);
+	boost::python::def("EndLinesOrTriangles", &EndLinesOrTriangles);
+	boost::python::def("GlVertex", &glVertexPoint3d);
+	boost::python::def("GlVertex2D", &glVertexPoint2d);
+	boost::python::def("GlLineWidth", &GlLineWidth);
+	boost::python::def("DrawNewList", &DrawNewList);
+	boost::python::def("DrawEndList", &DrawEndList);
+	boost::python::def("DrawCallList", &DrawCallList);
+	boost::python::def("DrawDeleteList", &DrawDeleteList);
+	boost::python::def("DrawEnableLights", &DrawEnableLights);
+	boost::python::def("DrawDisableLights", &DrawDisableLights);
+	boost::python::def("GenTexture", &GenTexture);
+	boost::python::def("DrawImageQuads", DrawImageQuads);
+	boost::python::def("DrawTris", DrawTris);
+	boost::python::def("DrawMultMatrix", DrawMultMatrix);
+	boost::python::def("DrawPushMatrix", DrawPushMatrix);
+	boost::python::def("DrawPopMatrix", DrawPopMatrix);
+	boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
+	boost::python::def("AddProperty", AddProperty);
+	boost::python::def("GetObjectFromId", &GetObjectFromId);
+	boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));
+	boost::python::def("GetObjectNamesAndTypes", GetObjectNamesAndTypes);
+	boost::python::def("SetXmlValue", SetXmlValue);
+	boost::python::def("BeginXmlChild", BeginXmlChild);
+	boost::python::def("EndXmlChild", EndXmlChild);
+	boost::python::def("GetXmlObject", &GetXmlObject);
+	boost::python::def("GetXmlValue", &GetXmlValue, GetXmlValueOverloads((boost::python::arg("name"), boost::python::arg("default_value") = std::wstring(L""))));
+	boost::python::def("GetXmlText", &GetXmlText);
+	boost::python::def("SetXmlText", &SetXmlText);
+	boost::python::def("GetXmlBool", &GetXmlBool, GetXmlBoolOverloads((boost::python::arg("name"), boost::python::arg("default_value") = false)));
+	boost::python::def("GetXmlInt", &GetXmlInt, GetXmlIntOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0)));
+	boost::python::def("GetXmlFloat", &GetXmlFloat, GetXmlFloatOverloads((boost::python::arg("name"), boost::python::arg("default_value") = 0.0)));
+	boost::python::def("GetXmlMatrix", &GetXmlMatrix, GetXmlMatrixOverloads((boost::python::arg("name"), boost::python::arg("default_value") = NULL)));
+	boost::python::def("SetXmlMatrix", SetXmlMatrix);
+	boost::python::def("ReturnFromXmlChild", ReturnFromXmlChild);
+	boost::python::def("GetFirstXmlChild", GetFirstXmlChild);
+	boost::python::def("GetNextXmlChild", GetNextXmlChild);
+	boost::python::def("OpenXmlFile", &OpenXmlFile, OpenXMLFileOverloads((boost::python::arg("filepath"), boost::python::arg("paste_into") = NULL, boost::python::arg("paste_before") = NULL)));
+	boost::python::def("RegisterOnEndXmlWrite", RegisterOnEndXmlWrite);
+	boost::python::def("RegisterObserver", RegisterObserver);
+	boost::python::def("RegisterOnRepaint", RegisterOnRepaint);
+	boost::python::def("RegisterOnGLCommands", RegisterOnGLCommands);
+	boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
+	boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
+	boost::python::def("SetInputModeCallback", SetInputModeCallback);
+	boost::python::def("RegisterImportFileType", RegisterImportFileType);
+	boost::python::def("RegisterExportFileType", RegisterExportFileType);
+	boost::python::def("GetFilePathForImportExport", GetFilePathForImportExport);
+	boost::python::def("GetResFolder", GetResFolder);
+	boost::python::def("SetResFolder", SetResFolder);
+	boost::python::def("MessageBox", CadMessageBox);
+	boost::python::def("GetSelectedObjects", GetSelectedObjects);
+	boost::python::def("GetSelectionTypes", GetSelectionTypes, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("GetNumSelected", GetNumSelected);
+	boost::python::def("GetObjects", GetObjects);
+	boost::python::def("ObjectMarked", ObjectMarked);
+	boost::python::def("Select", &Select, SelectOverloads(	(boost::python::arg("object"),	boost::python::arg("CallOnChanged") = NULL)));
+	boost::python::def("Unselect", Unselect);
+	boost::python::def("ClearSelection", &ClearSelection, ClearSelectionOverloads(boost::python::arg("CallOnChanged") = false));
+	boost::python::def("GetSelectionProperties", GetSelectionProperties);
+	boost::python::def("SetMarkNewlyAddedObjects", SetMarkNewlyAddedObjects);
+	boost::python::def("GetMarkNewlyAddedObjects", GetMarkNewlyAddedObjects);
+	boost::python::def("GetViewUnits", GetViewUnits);
+	boost::python::def("SetViewUnits", SetViewUnits);
+	boost::python::def("GetApp", GetApp, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("StartHistory", StartHistory);
+	boost::python::def("EndHistory", EndHistory);
+	boost::python::def("ClearHistory", ClearHistory);
+	boost::python::def("IsModified", IsModified);
+	boost::python::def("SetLikeNewFile", SetLikeNewFile);
+	boost::python::def("RollBack", RollBack);
+	boost::python::def("RollForward", RollForward);
+	boost::python::def("DeleteUndoably", DeleteUndoably);
+	boost::python::def("DeleteObjectsUndoably", DeleteObjectsUndoably);
+	boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
+	boost::python::def("CopyUndoably", CopyUndoably);
+	boost::python::def("TransformUndoably", TransformUndoably);
+	boost::python::def("DoUndoable", DoUndoable);
+	boost::python::def("WasModified", WasModified);
+	boost::python::def("ShiftSelect", ShiftSelect);
+	boost::python::def("ChangePropertyString", ChangePropertyString);
+	boost::python::def("ChangePropertyDouble", ChangePropertyDouble);
+	boost::python::def("ChangePropertyLength", ChangePropertyLength);
+	boost::python::def("ChangePropertyInt", ChangePropertyInt);
+	boost::python::def("ChangePropertyChoice", ChangePropertyChoice);
+	boost::python::def("ChangePropertyColor", ChangePropertyColor);
+	boost::python::def("ChangePropertyCheck", ChangePropertyCheck);
+	boost::python::def("GetUnits", GetUnits);
+	boost::python::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
+	boost::python::def("GetMagnification", GetMagnification, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("GetViewRotating", GetViewRotating, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("GetViewZooming", GetViewZooming, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("GetViewPanning", GetViewPanning, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("GetDigitizing", GetDigitizing, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("SetInputMode", SetInputMode);
+	boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("RestoreInputMode", RestoreInputMode);
+	boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
+	boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("GetDragGripper", GetDragGripper, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("AddGripper", AddGripper);
+	boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
+	boost::python::def("AddDrawingPoint", AddDrawingPoint);
+	boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
+	boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
+	boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
+	boost::python::def("SetILineDrawing", SetILineDrawing);
+	boost::python::def("SetRectanglesDrawing", SetRectanglesDrawing);
+	boost::python::def("SetObroundsDrawing", SetObroundsDrawing);
+	boost::python::def("SetPolygonsDrawing", SetPolygonsDrawing);
+	boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewLine", NewLine, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewArc", NewArc, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewCircle", NewCircle, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewSketch", NewSketch, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("PyIncref", PyIncref);
+	boost::python::def("GetNextID", GetNextID);
+	boost::python::def("GetDrawSelect", GetDrawSelect);
+	boost::python::def("GetDrawMarked", GetDrawMarked);
+	boost::python::def("CanUndo", CanUndo);
+	boost::python::def("CanRedo", CanRedo);
+	boost::python::def("EndDrawing", EndDrawing);
+	boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
+	boost::python::def("Digitize", Digitize);
+	boost::python::def("GetDigitizeEnd", GetDigitizeEnd);
+	boost::python::def("SetDigitizeEnd", SetDigitizeEnd);
+	boost::python::def("GetDigitizeInters", GetDigitizeInters);
+	boost::python::def("SetDigitizeInters", SetDigitizeInters);
+	boost::python::def("GetDigitizeCentre", GetDigitizeCentre);
+	boost::python::def("SetDigitizeCentre", SetDigitizeCentre);
+	boost::python::def("GetDigitizeMidpoint", GetDigitizeMidpoint);
+	boost::python::def("SetDigitizeMidpoint", SetDigitizeMidpoint);
+	boost::python::def("GetDigitizeNearest", GetDigitizeNearest);
+	boost::python::def("SetDigitizeNearest", SetDigitizeNearest);
+	boost::python::def("GetDigitizeCoords", GetDigitizeCoords);
+	boost::python::def("SetDigitizeCoords", SetDigitizeCoords);
+	boost::python::def("GetDigitizeTangent", GetDigitizeTangent);
+	boost::python::def("SetDigitizeTangent", SetDigitizeTangent);
+	boost::python::def("GetDigitizeSnapToGrid", GetDigitizeSnapToGrid);
+	boost::python::def("SetDigitizeSnapToGrid", SetDigitizeSnapToGrid);
+	boost::python::def("GetDigitizeGridSize", GetDigitizeGridSize);
+	boost::python::def("SetDigitizeGridSize", SetDigitizeGridSize);
+	boost::python::def("GetBackgroundColor", GetBackgroundColor);
+	boost::python::def("SetBackgroundColor", SetBackgroundColor);
+	boost::python::def("GetBackgroundMode", GetBackgroundMode);
+	boost::python::def("SetBackgroundMode", SetBackgroundMode);
+	boost::python::def("GetRotateUpright", GetRotateUpright);
+	boost::python::def("SetRotateUpright", SetRotateUpright);
+	boost::python::def("GetGraphicsTextMode", GetGraphicsTextMode);
+	boost::python::def("SetGraphicsTextMode", SetGraphicsTextMode);
+	boost::python::def("GetReverseZooming", GetReverseZooming);
+	boost::python::def("SetReverseZooming", SetReverseZooming);
+	boost::python::def("GetShowDatum", GetShowDatum);
+	boost::python::def("SetShowDatum", SetShowDatum);
+	boost::python::def("GetDatumSolid", GetDatumSolid);
+	boost::python::def("SetDatumSolid", SetDatumSolid);
+	boost::python::def("GetDatumSize", GetDatumSize);
+	boost::python::def("SetDatumSize", SetDatumSize);
+	boost::python::def("GetDatumSizeIsPixelsNotMm", GetDatumSizeIsPixelsNotMm);
+	boost::python::def("SetDatumSizeIsPixelsNotMm", SetDatumSizeIsPixelsNotMm);
+	boost::python::def("GetShowRuler", GetShowRuler);
+	boost::python::def("SetShowRuler", SetShowRuler);
+	boost::python::def("GetGridMode", GetGridMode);
+	boost::python::def("SetGridMode", SetGridMode);
+	boost::python::def("GetPerspective", GetPerspective);
+	boost::python::def("SetPerspective", SetPerspective);
+	boost::python::def("GetCurrentColor", GetCurrentColor);
+	boost::python::def("SetCurrentColor", SetCurrentColor);
+	boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewSketchFromArea", NewSketchFromArea, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
+	boost::python::def("GetStretchPoint", GetStretchPoint);
+	boost::python::def("GetStretchShift", GetStretchShift);
+	boost::python::def("GetAntialiasing", GetAntialiasing);
+	boost::python::def("SetAntialiasing", SetAntialiasing);
+	boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
+	boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
+	boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
+	boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
+	boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
+	boost::python::scope().attr("OBJECT_TYPE_GRIPPER") = (int)GripperType;
+	boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
+	boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
+	boost::python::scope().attr("OBJECT_TYPE_COORD_SYS") = (int)CoordinateSystemType;
+	boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_LONG_STRING") = (int)LongStringPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_DOUBLE") = (int)DoublePropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_LENGTH") = (int)LengthPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_INT") = (int)IntPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_CHOICE") = (int)ChoicePropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_COLOR") = (int)ColorPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_CHECK") = (int)CheckPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_LIST") = (int)ListOfPropertyType;
+	boost::python::scope().attr("PROPERTY_TYPE_FILE") = (int)FilePropertyType;
+}
