@@ -33,19 +33,19 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void GetProperties(std::list<Property *> *list);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
-	void OnApplyProperties();
 	bool ValidateProperties();
-	bool GetScaleAboutMatrix(double *m);
-	bool Stretch(const double *p, const double* shift, void* data);
-	bool StretchTemporary(const double *p, const double* shift, void* data);
+	bool GetScaleAboutMatrix(Matrix &m);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
+	bool StretchTemporary(const Point3d &p, const Point3d &shift, void* data);
 	bool DescendForUndo(){return false;}
 
 	// CShape's virtual functions
 	void SetXMLElement(TiXmlElement* element);
 	void SetFromXMLElement(TiXmlElement* pElem);
+	void OnApplyPropertiesRaw();
 
 	// CSolid's virtual functions
 	SolidTypeEnum GetSolidType(){return SOLID_TYPE_CONE;}
 
-	bool Stretch2(const double *p, const double* shift, gp_Ax2& new_pos, double& new_r1, double& new_r2, double& new_height);
+	bool Stretch2(const Point3d &p, const Point3d &shift, gp_Ax2& new_pos, double& new_r1, double& new_r2, double& new_height);
 };

@@ -31,11 +31,11 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void SetColor(const HeeksColor &col){m_color = col;}
 	const HeeksColor* GetColor()const{return &m_color;}
-	void OnApplyProperties();
 
 	// CShape's virtual functions
 	void SetXMLElement(TiXmlElement* element);
 	void SetFromXMLElement(TiXmlElement* pElem);
+	void OnApplyPropertiesRaw();
 
 	virtual SolidTypeEnum GetSolidType(){return SOLID_TYPE_UNKNOWN;}
 };

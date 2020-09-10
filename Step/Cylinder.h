@@ -27,15 +27,15 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void GetProperties(std::list<Property *> *list);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
-	void OnApplyProperties();
-	int GetCentrePoints(double* pos, double* pos2);
-	bool GetScaleAboutMatrix(double *m);
-	bool Stretch(const double *p, const double* shift, void* data);
-	bool DescendForUndo(){return false;}
+	int GetCentrePoints(Point3d &pos, Point3d &pos2);
+	bool GetScaleAboutMatrix(Matrix &m);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
+	bool DescendForUndo(){ return false; }
 
 	// CShape's virtual functions
 	void SetXMLElement(TiXmlElement* element);
 	void SetFromXMLElement(TiXmlElement* pElem);
+	void OnApplyPropertiesRaw();
 
 	// CSolid's virtual functions
 	SolidTypeEnum GetSolidType(){return SOLID_TYPE_CYLINDER;}

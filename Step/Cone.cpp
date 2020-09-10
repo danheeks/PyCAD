@@ -7,6 +7,7 @@
 #include "Gripper.h"
 #include "GripData.h"
 #include "CoordinateSystem.h"
+#include "PropertySolid.h"
 
 CCone::CCone(const gp_Ax2& pos, double r1, double r2, double height, const wchar_t* title, const HeeksColor& col, float opacity):CSolid(BRepPrimAPI_MakeCone(pos, r1, r2, height), title, col, opacity), m_render_without_OpenCASCADE(false), m_pos(pos), m_r1(r1), m_r2(r2), m_height(height)
 {
@@ -145,11 +146,11 @@ std::wstring CCone::StretchedName(){ return L"Stretched Cone";}
 void CCone::GetProperties(std::list<Property *> *list)
 {
 	GetAx2Properties(list, m_pos, this);
-#if 0
-	list->push_back((Property*)(new PropertyLength(this, L"r1", &m_r1)));
-	list->push_back((Property*)(new PropertyLength(this, L"r2", &m_r2)));
-	list->push_back((Property*)(new PropertyLength(this, L"height", &m_height)));
-#endif
+
+	list->push_back((Property*)(new PropertySolidLength(this, L"r1", &m_r1)));
+	list->push_back((Property*)(new PropertySolidLength(this, L"r2", &m_r2)));
+	list->push_back((Property*)(new PropertySolidLength(this, L"height", &m_height)));
+
 	CSolid::GetProperties(list);
 }
 
@@ -171,7 +172,7 @@ void CCone::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 	list->push_back(GripData(GripperTypeRotateObject, G2P(pmx), NULL));
 }
 
-void CCone::OnApplyProperties()
+void CCone::OnApplyPropertiesRaw()
 {
 	bool save_visible = m_visible;
 	*this = CCone(m_pos, m_r1, m_r2, m_height, m_title.c_str(), m_color, (float)m_opacity);
@@ -196,17 +197,16 @@ bool CCone::ValidateProperties()
 	return true;
 }
 
-bool CCone::GetScaleAboutMatrix(double *m)
+bool CCone::GetScaleAboutMatrix(Matrix &m)
 {
-	gp_Trsf mat = make_matrix(m_pos.Location(), m_pos.XDirection(), m_pos.YDirection());
-	extract(mat, m);
+	m = Matrix(G2P(m_pos.Location()), D2P(m_pos.XDirection()), D2P(m_pos.YDirection()));
 	return true;
 }
 
-bool CCone::Stretch2(const double *p, const double* shift, gp_Ax2& new_pos, double& new_r1, double& new_r2, double& new_height)
+bool CCone::Stretch2(const Point3d &p, const Point3d &shift, gp_Ax2& new_pos, double& new_r1, double& new_r2, double& new_height)
 {
-	gp_Pnt vp = make_point(p);
-	gp_Vec vshift = make_vector(shift);
+	gp_Pnt vp = make_point(&p.x);
+	gp_Vec vshift = make_vector(&shift.x);
 
 	gp_Pnt o = m_pos.Location();
 	gp_Pnt px(o.XYZ() + m_pos.XDirection().XYZ() * m_r1);
@@ -248,7 +248,7 @@ bool CCone::Stretch2(const double *p, const double* shift, gp_Ax2& new_pos, doub
 	return make_a_new_cone;
 }
 
-bool CCone::Stretch(const double *p, const double* shift, void* data)
+bool CCone::Stretch(const Point3d &p, const Point3d &shift, void* data)
 {
 	gp_Ax2 new_pos = m_pos;
 	double new_r1 = m_r1;
@@ -273,7 +273,7 @@ bool CCone::Stretch(const double *p, const double* shift, void* data)
 	return true;
 }
 
-bool CCone::StretchTemporary(const double *p, const double* shift, void* data)
+bool CCone::StretchTemporary(const Point3d &p, const Point3d &shift, void* data)
 {
 	gp_Ax2 new_pos = m_pos;
 	double new_r1 = m_r1;

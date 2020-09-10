@@ -30,8 +30,7 @@ public:
 	HeeksObj *MakeACopy(void)const;
 	void GetProperties(std::list<Property *> *list);
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
-	void OnApplyProperties();
-	bool GetScaleAboutMatrix(double *m);
+	bool GetScaleAboutMatrix(Matrix &m);
 	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	bool DescendForUndo(){return false;}
 	void GetOnEdit(bool(**callback)(HeeksObj*, std::list<HeeksObj*> *));
@@ -39,6 +38,7 @@ public:
 	// CShape's virtual functions
 	void SetXMLElement(TiXmlElement* element);
 	void SetFromXMLElement(TiXmlElement* pElem);
+	void OnApplyPropertiesRaw();
 
 	// CSolid's virtual functions
 	SolidTypeEnum GetSolidType(){return SOLID_TYPE_CUBOID;}

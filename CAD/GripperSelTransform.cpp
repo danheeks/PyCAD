@@ -165,10 +165,9 @@ void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, con
 			if(fabs(old_x) < 0.000000001)return;
 			double scale = new_x/old_x;
 			double m[16] = {scale, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-			Matrix invm = object_m;
-			invm.Inverse();
-			mat = object_m * Matrix(m) * invm;
-		}
+			Matrix invm = object_m.Inverse();
+			mat = (invm * Matrix(m)) * object_m;
+	}
 		break;
 	case GripperTypeObjectScaleY:
 		{
@@ -179,10 +178,9 @@ void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, con
 			if (fabs(old_x) < 0.000000001)return;
 			double scale = new_x / old_x;
 			double m[16] = { 1, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-			Matrix invm = object_m;
-			invm.Inverse();
-			mat = object_m * Matrix(m) * invm;
-		}
+			Matrix invm = object_m.Inverse();
+			mat = (invm * Matrix(m)) * object_m;
+	}
 		break;
 	case GripperTypeObjectScaleZ:
 		{
@@ -193,10 +191,9 @@ void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, con
 			if (fabs(old_x) < 0.000000001)return;
 			double scale = new_x / old_x;
 			double m[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1 };
-			Matrix invm = object_m;
-			invm.Inverse();
-			mat = object_m * Matrix(m) * invm;
-		}
+			Matrix invm = object_m.Inverse();
+			mat = (invm * Matrix(m)) * object_m;
+	}
 		break;
 	case GripperTypeObjectScaleXY:
 		{
@@ -206,11 +203,10 @@ void GripperSelTransform::MakeMatrix(const Point3d &from, const Point3d &to, con
 			double new_x = to * object_x - scale_centre_point * object_x;
 			if (fabs(old_x) < 0.000000001)return;
 			double scale = new_x / old_x;
-			double m[16] = { scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, scale };
-			Matrix invm = object_m;
-			invm.Inverse();
-			mat = object_m * Matrix(m) * invm;
-		}
+			double m[16] = { scale, 0, 0, 0, 0, scale, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+			Matrix invm = object_m.Inverse();
+			mat = (invm * Matrix(m)) * object_m;
+	}
 		break;
 	case GripperTypeRotate:
 	case GripperTypeRotateObject:

@@ -179,7 +179,6 @@ bool GetShowFaceNormals()
 			.def_readwrite("width", &CCuboid::m_x)
 			.def_readwrite("height", &CCuboid::m_y)
 			.def_readwrite("depth", &CCuboid::m_z)
-			.def("OnApplyProperties", &CCuboid::OnApplyProperties)
 			;
 
 		boost::python::def("SetResPath", SetResPath);

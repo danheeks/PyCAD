@@ -95,7 +95,10 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 					wofstream ofs(Ttc(temp_file.c_str()));
 					ofs << file_text;
 				}
+				bool save_set = theApp->GetSetIdInAdd();
+				theApp->SetSetIdInAdd(false);
 				CShape::ImportSolidsFile(temp_file.c_str(), false, &index_map, this);
+				theApp->SetSetIdInAdd(save_set);
 			}
 		}
 	}
@@ -111,7 +114,10 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 				wofstream ofs(Ttc(temp_file.c_str()));
 				ofs << a->Value();
 			}
+			bool save_set = theApp->GetSetIdInAdd();
+			theApp->SetSetIdInAdd(false);
 			CShape::ImportSolidsFile(temp_file.c_str(), false, &index_map, this);
+			theApp->SetSetIdInAdd(save_set);
 		}
 	}
 
@@ -133,7 +139,7 @@ void WriteSolids()
 	if (CShape::m_solids_found){
 		std::wstring temp_file = GetTempFolder() + TEMP_FILE_NAME;
 		std::map<int, CShapeData> index_map;
-		std::list<HeeksObj*> objects = theApp->GetObjPointer()->GetChildren();
+		std::list<HeeksObj*> objects = theApp->GetXmlWriteChildren();
 		wprintf(temp_file.c_str());
 		CShape::ExportSolidsFile(objects, temp_file.c_str(), &index_map);
 

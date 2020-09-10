@@ -84,6 +84,8 @@ public:
 	virtual SolidViewMode GetSolidViewMode() = 0;
 	virtual bool InOpenFile() = 0;
 	virtual FileOpenOrImportType GetFileOpenOrImportType() = 0;
+	virtual bool GetSetIdInAdd() = 0;
+	virtual void SetSetIdInAdd(bool value) = 0;
 	virtual TiXmlNode* GetXmlRoot() = 0;
 	virtual TiXmlElement* GetXmlElement() = 0;
 	virtual void SketchSplit(HeeksObj*, std::list<HeeksObj*> &) = 0;
@@ -95,6 +97,7 @@ public:
 	virtual void RegisterOnGLCommands(void(*callbackfunc)()) = 0;
 	virtual HeeksObj* GetObjPointer() = 0;
 	virtual ObjList* GetObjListPointer() = 0;
+	virtual std::list<HeeksObj *> GetXmlWriteChildren() = 0;
 	virtual bool GetDatumSolid() = 0;
 	virtual void RenderArrow() = 0;
 };

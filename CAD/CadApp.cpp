@@ -112,6 +112,7 @@ CCadApp::CCadApp()
 	m_loft_removes_sketches = false;
 	m_graphics_text_mode = GraphicsTextModeWithHelp;// GraphicsTextModeNone;
 	m_file_open_or_import_type = FileOpenOrImportTypeOther;
+	m_set_id_in_add = true;
 	m_file_open_matrix = NULL;
 	m_min_correlation_factor = 0.75;
 	m_max_scale_threshold = 1.5;
@@ -1104,6 +1105,8 @@ void CCadApp::SavePyFile(const std::list<HeeksObj*>& objects, const wchar_t *fil
 
 extern void PythonOnEndXmlWrite();
 
+static std::list<HeeksObj *> objects_for_SaveXMLFile;
+
 void CCadApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *filepath, bool for_clipboard)
 {
 	// write an xml file
@@ -1128,6 +1131,8 @@ void CCadApp::SaveXMLFile(const std::list<HeeksObj*>& objects, const wchar_t *fi
 		HeeksObj* object = *It;
 		object->WriteXML(m_cur_xml_root);
 	}
+
+	objects_for_SaveXMLFile = objects;
 
 	PythonOnEndXmlWrite();
 
@@ -2586,6 +2591,11 @@ HeeksObj* CCadApp::GetObjPointer()
 ObjList* CCadApp::GetObjListPointer()
 {
 	return this;
+}
+
+std::list<HeeksObj *> CCadApp::GetXmlWriteChildren()
+{
+	return objects_for_SaveXMLFile;
 }
 
 void CCadApp::RenderArrow()

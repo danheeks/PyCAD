@@ -7,6 +7,7 @@
 #include "Gripper.h"
 #include "GripData.h"
 #include "CoordinateSystem.h"
+#include "PropertySolid.h"
 
 static TopoDS_Solid MakeCylinder(const gp_Ax2& pos, double radius, double height)
 {
@@ -39,18 +40,6 @@ HeeksObj *CCylinder::MakeACopy(void)const
 	return new CCylinder(*this);
 }
 
-#if 0
-static void on_set_diameter(double value, HeeksObj* object){
-	((CCylinder*)object)->m_radius = value*0.5;
-	object->OnApplyProperties();
-}
-
-static void on_set_height(double value, HeeksObj* object){
-	((CCylinder*)object)->m_height = value;
-	object->OnApplyProperties();
-}
-#endif
-
 void CCylinder::MakeTransformedShape(const gp_Trsf &mat)
 {
 	m_pos.Transform(mat);
@@ -65,11 +54,10 @@ std::wstring CCylinder::StretchedName(){ return L"Stretched Cylinder";}
 void CCylinder::GetProperties(std::list<Property *> *list)
 {
 	GetAx2Properties(list, m_pos, this);
-#if 0
 
-	list->push_back(new PropertyLengthScaled(this, L"diameter", &m_radius, 2.0));
-	list->push_back(new PropertyLength(this, L"height", &m_height));
-#endif
+	list->push_back(new PropertySolidLengthScaled(this, L"diameter", &m_radius, 2.0));
+	list->push_back(new PropertySolidLength(this, L"height", &m_height));
+
 	CSolid::GetProperties(list);
 }
 
@@ -88,34 +76,31 @@ void CCylinder::GetGripperPositions(std::list<GripData> *list, bool just_for_end
 	list->push_back(GripData(GripperTypeObjectScaleZ, G2P(pz), NULL));
 }
 
-void CCylinder::OnApplyProperties()
+void CCylinder::OnApplyPropertiesRaw()
 {
 	*this = CCylinder(m_pos, m_radius, m_height, m_title.c_str(), m_color, (float)m_opacity);
-	this->create_faces_and_edges();
-	theApp->Repaint();
 }
 
-int CCylinder::GetCentrePoints(double* pos, double* pos2)
+int CCylinder::GetCentrePoints(Point3d &pos, Point3d &pos2)
 {
 	gp_Pnt o = m_pos.Location();
 	gp_Dir z_dir = m_pos.XDirection() ^ m_pos.YDirection();
 	gp_Pnt pz(o.XYZ() + z_dir.XYZ() * m_height);
-	extract(o, pos);
-	extract(pz, pos2);
+	pos = G2P(o);
+	pos2 = G2P(pz);
 	return 2;
 }
 
-bool CCylinder::GetScaleAboutMatrix(double *m)
+bool  CCylinder::GetScaleAboutMatrix(Matrix &m)
 {
-	gp_Trsf mat = make_matrix(m_pos.Location(), m_pos.XDirection(), m_pos.YDirection());
-	extract(mat, m);
+	m = Matrix(G2P(m_pos.Location()), D2P(m_pos.XDirection()), D2P(m_pos.YDirection()));
 	return true;
 }
 
-bool CCylinder::Stretch(const double *p, const double* shift, void* data)
+bool CCylinder::Stretch(const Point3d &p, const Point3d &shift, void* data)
 {
-	gp_Pnt vp = make_point(p);
-	gp_Vec vshift = make_vector(shift);
+	gp_Pnt vp = P2G(p);
+	gp_Vec vshift = P2V(shift);
 
 	gp_Pnt o = m_pos.Location();
 	gp_Pnt px(o.XYZ() + m_pos.XDirection().XYZ() * m_radius);

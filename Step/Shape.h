@@ -83,6 +83,8 @@ public:
 
 	virtual void SetXMLElement(TiXmlElement* element){}
 	virtual void SetFromXMLElement(TiXmlElement* pElem){}
+	void OnApplyProperties();
+	virtual void OnApplyPropertiesRaw(){}
 
 	void Init();
 };

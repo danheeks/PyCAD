@@ -7,6 +7,7 @@
 #include "Gripper.h"
 #include "MarkedList.h"
 #include "OCCProperty.h"
+#include "PropertySolid.h"
 
 CSphere::CSphere(const gp_Pnt& pos, double radius, const wchar_t* title, const HeeksColor& col, float opacity):CSolid(BRepPrimAPI_MakeSphere(pos, radius), title, col, opacity), m_pos(pos), m_radius(radius)
 {
@@ -59,7 +60,7 @@ std::wstring CSphere::StretchedName(){ return L"Ellipsoid";}
 void CSphere::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(PropertyGp<gp_Pnt>(this, L"centre", &m_pos));
-	list->push_back(new PropertyLength(this, L"radius", &m_radius));
+	list->push_back(new PropertySolidLength(this, L"radius", &m_radius));
 
 	CSolid::GetProperties(list);
 }
@@ -70,24 +71,21 @@ void CSphere::GetGripperPositions(std::list<GripData> *list, bool just_for_endof
 	list->push_back(GripData(GripperTypeScale,Point3d(m_pos.X() + m_radius,m_pos.Y(),m_pos.Z()),NULL));
 }
 
-void CSphere::OnApplyProperties()
+void CSphere::OnApplyPropertiesRaw()
 {
 	*this = CSphere(m_pos, m_radius, m_title.c_str(), m_color, (float)m_opacity);
-	this->create_faces_and_edges();
-	theApp->Repaint();
 }
 
-bool CSphere::GetCentrePoint(double* pos)
+bool CSphere::GetCentrePoint(Point3d &pos)
 {
-	extract(m_pos, pos);
+	pos = G2P(m_pos);
 	return true;
 }
 
-bool CSphere::GetScaleAboutMatrix(double *m)
+bool CSphere::GetScaleAboutMatrix(Matrix &m)
 {
-	gp_Trsf mat;
-	mat.SetTranslationPart(gp_Vec(m_pos.XYZ()));
-	extract(mat, m);
+	m = Matrix();
+	m.Translate(G2P(m_pos));
 	return true;
 }
 

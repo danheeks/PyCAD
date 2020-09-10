@@ -7,7 +7,6 @@
 #include "ViewPoint.h"
 
 class Gripper;
-class PointOrWindow;
 #include <set>
 
 class MarkedList{
@@ -24,7 +23,6 @@ private:
 	void OnChangedRemoved(HeeksObj* object);
 
 public:
-	PointOrWindow *point_or_window;
 	bool gripping;
 	std::list<Gripper*> move_grips;
 	bool gripper_marked_list_changed;

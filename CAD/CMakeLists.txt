@@ -94,6 +94,7 @@ set(CAD_SRC
     PointOrWindow.cpp
     Property.cpp
     PropertyChange.cpp
+    PropertySolid.cpp
     PyBaseObject.cpp
     PythonStuff.cpp
     PyWrapper.cpp

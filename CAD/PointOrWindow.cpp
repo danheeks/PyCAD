@@ -54,7 +54,7 @@ void PointOrWindow::OnModeChange(void){
 
 void PointOrWindow::SetWithPoint(const IPoint &point){
 	box_chosen.x = point.x - 5;
-	box_chosen.y = theApp->m_current_viewport->GetViewportSize().GetHeight() - point.y - 5;
+	box_chosen.y = point.y - 5;
 	box_chosen.width = 10;
 	box_chosen.height = 10;
 

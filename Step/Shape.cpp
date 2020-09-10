@@ -199,14 +199,17 @@ void CShape::glCommands(bool select, bool marked, bool no_color)
 			glEndList();
 		}
 
-		// update faces marking display list
-		GLint currentListIndex;
-		glGetIntegerv(GL_LIST_INDEX, &currentListIndex);
-		if(currentListIndex == 0){
-			for(HeeksObj* object = m_faces->GetFirstChild(); object; object = m_faces->GetNextChild())
-			{
-				CFace* f = (CFace*)object;
-				f->UpdateMarkingGLList(theApp->ObjectMarked(f), no_color);
+		if (!no_color)
+		{
+			// update faces marking display list
+			GLint currentListIndex;
+			glGetIntegerv(GL_LIST_INDEX, &currentListIndex);
+			if (currentListIndex == 0){
+				for (HeeksObj* object = m_faces->GetFirstChild(); object; object = m_faces->GetNextChild())
+				{
+					CFace* f = (CFace*)object;
+					f->UpdateMarkingGLList(theApp->ObjectMarked(f), no_color);
+				}
 			}
 		}
 	}
@@ -242,12 +245,6 @@ void CShape::glCommands(bool select, bool marked, bool no_color)
 		glCallList(m_face_gl_list);
 		if (!select)glDisable(GL_LIGHTING);
 		if (!select)glShadeModel(GL_FLAT);
-	}
-
-	{
-		// turn off transparency
-		glDisable(GL_BLEND);
-		glDepthMask(1);
 	}
 
 	if (draw_edges && *p_edge_gl_list)
@@ -755,7 +752,7 @@ bool CShape::ImportSolidsFile(const wchar_t* filepath, bool undoably, std::map<i
 						{
 							if(undoably)theApp->AddUndoably(new_object, add_to, NULL);
 							else add_to->Add(new_object, NULL);
-							shape_data.SetShape((CShape*)new_object/*, !theApp->m_inPaste*/, true);
+							shape_data.SetShape((CShape*)new_object, true);
 						}
 					}
 				}
@@ -1183,4 +1180,18 @@ void CShape::GetProperties(std::list<Property *> *list)
 	}
 #endif
 	IdNamedObjList::GetProperties(list);
+}
+
+void CShape::OnApplyProperties()
+{
+	unsigned int save_id = m_id;
+	bool save_visible = m_visible;
+
+	OnApplyPropertiesRaw();
+
+	m_id = save_id;
+	m_visible = save_visible;
+
+	this->create_faces_and_edges();
+	theApp->Repaint();
 }

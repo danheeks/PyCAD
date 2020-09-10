@@ -125,6 +125,7 @@
     <ClCompile Include="HSpline.cpp" />
     <ClCompile Include="Loop.cpp" />
     <ClCompile Include="OCCGeom.cpp" />
+    <ClCompile Include="PropertySolid.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="RuledSurface.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="NurbSurfaceParams.h" />
     <ClInclude Include="OCCGeom.h" />
     <ClInclude Include="OCCProperty.h" />
+    <ClInclude Include="PropertySolid.h" />
     <ClInclude Include="RuledSurface.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shape.h" />

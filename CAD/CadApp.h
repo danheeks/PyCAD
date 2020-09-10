@@ -142,6 +142,7 @@ public:
 	GraphicsTextMode m_graphics_text_mode;
 	bool m_print_scaled_to_page;
 	FileOpenOrImportType m_file_open_or_import_type;
+	bool m_set_id_in_add;
 	Matrix* m_file_open_matrix;
 	double m_view_units; // units to display to the user ( but everything is stored as mm ), 1.0 for mm, 25.4 for inches
 	bool m_dragging_moves_objects;
@@ -341,6 +342,8 @@ public:
 	virtual void Unmark(HeeksObj* object);
 	virtual bool InOpenFile(){ return m_in_OpenFile; }
 	virtual FileOpenOrImportType GetFileOpenOrImportType(){ return m_file_open_or_import_type; }
+	virtual bool GetSetIdInAdd(){return m_set_id_in_add;}
+	virtual void SetSetIdInAdd(bool value){ m_set_id_in_add = value; }
 	virtual SolidViewMode GetSolidViewMode(){ return m_solid_view_mode; }
 	TiXmlNode* GetXmlRoot(){ return m_cur_xml_root; }
 	TiXmlElement* GetXmlElement(){ return m_cur_xml_element; }
@@ -354,6 +357,7 @@ public:
 	void EndDrawFront();
 	HeeksObj* GetObjPointer();
 	ObjList* GetObjListPointer();
+	std::list<HeeksObj *> GetXmlWriteChildren();
 	bool GetDatumSolid(){ return m_datum_coords_system_solid_arrows; }
 	void RenderArrow();
 };

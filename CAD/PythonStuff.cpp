@@ -307,7 +307,8 @@ bool CadOpenFile(std::wstring fp)
 
 bool CadImport(const std::wstring &filepath, HeeksObj* paste_into = NULL)
 {
-	return theApp->OpenFile(filepath.c_str(), true, paste_into);
+	bool result = theApp->OpenFile(filepath.c_str(), true, paste_into);
+	return result;
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(CadImportOverloads, CadImport, 1, 2)

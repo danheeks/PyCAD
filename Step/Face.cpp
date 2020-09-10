@@ -677,8 +677,6 @@ void CFace::UpdateMarkingGLList(bool marked, bool no_color)
 			if (marked)
 			{
 				Material(CFace::face_selection_color).glMaterial(1.0);
-				glDisable(GL_BLEND);
-				glDepthMask(1);
 			}
 			else
 			{

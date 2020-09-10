@@ -6,7 +6,6 @@
 #include "MarkedList.h"
 #include "HeeksObj.h"
 #include "DigitizeMode.h"
-#include "PointOrWindow.h"
 #include "GripperSelTransform.h"
 #include "Picking.h"
 #include "CadApp.h"
@@ -15,13 +14,11 @@ using namespace std;
 
 MarkedList::MarkedList(){
 	gripping = false;
-	point_or_window = new PointOrWindow(true);
 	gripper_marked_list_changed = false;
 	ignore_coords_only = false;
 }
 
 MarkedList::~MarkedList(void){
-	delete point_or_window;
 	std::list<Gripper*>::iterator It;
 	for(It = move_grips.begin(); It != move_grips.end(); It++){
 		Gripper* gripper = *It;
