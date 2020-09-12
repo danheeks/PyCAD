@@ -95,10 +95,7 @@
 
 	wostream& operator <<(wostream& op, Circle& c){
 		// for debug - print circle to file
-		if(c.ok == false)
-			op << L"ok=\"false\"";
-		else
-			op << L" x=\"" << c.pc.x << L"\" y=\"" << c.pc.y << L"\" radius=\"" << c.radius << L"\"";
+		op << L" x=\"" << c.pc.x << L"\" y=\"" << c.pc.y << L"\" radius=\"" << c.radius << L"\"";
 		return op;
 	}
 
@@ -306,17 +303,17 @@
 	// circle methods
 	// ***************************************************************************************************************************************
 
-	Circle::Circle(const Point& p, double rad, bool okay){
+	Circle::Circle(const Point& p, double rad){
 		// Circle
 		pc = p;
 		radius = rad;
-		ok = okay;
+		m_is_a_line = false;
 	}
 
 	Circle::Circle( const Point& p, const Point& pc0){
-		ok = true;
 		pc = pc0;
 		radius = p.Dist(pc0);
+		m_is_a_line = false;
 	}
 
 	bool Circle::operator==(const Circle &c)const{
@@ -580,7 +577,7 @@
 		if(!s2.ok) return Thro(p0, p2);		// p1 & p2 coincident
 
 		Point p = Intof(Normal(s0, Mid(p0, p1)),  Normal(s1, Mid(p0, p2)));
-		return Circle(p, p0.Dist(p), true);
+		return Circle(p, p0.Dist(p));
 	}
 	Circle	Tanto(int NF, int AT0, const CLine& s0, int AT1, const Circle &c1, double rad) {
 		// circle tanto cline & circle with radius

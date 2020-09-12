@@ -35,10 +35,10 @@ double CArc::IncludedAngle()const
 	return fabs(ange - angs);
 }
 
-bool CArc::AlmostALine()const
+bool CArc::AlmostALine(double accuracy)const
 {
 	Point mid_point = MidParam(0.5);
-	if(Line2d(m_s, m_e - m_s).Dist(mid_point) <= TOLERANCE)
+	if (Line2d(m_s, m_e - m_s).Dist(mid_point) <= accuracy)
 		return true;
 
 	const double max_arc_radius = 1.0 / TOLERANCE;

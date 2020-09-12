@@ -336,9 +336,9 @@ DigitizedPoint DigitizeMode::Digitize(const Line &ray){
 	DigitizedPoint point(pnt, DigitizeCoordsType);
 
 	if(theApp->draw_to_grid){
-		Point3d plane_vx = Point3d(1, 0, 0).Transformed(digitizing_matrix());
-		Point3d plane_vy = Point3d(0, 1, 0).Transformed(digitizing_matrix());
 		Point3d datum = Point3d(0, 0, 0).Transformed(digitizing_matrix());
+		Point3d plane_vx = Point3d(1, 0, 0).Transformed(digitizing_matrix()) - datum;
+		Point3d plane_vy = Point3d(0, 1, 0).Transformed(digitizing_matrix()) - datum;
 
 		double a = Point3d(datum) * plane_vx;
 		double b = Point3d(point.m_point) * plane_vx;

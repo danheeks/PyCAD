@@ -6286,22 +6286,22 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.9999999"
-     inkscape:cx="161.25001"
-     inkscape:cy="-59.280064"
+     inkscape:zoom="2.828427"
+     inkscape:cx="262.77268"
+     inkscape:cy="781.78364"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
-     inkscape:window-x="-8"
+     inkscape:window-x="1912"
      inkscape:window-y="-8"
      inkscape:snap-global="false"
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:window-maximized="1"
      inkscape:snap-bbox="true"
-     inkscape:snap-grids="false">
+     inkscape:snap-grids="true">
     <inkscape:grid
        type="xygrid"
        id="grid2383" />
@@ -9176,29 +9176,20 @@
        inkscape:export-xdpi="43.903519"
        inkscape:export-ydpi="43.903519" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 200,322.36218 L 230,322.36218 L 230,292.36218 L 200,292.36218 L 200,322.36218 z"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#d0d0d0;fill-opacity:1;fill-rule:evenodd;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       d="m 227.54555,297.18429 c -7e-5,2.9069 2.7e-4,25.01829 0,26.76019 h 27.62343 v -26.76019 z m 4.31616,4.31616 h 18.99111 v 18.12787 h -18.99111 z"
        id="path4695"
-       inkscape:export-filename="C:\Users\Dan\HeeksCAD\bitmaps\rect.png"
-       inkscape:export-xdpi="269.94592"
-       inkscape:export-ydpi="269.94592" />
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccc"
+       inkscape:export-xdpi="310.42908"
+       inkscape:export-ydpi="310.42908" />
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 388.94149,318.41594 c 0,0 7.12783,-7.15405 14.25566,-14.30813 7.12782,-7.15407 -3.10002,-17.34439 -10.22785,-10.19032 -7.12783,7.15406 -7.12783,7.15406 -14.25565,14.30813 -7.12784,7.15407 3.10001,17.3444 10.22784,10.19032 z"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#d0d0d0;fill-opacity:1;fill-rule:evenodd;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       d="m 281.5293,297.35352 c -2.01145,-0.0664 -4.16193,0.75708 -5.90235,2.5039 -5.61623,5.6369 -5.6162,5.63654 -11.23242,11.27344 -1.74041,1.74682 -2.55428,3.89896 -2.48047,5.91016 0.0738,2.01119 0.96504,3.82737 2.30274,5.16015 1.33769,1.33279 3.15847,2.21874 5.16992,2.28516 2.01145,0.0664 4.15997,-0.75709 5.90039,-2.50391 0,0 5.6162,-5.63652 11.23242,-11.27344 1.74041,-1.74681 2.55623,-3.89896 2.48242,-5.91015 -0.0738,-2.01119 -0.96699,-3.82737 -2.30468,-5.16016 -1.33769,-1.33278 -3.15652,-2.21873 -5.16797,-2.28515 z m -0.13282,3.99804 c 0.90364,0.0298 1.80151,0.44657 2.47852,1.1211 0.67701,0.67453 1.09575,1.56913 1.12891,2.47265 0.0332,0.90353 -0.25066,1.86977 -1.31836,2.94141 -5.61622,5.63691 -11.23243,11.27344 -11.23243,11.27344 -1.06771,1.07164 -2.0319,1.35796 -2.93554,1.32812 -0.90364,-0.0298 -1.79955,-0.44656 -2.47656,-1.12109 -0.67702,-0.67453 -1.0977,-1.56914 -1.13086,-2.47266 -0.0332,-0.90352 0.25065,-1.86977 1.31836,-2.94141 5.61622,-5.63689 5.61619,-5.63653 11.23242,-11.27343 1.06771,-1.07164 2.03191,-1.35797 2.93554,-1.32813 z"
        id="path4697"
-       sodipodi:nodetypes="csssc"
-       inkscape:export-filename="c:\dev\HeeksCAD\trunk\bitmaps\obround.png"
-       inkscape:export-xdpi="229.95706"
-       inkscape:export-ydpi="229.95706"
-       inkscape:connector-curvature="0" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 277.15158,317.99795 L 295.19605,317.99795 L 300.75234,304.13896 L 286.37824,293.0511 L 272.00414,303.25194 L 277.15158,317.99795 z"
-       id="path4699"
-       sodipodi:nodetypes="cccccc"
-       inkscape:export-filename="C:\Users\Dan\HeeksCAD\bitmaps\pentagon.png"
-       inkscape:export-xdpi="229.95706"
-       inkscape:export-ydpi="229.95706" />
+       inkscape:connector-curvature="0"
+       inkscape:export-xdpi="316.26349"
+       inkscape:export-ydpi="316.26349" />
     <g
        inkscape:label="Layer 1"
        id="g3700"
@@ -10172,23 +10163,26 @@
     </g>
     <g
        id="g4617"
-       transform="translate(-90.25622,98.925973)"
+       transform="translate(-43.233617,98.57242)"
        inkscape:export-filename="C:\Users\Dan\HeeksCAD\icons\spline.png"
        inkscape:export-xdpi="45.405392"
        inkscape:export-ydpi="45.405392">
       <path
          sodipodi:nodetypes="cs"
          id="path3835"
-         d="M 408.92597,213.38686 C 421.72412,193.28815 430.25622,223.43621 438.78832,208.36218"
-         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.85194027;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         d="m 408.92597,213.38686 c 12.79815,-20.09871 21.33025,10.04935 29.86235,-5.02468"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.85194027;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0" />
       <path
          id="path3837"
-         d="M 421.72412,193.28815 L 408.92597,213.38686 L 408.92597,213.38686"
-         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.85194027;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         d="m 421.72412,193.28815 -12.79815,20.09871 v 0"
+         style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.85194027;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0" />
       <path
          id="path3839"
-         d="M 438.78832,208.36218 L 430.25622,223.43621 L 430.25622,223.43621"
-         style="fill:#0000ff;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.85194027;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         d="m 438.78832,208.36218 -8.5321,15.07403 v 0"
+         style="fill:#0000ff;fill-rule:evenodd;stroke:#0000ff;stroke-width:1.85194027;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         inkscape:connector-curvature="0" />
     </g>
     <g
        id="g3898"
@@ -13012,7 +13006,7 @@
            height="192.00002"
            x="86.000008"
            y="1165.3622" /></flowRegion><flowPara
-         id="flowPara7521"></flowPara></flowRoot>    <flowRoot
+         id="flowPara7521" /></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot7533"
        style="fill:black;fill-opacity:1;stroke:none;font-family:Arial;font-style:normal;font-weight:normal;font-size:42.66666667px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Arial, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal"><flowRegion
@@ -13022,7 +13016,7 @@
            height="64.5"
            x="292.5"
            y="1121.3622" /></flowRegion><flowPara
-         id="flowPara7539"></flowPara></flowRoot>    <flowRoot
+         id="flowPara7539" /></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot7551"
        style="fill:black;fill-opacity:1;stroke:none;font-family:Arial;font-style:normal;font-weight:normal;font-size:42.66666667px;line-height:1.25;letter-spacing:0px;word-spacing:0px;-inkscape-font-specification:'Arial, Normal';font-stretch:normal;font-variant:normal;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal"><flowRegion
@@ -13032,7 +13026,7 @@
            height="47.500004"
            x="293.5"
            y="1180.3622" /></flowRegion><flowPara
-         id="flowPara7557"></flowPara></flowRoot>    <g
+         id="flowPara7557" /></flowRoot>    <g
        id="g7600"
        inkscape:export-xdpi="145.69792"
        inkscape:export-ydpi="145.69792">
@@ -13079,5 +13073,21 @@
            x="290.5"
            y="1116.8622" /></flowRegion><flowPara
          id="flowPara7547-3">Title</flowPara><flowPara
-         id="flowPara7549-7" /></flowRoot>  </g>
+         id="flowPara7549-7" /></flowRoot>    <path
+       inkscape:connector-curvature="0"
+       style="fill:#d0d0d0;fill-opacity:1;fill-rule:evenodd;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 191.00575,316.53629 4.01127,1.55806 5.51559,-14.36829 c 0.94306,-3.28029 6.34298,-2.19639 4.91509,2.0312 l -3,7.85269 c -3.97994,12.37913 11.57773,13.93261 13.55805,4.92634 l 5,-14 -4.15857,-1.63172 -5.36829,14.29463 c -1.3878,3.82186 -6.20959,2.1632 -4.76776,-1.81022 l 3,-8.14732 c 3.36721,-9.22211 -8.33088,-15.69155 -13.70538,-4.70537 z"
+       id="path24188-1"
+       sodipodi:nodetypes="ccssssccssssc"
+       inkscape:export-filename="C:\Users\Dan\HeeksCAD\icons\sketch.png"
+       inkscape:export-xdpi="45.74511"
+       inkscape:export-ydpi="45.74511" />
+    <path
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#d0d0d0;fill-opacity:1;fill-rule:nonzero;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       d="m 315.71484,294.66016 -16.77734,11.45703 6.83789,19.28711 1.42383,-0.01 19.79297,-0.12695 6.32226,-18.82813 z m 0.0215,4.82812 12.81445,8.57422 -4.43945,13.22461 -15.51563,0.0977 -4.85937,-13.70118 z"
+       id="path7199"
+       inkscape:connector-curvature="0"
+       inkscape:export-xdpi="250.51404"
+       inkscape:export-ydpi="250.51404" />
+  </g>
 </svg>

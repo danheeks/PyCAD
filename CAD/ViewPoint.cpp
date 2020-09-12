@@ -394,9 +394,10 @@ int CViewPoint::ChooseBestPlane(int plane)const{
 	Point3d f = forwards_vector();
 	double dp[3];
 	Matrix orimat = *(theApp->GetDrawMatrix(false));
-	dp[0] = Point3d(0, 0, 1).Transformed(orimat) * f;
-	dp[1] = Point3d(0, 1, 0).Transformed(orimat) * f;
-	dp[2] = Point3d(1, 0, 0).Transformed(orimat) * f;
+	Point3d o = Point3d(0, 0, 0).Transformed(orimat);
+	dp[0] = (Point3d(0, 0, 1).Transformed(orimat) - o) * f;
+	dp[1] = (Point3d(0, 1, 0).Transformed(orimat) - o) * f;
+	dp[2] = (Point3d(1, 0, 0).Transformed(orimat) - o) * f;
 	double best_dp = 0.0;
 	int best_mode = -1;
 	double second_best_dp = 0.0;
@@ -447,20 +448,22 @@ int CViewPoint::GetTwoAxes(Point3d& vx, Point3d& vy, bool flattened_onto_screen,
 	int plane_mode = ChooseBestPlane(plane);
 	Matrix orimat = *(theApp->GetDrawMatrix(false));
 
+	Point3d o = Point3d(0, 0, 0).Transformed(orimat);
+
 	switch(plane_mode){
 	case 0:
-		vx = Point3d(1, 0, 0).Transformed(orimat);
-		vy = Point3d(0, 1, 0).Transformed(orimat);
+		vx = Point3d(1, 0, 0).Transformed(orimat) - o;
+		vy = Point3d(0, 1, 0).Transformed(orimat) - o;
 		break;
 
 	case 1:
-		vx = Point3d(1, 0, 0).Transformed(orimat);
-		vy = Point3d(0, 0, 1).Transformed(orimat);
+		vx = Point3d(1, 0, 0).Transformed(orimat) - o;
+		vy = Point3d(0, 0, 1).Transformed(orimat) - o;
 		break;
 
 	case 2:
-		vx = Point3d(0, 1, 0).Transformed(orimat);
-		vy = Point3d(0, 0, 1).Transformed(orimat);
+		vx = Point3d(0, 1, 0).Transformed(orimat) - o;
+		vy = Point3d(0, 0, 1).Transformed(orimat) - o;
 		break;
 	}
 
@@ -491,20 +494,6 @@ int CViewPoint::GetTwoAxes(Point3d& vx, Point3d& vy, bool flattened_onto_screen,
 		}
 	}
 	return plane_mode;
-}
-
-void CViewPoint::Set90PlaneDrawMatrix(Matrix &mat)const{
-	int plane = ChooseBestPlane(0);
-	mat = *(theApp->GetDrawMatrix(false));
-	switch(plane){
-	case 1:
-		mat = Matrix(Point3d(0, 0, 0).Transformed(mat), Point3d(1, 0, 0).Transformed(mat), Point3d(0, 0, 1).Transformed(mat));
-		break;
-		
-	case 2:
-		mat = Matrix(Point3d(0, 0, 0).Transformed(mat), Point3d(0, 1, 0).Transformed(mat), Point3d(0, 0, 1).Transformed(mat));
-		break;
-	}
 }
 
 void CViewPoint::SetPerspective(bool perspective){

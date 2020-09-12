@@ -62,7 +62,6 @@ public:
 	void SetViewAroundAllObjects(int margin);
 	Line SightLine(const IPoint &point);
 	int GetTwoAxes(Point3d& vx, Point3d& vy, bool flattened_onto_screen, int plane)const;
-	void Set90PlaneDrawMatrix(Matrix &mat)const;
 	void SetPerspective(bool perspective);
 	bool GetPerspective(){return m_perspective;}
 };

@@ -796,6 +796,11 @@ HeeksObj* NewText(const std::wstring &value)
 	return new HText(Matrix(), value, &theApp->current_color, 0, 0);
 }
 
+HeeksObj* NewCoordinateSystem(const std::wstring &title, const Point3d& o, const Point3d& x, const Point3d& y)
+{
+	return new CoordinateSystem(title, o, x, y);
+}
+
 boost::python::list HeeksObjGetLines(HeeksObj& object)
 {
 	return_list_ForGetLines = boost::python::list();
@@ -2004,6 +2009,16 @@ void DeleteObjectsUndoably(boost::python::list &list)
 	return theApp->DeleteUndoably(o_list);
 }
 
+void DeleteInternalObject(HeeksObj* object)
+{
+	delete object;
+}
+
+Matrix* GetDrawMatrix(bool get_the_appropriate_orthogonal)
+{
+	return theApp->GetDrawMatrix(get_the_appropriate_orthogonal);
+}
+
 void CopyUndoably(HeeksObj* object, HeeksObj* copy_object)
 {
 	theApp->CopyUndoably(object, copy_object);
@@ -2762,6 +2777,15 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("NumTriangles", StlSolidNumTriangles)
 		;
 
+	boost::python::class_<CoordinateSystem, boost::python::bases<HeeksObj> >("CoordinateSystem")
+		.def(boost::python::init<CoordinateSystem>())
+		.def(boost::python::init<const std::wstring&, const Point3d &, const Point3d &, const Point3d &>()) //, "create with name, origin, x-axis and y-axis"
+		.def_readwrite("o", &CoordinateSystem::m_o)
+		.def_readwrite("x", &CoordinateSystem::m_x)
+		.def_readwrite("y", &CoordinateSystem::m_y)
+		.def_readwrite("title", &CoordinateSystem::m_title)
+	;
+
 	boost::python::class_<PropertyCheck, boost::noncopyable, boost::python::bases<Property> >("PropertyCheck", boost::python::no_init);
 	boost::python::class_<PropertyChoice, boost::python::bases<Property> >("PropertyChoice", boost::python::no_init);
 	boost::python::class_<PropertyColor, boost::python::bases<Property> >("PropertyColor", boost::python::no_init);
@@ -3217,6 +3241,8 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("RollForward", RollForward);
 	boost::python::def("DeleteUndoably", DeleteUndoably);
 	boost::python::def("DeleteObjectsUndoably", DeleteObjectsUndoably);
+	boost::python::def("DeleteInternalObject", DeleteInternalObject);
+	boost::python::def("GetDrawMatrix", GetDrawMatrix, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
 	boost::python::def("CopyUndoably", CopyUndoably);
 	boost::python::def("TransformUndoably", TransformUndoably);
@@ -3259,6 +3285,7 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("NewCircle", NewCircle, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("NewSketch", NewSketch, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("NewText", NewText, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewCoordinateSystem", NewCoordinateSystem, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("PyIncref", PyIncref);
 	boost::python::def("GetNextID", GetNextID);
 	boost::python::def("GetDrawSelect", GetDrawSelect);

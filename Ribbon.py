@@ -348,6 +348,11 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar,'Text', 'text', 'Add a text object', app.OnText)
         Ribbon.AddToolBarTool(toolbar,'Dimensioning', 'dimension', 'Add a dimension', app.OnDimensioning)
         
+        panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Set Origin', self.Image('coordsys'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar,'3 Points', 'coordsys', 'Pick 3 points', app.OnSetOrigin3Points)
+        Ribbon.AddToolBarTool(toolbar,'1 point', 'coordsys', 'Pick 1 point', app.OnSetOrigin1Point)
+        
         panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Transformations', self.Image('movet'))
         toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(toolbar,'Move Translate', 'movet', 'Translate selected items', app.OnMoveTranslate)

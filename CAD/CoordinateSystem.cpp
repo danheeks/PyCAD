@@ -1207,14 +1207,18 @@ HeeksObj *CoordinateSystem::MakeACopy(void)const
 void CoordinateSystem::Transform(const Matrix &m)
 {
 	m_o = m_o.Transformed(m);
-	m_x = m_x.Transformed(m);
-	m_y = m_y.Transformed(m);
+	m_x = m_x.TransformedOnlyRotation(m);
+	m_y = m_y.TransformedOnlyRotation(m);
 }
 
 
 void CoordinateSystem::GetProperties(std::list<Property *> *list)
 {
-	//list->push_back(PropertyTrsf(this, L"position", &m_p));
+	list->push_back(new PropertyString(this, L"title", &m_title));
+	list->push_back(PropertyPnt(this, L"position", &m_o));
+	list->push_back(PropertyPnt(this, L"x-axis", &m_x));
+	list->push_back(PropertyPnt(this, L"y-axis", &m_y));
+
 	HeeksObj::GetProperties(list);
 }
 
@@ -1226,7 +1230,7 @@ void CoordinateSystem::GetGripperPositions(std::list<GripData> *list, bool just_
 
 	Point3d px(m_o + m_x * s);
 	Point3d py(m_o + m_y * s);
-	Point3d vz = Point3d(0, 0, 1).Transformed(mat);
+	Point3d vz = Point3d(0, 0, 1).Transformed(mat) - m_o;
 	Point3d pz(m_o + vz * s);
 	list->push_back(GripData(GripperTypeTranslate,m_o,NULL));
 	list->push_back(GripData(GripperTypeRotateObject,px,NULL));

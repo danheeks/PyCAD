@@ -105,7 +105,6 @@
     <ClInclude Include="AreaOrderer.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Box2D.h" />
-    <ClInclude Include="Circle.h" />
     <ClInclude Include="clipper.hpp" />
     <ClInclude Include="Curve.h" />
     <ClInclude Include="Curve3D.h" />

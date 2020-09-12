@@ -12,6 +12,34 @@ Circle::Circle(const Point& p0, const Point& p1, const Point& p2)
 	radius = 0.0;
 	pc = Point(0, 0);
 
+	if (p0 == p2)
+	{
+		if (p1 == p0)
+		{
+			m_is_a_line = true;
+			m_p0 = p0;
+			m_p1 = p0;
+		}
+		else
+		{
+			m_is_a_line = false;
+			pc = (p0 + p1) * 0.5;
+			radius = p0.dist(pc);
+		}
+		return;
+	}
+
+	CLine line(p0, p2);
+	if (line.Dist(p1) <= TOLERANCE)
+	{
+		m_is_a_line = true;
+		m_p0 = p0;
+		m_p1 = p2;
+		return;
+	}
+
+	m_is_a_line = false;
+
 	double x1 = p0.x;
 	double y1 = p0.y;
 	double x2 = p1.x;
@@ -59,6 +87,10 @@ Circle::Circle(const Point& p0, const Point& p1, const Point& p2)
 
 bool Circle::PointIsOn(const Point& p, double accuracy)
 {
+	if (m_is_a_line)
+	{
+		return CLine(m_p0, m_p1).Dist(p) <= accuracy;
+	}
 	double rp = p.dist(pc);
 	bool on = fabs(radius - rp) < accuracy;
 	return on;
@@ -67,6 +99,16 @@ bool Circle::PointIsOn(const Point& p, double accuracy)
 bool Circle::LineIsOn(const Point& p0, const Point& p1, double accuracy)
 {
 	// checks the points are on the arc, to the given accuracy, and the mid point of the line.
+
+	if (m_is_a_line)
+	{
+		if (!PointIsOn(p0, accuracy))return false;
+		if (!PointIsOn(p1, accuracy))return false;
+
+		CLine line_this(m_p0, m_p1);
+		CLine line(p0, p1);
+		return line.Intof(line) != INVALID_POINT;
+	}
 
 	if(!PointIsOn(p0, accuracy))return false;
 	if(!PointIsOn(p1, accuracy))return false;

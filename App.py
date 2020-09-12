@@ -32,6 +32,10 @@ def OnMessageBox(error_message):
 def OnInputMode():
     wx.GetApp().OnInputMode()
     
+def OnPaint():
+    if wx.GetApp().coordsys_for_P3P != None:
+        wx.GetApp().RenderCoordSys()
+    
 tools = []
 save_filter_for_StartPickObjects = 0
 save_just_one_for_EndPickObjects = False
@@ -56,6 +60,10 @@ class App(wx.App):
         self.bitmap_path = self.cad_dir + '/bitmaps'
         self.inMainLoop = False
         self.select_mode = SelectMode.SelectMode()
+        self.coordsys_for_P3P = None
+        self.paint_registered = False
+        self.import_file_types = [] # a list of tuples, example entry:   ( ['step', 'stp'], 'Step Files' )
+        self.export_file_types = [] # a list of tuples
         
         save_out = sys.stdout
         save_err = sys.stderr
@@ -121,9 +129,9 @@ class App(wx.App):
     def RegisterObjectTypes(self):
         HImage.type = cad.RegisterObjectType("Image", CreateImage)
         Gear.type = cad.RegisterObjectType("Gear", CreateGear)
-        global wx_image_extensions
-        for ext in wx_image_extensions:
-            cad.RegisterImportFileType(ext, ImportImageFile)
+        self.RegisterImportFileTypes(wx_image_extensions, 'Picture Files', ImportImageFile)
+        import Svg
+        self.RegisterExportFileTypes(['svg'], 'Svg Files', Svg.Export)
     
     def OnNewOrOpen(self, open):
         pass
@@ -214,14 +222,17 @@ class App(wx.App):
         cad.EndHistory()
         
     def FitArcs(self):
-        sketch = self.object
-        sketch.__class__ = cad.Sketch
-        curve = sketch.GetCurve()
-        curve.FitArcs()
-        cad.StartHistory()
-        cad.DeleteUndoably(self.object)
-        cad.AddUndoably(cad.NewSketchFromCurve(curve))
-        cad.EndHistory()        
+        value = self.InputLength('Set tolerance for Fit Arcs', 'tolerance', geom.get_accuracy())
+        if value != None:
+            geom.set_accuracy(value)
+            sketch = self.object
+            sketch.__class__ = cad.Sketch
+            curve = sketch.GetCurve()
+            curve.FitArcs()
+            cad.StartHistory()
+            cad.DeleteUndoably(self.object)
+            cad.AddUndoably(cad.NewSketchFromCurve(curve))
+            cad.EndHistory()        
         
     def CopyUndoably(self, object, copy_with_new_data):
         copy_undoable = CopyObjectUndoable(object, copy_with_new_data)
@@ -678,28 +689,27 @@ class App(wx.App):
         dialog.CenterOnParent()
         if dialog.ShowModal() != wx.ID_CANCEL:
             self.OnSaveFilepath(dialog.GetPath())
-            
+                    
     def GetImportWildcardString(self):
-        global wx_image_extensions
-        imageExtStr = ''
-        imageExtStr2 = ''
-        for ext in wx_image_extensions:
-            if imageExtStr:
-                imageExtStr += ';'
-            imageExtStr += '*.'
-            imageExtStr += ext
-            if imageExtStr2:
-                imageExtStr2 += ' '
-            imageExtStr2 += '*.'
-            imageExtStr2 += ext
-        return 'Known Files' + ' |*.heeks;*.HEEKS;*.igs;*.IGS;*.iges;*.IGES;*.stp;*.STP;*.step;*.STEP;*.dxf;*.DXF;*.stl' + imageExtStr + '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO|Picture files (' + imageExtStr2 + ')|' + imageExtStr
+        wild_card_string1 = 'Known Files |*.heeks;*.HEEKS;*.dxf;*.DXF;*.stl'
+        wild_card_string2 = '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO'
+        
+        wild_card_string1, wild_card_string2 = AddToWildcardStrings(wild_card_string1, wild_card_string2, self.import_file_types)
+        
+        return wild_card_string1 + wild_card_string2
 
     def GetExportWildcardString(self):
-        return 'Known Files |*.stl;*.dxf;*.cpp;*.py;*.obj|STL files (*.stl)|*.stl|DXF files (*.dxf)|*.dxf|CPP files (*.cpp)|*.cpp|OpenCAMLib python files (*.py)|*.py|Wavefront .obj files (*.obj)|*.obj'
+        wild_card_string1 = 'Known Files |*.stl;*.dxf;*.cpp;*.py;*.obj'
+        wild_card_string2 = '|STL files (*.stl)|*.stl|DXF files (*.dxf)|*.dxf|CPP files (*.cpp)|*.cpp|OpenCAMLib python files (*.py)|*.py|Wavefront .obj files (*.obj)|*.obj'
+        
+        wild_card_string1, wild_card_string2 = AddToWildcardStrings(wild_card_string1, wild_card_string2, self.export_file_types)
+        
+        return wild_card_string1 + wild_card_string2
                                          
     def OnImport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
+        
         dialog = wx.FileDialog(self.frame, 'Import File', default_directory, '', self.GetImportWildcardString())
         dialog.CenterOnParent()
         
@@ -711,7 +721,7 @@ class App(wx.App):
                 if self.filepath == None:
                     dot = filepath.rfind('.')
                     if dot != -1:
-                        self.filepath = filepath[:dot+1] + '.heeks'
+                        self.filepath = filepath[:dot+1] + 'heeks'
                 self.frame.SetFrameTitle()
                 config.Write('ImportDirectory', dialog.GetDirectory())
                 cad.Repaint()
@@ -721,6 +731,16 @@ class App(wx.App):
         if dot == -1:
             return ''
         return path[dot+1:].lower()
+        
+    def RegisterImportFileTypes(self, suffix_list, description, ImportCallback):
+        self.import_file_types.append((suffix_list, description))
+        for suffix in suffix_list:
+            cad.RegisterImportFileType(suffix, ImportCallback)
+        
+    def RegisterExportFileTypes(self, suffix_list, description, ExportCallback):        
+        self.export_file_types.append((suffix_list, description))
+        for suffix in suffix_list:
+            cad.RegisterExportFileType(suffix, ExportCallback)
         
     def OnExport(self, e):
         config = HeeksConfig()
@@ -1006,12 +1026,80 @@ class App(wx.App):
         
     def OnDimensioning(self, e):
         pass
+    
+    def RenderCoordSys(self):
+        p = cad.GetDigitizing().digitized_point.point
+        if self.coord_render_mode == 0:
+            self.coordsys_for_P3P.o = p
+        elif self.coord_render_mode == 1:
+            if p != self.coordsys_for_P3P.o:
+                self.coordsys_for_P3P.x = (p - self.coordsys_for_P3P.o).Normalized()
+                if self.coordsys_for_P3P.x.Dist(self.z_for_P3P) < 0.0000000001 or self.coordsys_for_P3P.x.Dist(-self.z_for_P3P) < 0.0000000001:
+                    self.coordsys_for_P3P.y = self.y_for_P3P ^ self.coordsys_for_P3P.x
+                else:
+                    self.coordsys_for_P3P.y = self.z_for_P3P ^ self.coordsys_for_P3P.x
+        elif self.coord_render_mode == 2:
+            if p != self.coordsys_for_P3P.o:
+                y = (p - self.coordsys_for_P3P.o).Normalized()
+                if y.Dist(self.coordsys_for_P3P.x) > 0.0000000001 and y.Dist(-self.coordsys_for_P3P.x) > 0.0000000001:
+                    z = self.coordsys_for_P3P.x ^ y
+                    self.coordsys_for_P3P.y = z ^ self.coordsys_for_P3P.x
+        self.coordsys_for_P3P.OnGlCommands(False, False, False)
+    
+    def MakeOriginFromPickPoints(self, coordsys, three_points):
+        self.coordsys_for_P3P = coordsys
+        self.y_for_P3P = coordsys.y
+        self.z_for_P3P = coordsys.x ^ coordsys.y
+        coordsys.SetVisible(False)
+        if self.paint_registered == False:
+            cad.RegisterOnGLCommands(OnPaint)
+            self.paint_registered = True
         
-    def OnCoordinateSystem(self, e):
-        pass
+        self.coord_render_mode = 0
         
-    def OnNewOrigin(self, e):
-        pass
+        ret = True
+
+        if self.PickPosition('Pick the location') == None:
+            ret = False
+
+        if three_points:
+            self.coord_render_mode = 1
+    
+            if ret and self.PickPosition('Pick a point on the x-axis') == None:
+                ret = False
+    
+            self.coord_render_mode = 2
+            
+            if ret and self.PickPosition('Pick a point where y > 0') == None:
+                ret = False
+        
+        self.coordsys_for_P3P = None
+        coordsys.SetVisible(True)
+        
+        return ret
+    
+    def OnSetOriginPoints(self, three_points):
+        mat = cad.GetDrawMatrix(False)
+        o = geom.Point3D(0,0,0).Transformed(mat)
+        x = geom.Point3D(1,0,0).Transformed(mat) - o
+        y = geom.Point3D(0,1,0).Transformed(mat) - o
+        new_object = cad.NewCoordinateSystem("Coordinate System", o, x, y)
+        cad.ClearSelection()
+        cad.SetInputMode(self.select_mode)
+
+        # and pick from three points
+        result = self.MakeOriginFromPickPoints(new_object, three_points)
+        if result:
+            cad.AddUndoably(new_object)
+            cad.Select(new_object)
+        else:
+            cad.DeleteInternalObject(new_object)
+
+    def OnSetOrigin3Points(self, e):
+        self.OnSetOriginPoints(True)
+
+    def OnSetOrigin1Point(self, e):
+        self.OnSetOriginPoints(False)
         
     def OnMoveTranslate(self, e):
         from Transform import Translate
@@ -1109,5 +1197,21 @@ class CopyObjectUndoable(cad.BaseUndoable):
         self.object.CopyFrom(self.old_copy)
         cad.WasModified(self.object)
         
+def AddToWildcardStrings(wild_card_string1, wild_card_string2, file_types):
+    for suffix_list, description in file_types:
+        wild_card_string2 += '|' + description + ' ('
+        imageExtStr = ''
+        imageExtStr2 = ''
+        for suffix in suffix_list:
+            wild_card_string1 += ';*.'
+            wild_card_string1 += suffix
+            if imageExtStr:
+                imageExtStr += ' '
+                imageExtStr2 += ';'
+            imageExtStr += ('*.' + suffix)
+            imageExtStr2 += ('*.' + suffix)
+        wild_card_string2 += (imageExtStr + ')|' + imageExtStr2)
+        
+    return wild_card_string1, wild_card_string2
         
         

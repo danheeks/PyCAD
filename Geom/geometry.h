@@ -368,13 +368,16 @@ public:
 class Circle{
 	friend wostream& operator <<(wostream& op, Circle& c);
 public:
-	bool ok;
+	//bool ok;
 	Point pc;
 	double	radius;
+	bool m_is_a_line; // true for line, false for circle
+	Point m_p0;       // just for line
+	Point m_p1;       // just for line
 
 	// constructors etc...
-	inline	Circle() {ok = false;};
-	Circle( const Point& p, double r, bool okay = true);							// Circle  c1(Point(10,30), 20);
+	inline	Circle(){}
+	Circle( const Point& p, double r);							// Circle  c1(Point(10,30), 20);
 	Circle( const Point& p, const Point& pc);											// Circle  c1(p[222], p[223]);
 	Circle( const Circle& c ){*this = c;}									// copy constructor  Circle c1(c2);
 	Circle(const Point& p0, const Point& p1, const Point& p2); // circle through three points

@@ -22,9 +22,9 @@ static void RenderGrid(const CViewPoint *view_point, double max_number_across, b
 	datum = datum.Transformed(orimat);
 	orimat = Matrix(datum, vx, vy);
 	Point3d unit_forward = view_point->forwards_vector().Normalized();
-	double plane_dp = fabs(Point3d(0, 0, 1).Transformed(orimat) * unit_forward);
+	double plane_dp = fabs((Point3d(0, 0, 1).Transformed(orimat) - datum) * unit_forward);
 	if(plane_dp < 0.3)return;
-	Plane plane(Point3d(0, 0, 0).Transformed(orimat), Point3d(0, 0, 1).Transformed(orimat));
+	Plane plane(datum, Point3d(0, 0, 1).Transformed(orimat) - datum);
 	{
 		for(int i =0; i<4; i++){
 			Point3d p1 = view_point->glUnproject(sp[i]);
@@ -169,7 +169,7 @@ void GetGridBox(const CViewPoint *view_point, CBox &ext){
 	Matrix orimat = *(theApp->GetDrawMatrix(false));
 	datum = datum.Transformed(orimat);
 	orimat = Matrix(datum, vx, vy);
-	Plane plane(datum, Point3d(0, 0, 1).Transformed(orimat));
+	Plane plane(datum, Point3d(0, 0, 1).Transformed(orimat) - datum);
 	{
 		for(int i =0; i<4; i++){
 			Point3d p1 = view_point->glUnproject(sp[i]);
@@ -218,7 +218,7 @@ static void RenderGrid(const CViewPoint *view_point, int plane)
 			Matrix orimat = *(theApp->GetDrawMatrix(false));
 			datum = datum.Transformed(orimat);
 			orimat = Matrix(datum, vx, vy);
-			Point3d v_up = Point3d(0,0, 1).Transformed(orimat);
+			Point3d v_up = Point3d(0,0, 1).Transformed(orimat) - datum;
 			double fufz = fabs(uf * v_up);
 			if(fufz<0.7){
 				double there = (fufz - 0.3) / 0.4;

@@ -578,8 +578,8 @@
 	 void Plane::Transform(const Matrix& m)
 	 {
 		 Point3d p = normal * d;
-		 normal = normal.Transformed(m);
 		 p = p.Transformed(m);
+		 normal = normal.Transformed(m) - p;
 		 normal.Normalize();
 		 d = Point3d(0, 0, 0) * normal;
 	 }

@@ -44,14 +44,10 @@ class SolidApp(App):
         step.SetEdgeType(cad.RegisterObjectType("Edge", None))
         step.SetEllipseType(cad.RegisterObjectType("Ellipse", step.CreateEllipse))
         step.SetSplineType(cad.RegisterObjectType("Spline", step.CreateSpline))
-        cad.RegisterImportFileType("step", ImportSolidsFile)
-        cad.RegisterImportFileType("stp", ImportSolidsFile)
-        cad.RegisterImportFileType("iges", ImportSolidsFile)
-        cad.RegisterImportFileType("igs", ImportSolidsFile)
-        cad.RegisterExportFileType("step", ExportSolidsFile)
-        cad.RegisterExportFileType("stp", ExportSolidsFile)        
-        cad.RegisterExportFileType("iges", ExportSolidsFile)
-        cad.RegisterExportFileType("igs", ExportSolidsFile)        
+        self.RegisterImportFileTypes(['step', 'stp'], 'STEP Files', ImportSolidsFile)
+        self.RegisterImportFileTypes(['iges', 'igs'], 'IGES Files', ImportSolidsFile)
+        self.RegisterExportFileTypes(['step', 'stp'], 'STEP Files', ExportSolidsFile)
+        self.RegisterExportFileTypes(['iges', 'igs'], 'IGES Files', ExportSolidsFile)
         
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = App.GetObjectTools(self, object, control_pressed, from_tree_canvas)
@@ -73,12 +69,6 @@ class SolidApp(App):
 
     def IsSolidApp(self):
         return True
-            
-    def GetImportWildcardString(self):
-        return App.GetImportWildcardString(self) + '|STEP files|*.step;*.STEP'
-
-    def GetExportWildcardString(self):
-        return App.GetExportWildcardString(self) + '|STEP files|*.step;*.STEP'
     
     def AddObjectFromButton(self, new_object):
         cad.StartHistory()
@@ -244,16 +234,18 @@ class SolidApp(App):
     def OnShadow(self, event):
         if not self.CheckForNumberOrMore(1, [step.GetSolidType()], 'Pick one or more solids to make a shadow sketch from', 'Shadow Sketch of Solids'):
             return
-        cad.StartHistory()
-        for object in cad.GetSelectedObjects():
-            stl = object.GetTris(0.1)
-            mat = geom.Matrix()
-            shadow = stl.Shadow(mat, False)
-            shadow.Reorder()
-            sketch = cad.NewSketchFromArea(shadow)
-            cad.AddUndoably(sketch)
-        cad.EndHistory()
-        
+        accuracy = self.InputLength('Enter Shadow Accuracy', 'Accuracy', geom.get_accuracy())
+        if accuracy:
+            cad.StartHistory()
+            geom.set_accuracy(accuracy)
+            for object in cad.GetSelectedObjects():
+                stl = object.GetTris(accuracy)
+                mat = geom.Matrix()
+                shadow = stl.Shadow(mat, False)
+                shadow.Reorder()
+                sketch = cad.NewSketchFromArea(shadow)
+                cad.AddUndoably(sketch)
+            cad.EndHistory()
 
     def OnFillet(self, event):
         if not self.CheckForNumberOrMore(1, [step.GetEdgeType()], 'Pick one or more edges to add a fillet to', 'Edge Fillet'):
