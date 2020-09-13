@@ -354,7 +354,8 @@ public:
 	CLine Transform(Matrix& m);												// transform a CLine
 	Point Intof(const CLine& s);													// intersection of 2 clines
 	Point Intof(int NF, const Circle& c);											// intersection of cline & circle 
-	Point Intof(int NF, const Circle& c, Point& otherInters);	double Dist(const Point& p1)const;	//  ditto & other intersection												
+	Point Intof(int NF, const Circle& c, Point& otherInters);	//  ditto & other intersection
+	double Dist(const Point& p1)const;												
 	CLine Bisector(const CLine& s);												// Bisector of 2 Clines
 
 	// destructor

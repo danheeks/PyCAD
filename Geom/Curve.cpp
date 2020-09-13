@@ -163,7 +163,8 @@ bool CCurve::CheckForArc(const CVertex& prev_vt, std::list<const CVertex*>& migh
 		if (angs < ange)angs += 6.2831853071795864;
 	}
 
-	if (arc.IncludedAngle() >= 3.15)return false; // We don't want full arcs, so limit to about 180 degrees
+	if (arc.IncludedAngle() >= 3.4)
+		return false; // We don't want full arcs, so limit to about 180 degrees
 
 	for (std::list<const CVertex*>::iterator It = might_be_an_arc.begin(); It != might_be_an_arc.end(); It++)
 	{
@@ -255,6 +256,40 @@ void CCurve::AddArcOrLines(bool check_for_arc, std::list<CVertex> &new_vertices,
 	}
 }
 
+void CCurve::AddToPreviousArc(std::list<CVertex> &new_vertices, std::list<const CVertex*>& might_be_an_arc)
+{
+	// need two vertices for the previous arc
+	if (new_vertices.size() < 2)
+		return;
+
+	// previous span is not an arc
+	if (new_vertices.back().m_type == 0)
+		return;
+
+	// create a circle to test
+	std::list<CVertex>::reverse_iterator It = new_vertices.rbegin();
+	CVertex& arc_end = *It;
+	It++;
+	CVertex& arc_start = *It;
+
+	Circle c(arc_end.m_c, arc_end.m_c.dist(arc_start.m_p));
+
+	const CVertex* current_vt = &arc_end;
+	double accuracy = CArea::m_accuracy * 1.4 / CArea::m_units * 0.1;
+	for (std::list<const CVertex*>::iterator It = might_be_an_arc.begin(); It != might_be_an_arc.end();)
+	{
+		const CVertex* vt = *It;
+		if (!c.PointIsOn(vt->m_p, CArea::m_accuracy / CArea::m_units * 0.1))
+			break; // point not on circle
+		if (!c.LineIsOn(current_vt->m_p, vt->m_p, CArea::m_accuracy * 2.0 / CArea::m_units))
+			break; // line not on circle
+		// line is on circle
+		arc_end.m_p = vt->m_p; // extend previous arc to this
+		might_be_an_arc.erase(It++); // increment iterator and remove item ( with value of iterator before it got incremented )
+		current_vt = vt;
+	}
+}
+
 void CCurve::FitArcs()
 {
 	std::list<CVertex> new_vertices;
@@ -295,7 +330,16 @@ void CCurve::FitArcs()
 		prev_vt = &vt;
 	}
 
-	if (might_be_an_arc.size() > 0)AddArcOrLines(false, new_vertices, might_be_an_arc, arc_or_line, arc_found, arc_added);
+	// finished looping through spans
+
+	if (might_be_an_arc.size() > 0)
+	{
+		// add any remaining as their own arc
+		AddArcOrLines(false, new_vertices, might_be_an_arc, arc_or_line, arc_found, arc_added);
+
+		// still some unused section
+		AddToPreviousArc(new_vertices, might_be_an_arc);
+	}
 
 	if (arc_added)
 	{

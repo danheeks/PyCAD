@@ -30,7 +30,7 @@ Circle::Circle(const Point& p0, const Point& p1, const Point& p2)
 	}
 
 	CLine line(p0, p2);
-	if (line.Dist(p1) <= TOLERANCE)
+	if (fabs(line.Dist(p1)) <= TOLERANCE)
 	{
 		m_is_a_line = true;
 		m_p0 = p0;
