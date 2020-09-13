@@ -492,7 +492,9 @@ class Ribbon(RB.RibbonBar):
         wx.GetApp().OnKeyDown(event)
     
     def OnSnapDropdown(self, e):
-        cad.SetDigitizeGridSize(wx.GetApp().InputLength('Edit Snap Grid', 'Snap Grid', cad.GetDigitizeGridSize()))
+        value = wx.GetApp().InputLength('Edit Snap Grid', 'Snap Grid', cad.GetDigitizeGridSize())
+        if value != None:
+            cad.SetDigitizeGridSize(value)
 
     def OnWindowButton(self, e):
         f = self.GetParent()
