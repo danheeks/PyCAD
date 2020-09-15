@@ -23,6 +23,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	const wchar_t* GetTypeString(void)const{return L"Gripper";}
 	void Transform(const Matrix &m);
+	int PickPriority(){ return 3; };
 
 	//Gripper's virtual functions
 //	virtual wxCursor* get_gripper_cursor(){return NULL;}

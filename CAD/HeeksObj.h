@@ -134,6 +134,7 @@ public:
 	virtual bool IsList(){return false;}
 	virtual HeeksObj *Find( const int type, const unsigned int id );
 	virtual unsigned int GetIndex();
+	virtual int PickPriority(){ return 1; } // 1 for faces, 2 for edges, 3 for points
 protected:
 	virtual void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);
 public:

@@ -2324,7 +2324,7 @@ IRect CCadApp::PointToPickBox(const IPoint& point)
 	return IRect(point.x - 5, theApp->m_current_viewport->GetViewportSize().GetHeight() - point.y - 5, 10, 10);
 }
 
-void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects, bool just_top_level_item)
+void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects, bool just_top_level_item, bool sort_by_pick_priority)
 {
 	if (only_if_fully_in){
 		// only select objects which are completely within the window
@@ -2357,7 +2357,7 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 		for (int i = 0; i < 4; i++)
 		{
 			std::list<HeeksObj*> objects_in_strip;
-			GetObjectsInWindow(strip_boxes[i], false, one_of_each, filter, objects_in_strip, just_top_level_item);
+			GetObjectsInWindow(strip_boxes[i], false, one_of_each, filter, objects_in_strip, just_top_level_item, false);
 			for (std::list<HeeksObj*>::iterator It = objects_in_strip.begin(); It != objects_in_strip.end(); It++)
 				obj_set.erase(*It);
 		}
@@ -2410,6 +2410,21 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 				if (!continue_in_loop)
 					break;
 			}
+		}
+	}
+
+	if (sort_by_pick_priority)
+	{
+		std::multimap<int, HeeksObj*> priority_map; // make this ordered by pick priority
+		for (std::list<HeeksObj*>::iterator It = objects.begin(); It != objects.end(); It++)
+		{
+			HeeksObj* object = *It;
+			priority_map.insert(std::make_pair(object->PickPriority(), object));
+		}
+		objects.clear();
+		for (std::multimap<int, HeeksObj*>::iterator It = priority_map.begin(); It != priority_map.end(); It++)
+		{
+			objects.push_front(It->second);
 		}
 	}
 }

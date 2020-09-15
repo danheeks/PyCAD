@@ -70,7 +70,8 @@ public:
 	void Intersect(const Span& s, std::list<Point> &pts)const; // finds all the intersection points between two spans
 	void Reverse();
 	double GetRadius()const;
-	Span Offset(double offset);													// offset span method
+	Span Offset(double offset);	// offset span method
+	bool IsOn(Circle& c, double tol)const;
 };
 
 ostream & operator<<(ostream &os, const Span &);
@@ -114,7 +115,7 @@ public:
 	void SpanIntersections(const Span& s, std::list<Point> &pts)const;
 	void CurveIntersections(const CCurve& c, std::list<Point> &pts)const;
 	void Transform(const Matrix& matrix);
-	bool GetMaxCutterRadius(double &radius, bool outside)const;
+	bool GetMaxCutterRadius(double &radius, bool outside, double tol)const;
 	bool IsACircle(Circle& circle, double tol)const;
 };
 

@@ -899,6 +899,11 @@ CBox ObjListGetBox(ObjList& objlist)
 	return box;
 }
 
+void IdNamedObjListSetTitle(IdNamedObjList& object, const wstring& title)
+{
+	object.m_title_made_from_id = false;
+	object.m_title = title;
+}
 
 HeeksColor PropertyGetColor(const Property& p)
 {
@@ -2744,6 +2749,9 @@ BOOST_PYTHON_MODULE(cad) {
 
 	boost::python::class_<IdNamedObjList, boost::python::bases<ObjList>, boost::noncopyable>("IdNamedObjList")
 		.def(boost::python::init<IdNamedObjList>())
+		.def_readwrite("title", &IdNamedObjList::m_title)
+		.def_readwrite("title_made_from_id", &IdNamedObjList::m_title_made_from_id)
+		.def("SetTitle", &IdNamedObjListSetTitle)
 		;
 
 	boost::python::class_<CSketch, boost::python::bases<IdNamedObjList>, boost::noncopyable>("Sketch")

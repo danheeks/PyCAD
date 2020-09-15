@@ -40,4 +40,5 @@ public:
 	void CopyFrom(const HeeksObj* object){operator=(*((HPoint*)object));}
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement *element);
+	int PickPriority(){ return 3; } // points
 };

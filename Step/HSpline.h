@@ -39,6 +39,7 @@ public:
 	int Intersects(const HeeksObj *object, std::list< double > *rl)const;
 	bool GetStartPoint(double* pos);
 	bool GetEndPoint(double* pos);
+	int PickPriority(){ return 2; } // lines
 
 	void Reverse();
 };

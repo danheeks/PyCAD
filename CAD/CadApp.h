@@ -264,7 +264,7 @@ public:
 	virtual std::wstring GetResFolder()const;
 	void get_2d_arc_segments(double xs, double ys, double xe, double ye, double xc, double yc, bool dir, bool want_start, double pixels_per_mm, void(*callbackfunc)(const double* xy));
 	IRect PointToPickBox(const IPoint& point);
-	void GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects, bool just_top_level_item = true);
+	void GetObjectsInWindow(const IRect &window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, std::list<HeeksObj*> &objects, bool just_top_level_item = true, bool sort_by_pick_priority = true);
 	void ColorPickLowestObjects(IRect window, bool single_picking, std::list<HeeksObj*> &objects);
 	bool PickPosition(const wchar_t* str, double* pos, void(*callback)(const double*) = NULL);
 	void glSphere(double radius, const double* pos = NULL);

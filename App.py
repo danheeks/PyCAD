@@ -268,6 +268,8 @@ class App(wx.App):
             tools.append(ContextTool.EditTool(object))
         if object.CanBeDeleted():
             tools.append(ContextTool.DeleteTool(object))
+        if self.IsPasteReady():
+            tools.append(ContextTool.CADObjectContextTool(object, "Paste Into", 'paste', self.OnPasteInto))
         return tools
         
     def GetTools(self, x, y, control_pressed):
@@ -844,45 +846,46 @@ class App(wx.App):
         self.CopySelectedItems()
         
     def OnUpdateCopy(self, e):
-        e.Enable(cad.GetNumSelected() > 0)            
+        e.Enable(cad.GetNumSelected() > 0)    
         
-    def OnPaste(self, e):
+    def GetClipboardText(self):
+        if wx.TheClipboard.IsOpened():
+            return None
         s = None
-        
         if wx.TheClipboard.Open():
             if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
                 data = wx.TextDataObject()
                 wx.TheClipboard.GetData(data)
                 s = data.GetText()                
             wx.TheClipboard.Close()
-            
-        if s == None:
-            return
-
-        temp_file = wx.StandardPaths.Get().GetTempDir() + '/temp_Heeks_clipboard_file.xml'
-        f = open(temp_file, 'w')
-        f.write(s)
-        f.close()
-        cad.ClearSelection()
-        cad.SetMarkNewlyAddedObjects(True)
-        cad.Import(temp_file)
-        cad.SetMarkNewlyAddedObjects(False)
+        return s
+    
+    def OnPasteInto(self, object):
+        s = self.GetClipboardText()
+        if s != None:
+            temp_file = wx.StandardPaths.Get().GetTempDir() + '/temp_Heeks_clipboard_file.xml'
+            f = open(temp_file, 'w')
+            f.write(s)
+            f.close()
+            cad.Import(temp_file, object)
+        
+    def OnPaste(self, e):
+        s = self.GetClipboardText()
+        if s != None:
+            temp_file = wx.StandardPaths.Get().GetTempDir() + '/temp_Heeks_clipboard_file.xml'
+            f = open(temp_file, 'w')
+            f.write(s)
+            f.close()
+            cad.ClearSelection()
+            cad.SetMarkNewlyAddedObjects(True)
+            cad.Import(temp_file)
+            cad.SetMarkNewlyAddedObjects(False)
         
     def IsPasteReady(self):
-        if wx.TheClipboard.IsOpened():
-            return False
-        
-        if wx.TheClipboard.Open():
-            s = ''
-            if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
-                data = wx.TextDataObject()
-                wx.TheClipboard.GetData(data)
-                s = data.GetText()
-            wx.TheClipboard.Close()
-            
+        s = self.GetClipboardText()
+        if s != None:
             if s[:19] == '<?xml version="1.0"':
                 return True
-        
         return False
     
     def OnUpdatePaste(self, e):

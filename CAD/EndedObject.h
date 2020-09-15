@@ -34,4 +34,5 @@ public:
 	HeeksObj* MakeACopyWithID();
 	void WriteToXML(TiXmlElement *element);
 	void ReadFromXML(TiXmlElement* element);
+	int PickPriority(){ return 2; } // lines
 };

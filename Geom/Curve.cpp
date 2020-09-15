@@ -1071,7 +1071,7 @@ void CCurve::SpanIntersections(const Span& s, std::list<Point> &pts)const
 	}
 }
 
-bool CCurve::GetMaxCutterRadius(double &radius, bool outside)const
+bool CCurve::GetMaxCutterRadius(double &radius, bool outside, double tol)const
 {
 	bool max_rad_found = false;
 	double max_rad = 0.0;
@@ -1531,6 +1531,18 @@ Span Span::Offset(double offset)
 	return Offsp;
 }
 
+bool Span::IsOn(Circle& c, double tol)const
+{
+	if (!c.PointIsOn(m_p, tol))
+		return false;
+	if (!c.PointIsOn(m_v.m_p, tol))
+		return false;
+
+	Point mid_point = MidParam(0.5);
+	if (!c.PointIsOn(mid_point, tol))
+		return false;
+	return true;
+}
 
 ostream & operator<<(ostream &os, const Span &span)
 {
@@ -1564,50 +1576,74 @@ void tangential_arc(const Point &p0, const Point &p1, const Point &v0, Point &c,
 
 bool CCurve::IsACircle(Circle& circle, double tol)const
 {
-	CCurve copy(*this);
-	CArea::m_accuracy = tol;
-	copy.FitArcs();
+	if (!IsClosed())
+		return false; // a circle must be closed
 
-	std::list<Span> spans;
-	copy.GetSpans(spans);
+	if (m_vertices.size() < 3)
+		return false; // minimum needed is 2 arc spans
 
-	Span* longest_arc_span = NULL;
-	double longest_length = 0.0;
+	// two passes; 1st, find 3 points evenly spaced on curve
 
-	int valid_type = this->IsClockwise() ? -1 : 1;
+	const Point* centre_of_arc = NULL; // if not null, then arc found and we can use the centre if only two vertices found
 
-	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
+	double total_perim = Perim();
+	double p1 = total_perim * 0.33333;
+	double p2 = total_perim * 0.66667;
+	const CVertex *v0 = &(m_vertices.front());
+	double best_pdiff1 = total_perim;
+	double best_pdiff2 = total_perim;
+	const CVertex *v1 = v0;
+	const CVertex *v2 = v0;
+
+	// find second and third points ( closest to p1 and p2 perimeter values )
+	const Point *prev_p = NULL;
+	double perim = 0.0;
+	for (std::list<CVertex>::const_iterator It = m_vertices.begin(); It != m_vertices.end(); It++)
 	{
-		Span &span = *It;
-		if (span.m_v.m_type == valid_type)
+		const CVertex& vertex = *It;
+		if (prev_p)
 		{
-			double length = span.Length();
-			if ((longest_arc_span == NULL) || (length > longest_length))
-			{
-				longest_arc_span = &span;
-				longest_length = span.Length();
-			}
+			Span span(*prev_p, vertex);
+			perim += span.Length();
+			if (vertex.m_type != 0)
+				centre_of_arc = &vertex.m_c;
 		}
-		else
-			return false; // they must all be of the type wanted
+		prev_p = &(vertex.m_p);
+
+		double diff1 = fabs(perim - p1);
+		if (diff1 < best_pdiff1){
+			v1 = &vertex;
+			best_pdiff1 = diff1;
+		}
+		double diff2 = fabs(perim - p2);
+		if (diff2 < best_pdiff2){
+			v2 = &vertex;
+			best_pdiff2 = diff2;
+		}
 	}
 
-	if (longest_arc_span == NULL)
-		return false;
+	Circle c;
 
-	Circle c(longest_arc_span->m_p, longest_arc_span->m_v.m_c);
+	if (v1 == v2)
+	{
+		if (centre_of_arc == NULL)
+			return false;
 
+		c = Circle(v0->m_p, *centre_of_arc);
+	}
+	else
+		c = Circle(v0->m_p, v1->m_p, v2->m_p);
+
+	std::list<Span> spans;
+	GetSpans(spans);
 	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
 	{
 		Span &span = *It;
-		if (!c.PointIsOn(span.MidParam(0.0), tol))
-			return false;
-		if (!c.PointIsOn(span.MidParam(0.5), tol))
-			return false;
-		if (!c.PointIsOn(span.MidParam(1.0), tol))
+		if (!span.IsOn(c, tol))
 			return false;
 	}
 
 	circle = c;
+
 	return true;
 }

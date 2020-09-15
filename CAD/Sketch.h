@@ -39,6 +39,7 @@ public:
 	const HeeksColor* GetColor()const;
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
+	int PickPriority(){ return 2; } // lines
 
 	void CalculateSketchOrder();
 	SketchOrderType GetSketchOrder();
