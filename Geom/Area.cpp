@@ -530,15 +530,15 @@ void CArea::MakePocketToolpath(std::list<CCurve> &curve_list, const CAreaPocketP
 	}
 }
 
-void CArea::Split(std::list<CArea> &m_areas)const
+void CArea::Split(std::list<CArea> &areas)const
 {
 	if(HolesLinked())
 	{
 		for(std::list<CCurve>::const_iterator It = m_curves.begin(); It != m_curves.end(); It++)
 		{
 			const CCurve& curve = *It;
-			m_areas.push_back(CArea());
-			m_areas.back().m_curves.push_back(curve);
+			areas.push_back(CArea());
+			areas.back().m_curves.push_back(curve);
 		}
 	}
 	else
@@ -553,13 +553,13 @@ void CArea::Split(std::list<CArea> &m_areas)const
 			const CCurve& curve = *It;
 			if(curve.IsClockwise())
 			{
-				if(m_areas.size() > 0)
-					m_areas.back().m_curves.push_back(curve);
+				if(areas.size() > 0)
+					areas.back().m_curves.push_back(curve);
 			}
 			else
 			{
-				m_areas.push_back(CArea());
-				m_areas.back().m_curves.push_back(curve);
+				areas.push_back(CArea());
+				areas.back().m_curves.push_back(curve);
 			}
 		}
 	}
@@ -768,7 +768,7 @@ void CArea::Transform(const Matrix& matrix)
 	}
 }
 
-void CArea::GetTriangles(CTris& tris)
+void CArea::GetTrianglesAlreadySplit(CTris& tris)const
 {
 	// color in the area
 	// The number type to use for tessellation
@@ -783,13 +783,13 @@ void CArea::GetTriangles(CTris& tris)
 	std::vector<std::vector<Point>> polygon;
 	std::vector<Point> points;
 
-	for (std::list<CCurve>::iterator It = m_curves.begin(); It != m_curves.end(); It++)
+	for (std::list<CCurve>::const_iterator It = m_curves.begin(); It != m_curves.end(); It++)
 	{
-		CCurve& curve = *It;
+		const CCurve& curve = *It;
 		polygon.push_back({});
-		for (std::list<CVertex>::iterator VIt = curve.m_vertices.begin(); VIt != curve.m_vertices.end(); VIt++)
+		for (std::list<CVertex>::const_iterator VIt = curve.m_vertices.begin(); VIt != curve.m_vertices.end(); VIt++)
 		{
-			CVertex& vt = *VIt;
+			const CVertex& vt = *VIt;
 			polygon.back().push_back({ vt.m_p.x, vt.m_p.y });
 			points.push_back({ vt.m_p.x, vt.m_p.y });
 		}
@@ -816,5 +816,18 @@ void CArea::GetTriangles(CTris& tris)
 		tri.x[2][1] = (float)points[indices[i]][1];
 		tri.x[2][2] = 0.0f;
 		tris.m_tris.push_back(tri);
+	}
+}
+
+void CArea::GetTriangles(std::list<CTris> &tri_list)const
+{
+	std::list<CArea> areas;
+	Split(areas);
+	for (std::list<CArea>::iterator It = areas.begin(); It != areas.end(); It++)
+	{
+		CArea& area = *It;
+		CTris tris;
+		tri_list.push_back(tris);
+		area.GetTrianglesAlreadySplit(tri_list.back());
 	}
 }

@@ -39,6 +39,8 @@ struct CAreaPocketParams
 
 class CArea
 {
+	void GetTrianglesAlreadySplit(CTris& tris)const;
+
 public:
 	std::list<CCurve> m_curves;	// outsides are anti-clockwise and insides are clockwise
 	static double m_accuracy;
@@ -69,14 +71,14 @@ public:
 	void SplitAndMakePocketToolpath(std::list<CCurve> &toolpath, const CAreaPocketParams &params)const;
 	void MakeOnePocketCurve(std::list<CCurve> &curve_list, const CAreaPocketParams &params)const;
 	static bool HolesLinked();
-	void Split(std::list<CArea> &m_areas)const;
+	void Split(std::list<CArea> &areas)const;
 	double GetArea(bool always_add = false)const;
 	void SpanIntersections(const Span& span, std::list<Point> &pts)const; 
 	void CurveIntersections(const CCurve& curve, std::list<Point> &pts)const; 
 	void InsideCurves(const CCurve& curve, std::list<CCurve> &curves_inside)const;
 	CArea Swept(const Point& vector)const;
 	void Transform(const Matrix& matrix);
-	void GetTriangles(CTris& tris);
+	void GetTriangles(std::list<CTris> &tri_list)const;
 };
 
 enum eOverlapType

@@ -1205,7 +1205,7 @@ void CTris::GetMachiningAreas(std::list<CMachiningArea>& areas)const
 		a.m_area = face_group.m_tris.Shadow2();
 		a.m_top = face_group.m_tris.m_box.MaxZ();
 		a.m_bottom = face_group.m_tris.m_box.MinZ();
-		height_sorted_areas.insert(std::make_pair(a.m_bottom, a));
+		height_sorted_areas.insert(std::make_pair(a.m_top, a));
 	}
 
 	for (std::multimap<double, CMachiningArea>::iterator It = height_sorted_areas.begin(); It != height_sorted_areas.end(); It++)

@@ -425,6 +425,19 @@ CBox2D AreaGetBox(const CArea& a)
 	return box;
 }
 
+boost::python::list AreaGetTrianglesList(const CArea& a)
+{
+	std::list<CTris> tri_list;
+	a.GetTriangles(tri_list);
+	boost::python::list python_list;
+	for (std::list<CTris>::const_iterator It = tri_list.begin(); It != tri_list.end(); It++)
+	{
+		const CTris& tris = *It;
+		python_list.append(tris);
+	}
+	return python_list;
+}
+
 extern int oct_ele_count;
 int get_oct_ele_count()
 {
@@ -697,7 +710,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("WriteDxf", static_cast< void(*)(const CArea& area, const std::string& dxf_file_path) >(&WriteDxfFile), bp::args("filepath"), "writes a dxf file with this area in")
 		.def("Swept", &CArea::Swept, bp::args("v"), "returns an area that is this area swept along the given vector")
 		.def("Transform", &CArea::Transform, bp::args("m"), "transforms this area by the matrix\nan area is only 2D though, so don't rotate in 3D")
-		.def("GetTriangles", &CArea::GetTriangles, "fills a Stl object with triangles that fill this area")
+		.def("GetTrianglesList", &AreaGetTrianglesList, "returns a list of Stl objects with triangles that fill each separate area")
 		;
 
 	bp::class_<Matrix > ("Matrix", "Matrix((Point)o, (Point)x_vector, (Point)y_vector)\nMatrix([list of 16 floats])\n\ndefines a 4x4 transformation matrix")
