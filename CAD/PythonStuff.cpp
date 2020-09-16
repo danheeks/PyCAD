@@ -2526,20 +2526,11 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		CCurve& curve = *It;
 		curve.UnFitArcs();
 	}
-	CTris tris;
-	area.GetTriangles(tris);
+
+	std::list<CTris> tri_list;
+	area.GetTriangles(tri_list);
 
 	glBegin(GL_TRIANGLES);
-
-	// top layer
-	glNormal3f(0.0f, 0.0f, 1.0f);
-	for (std::list<CTri>::iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
-	{
-		CTri& tri = *It;
-		glVertex3f(tri.x[0][0], tri.x[0][1], start_depth);
-		glVertex3f(tri.x[1][0], tri.x[1][1], start_depth);
-		glVertex3f(tri.x[2][0], tri.x[2][1], start_depth);
-	}
 
 	// walls
 	for (std::list<CCurve>::iterator It = area.m_curves.begin(); It != area.m_curves.end(); It++)
@@ -2564,14 +2555,29 @@ void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_d
 		}
 	}
 
-	// bottom layer
-	glNormal3f(0.0f, 0.0f, -1.0f);
-	for (std::list<CTri>::iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
+	for (std::list<CTris>::iterator It = tri_list.begin(); It != tri_list.end(); It++)
 	{
-		CTri& tri = *It;
-		glVertex3f(tri.x[0][0], tri.x[0][1], final_depth);
-		glVertex3f(tri.x[2][0], tri.x[2][1], final_depth);
-		glVertex3f(tri.x[1][0], tri.x[1][1], final_depth);
+		CTris &tris = *It;
+
+		// top layer
+		glNormal3f(0.0f, 0.0f, 1.0f);
+		for (std::list<CTri>::iterator It2 = tris.m_tris.begin(); It2 != tris.m_tris.end(); It2++)
+		{
+			CTri& tri = *It2;
+			glVertex3f(tri.x[0][0], tri.x[0][1], start_depth);
+			glVertex3f(tri.x[1][0], tri.x[1][1], start_depth);
+			glVertex3f(tri.x[2][0], tri.x[2][1], start_depth);
+		}
+
+		// bottom layer
+		glNormal3f(0.0f, 0.0f, -1.0f);
+		for (std::list<CTri>::iterator It2 = tris.m_tris.begin(); It2 != tris.m_tris.end(); It2++)
+		{
+			CTri& tri = *It2;
+			glVertex3f(tri.x[0][0], tri.x[0][1], final_depth);
+			glVertex3f(tri.x[2][0], tri.x[2][1], final_depth);
+			glVertex3f(tri.x[1][0], tri.x[1][1], final_depth);
+		}
 	}
 
 	glEnd();
@@ -2600,7 +2606,6 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("GetID", &BaseObject::GetID)
 		.def("SetID", &BaseObject::SetID)
 		.def("GetIndex", &BaseObjectGetIndex)
-		.def("KillGLLists", &BaseObject::KillGLLists)
 		.def("GetColor", &BaseObjectGetColor)
 		.def("AutoExpand", &BaseObject::AutoExpand)
 		.def("GetNumChildren", &BaseObject::GetNumChildren)

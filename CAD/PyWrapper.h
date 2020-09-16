@@ -557,7 +557,9 @@ public:
 					boost::python::detail::method_result result = f();
 					success = AfterPythonCall(main_module);
 					after_called = true;
-					return std::make_pair(success, (std::string)(const char*)result);
+					const char* result_string = (const char*)result;
+					if (result_string == NULL)result_string = "";
+					return std::make_pair(success, (std::string)result_string);
 				}
 				catch (const boost::python::error_already_set&)
 				{
