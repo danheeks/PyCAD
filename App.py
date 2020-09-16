@@ -324,7 +324,11 @@ class App(wx.App):
         return False
     
     def DeleteMarkedList(self):
-        cad.DeleteObjectsUndoably(cad.GetSelectedObjects())
+        to_delete = []
+        for object in cad.GetSelectedObjects():
+            if object.CanBeDeleted():
+                to_delete.append(object)
+        cad.DeleteObjectsUndoably(to_delete)
         
     def MakeToSketch(self):
         objects_to_delete = []
@@ -523,11 +527,7 @@ class App(wx.App):
         k = e.GetKeyCode()
         if k == wx.WXK_DELETE:
             if cad.GetNumSelected() > 0:
-                cad.StartHistory()
-                for object in cad.GetSelectedObjects():
-                    cad.DeleteUndoably(object)
-                cad.EndHistory()
-                cad.ClearSelection(True)
+                self.DeleteMarkedList()
         elif k == wx.WXK_RETURN:
             if self.inMainLoop:
                 self.ExitMainLoop()
