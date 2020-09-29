@@ -1645,8 +1645,16 @@ void CCadApp::DeleteUndoably(const std::list<HeeksObj*>& list)
 		if (object->CanBeRemoved())list2.push_back(object);
 	}
 	if (list2.size() == 0)return;
-	RemoveObjectsTool *undoable = new RemoveObjectsTool(list2, list2.front()->m_owner);
-	DoUndoable(undoable);
+	
+	if (list2.size() > 1)StartHistory();
+	for (std::list<HeeksObj*>::const_iterator It = list2.begin(); It != list2.end(); It++)
+	{
+		HeeksObj* object = *It;
+		RemoveObjectTool *undoable = new RemoveObjectTool(object);
+		DoUndoable(undoable);
+	}
+
+	if (list2.size() > 1)EndHistory();
 }
 
 void CCadApp::CopyUndoably(HeeksObj* object, HeeksObj* copy_with_new_data)

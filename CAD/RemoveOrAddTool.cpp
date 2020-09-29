@@ -77,7 +77,7 @@ void AddObjectTool::RollBack()
 	Remove();
 }
 
-RemoveObjectTool::RemoveObjectTool(HeeksObj *object):RemoveOrAddTool(object, NULL, NULL)
+RemoveObjectTool::RemoveObjectTool(HeeksObj *object):RemoveOrAddTool(object, object->m_owner, GetPrevObject(object))
 {
 	if(object)m_owner = object->m_owner;
 	else m_owner = NULL;
@@ -93,8 +93,21 @@ void RemoveObjectTool::RollBack()
 	Add();
 }
 
+HeeksObj* RemoveObjectTool::GetPrevObject(HeeksObj* object)
+{
+	HeeksObj* prev_object = NULL;
+	for (HeeksObj* child = object->m_owner->GetFirstChild(); child; child = object->m_owner->GetNextChild())
+	{
+		if (child == object)
+			break;
+		prev_object = child;
+	}
+	return prev_object;
+}
 
-ManyRemoveOrAddTool::~ManyRemoveOrAddTool()
+AddObjectsTool::AddObjectsTool(const std::list<HeeksObj*> &list, HeeksObj *owner) :m_objects(list), m_owner(owner){}
+
+AddObjectsTool::~AddObjectsTool()
 {
 	if(!m_belongs_to_owner){
 		std::list<HeeksObj*>::iterator It;
@@ -105,7 +118,7 @@ ManyRemoveOrAddTool::~ManyRemoveOrAddTool()
 	}
 }
 
-void ManyRemoveOrAddTool::Add()
+void AddObjectsTool::Add()
 {
 	if (m_owner == NULL)
 	{
@@ -126,7 +139,7 @@ void ManyRemoveOrAddTool::Add()
 	m_belongs_to_owner = true;
 }
 
-void ManyRemoveOrAddTool::Remove()
+void AddObjectsTool::Remove()
 {
 	std::list<HeeksObj*>::iterator It;
 	for(It = m_objects.begin(); It != m_objects.end(); It++){
@@ -158,21 +171,6 @@ void AddObjectsTool::Run(bool redo)
 void AddObjectsTool::RollBack()
 {
 	Remove();
-}
-
-const wchar_t* RemoveObjectsTool::GetTitle()
-{
-	return L"Remove Objects";
-}
-
-void RemoveObjectsTool::Run(bool redo)
-{
-	Remove();
-}
-
-void RemoveObjectsTool::RollBack()
-{
-	Add();
 }
 
 CopyObjectUndoable::CopyObjectUndoable(HeeksObj* object, HeeksObj* copy_object): m_object(object), m_new_copy(copy_object)

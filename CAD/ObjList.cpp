@@ -186,7 +186,14 @@ bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)
 	}
 	else
 	{
-		for(LoopIt = m_objects.begin(); LoopIt != m_objects.end(); LoopIt++) { if (*LoopIt==prev_object) break; }
+		for (LoopIt = m_objects.begin(); LoopIt != m_objects.end(); LoopIt++)
+		{
+			if (*LoopIt == prev_object)
+			{
+				LoopIt++;
+				break;
+			}
+		}
 		m_objects.insert(LoopIt, object);
 	}
 	m_index_list_valid = false;

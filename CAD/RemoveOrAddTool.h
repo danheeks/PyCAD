@@ -34,6 +34,8 @@ public:
 };
 
 class RemoveObjectTool:public RemoveOrAddTool{
+	static HeeksObj* GetPrevObject(HeeksObj* object);
+
 public:
 	RemoveObjectTool(HeeksObj *object);
 
@@ -44,33 +46,16 @@ public:
 	std::wstring BitmapPath(){return L"delete";}
 };
 
-class ManyRemoveOrAddTool:public Undoable{
-protected:
+class AddObjectsTool:public Undoable{
 	std::list<HeeksObj*> m_objects;
 	HeeksObj* m_owner;
 	bool m_belongs_to_owner;
 
 	void Add();
 	void Remove();
-
 public:
-	ManyRemoveOrAddTool(const std::list<HeeksObj*> &list, HeeksObj *owner): m_objects(list), m_owner(owner), m_belongs_to_owner(false){}
-	virtual ~ManyRemoveOrAddTool();
-};
-
-class AddObjectsTool:public ManyRemoveOrAddTool{
-public:
-	AddObjectsTool(const std::list<HeeksObj*> &list, HeeksObj *owner):ManyRemoveOrAddTool(list, owner){}
-
-	// Tool's virtual functions
-	const wchar_t* GetTitle();
-	void Run(bool redo);
-	void RollBack();
-};
-
-class RemoveObjectsTool:public ManyRemoveOrAddTool{
-public:
-	RemoveObjectsTool(const std::list<HeeksObj*> &list, HeeksObj *owner):ManyRemoveOrAddTool(list, owner){}
+	AddObjectsTool(const std::list<HeeksObj*> &list, HeeksObj *owner);
+	~AddObjectsTool();
 
 	// Tool's virtual functions
 	const wchar_t* GetTitle();
