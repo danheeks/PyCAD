@@ -2563,6 +2563,7 @@ HeeksObj* CCadApp::CreateNewLine(const Point3d& s, const Point3d& e){ return new
 HeeksObj* CCadApp::CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c){ return new HArc(s, e, a, c, &current_color); }
 HeeksObj* CCadApp::CreateNewCircle(const Point3d& c, const Point3d& a, double r){ return new HCircle(c, a, r, &current_color); }
 HeeksObj* CCadApp::CreateNewPoint(const Point3d& p){ return new HPoint(p, &current_color); }
+HeeksObj* CCadApp::CreateNewSketch(){ return new CSketch(); }
 
 void CCadApp::DrawFront()
 {

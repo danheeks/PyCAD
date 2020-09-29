@@ -55,7 +55,14 @@ class SolidApp(App):
         if t == step.GetEdgeType():
             tools.append(ContextTool.CADObjectContextTool(object, "Blend", "fillet", self.BlendEdge))
             tools.append(ContextTool.CADObjectContextTool(object, "Chamfer", "chamfer", self.ChamferEdge))
+        elif t == step.GetFaceType():
+            tools.append(ContextTool.CADObjectContextTool(object, "Make Sketch From Face", "face2sketch", self.FaceToSketch))
         return tools
+    
+    def FaceToSketch(self, object):
+        sketch = step.NewSketchFromFace(object)
+        cad.AddUndoably(sketch)
+        cad.Select(sketch)
     
     def BlendEdge(self, object):
         cad.ClearSelection()

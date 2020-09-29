@@ -331,16 +331,6 @@ boost::python::list CurveIntersections(const CCurve& c1, const CCurve& c2) {
 	return plist;
 }
 
-boost::python::object CurveGetMaxCutterRadius(const CCurve& c, bool outside, double tol)
-{
-	double radius;
-	if (c.GetMaxCutterRadius(radius, outside, tol))
-	{
-		return boost::python::object(radius);
-	}
-	return boost::python::object(); // None
-}
-
 CBox2D CurveGetBox(const CCurve &c)
 {
 	CBox2D box;
@@ -646,7 +636,6 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("FitArcs",&CCurve::FitArcs, "replaces little lines with arcs where possible")
         .def("UnFitArcs",&CCurve::UnFitArcs, "replaces arcs with lots of little lines")
 		.def("Intersections", &CurveIntersections, bp::args("c2"), "returns a list of all the intersections between this Curve and the given Curve\nordered along this Curve")
-		.def("GetMaxCutterRadius", &CurveGetMaxCutterRadius, bp::args("outside"), "returns the biggest cutter radius that would cut the curve without leaving material in the corner\nreturns None if any size cutter would be ok")
 		.def("GetBox", &CurveGetBox, "returns the box that fits round the curve")
 		.def("Transform", &CCurve::Transform, bp::args("m"), "transforms the curve by the matrix\na curve is only 2D though, so don't rotate in 3D")
 		.def("IsACircle", CurveIsACircle, bp::args("tol"), "returns True if all the spans are arcs of the same direction and fit the same circle\n to given tolerance")

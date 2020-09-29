@@ -82,6 +82,8 @@ class Frame(wx.Frame):
             e.Veto()
             return
         e.Skip()
+        config = HeeksConfig()
+        config.WriteBool('AuiMaximised', self.IsMaximized())
         self.aui_manager.UnInit()
     
     def SetFrameTitle(self):

@@ -352,6 +352,7 @@ public:
 	HeeksObj* CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c);
 	HeeksObj* CreateNewCircle(const Point3d& c, const Point3d& a, double r);
 	HeeksObj* CreateNewPoint(const Point3d& p);
+	HeeksObj* CreateNewSketch();
 	const HeeksColor& GetCurrentColor(){ return current_color; }
 	void DrawFront();
 	void EndDrawFront();

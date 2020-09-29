@@ -258,6 +258,7 @@ class App(wx.App):
             if self.object.GetNumChildren() > 1:
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
                 tools.append(ContextTool.CADContextTool("Fit Arcs", "fitarcs", self.FitArcs))
+                tools.append(ContextTool.CADContextTool("Offset", "offset", self.OffsetSketch))
                 
         if len(tools)>0:
             tools.append(None) # a separator
@@ -343,6 +344,21 @@ class App(wx.App):
                 
         cad.AddUndoably(sketch)
         cad.DeleteObjectsUndoably(objects_to_delete)
+        
+    def OffsetSketch(self):
+        config = HeeksConfig()
+        value = config.ReadFloat('SketchOffsetValue', 1.0)
+        value = self.InputLength('Offset Sketch', 'Offset Value +ve for Outwards -ve for Inwards', value)
+        if value == None: return
+        sketch = self.object
+        sketch.__class__ = cad.Sketch
+        area = sketch.GetArea()
+        area.Reorder()
+        area.Offset(-value)
+        new_object = cad.NewSketchFromArea(area)
+        cad.AddUndoably(new_object)
+        cad.ClearSelection()
+        cad.Select(new_object)
     
     def AddPointToDrawing(self):
         cad.AddDrawingPoint()
@@ -394,16 +410,6 @@ class App(wx.App):
         
         # add selection tools
         tools += self.GetSelectionTools()
-        
-        #cad.GetSelectedItemsTools(marked_object, new_point, True)
-        #GenerateIntersectionMenuOptions( f_list );
-        #self.AddToolListWithSeparator(tools, cad.GetInputMode().GetTools())
-        
-        #if(m_current_coordinate_system)f_list.push_back(&coord_system_unset);
-        
-        #// exit full screen
-        #if(m_frame->IsFullScreen() && point.x>=0 && point.y>=0)temp_f_list.push_back(new CFullScreenTool);
-        #AddToolListWithSeparator(f_list, temp_f_list);
                                    
         return tools
         

@@ -165,6 +165,16 @@ bool GetShowFaceNormals()
 	return CSettings::showFaceNormals;
 }
 
+HeeksObj* NewSketchFromFace(HeeksObj* object)
+{
+	HeeksObj* new_object = theApp->CreateNewSketch();
+	if (object->GetType() == CFace::m_type)
+	{
+		ConvertFaceToSketch2(((CFace*)object)->Face(), new_object, 0.1);
+	}
+	return new_object;
+}
+
 
 	BOOST_PYTHON_MODULE(step) {
 
@@ -226,6 +236,7 @@ bool GetShowFaceNormals()
 		boost::python::def("SetEllipseDrawing", SetEllipseDrawing); 
 		boost::python::def("SketchToFace", SketchToFace);
 		boost::python::def("SetShowFaceNormals", SetShowFaceNormals);
-		boost::python::def("GetShowFaceNormals", GetShowFaceNormals);
+		boost::python::def("GetShowFaceNormals", GetShowFaceNormals); 
+		boost::python::def("NewSketchFromFace", NewSketchFromFace, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	}
 	

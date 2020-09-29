@@ -93,6 +93,7 @@ public:
 	virtual HeeksObj* CreateNewArc(const Point3d& s, const Point3d& e, const Point3d& a, const Point3d& c) = 0;
 	virtual HeeksObj* CreateNewCircle(const Point3d& c, const Point3d& a, double r) = 0;
 	virtual HeeksObj* CreateNewPoint(const Point3d& p) = 0;
+	virtual HeeksObj* CreateNewSketch() = 0;
 	virtual const HeeksColor& GetCurrentColor() = 0;
 	virtual void RegisterOnGLCommands(void(*callbackfunc)()) = 0;
 	virtual HeeksObj* GetObjPointer() = 0;

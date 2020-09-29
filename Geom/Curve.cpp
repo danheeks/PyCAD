@@ -1071,56 +1071,6 @@ void CCurve::SpanIntersections(const Span& s, std::list<Point> &pts)const
 	}
 }
 
-bool CCurve::GetMaxCutterRadius(double &radius, bool outside, double tol)const
-{
-	bool max_rad_found = false;
-	double max_rad = 0.0;
-	bool clockwise = this->IsClockwise();
-
-	int type_to_check = 1;
-	if (clockwise)type_to_check = -type_to_check;
-	if (outside)type_to_check = -type_to_check;
-
-	std::list<Span> spans;
-	GetSpans(spans);
-	const Span *prev_span = NULL;
-
-	if (m_vertices.size() > 2 && IsClosed())
-	{
-		prev_span = &(spans.back());
-	}
-
-	for (std::list<Span>::iterator It = spans.begin(); It != spans.end(); It++)
-	{
-		Span &span = *It;
-		if (span.m_v.m_type == type_to_check)
-		{
-			if (!max_rad_found || (span.GetRadius() < max_rad))
-			{
-				max_rad = span.GetRadius();
-				max_rad_found = true;
-			}
-		}
-
-		if (prev_span)
-		{
-			Point v0 = prev_span->GetVector(1.0);
-			Point left = ~v0;
-			Point v1 = span.GetVector(0.0);
-			double dotp = v1*left;
-			if (dotp < -0.2)
-			{
-				radius = 0.0;// sharp internal corner found
-				return true;
-			}
-		}
-		prev_span = &span;
-	}
-
-	if (max_rad_found)radius = max_rad;
-	return max_rad_found;
-}
-
 const Point Span::null_point = Point(0, 0);
 const CVertex Span::null_vertex = CVertex(Point(0, 0));
 
