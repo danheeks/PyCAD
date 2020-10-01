@@ -224,6 +224,7 @@
 		
 		*this = ret;
 		this->IsUnit();
+		m_mirrored = -1;
 	}
 
 	void	Matrix::Transform(double p0[3], double p1[3]) const

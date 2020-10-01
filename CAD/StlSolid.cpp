@@ -388,17 +388,22 @@ void CStlSolid::GetBox(CBox &box){
 }
 
 void CStlSolid::Transform(const Matrix &m){
-	Matrix mat = Matrix(m);
+	int mirrored = Matrix(m).IsMirrored();
+
+	int index[3] = { 0, 1, 2 };
+	if (mirrored){ index[1] = 2; index[2] = 1; } // reverse direction of triangles
+
 	for(std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
 	{
+		CStlTri copy_t = *It;
 		CStlTri &t = *It;
 		for(int i = 0; i<3; i++){
 			Point3d vx;
-			vx = Point3d(t.x[i][0], t.x[i][1], t.x[i][2]);
-			vx = vx.Transformed(mat);
-			t.x[i][0] = (float)vx.x;
-			t.x[i][1] = (float)vx.y;
-			t.x[i][2] = (float)vx.z;
+			vx = Point3d(copy_t.x[i][0], copy_t.x[i][1], copy_t.x[i][2]);
+			vx = vx.Transformed(m);
+			t.x[index[i]][0] = (float)vx.x;
+			t.x[index[i]][1] = (float)vx.y;
+			t.x[index[i]][2] = (float)vx.z;
 		}
 	}
 
