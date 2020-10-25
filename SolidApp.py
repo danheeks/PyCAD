@@ -239,7 +239,7 @@ class SolidApp(App):
         cad.EndHistory()
         
     def OnShadow(self, event):
-        if not self.CheckForNumberOrMore(1, [step.GetSolidType()], 'Pick one or more solids to make a shadow sketch from', 'Shadow Sketch of Solids'):
+        if not self.CheckForNumberOrMore(1, [step.GetSolidType(), cad.OBJECT_TYPE_STL_SOLID], 'Pick one or more solids to make a shadow sketch from', 'Shadow Sketch of Solids'):
             return
         accuracy = self.InputLength('Enter Shadow Accuracy', 'Accuracy', geom.get_accuracy())
         if accuracy:

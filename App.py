@@ -447,7 +447,7 @@ class App(wx.App):
         self.select_mode.just_one = save_just_one_for_EndPickObjects
         cad.SetInputMode(save_mode_for_EndPickObjects)
         
-    def PickObjects(self, str, filter = -1, just_one = False):
+    def PickObjects(self, str, filter = cad.Filter(), just_one = False):
         if self.inMainLoop:
             wx.MessageBox('recursive call to PickObjects')
             return
@@ -775,7 +775,7 @@ class App(wx.App):
         printer = wx.Printer(printDialogData)
         self.printout = Printout()
         if printer.Print(self.frame, self.printout, True):
-            theApp.printData = printer.GetPrintDialogData().GetPrintData()
+            self.printData = printer.GetPrintDialogData().GetPrintData()
         else:
             if wx.Printer.GetLastError() == wx.PRINTER_ERROR:
                 wx.MessageBox('There was a problem printing.\nPerhaps your current printer is not set correctly?', 'Printing', wx.OK)
