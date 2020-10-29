@@ -127,7 +127,6 @@ bool CCurve::CheckForArc(const CVertex& prev_vt, std::list<const CVertex*>& migh
 
 	const CVertex* current_vt = &prev_vt;
 
-	double accuracy = CArea::m_accuracy * 1.4 / CArea::m_units * 0.1;
 	for (std::list<const CVertex*>::iterator It = might_be_an_arc.begin(); It != might_be_an_arc.end(); It++)
 	{
 		const CVertex* vt = *It;
@@ -275,7 +274,6 @@ void CCurve::AddToPreviousArc(std::list<CVertex> &new_vertices, std::list<const 
 	Circle c(arc_end.m_c, arc_end.m_c.dist(arc_start.m_p));
 
 	const CVertex* current_vt = &arc_end;
-	double accuracy = CArea::m_accuracy * 1.4 / CArea::m_units * 0.1;
 	for (std::list<const CVertex*>::iterator It = might_be_an_arc.begin(); It != might_be_an_arc.end();)
 	{
 		const CVertex* vt = *It;
