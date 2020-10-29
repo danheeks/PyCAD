@@ -28,7 +28,7 @@ public:
 	PropertyGpY(HeeksObj* object, T *pnt) :PropertyGpCoord<T>(object, L"y", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ this->m_pnt->SetY(value); ((CShape*)m_object)->OnApplyProperties(); }
+	void Set(double value){ this->m_pnt->SetY(value); ((CShape*)(Property::m_object))->OnApplyProperties(); }
 	double GetDouble(void)const{ return this->m_pnt->Y(); }
 	Property* MakeACopy()const{ return new PropertyGpY<T>(*this); }
 };
@@ -40,7 +40,7 @@ public:
 	PropertyGpZ(HeeksObj* object, T *pnt) :PropertyGpCoord<T>(object, L"z", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ this->m_pnt->SetZ(value); ((CShape*)m_object)->OnApplyProperties(); }
+	void Set(double value){ this->m_pnt->SetZ(value); ((CShape*)(Property::m_object))->OnApplyProperties(); }
 	double GetDouble(void)const{ return this->m_pnt->Z(); }
 	Property* MakeACopy()const{ return new PropertyGpZ<T>(*this); }
 };
