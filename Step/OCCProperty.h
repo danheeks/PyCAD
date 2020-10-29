@@ -16,7 +16,7 @@ public:
 	PropertyGpX(HeeksObj* object, T *pnt) :PropertyGpCoord<T>(object, L"x", pnt){ }
 	// Property's virtual functions
 	int get_property_type(){ return LengthPropertyType; }
-	void Set(double value){ this->m_pnt->SetX(value); ((CShape*)m_object)->OnApplyProperties(); }
+	void Set(double value){ this->m_pnt->SetX(value); ((CShape*)(Property::m_object))->OnApplyProperties(); }
 	double GetDouble(void)const{ return this->m_pnt->X(); }
 	Property* MakeACopy()const{ return new PropertyGpX<T>(*this); }
 };
