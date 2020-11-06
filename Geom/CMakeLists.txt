@@ -66,7 +66,6 @@ set(GEOM_SRC
     OctTree.cpp
     Offset.cpp
     PythonStuff.cpp
-    Solid.cpp
     Tris.cpp
 )
 

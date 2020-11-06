@@ -109,6 +109,7 @@ set(STEP_SRC
     HSpline.cpp
     Loop.cpp
     OCCGeom.cpp
+    PropertySolid.cpp
     PythonStuff.cpp
     RuledSurface.cpp
     Settings.cpp
