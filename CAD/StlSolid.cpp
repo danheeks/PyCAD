@@ -355,7 +355,7 @@ void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 
 void CStlSolid::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 {
-	if (just_for_endof && theApp->m_stl_solid_random_colors)
+	if (just_for_endof/* && theApp->m_stl_solid_random_colors*/)
 	{
 		for (std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
 		{

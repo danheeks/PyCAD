@@ -39,6 +39,7 @@ public:
 	void SetBox();
 	bool On(const Point3d &p)const;
 	bool Intof(const Line& l, LineOrPoint& intof)const;
+	bool SplitAtZ(double z, CTris &new_tris_above, CTris &new_tris_below)const;
 };
 
 class CTris
@@ -81,4 +82,5 @@ public:
 	void ClipSpans(std::list<Span>& spans, double length)const;
 	void GetMachiningAreas(std::list<CMachiningArea>& areas)const;
 	CTris* GetFlattenedSurface()const;
+	bool SplitAtZ(double z, CTris& new_tris);
 };

@@ -1595,3 +1595,17 @@ bool CCurve::IsACircle(Circle& circle, double tol)const
 
 	return true;
 }
+
+std::ostream & operator<<(std::ostream &os, const CCurve& c)
+{
+	os << "Curve vertices = [\n";
+	for (std::list<CVertex>::const_iterator It = c.m_vertices.begin(); It != c.m_vertices.end(); It++)
+	{
+		const CVertex& vertex = *It;
+		os << vertex;
+		os << "\n";
+	}
+	os << "]";
+	return os;
+}
+

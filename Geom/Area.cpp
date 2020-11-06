@@ -831,3 +831,15 @@ void CArea::GetTriangles(std::list<CTris> &tri_list)const
 		area.GetTrianglesAlreadySplit(tri_list.back());
 	}
 }
+
+std::ostream & operator<<(std::ostream &os, const CArea& a)
+{
+	os << "Area num_curves = " << a.num_curves();
+	for (std::list<CCurve>::const_iterator It = a.m_curves.begin(); It != a.m_curves.end(); It++)
+	{
+		const CCurve& curve = *It;
+		os << curve;
+	}
+	return os;
+}
+

@@ -249,6 +249,23 @@ class App(wx.App):
             if copy_object.Edit():
                 self.CopyUndoably(object, copy_object)
                 #cad.CopyUndoably(object, copy_object)
+                
+    def SplitStlAtZ(self):
+        p = self.PickPosition('Pick point at z height')
+        if p == None:
+            return
+        
+        temp_file = wx.StandardPaths.Get().GetTempDir() + '/split.stl'
+        self.object.WriteSTL(0.001, temp_file)
+        
+        stl = geom.Stl(temp_file)
+                
+        new_stl = stl.SplitAtZ(p.z)
+        if new_stl != None:
+            stl.WriteStl(temp_file)
+            cad.Import(temp_file)
+            new_stl.WriteStl(temp_file)
+            cad.Import(temp_file)
 
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = []
@@ -259,6 +276,9 @@ class App(wx.App):
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
                 tools.append(ContextTool.CADContextTool("Fit Arcs", "fitarcs", self.FitArcs))
                 tools.append(ContextTool.CADContextTool("Offset", "offset", self.OffsetSketch))
+                
+        if type == cad.OBJECT_TYPE_STL_SOLID:
+            tools.append(ContextTool.CADContextTool("Split at Z", "splitsketch", self.SplitStlAtZ))
                 
         if len(tools)>0:
             tools.append(None) # a separator

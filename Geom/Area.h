@@ -63,7 +63,7 @@ public:
 	void Offset(double inwards_value);
 	void Thicken(double value);
 	void FitArcs();
-	unsigned int num_curves(){return (unsigned int)(m_curves.size());}
+	unsigned int num_curves()const{return (unsigned int)(m_curves.size());}
 	Point NearestPoint(const Point& p)const;
 	void GetBox(CBox2D &box)const;
 	void Reorder();
@@ -80,6 +80,8 @@ public:
 	void Transform(const Matrix& matrix);
 	void GetTriangles(std::list<CTris> &tri_list)const;
 };
+
+std::ostream & operator<<(std::ostream &os, const CArea &a);
 
 enum eOverlapType
 {

@@ -367,6 +367,22 @@ boost::python::list CTrisGetMachiningAreas(const CTris& tris)
 	return plist;
 }
 
+bool SplitAtZ(double z, CTris& new_tris);
+
+boost::python::object CTrisSplitAtZ(CTris& tris, double z)
+{
+	CTris new_tris;
+	if (tris.SplitAtZ(z, new_tris))
+	{
+		return boost::python::object(new_tris);
+	}
+	else
+	{
+		return boost::python::object(); // None
+	}
+}
+
+
 boost::python::object LineIntersectPlane(const Line& line, const Plane& plane)
 {
 	Point3d intof;
@@ -516,7 +532,19 @@ static std::string Span__str__(const Span& self) {
 	return ss.str();
 }
 
+static std::string Curve__str__(const CCurve& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
 static std::string CBox__str__(const CBox& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
+static std::string Area__str__(const CArea& self) {
 	std::ostringstream ss;
 	ss << self;
 	return ss.str();
@@ -639,6 +667,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetBox", &CurveGetBox, "returns the box that fits round the curve")
 		.def("Transform", &CCurve::Transform, bp::args("m"), "transforms the curve by the matrix\na curve is only 2D though, so don't rotate in 3D")
 		.def("IsACircle", CurveIsACircle, bp::args("tol"), "returns True if all the spans are arcs of the same direction and fit the same circle\n to given tolerance")
+		.def("__str__", Curve__str__);
 	;
 
 	bp::class_<CBox2D>("Box", "Box((Point)minxy, (Point)maxxy)\n\na 2D box used for returning the extents of a Span or Curve") 
@@ -700,7 +729,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Swept", &CArea::Swept, bp::args("v"), "returns an area that is this area swept along the given vector")
 		.def("Transform", &CArea::Transform, bp::args("m"), "transforms this area by the matrix\nan area is only 2D though, so don't rotate in 3D")
 		.def("GetTrianglesList", &AreaGetTrianglesList, "returns a list of Stl objects with triangles that fill each separate area")
-		;
+		.def("__str__", Area__str__);
+	;
 
 	bp::class_<Matrix > ("Matrix", "Matrix((Point)o, (Point)x_vector, (Point)y_vector)\nMatrix([list of 16 floats])\n\ndefines a 4x4 transformation matrix")
         .def(bp::init<Matrix>())
@@ -788,6 +818,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetBox", &CTrisGetBox, "returns the (Box3D)box that fits round the area")
 		.def("NumTris", &CTrisNumTris, "returns the number of triangles in this Stl")
 		.def("GetMachiningAreas", &CTrisGetMachiningAreas, "joins up triangles of the same FaceFlatType and returns a list of MachiningArea objects")
+		.def("SplitAtZ", &CTrisSplitAtZ, "split at z height, returns new Stl object, for triangles above z, or None if split not done")
 		.def("Add", &CTrisAddTriangle, bp::args("p1", "p2", "p3"), "Add a triangles given 3 Point3D objects")
 		.def("GetFlattenedSurface", &CTris::GetFlattenedSurface, bp::return_value_policy<bp::manage_new_object>(), "returns a new Stl with all the triangles unfolded into a flat shape")
 		.def("GetTrianglesAsCurveList", &GetTrianglesAsCurveList, "returns a list of Curve objects, each one being a closed triangle")

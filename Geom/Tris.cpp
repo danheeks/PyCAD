@@ -372,6 +372,70 @@ bool CTri::Intof(const Line& l, LineOrPoint& intof)const
 	return false;
 }
 
+bool CTri::SplitAtZ(double z, CTris &new_tris_above, CTris &new_tris_below)const
+{
+	// returns false if triangle was left alone
+	// returns true if the triangle was split, or it was above z, in which case the triangle should be deleted.
+	bool above[3] = { false, false, false };
+	int num_above = 0;
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		if (x[i][2] > z + TOLERANCE)
+		{
+			above[i] = true;
+			num_above++;
+		}
+	}
+
+	if (num_above == 0)
+		return false;
+
+	if (num_above == 3)
+	{
+		new_tris_above.AddTri(this->x[0]);
+	}
+	else
+	{
+		CTris *p_new_tris_above = &new_tris_above;
+		CTris *p_new_tris_below = &new_tris_below;
+
+		// written for (num_above == 1) use the same code swapped for (num_above == 2)
+		if (num_above == 2)
+		{
+			for (unsigned int i = 0; i < 3; i++)
+				above[i] = !above[i];
+
+			p_new_tris_above = &new_tris_below;
+			p_new_tris_below = &new_tris_above;
+		}
+
+		unsigned int above_index, below_index1, below_index2;
+		if (above[1]){ above_index = 1; below_index1 = 2; below_index2 = 0; }
+		else if (above[2]){ above_index = 2; below_index1 = 0; below_index2 = 1; }
+		else { above_index = 0; below_index1 = 1; below_index2 = 2; }
+
+		Point3d p0(x[above_index][0], x[above_index][1], x[above_index][2]);
+		Point3d p1(x[below_index1][0], x[below_index1][1], x[below_index1][2]);
+		Point3d p2(x[below_index2][0], x[below_index2][1], x[below_index2][2]);
+		double fraction1 = (z - p0.z) / (p1.z - p0.z);
+		Point3d m1 = p0 + (p1 - p0) * fraction1;
+		double fraction2 = (z - p0.z) / (p2.z - p0.z);
+		Point3d m2 = p0 + (p2 - p0) * fraction2;
+
+		float f0[9] = { (float)(p0.x), (float)(p0.y), (float)(p0.z), (float)(m1.x), (float)(m1.y), (float)z, (float)(m2.x), (float)(m2.y), (float)z };
+		p_new_tris_above->AddTri(f0);
+
+		float f1[9] = { (float)(m1.x), (float)(m1.y), (float)z, (float)(p1.x), (float)(p1.y), (float)(p1.z), (float)(m2.x), (float)(m2.y), (float)z };
+		p_new_tris_below->AddTri(f1);
+
+		float f2[9] = { (float)(p1.x), (float)(p1.y), (float)(p1.z), (float)(p2.x), (float)(p2.y), (float)(p2.z), (float)(m2.x), (float)(m2.y), (float)z };
+		p_new_tris_below->AddTri(f2);
+	}
+
+	return true;
+}
+
+
 void CTris::read_from_file(const std::wstring& stl_file_path)
 {
 	// read the stl file
@@ -1195,6 +1259,48 @@ void CTris::GetMachiningAreas(std::list<CMachiningArea>& areas)const
 		WalkFacesMakingAFaceGroup(face, face_groups, unvisited_faces);
 	}
 
+	// make a list of flat planes to split non flat areas
+	std::set<double> plane_heights;
+	for (std::list<CFaceGroup>::iterator It = face_groups.begin(); It != face_groups.end(); It++)
+	{
+		CFaceGroup& face_group = *It;
+		if (face_group.m_face_type == FaceFlatTypeFlat)
+		{
+			// just insert the z-value of the first point of the first triangle
+			plane_heights.insert(face_group.m_tris.m_tris.front().x[0][2]);
+		}
+	}
+
+	std::list<CFaceGroup> new_face_groups;
+	for (std::list<CFaceGroup>::iterator It = face_groups.begin(); It != face_groups.end(); It++)
+	{
+		CFaceGroup& face_group = *It;
+		if (face_group.m_face_type == FaceFlatTypeUpButNotFlat)
+		{
+			for (std::set<double>::reverse_iterator RIt = plane_heights.rbegin(); RIt != plane_heights.rend(); RIt++)
+			{
+				double z = *RIt;
+				CFaceGroup new_face_group;
+				if (face_group.m_tris.SplitAtZ(z, new_face_group.m_tris))
+				{
+					// add the old, modified face_group
+					//new_face_groups.push_back(face_group);
+
+					// add the new face group
+					new_face_group.m_face_type = FaceFlatTypeUpButNotFlat;
+					new_face_groups.push_back(new_face_group);
+				}
+			}
+		}
+	}
+
+	// add the new face groups
+	for (std::list<CFaceGroup>::iterator It = new_face_groups.begin(); It != new_face_groups.end(); It++)
+	{
+		CFaceGroup &face_group = *It;
+		face_groups.push_back(face_group);
+	}
+
 	std::multimap<double, CMachiningArea> height_sorted_areas;
 
 	for (std::list<CFaceGroup>::iterator It = face_groups.begin(); It != face_groups.end(); It++)
@@ -1335,3 +1441,35 @@ CTris* CTris::GetFlattenedSurface()const
 	return new_solid;
 }
 
+bool CTris::SplitAtZ(double z, CTris& new_tris)
+{
+	// put any parts of the triangle that are above z into new_tris.
+	// leave any parts of the trialge that are bloew z in m_tris
+	// return true if there are any triangles in new_tris
+
+	if (z >= m_box.MaxZ())
+		return false;
+
+	if (z <= m_box.MinZ())
+		return false;
+
+	bool split_done = false;
+
+	CTris new_tris_below;
+
+	for (std::list<CTri>::iterator It = m_tris.begin(); It != m_tris.end(); It++)
+	{
+		CTri& tri = *It;
+		if (tri.SplitAtZ(z, new_tris, new_tris_below))
+			split_done = true;
+		else
+			new_tris_below.AddTri(tri.x[0]);
+	}
+
+	if (split_done)
+	{
+		*this = new_tris_below;
+	}
+
+	return split_done;
+}
