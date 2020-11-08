@@ -23,8 +23,7 @@ pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
 wx_image_extensions = ['bmp','png','jpeg','jpg','gif','pcx','pnm','tif','tga','iff','xpm','ico','cur','ani'] # couldn't find GetHandlers in wxpython
 
-
-pycad_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(pycad_dir)
 
 def OnMessageBox(error_message):
     wx.MessageBox(error_message)
