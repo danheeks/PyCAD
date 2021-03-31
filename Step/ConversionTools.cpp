@@ -472,6 +472,22 @@ bool ConvertWireToSketch(const TopoDS_Wire& wire, HeeksObj* sketch, double devia
 }
 
 
+static void AddLineOrArcToSketch(HeeksObj* sketch, HeeksObj* line_or_arc)
+{
+	Point3d sketch_end;
+	if (sketch->GetEndPoint(sketch_end))
+	{
+		Point3d start;
+		if (line_or_arc->GetStartPoint(start))
+		{
+			if (start.Dist(sketch_end) <= 0.001)
+			{
+				line_or_arc->SetStartPoint(sketch_end);
+			}
+		}
+	}
+	sketch->Add(line_or_arc, NULL);
+}
 
 bool ConvertEdgeToSketch2(const TopoDS_Edge& edge, HeeksObj* sketch, double deviation, bool reverse)
 {
@@ -505,7 +521,7 @@ bool ConvertEdgeToSketch2(const TopoDS_Edge& edge, HeeksObj* sketch, double devi
 			gp_Vec VE;
 			curve.D1(uEnd, PE, VE);
 			HeeksObj* new_object = theApp->CreateNewLine(G2P(sense ? PS : PE), G2P(sense ? PE : PS));
-			sketch->Add(new_object, NULL);
+			AddLineOrArcToSketch(sketch, new_object);
 		}
 		break;
 
@@ -537,17 +553,17 @@ bool ConvertEdgeToSketch2(const TopoDS_Edge& edge, HeeksObj* sketch, double devi
 				curve.D1(uHalf, PH, VH);
 				{
 					HeeksObj* new_object = theApp->CreateNewArc(G2P(PS), G2P(PH), D2P(circle.Axis().Direction()), G2P(circle.Location()));
-					sketch->Add(new_object, NULL);
+					AddLineOrArcToSketch(sketch, new_object);
 				}
 				{
 					HeeksObj* new_object = theApp->CreateNewArc(G2P(PH), G2P(PE), D2P(circle.Axis().Direction()), G2P(circle.Location()));
-					sketch->Add(new_object, NULL);
+					AddLineOrArcToSketch(sketch, new_object);
 				}
 			}
 			else
 			{
 				HeeksObj* new_object = theApp->CreateNewArc(G2P(sense ? PS : PE), G2P(sense ? PE : PS), D2P(circle.Axis().Direction()), G2P(circle.Location()));
-				sketch->Add(new_object, NULL);
+				AddLineOrArcToSketch(sketch, new_object);
 			}
 		}
 		break;
@@ -562,7 +578,7 @@ bool ConvertEdgeToSketch2(const TopoDS_Edge& edge, HeeksObj* sketch, double devi
 				if(sense)
 				{
 					for(std::list<HeeksObj*>::iterator It = new_spans.begin(); It != new_spans.end(); It++)
-						sketch->Add(*It, NULL);
+						AddLineOrArcToSketch(sketch, *It);
 				}
 				else
 				{
@@ -570,7 +586,7 @@ bool ConvertEdgeToSketch2(const TopoDS_Edge& edge, HeeksObj* sketch, double devi
 					{
 						HeeksObj* object = *It;
 						object->Reverse();
-						sketch->Add(object, NULL);
+						AddLineOrArcToSketch(sketch, object);
 					}
 				}
 			}
@@ -595,7 +611,7 @@ bool ConvertEdgeToSketch2(const TopoDS_Edge& edge, HeeksObj* sketch, double devi
 					if(i != 0)
 					{
 						HeeksObj* new_object = theApp->CreateNewLine(G2P(prev_p), G2P(p));
-						sketch->Add(new_object, NULL);
+						AddLineOrArcToSketch(sketch, new_object);
 					}
 					prev_p = p;
 					if(sense)po++;
@@ -614,13 +630,13 @@ static void AddLineOrArc(HeeksObj* sketch, Span &span)
 	if(span.m_v.m_type == 0)
 	{
 		HeeksObj* new_object = theApp->CreateNewLine(Point3d(span.m_p.x, span.m_p.y, 0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0));
-		sketch->Add(new_object, NULL);
+		AddLineOrArcToSketch(sketch, new_object);
 	}
 	else
 	{
 		Point3d axis = (span.m_v.m_type > 0) ? Point3d(0, 0, 1) : Point3d(0, 0, -1);
 		Point3d c(span.m_v.m_c);
 		HeeksObj* new_object = theApp->CreateNewArc(Point3d(span.m_p.x, span.m_p.y, 0), Point3d(span.m_v.m_p.x, span.m_v.m_p.y, 0), axis, c);
-		sketch->Add(new_object, NULL);
+		AddLineOrArcToSketch(sketch, new_object);
 	}
 }

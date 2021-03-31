@@ -40,6 +40,8 @@ public:
 	bool Add(HeeksObj* object, HeeksObj* prev_object);
 	void Remove(HeeksObj* object);
 	int PickPriority(){ return 2; } // lines
+	bool GetStartPoint(Point3d &pos);
+	bool GetEndPoint(Point3d &pos);
 
 	void CalculateSketchOrder();
 	SketchOrderType GetSketchOrder();

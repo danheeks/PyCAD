@@ -829,6 +829,20 @@ void CSketch::Remove(HeeksObj* object)
 	IdNamedObjList::Remove(object);
 }
 
+bool CSketch::GetStartPoint(Point3d &pos)
+{
+	if (m_objects.size() == 0)
+		return false;
+	return m_objects.front()->GetStartPoint(pos);
+}
+
+bool CSketch::GetEndPoint(Point3d &pos)
+{
+	if (m_objects.size() == 0)
+		return false;
+	return m_objects.back()->GetEndPoint(pos);
+}
+
 bool CSketchRelinker::TryAdd(HeeksObj* object)
 {
 	// if the object is not already added

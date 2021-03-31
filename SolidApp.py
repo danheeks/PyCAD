@@ -255,7 +255,7 @@ class SolidApp(App):
                 stl = object.GetTris(accuracy)
                 mat = geom.Matrix()
                 shadow = stl.Shadow(mat, False)
-                shadow.Reorder()
+                #shadow.Reorder()
                 sketch = cad.NewSketchFromArea(shadow)
                 cad.AddUndoably(sketch)
             cad.EndHistory()

@@ -275,6 +275,7 @@ class App(wx.App):
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
                 tools.append(ContextTool.CADContextTool("Fit Arcs", "fitarcs", self.FitArcs))
                 tools.append(ContextTool.CADContextTool("Offset", "offset", self.OffsetSketch))
+            tools.append(ContextTool.CADContextTool("Measure", "measure", self.MeasureSketch))
                 
         if type == cad.OBJECT_TYPE_STL_SOLID:
             tools.append(ContextTool.CADContextTool("Split at Z", "splitsketch", self.SplitStlAtZ))
@@ -378,6 +379,18 @@ class App(wx.App):
         cad.AddUndoably(new_object)
         cad.ClearSelection()
         cad.Select(new_object)
+        
+    def MeasureSketch(self):
+        sketch = self.object
+        sketch.__class__ = cad.Sketch
+        area = sketch.GetArea()
+        area.Reorder()
+        s = 'num curves = ' + str(area.NumCurves()) + '\ntotal perimeter = '
+        p = 0.0
+        for curve in area.GetCurves():
+            p += curve.Perim()
+        s += str(p)
+        wx.MessageBox(s)
     
     def AddPointToDrawing(self):
         cad.AddDrawingPoint()

@@ -43,6 +43,20 @@ const wchar_t* BaseObject::GetShortString()const
 	return ObjList::GetShortString();
 }
 
+bool  BaseObject::CanEditString(void)const
+{
+	std::pair<bool, bool> result = CallReturnBool("CanEditString");
+	if (result.first)
+		return result.second;
+	return ObjList::CanEditString();
+}
+
+void BaseObject::OnEditString(const wchar_t* str)
+{
+	if (!CallVoidReturn("OnEditString", std::wstring(str)))
+		ObjList::OnEditString(str);
+}
+
 const wchar_t* BaseObject::GetTypeString()const
 {
 	std::pair<bool, std::string> result = CallReturnString("GetTypeString");

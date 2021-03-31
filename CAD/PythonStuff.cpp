@@ -2643,6 +2643,7 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("GetIndex", &HeeksObjGetIndex)
 		.def("KillGLLists", &HeeksObj::KillGLLists)
 		.def("GetColor", &HeeksObjGetColor)
+		.def("SetColor", &HeeksObj::SetColor)
 		.def("HasEdit", &HeeksObjHasEdit)
 		.def("GetTitle", &HeeksObjGetTitle)
 		.def("GetBox", &HeeksObjGetBox)

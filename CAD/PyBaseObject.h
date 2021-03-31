@@ -19,6 +19,8 @@ public:
 	int GetType()const;
 	const wchar_t* GetIconFilePath();
 	const wchar_t* GetShortString()const;
+	bool CanEditString(void)const;
+	void OnEditString(const wchar_t* str);
 	const wchar_t* GetTypeString()const;
 	const HeeksColor* GetColor()const;
 	void SetColor(const HeeksColor &col);

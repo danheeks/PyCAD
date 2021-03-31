@@ -714,6 +714,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Intersect", &CArea::Intersect, bp::args("a2"), "leaves the area that is common to both this area and a2")
 		.def("Union", &CArea::Union, bp::args("a2"), "joins a2 to this area")
 		.def("Offset", &CArea::Offset, bp::args("inwards_value"), "offset the area inwards by the value\nuse a negative value to offset outwards\nthis can change the number of curves of the area\nwhen you offset too far inwards there will be no curves left")
+		.def("Thicken", &CArea::Thicken, bp::args("value"), "offset the thin curves outwards by the value to make sausages")
         .def("FitArcs",&CArea::FitArcs, "replaces little lines with arcs where possible. to tolerance set by set_accuracy")
         .def("Text", &print_area, "for debugging, prints a text definition of the Area")
 		.def("NumCurves", &CArea::num_curves, "returns the number of curves in this area")
