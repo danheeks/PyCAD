@@ -275,7 +275,7 @@ class App(wx.App):
                 tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
                 tools.append(ContextTool.CADContextTool("Fit Arcs", "fitarcs", self.FitArcs))
                 tools.append(ContextTool.CADContextTool("Offset", "offset", self.OffsetSketch))
-            tools.append(ContextTool.CADContextTool("Measure", "measure", self.MeasureSketch))
+            tools.append(ContextTool.CADObjectContextTool(object, "Measure", "measure", self.MeasureSketch))
                 
         if type == cad.OBJECT_TYPE_STL_SOLID:
             tools.append(ContextTool.CADContextTool("Split at Z", "splitsketch", self.SplitStlAtZ))
@@ -380,8 +380,8 @@ class App(wx.App):
         cad.ClearSelection()
         cad.Select(new_object)
         
-    def MeasureSketch(self):
-        sketch = self.object
+    def MeasureSketch(self, object):
+        sketch = object
         sketch.__class__ = cad.Sketch
         area = sketch.GetArea()
         area.Reorder()
@@ -418,16 +418,20 @@ class App(wx.App):
         if tool == None:
             menu.AppendSeparator()
         else:
+            title = tool.GetTitle()
+            if title == '':
+                print('Empty title, tool = ' + str(tool))
+                title = 'Empty' # error if no title
             if tool.IsAToolList():
                 menu2 = wx.Menu()
                 for tool2 in tool.GetTools():
                     self.AddToolToListAndMenu(tool2, menu2)
-                item = wx.MenuItem(menu, wx.ID_ANY, tool.GetTitle())
+                item = wx.MenuItem(menu, wx.ID_ANY, title)
                 item.SetSubMenu(menu2)
                 self.SetMenuItemBitmap(item, tool)
                 menu.Append(item)
             else:
-                item = wx.MenuItem(menu, wx.ID_ANY, tool.GetTitle())        
+                item = wx.MenuItem(menu, wx.ID_ANY, title)        
                 self.SetMenuItemBitmap(item, tool)
                 self.Bind(wx.EVT_MENU, tool.Run, menu.Append(item))     
                 if not tool.IsEnabled():
@@ -1167,7 +1171,8 @@ class App(wx.App):
         Mirror(True)
         
     def OnMoveScale(self, e):
-        pass
+        from Transform import Scale
+        Scale()
     
     def OnOriginTransform(self, e):
         from Transform import OriTransform

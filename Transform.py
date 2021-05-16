@@ -705,7 +705,9 @@ def Mirror():
     cad.EndHistory()   
     
 def PickOrigin(prompt):
-    wx.GetApp().PickObjects(prompt)
+    filter = cad.Filter()
+    filter.AddType(cad.OBJECT_TYPE_COORD_SYS)
+    wx.GetApp().PickObjects(prompt, filter, True)
     origin = None
     for object in cad.GetSelectedObjects():
         if object.GetType() == cad.OBJECT_TYPE_COORD_SYS:
@@ -747,3 +749,123 @@ def OriTransform():
     
     cad.EndHistory()   
    
+   
+        
+class ScaleDlg(HDialog):
+    def __init__(self, fromp, scale_factor, copy, title):
+        HDialog.__init__(self, title)
+        self.ignore_event_functions = True
+        sizerMain = wx.BoxSizer(wx.VERTICAL)
+        
+        self.copy = copy
+        self.fromp = fromp
+        self.scale_factor = scale_factor
+
+        self.chkCopy = wx.CheckBox(self, wx.ID_ANY, 'Keep Original')
+        HControl(wx.ALL, self.chkCopy).AddToSizer(sizerMain)
+        self.chkCopy.SetValue(copy)
+        
+        sizerPos = wx.BoxSizer(wx.VERTICAL)
+        sizerMain.Add(sizerPos, 0, wx.EXPAND)
+        self.btnFrom = wx.Button(self, label = 'Select')
+        self.AddLabelAndControl(sizerPos, 'Position to scale about', self.btnFrom)
+        self.fromx = LengthCtrl(self)
+        self.AddLabelAndControl(sizerPos, 'X', self.fromx)
+        self.fromy = LengthCtrl(self)
+        self.AddLabelAndControl(sizerPos, 'Y', self.fromy)
+        self.fromz = LengthCtrl(self)
+        self.AddLabelAndControl(sizerPos, 'Z', self.fromz)
+        
+        self.fromx.SetValue(fromp.x)
+        self.fromy.SetValue(fromp.y)
+        self.fromz.SetValue(fromp.z)
+
+        self.txt_scale_factor = wx.TextCtrl(self, wx.ID_ANY, '%.6f' % scale_factor)
+        self.AddLabelAndControl(sizerMain, 'Scale Factor ( 1.0 for no change )', self.txt_scale_factor)
+            
+        self.MakeOkAndCancel(wx.HORIZONTAL).AddToSizer(sizerMain)
+        
+        self.SetSizer(sizerMain)
+        sizerMain.SetSizeHints(self)
+        sizerMain.Fit(self)
+        
+        self.chkCopy.SetFocus()
+            
+        self.Bind(wx.EVT_BUTTON, self.OnPickFrom, self.btnFrom)
+            
+        self.ignore_event_functions = False
+        
+    def OnPickFrom(self, event):
+        self.EndModal(self.btnFrom.GetId())
+        
+    def GetAllValues(self):
+        self.fromp.x = self.fromx.GetValue()
+        self.fromp.y = self.fromy.GetValue()
+        self.fromp.z = self.fromz.GetValue()
+        copy = self.chkCopy.GetValue()
+        scale_factor = float(self.txt_scale_factor.GetValue())
+        
+        return self.fromp, scale_factor, copy
+
+def InputScale(about_p, scale_factor, copy, title):
+    while(True):
+        dlg = ScaleDlg(about_p, scale_factor, copy, title)
+        ret = dlg.ShowModal()
+        about_p, scale_factor, copy = dlg.GetAllValues()
+        
+        if ret == wx.ID_OK:
+            return True, about_p, scale_factor, copy
+        if ret == dlg.btnFrom.GetId():
+            pos = wx.GetApp().PickPosition("Pick position to scale about")
+            if pos != None: about_p = pos
+        else:
+            return False, None, None, None
+
+def Scale():
+    centre_Pos = geom.Point3D(0,0,0)
+    
+    if cad.GetNumSelected() == 0:
+        wx.GetApp().PickObjects('Pick objects to scale')
+    
+    if cad.GetNumSelected() == 0:
+        return
+    
+    config = HeeksConfig()
+        
+    selected_items = cad.GetSelectedObjects()
+    
+    cad.ClearSelection(False)
+
+    scale_factor = config.ReadFloat('ScaleFactor', 1.0)
+    copy = config.ReadBool("ScaleCopy", False)
+    pos = geom.Point3D(0,0,0)
+    pos.x = config.ReadFloat("ScaleAboutPosX", 0.0)
+    pos.y = config.ReadFloat("ScaleAboutPosY", 0.0)
+    pos.z = config.ReadFloat("ScaleAboutPosZ", 0.0)
+    
+    result, pos, scale_factor, copy = InputScale(pos, scale_factor, copy, 'Scale')
+    if not result:
+        return
+    
+    config.WriteFloat("ScaleFactor", scale_factor)
+    config.WriteBool("ScaleCopy", copy)
+    config.WriteFloat("ScaleAboutPosX", pos.x)
+    config.WriteFloat("ScaleAboutPosY", pos.y)
+    config.WriteFloat("ScaleAboutPosZ", pos.z)
+    
+    cad.StartHistory()
+    
+    mat = geom.Matrix()
+    mat.Translate(-pos)
+    mat.Scale(scale_factor)
+    mat.Translate(pos)
+    for object in selected_items:
+        if copy:
+            if object.CanBeCopied():
+                object = object.MakeACopy()
+                object.Transform(mat)
+                cad.AddUndoably(object)
+        else:
+            cad.TransformUndoably(object, mat)
+
+    cad.EndHistory()    

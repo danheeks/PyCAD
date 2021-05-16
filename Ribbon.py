@@ -283,12 +283,12 @@ class Ribbon(RB.RibbonBar):
         Ribbon.next_id = self.ID_RECENT_FIRST + wx.GetApp().MAX_RECENT_FILES
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
-        main_page = RB.RibbonPage(self, wx.ID_ANY, 'File', self.Image('file'))
-        main_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.main_page = RB.RibbonPage(self, wx.ID_ANY, 'File', self.Image('file'))
+        self.main_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         app = wx.GetApp()
 
-        panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'File', self.Image('new'))
+        panel = RB.RibbonPanel(self.main_page, wx.ID_ANY, 'File', self.Image('new'))
         toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(toolbar, 'New', 'new', 'New File', app.OnNew)
         Ribbon.AddToolBarTool(toolbar, "Open", 'open', "Open file", app.OnOpen, None, self.OnOpenDropdown)
@@ -299,13 +299,13 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar, "Restore Defaults", 'restore', "Restore all defaults", app.OnResetDefaults)
         Ribbon.AddToolBarTool(toolbar, "About", 'about', "Software Information", app.OnAbout)
 
-        panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'Print', self.Image('print'))
+        panel = RB.RibbonPanel(self.main_page, wx.ID_ANY, 'Print', self.Image('print'))
         toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(toolbar, "Print", 'print', "Print the view to a printer", app.OnPrint)
         Ribbon.AddToolBarTool(toolbar, "Page Setup", 'psetup', "Setup the printer layout", app.OnPageSetup)
         Ribbon.AddToolBarTool(toolbar, "Print Preview", 'ppreview', "Show a preview of the print view", app.OnPrintPreview)
 
-        panel = RB.RibbonPanel(main_page, wx.ID_ANY, 'Edit', self.Image('cut'))
+        panel = RB.RibbonPanel(self.main_page, wx.ID_ANY, 'Edit', self.Image('cut'))
         toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(toolbar, "Undo", 'undo', 'Undo the previous command', app.OnUndo, app.OnUpdateUndo, None)
         Ribbon.AddToolBarTool(toolbar, "Redo", 'redo', 'Redo the next command', app.OnRedo, app.OnUpdateRedo, None)
@@ -316,7 +316,7 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar, "Select", 'select', 'Select Mode', app.OnSelectMode)
         Ribbon.AddToolBarTool(toolbar, "Filter", 'filter', 'Edit theSelection Filter', app.OnFilter)
 
-        main_page.Realize()
+        self.main_page.Realize()
 
         
         self.geom_page = RB.RibbonPage(self, wx.ID_ANY, 'Geom', self.Image('geom'))

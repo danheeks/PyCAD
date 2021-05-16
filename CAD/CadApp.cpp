@@ -1218,7 +1218,7 @@ void CCadApp::RenderDatumOrCurrentCoordSys()
 			if (m_show_datum_coords_system)
 			{
 				glClear(GL_DEPTH_BUFFER_BIT);
-				CoordinateSystem::RenderDatum(bright_datum, true);
+				CoordinateSystem::RenderDatum(bright_datum, true, false);
 			}
 			if (m_current_coordinate_system)
 			{
@@ -1243,7 +1243,7 @@ void CCadApp::RenderDatumOrCurrentCoordSys()
 			}
 			if (m_show_datum_coords_system)
 			{
-				CoordinateSystem::RenderDatum(bright_datum, false);
+				CoordinateSystem::RenderDatum(bright_datum, false, false);
 			}
 
 			// restore the depth range
@@ -2515,7 +2515,8 @@ void CCadApp::ColorPickLowestObjects(IRect window, bool single_picking, std::lis
 		{
 			unsigned int name = *It;
 			HeeksObj *object = m_name_index.find(name);
-			objects.push_back(object);
+			if (object != NULL)
+				objects.push_back(object);
 		}
 
 		window_mode++;

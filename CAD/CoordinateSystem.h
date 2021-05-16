@@ -48,7 +48,7 @@ public:
 	void ApplyMatrix();
 
 	static void RenderArrow();
-	static void RenderDatum(bool bright, bool solid); // render a coordinate system at 0, 0, 0
+	static void RenderDatum(bool bright, bool solid, bool no_color); // render a coordinate system at 0, 0, 0
 	//static void GetAx2Properties(std::list<Property *> *list, Point3d& a, HeeksObj* object);
 	bool PickFrom3Points();
 	bool PickFrom1Point();

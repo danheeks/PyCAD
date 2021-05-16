@@ -1099,7 +1099,7 @@ void CoordinateSystem::RenderArrow()
 }
 
 // static
-void CoordinateSystem::RenderDatum(bool bright, bool solid)
+void CoordinateSystem::RenderDatum(bool bright, bool solid, bool no_color)
 {
 	double s = size;
 	if(size_is_pixels)s /= theApp->GetPixelScale();
@@ -1107,45 +1107,69 @@ void CoordinateSystem::RenderDatum(bool bright, bool solid)
 	if(solid)
 	{
 		// render an arrow, like I saw on a commercial CAD system
-		glEnable(GL_LIGHTING);
-		glShadeModel(GL_SMOOTH);
+		if (!no_color)
+		{
+			glEnable(GL_LIGHTING);
+			glShadeModel(GL_SMOOTH);
+		}
 		glPushMatrix();
 		glScaled(s, s, s);
-		if(bright)Material(HeeksColor(0, 0, 255)).glMaterial(1.0);
-		else Material(HeeksColor(64, 64, 128)).glMaterial(1.0);
+		if (!no_color)
+		{
+			if (bright)Material(HeeksColor(0, 0, 255)).glMaterial(1.0);
+			else Material(HeeksColor(64, 64, 128)).glMaterial(1.0);
+		}
 		RenderArrow();
-		if(bright)Material(HeeksColor(255, 0, 0)).glMaterial(1.0);
-		else Material(HeeksColor(128, 64, 64)).glMaterial(1.0);
+		if (!no_color)
+		{
+			if (bright)Material(HeeksColor(255, 0, 0)).glMaterial(1.0);
+			else Material(HeeksColor(128, 64, 64)).glMaterial(1.0);
+		}
 		glRotated(90, 0, 1, 0);
 		RenderArrow();
-		if(bright)Material(HeeksColor(0, 255, 0)).glMaterial(1.0);
-		else Material(HeeksColor(64, 128, 64)).glMaterial(1.0);
+		if (!no_color)
+		{
+			if (bright)Material(HeeksColor(0, 255, 0)).glMaterial(1.0);
+			else Material(HeeksColor(64, 128, 64)).glMaterial(1.0);
+		}
 		glRotated(90, -1, 0, 0);
 		RenderArrow();
 		glPopMatrix();
-		glShadeModel(GL_FLAT);
-		glDisable(GL_LIGHTING);
+		if (!no_color)
+		{
+			glShadeModel(GL_FLAT);
+			glDisable(GL_LIGHTING);
+		}
 	}
 	else
 	{
 		// red, green, blue for x, y, z, like I saw on Open Arena
 		glBegin(GL_LINES);
-		if(bright)glColor3ub(255, 0, 0);
-		else glColor3ub(128, 64, 64);
+		if (!no_color)
+		{
+			if (bright)glColor3ub(255, 0, 0);
+			else glColor3ub(128, 64, 64);
+		}
 		glVertex3d(0, 0, 0);
 		glVertex3d(s, 0, 0);
-		if(bright)glColor3ub(0, 255, 0);
-		else glColor3ub(64, 128, 64);
+		if (!no_color)
+		{
+			if (bright)glColor3ub(0, 255, 0);
+			else glColor3ub(64, 128, 64);
+		}
 		glVertex3d(0, 0, 0);
 		glVertex3d(0, s, 0);
-		if(bright)glColor3ub(0, 0, 255);
-		else glColor3ub(64, 64, 128);
+		if (!no_color)
+		{
+			if (bright)glColor3ub(0, 0, 255);
+			else glColor3ub(64, 64, 128);
+		}
 		glVertex3d(0, 0, 0);
 		glVertex3d(0, 0, s);
 		glEnd();
 	}
 
-	if(bright)
+	if(bright && !no_color)
 	{
 		// render X, Y, Z text
 		double extra_pixels_out = 10.0;
@@ -1180,7 +1204,7 @@ void CoordinateSystem::glCommands(bool select, bool marked, bool no_color)
 
 	bool bright = rendering_current;
 
-	RenderDatum(bright, theApp->m_datum_coords_system_solid_arrows);
+	RenderDatum(bright, theApp->m_datum_coords_system_solid_arrows, no_color);
 
 	glPopMatrix();
 	glLineWidth(1);

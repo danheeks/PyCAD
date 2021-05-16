@@ -41,7 +41,10 @@ class ObjectTitleTool(ContextTool):
         return 16
     
     def GetTitle(self):
-        return self.object.GetTitle()
+        title = self.object.GetTitle()
+        if title == '':
+            title = self.object.GetTypeString()
+        return title
         
     def IsEnabled(self):
         return False
@@ -64,7 +67,11 @@ class ContextToolList(ContextTool):
 class ObjectToolList(ContextToolList):
     def __init__(self, object):
         self.object = object
-        ContextToolList.__init__(self, object.GetTitle())
+        title = object.GetTitle()
+        if title == '':
+            # use obect type
+            title = object.GetTypeString()
+        ContextToolList.__init__(self, title)
 
     def BitmapPath(self):
         return self.object.GetIconFilePath()
