@@ -39,7 +39,7 @@ public:
 	void GetProperties(std::list<Property *> *list);
 	bool FindNearPoint(const Line &ray, double *point);
 	bool FindPossTangentPoint(const Line &ray, double *point);
-	bool Stretch(const double *p, const double* shift, void* data);
+	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const;
 	bool GetCentrePoint(Point3d &pos);
 	bool GetAxis(Point3d &);

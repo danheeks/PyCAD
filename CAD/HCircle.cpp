@@ -129,7 +129,7 @@ void HCircle::Transform(const Matrix& m){
 	double sx = 1.0;
 	m.GetScale(sx);
 	m_radius *= sx;
-	m_axis = m_axis.Transformed(m);
+	m_axis = m_axis.TransformedOnlyRotation(m);
 	m_c = m_c.Transformed(m);
 }
 
@@ -152,8 +152,8 @@ void HCircle::GetGripperPositions(std::list<GripData> *list, bool just_for_endof
 		Point3d x_axis, y_axis;
 		m_axis.arbitrary_axes(x_axis, y_axis);
 		Point3d s = (m_c + x_axis * m_radius);
-		list->push_back(GripData(GripperTypeStretch, m_c, &m_c));
-		list->push_back(GripData(GripperTypeStretch, s, &m_radius));
+		list->push_back(GripData(GripperTypeTranslate, m_c));
+		list->push_back(GripData(GripperTypeStretch, s));
 	}
 }
 
@@ -183,29 +183,10 @@ bool HCircle::FindPossTangentPoint(const Line &ray, double *point){
 	return FindNearPoint(ray, point);
 }
 
-bool HCircle::Stretch(const double *p, const double* shift, void* data){
-#if 0 // to do
-	Point3d vp = make_point(p);
-	Point3d vshift = make_vector(shift);
+bool HCircle::Stretch(const Point3d &p, const Point3d &shift, void* data){
+	m_radius = m_c.Dist(p + shift);
 
-	gp_Ax2 axis(m_axis.Location(), m_axis.Direction());
-	Point3d x_axis = axis.XDirection();
-	Point3d c = m_axis.Location();
-	double r = m_radius;
-	Point3d s(c + x_axis * r);
-
-	if (data == &C_for_gripper_posns){
-		C_for_gripper_posns = vp + vshift;
-		m_axis.SetLocation(C_for_gripper_posns);
-
-	}
-	else if (data == &m_radius)
-	{
-		s = Point3d(vp + vshift);
-		m_radius = c.Distance(s);
-	}
-#endif
-	return false;
+	return true;
 }
 
 bool HCircle::GetCentrePoint(Point3d &pos)
