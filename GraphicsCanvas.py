@@ -123,5 +123,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       for callback in self.paint_callbacks:
           callback()
       self.SwapBuffers()
+      self.viewport.render_on_front_done = False
+      self.viewport.DrawFront()
       
       return

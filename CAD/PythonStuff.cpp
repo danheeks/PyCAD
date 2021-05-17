@@ -2867,6 +2867,7 @@ BOOST_PYTHON_MODULE(cad) {
 		.def_readwrite("need_refresh", &CViewport::m_need_refresh)
 		.def_readwrite("orthogonal", &CViewport::m_orthogonal)
 		.def_readwrite("view_point", &CViewport::m_view_point)
+		.def_readwrite("render_on_front_done", &CViewport::m_render_on_front_done)
 		;
 
 	boost::python::enum_<MouseEventType>("MouseEventType")

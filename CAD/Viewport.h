@@ -9,7 +9,6 @@ class CViewport
 protected:
 	bool m_LButton;
 	IPoint m_CurrentPoint;
-	bool m_render_on_front_done;
 	int m_save_buffer_for_XOR;
 	std::list<CViewPoint> m_view_points;
 	bool m_frozen;
@@ -22,6 +21,7 @@ public:
 	bool m_orthogonal;
 	bool m_need_update;
 	bool m_need_refresh;
+	bool m_render_on_front_done;
 
 	CViewport();
 	CViewport(int w, int h);

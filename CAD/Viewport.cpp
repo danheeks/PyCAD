@@ -188,9 +188,6 @@ void CViewport::glCommands()
 
 	// render everything
 	theApp->glCommandsAll(m_view_point);
-
-	// mark various XOR drawn items as not drawn
-	m_render_on_front_done = false;
 }
 
 void CViewport::DrawFront(void){
