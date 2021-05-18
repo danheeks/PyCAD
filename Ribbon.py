@@ -359,8 +359,8 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar,'Copy Translate', 'copyt', 'Copy and translate selected items', app.OnCopyTranslate)
         Ribbon.AddToolBarTool(toolbar,'Move Rotate', 'mover', 'Rotate selected items', app.OnMoveRotate)
         Ribbon.AddToolBarTool(toolbar,'Copy Rotate', 'copyr', 'Copy and rotate selected items', app.OnCopyRotate)
-        Ribbon.AddToolBarTool(toolbar,'Move Mirror', 'copym', 'Mirror selected items', app.OnMirror)
-        Ribbon.AddToolBarTool(toolbar,'Move Scale', 'moves', 'Scale selected items', app.OnMoveScale)
+        Ribbon.AddToolBarTool(toolbar,'Mirror', 'copym', 'Mirror selected items', app.OnMirror)
+        Ribbon.AddToolBarTool(toolbar,'Scale', 'moves', 'Scale selected items', app.OnMoveScale)
         Ribbon.AddToolBarTool(toolbar,'Move Origin', 'coords3', 'Move selected items from one origin to another', app.OnOriginTransform)
         
         panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Snapping', self.Image('endof'))
