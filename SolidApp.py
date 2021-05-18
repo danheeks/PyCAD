@@ -286,8 +286,7 @@ class SolidApp(App):
             cad.ClearSelection(True)
             cad.EndHistory()
         
-    def AddExtraRibbonPages(self, ribbon):
-        
+    def AddExtraRibbonPages(self, ribbon):        
         page = RB.RibbonPage(ribbon, wx.ID_ANY, 'Solid', ribbon.Image('solids'))
         page.Bind(wx.EVT_KEY_DOWN, ribbon.OnKeyDown)
 
@@ -320,6 +319,7 @@ class SolidApp(App):
         page.Realize()
         
         Ribbon.AddToolBarTool(ribbon.other_drawing_toolbar, 'Ellipses', 'circles', 'Draw Ellipses', self.OnEllipse)
+        Ribbon.AddToolBarTool(ribbon.other_drawing_toolbar,'Spline', 'splpts', 'Spline Through Points', self.OnSpline)
         
     def AddOptionsRibbonPanels(self, ribbon):
         App.AddOptionsRibbonPanels(self, ribbon)
@@ -336,6 +336,17 @@ class SolidApp(App):
         
     def OnEllipse(self, e):
         step.SetEllipseDrawing()
+        
+    def OnSpline(self, e):
+        if not self.CheckForNumberOrMore(2, [cad.OBJECT_TYPE_POINT], 'Pick one or more points to make a spline through', 'Spline Through Points'):
+            return
+        cad.StartHistory()
+        points = []
+        for object in cad.GetSelectedObjects():
+            points.append(object.GetStartPoint())
+        new_object = step.NewSplineFromPoints(points)
+        cad.AddUndoably(new_object)
+        cad.EndHistory()
 
     def GetSelectionFilterTools(self, filter):
         tools = App.GetSelectionFilterTools(self, filter)

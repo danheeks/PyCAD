@@ -175,6 +175,20 @@ HeeksObj* NewSketchFromFace(HeeksObj* object)
 	return new_object;
 }
 
+HeeksObj* NewSplineFromPoints(boost::python::list &list)
+{
+	std::list<gp_Pnt> p_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		Point3d p = boost::python::extract<Point3d>(list[i]);
+		gp_Pnt gp(p.x, p.y, p.z);
+		p_list.push_back(gp);
+	}
+
+	HSpline* new_object = new HSpline(p_list, &theApp->GetCurrentColor());
+	return new_object;
+}
+
 
 	BOOST_PYTHON_MODULE(step) {
 
@@ -238,5 +252,6 @@ HeeksObj* NewSketchFromFace(HeeksObj* object)
 		boost::python::def("SetShowFaceNormals", SetShowFaceNormals);
 		boost::python::def("GetShowFaceNormals", GetShowFaceNormals); 
 		boost::python::def("NewSketchFromFace", NewSketchFromFace, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewSplineFromPoints", NewSplineFromPoints, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	}
 	

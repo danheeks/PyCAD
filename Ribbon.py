@@ -341,7 +341,6 @@ class Ribbon(RB.RibbonBar):
         self.other_drawing_toolbar = RB.RibbonButtonBar(panel)
         Ribbon.AddToolBarTool(self.other_drawing_toolbar,'Infinite Line', 'iline', 'Drawing Infinite Lines', app.OnILine)
         Ribbon.AddToolBarTool(self.other_drawing_toolbar,'Points', 'point', 'Drawing Points', app.OnPoints)
-        Ribbon.AddToolBarTool(self.other_drawing_toolbar,'Spline', 'splpts', 'Spline Through Points', app.OnGear)
         
         panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Text', self.Image('text'))
         toolbar = RB.RibbonButtonBar(panel)
