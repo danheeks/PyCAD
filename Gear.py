@@ -61,11 +61,11 @@ class Gear(Object):
         c.Append(points[0])
         a.Append(c)
         
-        t = geom.Stl()
-        a.GetTriangles(t)
+        t_list = a.GetTrianglesList()
         if not no_color:
             cad.DrawColor(self.color)
-        cad.DrawTris(t, True)
+        for t in t_list:
+            cad.DrawTris(t, True)
         cad.DrawPopMatrix()
             
     def Transform(self, mat):
