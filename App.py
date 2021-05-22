@@ -697,6 +697,12 @@ class App(wx.App):
             recent_id += 1
             
     def OnSaveFilepath(self, filepath):
+        # save .heeks file
+        
+        # filepath must end in .heeks
+        if (filepath[-6:].lower()) != '.heeks':
+            filepath.append('.heeks')
+        
         if cad.SaveFile(filepath):
             self.filepath = filepath        
             cad.SetLikeNewFile()
