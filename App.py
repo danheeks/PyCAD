@@ -711,7 +711,7 @@ class App(wx.App):
             return self.OnSaveFilepath(self.filepath)
 
         dialog = wx.FileDialog(self.frame, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-        dialog.SetFilterIndex(1)
+        dialog.SetFilterIndex(0)
         dialog.CenterOnParent()
         if dialog.ShowModal() == wx.ID_CANCEL:
             return wx.ID_CANCEL
