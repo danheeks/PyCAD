@@ -363,7 +363,7 @@ void CViewport::DrawWindow(IRect &rect, bool allow_extra_bits){
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(-0.5, m_w - 0.5, -0.5, m_h - 0.5, 0, 10);
+	glOrtho(-0.5, m_w - 0.5, m_h -0.5, -0.5, 0, 10);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
