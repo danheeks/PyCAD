@@ -79,7 +79,10 @@ bool LineToBigCircles(const Line& lin, const Point3d& z_axis, Circle& c1, Circle
 //Matrix make_matrix(const double* m);
 //Matrix make_matrix(const Point3d &origin, const Point3d &x_axis, const Point3d &y_axis);
 
-//void add_pnt_to_doubles(const Point3d& pnt, std::list<double> &dlist);
+void add_pnt_to_doubles(const Point3d& pnt, std::list<double> &dlist);
+void intersect(const Line& lin, const Circle& cir, std::list<Point3d> &list);
+void intersect(const Circle& c1, const Circle& c2, std::list<Point> &list);
+
 //int convert_pnts_to_doubles(const std::list<Point3d> &plist, std::list<double> &dlist);
 //bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::const_iterator &It, Point3d& pnt, bool four_doubles = false);
 //int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<Point3d> &plist, bool four_doubles = false);

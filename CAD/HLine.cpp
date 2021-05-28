@@ -3,9 +3,10 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 
+#include "../Geom/Geom.h"
 #include "HLine.h"
 #include "HILine.h"
-//#include "HCircle.h"
+#include "HCircle.h"
 #include "HArc.h"
 #include "Gripper.h"
 #include "Sketch.h"
@@ -249,7 +250,6 @@ Line HLine::GetLine()const{
 int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 	int numi = 0;
 
-#if 0 // to do
 	switch(object->GetType())
 	{
     case SketchType:
@@ -266,7 +266,7 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 			    (A.z == B.z)) break;
 
 			Point3d pnt;
-			if(intersect(GetLine(), ((HLine*)object)->GetLine(), pnt))
+			if(Intof(GetLine(), ((HLine*)object)->GetLine(), pnt))
 			{
 				if(Intersects(pnt) && ((HLine*)object)->Intersects(pnt)){
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -279,7 +279,7 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 	case ILineType:
 		{
 			Point3d pnt;
-			if(intersect(GetLine(), ((HILine*)object)->GetLine(), pnt))
+			if (Intof(GetLine(), ((HILine*)object)->GetLine(), pnt))
 			{
 				if(Intersects(pnt)){
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -309,7 +309,7 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 		{
 			std::list<Point3d> plist;
 			intersect(GetLine(), ((HCircle*)object)->GetCircle(), plist);
-			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for (std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
 				Point3d& pnt = *It;
 				if(Intersects(pnt))
@@ -321,26 +321,22 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 		}
 		break;
 	}
-#endif
 
 	return numi;
 }
 
 bool HLine::Intersects(const Point3d &pnt)const
 {
-#if 0
-	gp_Lin this_line = GetLine();
-	if(!intersect(pnt, this_line))return false;
+	Line this_line = GetLine();
+	if (!this_line.Intof(pnt))return false;
 
 	// check it lies between A and B
-	Point3d v = this_line.Direction();
+	Point3d v = this_line.v;
+	v.Normalize();
 	double dpA = Point3d(A) * v;
 	double dpB = Point3d(B) * v;
 	double dp = Point3d(pnt) * v;
-	return dp >= dpA - theApp->m_geom_tol && dp <= dpB + theApp->m_geom_tol;
-#else
-	return false;
-#endif
+	return dp >= dpA - TOLERANCE && dp <= dpB + TOLERANCE;
 }
 
 void HLine::GetSegments(void(*callbackfunc)(const double *p, bool start), double pixels_per_mm)const{

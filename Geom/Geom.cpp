@@ -831,3 +831,24 @@ Point3d ClosestPointOnLine(const Line& line, const Point3d &p){
 	double t;
 	return line.Near(p, t);
 }
+
+
+void add_pnt_to_doubles(const Point3d& pnt, std::list<double> &dlist)
+{
+	dlist.push_back(pnt.x);
+	dlist.push_back(pnt.y);
+	dlist.push_back(pnt.z);
+}
+
+
+void intersect(const Line& line, const Circle& circle, std::list<Point3d> &list)
+{
+	std::list<Point3d> plist;
+	ClosestPointsLineAndCircle(line, circle, plist);
+	for (std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+	{
+		Point3d& p = *It;
+		if (line.Intof(p))list.push_back(p);
+	}
+}
+

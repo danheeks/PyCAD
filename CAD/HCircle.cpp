@@ -11,6 +11,8 @@
 #include "DigitizeMode.h"
 #include "Drawing.h"
 #include "Property.h"
+#include "Sketch.h"
+#include "../Geom/Geom.h"
 
 HCircle::HCircle(const HCircle &c){
 	operator=(c);
@@ -238,7 +240,6 @@ void HCircle::ReadFromXML(TiXmlElement* element)
 int HCircle::Intersects(const HeeksObj *object, std::list< double > *rl)const
 {
 	int numi = 0;
-#if 0 // to do
 
 	switch (object->GetType())
 	{
@@ -246,56 +247,32 @@ int HCircle::Intersects(const HeeksObj *object, std::list< double > *rl)const
 		return(((CSketch *)object)->Intersects(this, rl));
 
 	case LineType:
-	{
-		std::list<Point3d> plist;
-		intersect(((HLine*)object)->GetLine(), GetCircle(), plist);
-		for (std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
-		{
-			Point3d& pnt = *It;
-			if (((HLine*)object)->Intersects(pnt))
-			{
-				if (rl)add_pnt_to_doubles(pnt, *rl);
-				numi++;
-			}
-		}
-	}
-	break;
+		return(((HLine *)object)->Intersects(this, rl));
 
 	case ILineType:
-	{
-		std::list<Point3d> plist;
-		intersect(((HILine*)object)->GetLine(), GetCircle(), plist);
-		if (rl)convert_pnts_to_doubles(plist, *rl);
-		numi += plist.size();
-	}
-	break;
+		return(((HILine *)object)->Intersects(this, rl));
 
 	case ArcType:
-	{
-		std::list<Point3d> plist;
-		intersect(GetCircle(), ((HArc*)object)->GetCircle(), plist);
-		for (std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
-		{
-			Point3d& pnt = *It;
-			if (((HArc*)object)->Intersects(pnt))
-			{
-				if (rl)add_pnt_to_doubles(pnt, *rl);
-				numi++;
-			}
-		}
-	}
-	break;
+		return(((HArc *)object)->Intersects(this, rl));
 
 	case CircleType:
 	{
-		std::list<Point3d> plist;
-		intersect(GetCircle(), ((HCircle*)object)->GetCircle(), plist);
-		if (rl)convert_pnts_to_doubles(plist, *rl);
-		numi += plist.size();
+		Point leftInters, rightInters;
+		int	n = GetCircle().Intof(((HCircle*)object)->GetCircle(), leftInters, rightInters);
+		if (n > 0)
+		{
+			if (rl)add_pnt_to_doubles(leftInters, *rl);
+			numi++;
+		}
+		if (n > 1)
+		{
+			if (rl)add_pnt_to_doubles(rightInters, *rl);
+			numi++;
+		}
 	}
 	break;
 	}
-#endif
+
 	return numi;
 }
 

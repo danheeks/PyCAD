@@ -8,6 +8,7 @@
 #include "HPoint.h"
 #include "HILine.h"
 //#include "HCircle.h"
+#include "../Geom/Geom.h"
 #include "tinyxml.h"
 #include "Gripper.h"
 #include "Sketch.h"
@@ -309,27 +310,15 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 {
 	int numi = 0;
 
-#if 0  // to do
 	switch(object->GetType())
 	{
     case SketchType:
         return( ((CSketch *)object)->Intersects( this, rl ));
 
 	case LineType:
-		{
-			std::list<Point3d> plist;
-			intersect(((HLine*)object)->GetLine(), GetCircle(), plist);
-			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
-			{
-				Point3d& pnt = *It;
-				if(Intersects(pnt) && ((HLine*)object)->Intersects(pnt))
-				{
-					if(rl)add_pnt_to_doubles(pnt, *rl);
-					numi++;
-				}
-			}
-		}
-		break;
+		return object->Intersects(this, rl);
+
+#if 0  // to do
 
 	case ILineType:
 		{
@@ -347,13 +336,15 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 		}
 		break;
 
+#endif
 	case ArcType:
 		{
-			std::list<Point3d> plist;
+			std::list<Point> plist;
 			intersect(GetCircle(), ((HArc*)object)->GetCircle(), plist);
-			for(std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
+			for(std::list<Point>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
-				Point3d& pnt = *It;
+				Point& p = *It;
+				Point3d pnt(p.x, p.y, 0.0);
 				if(Intersects(pnt) && ((HArc*)object)->Intersects(pnt))
 				{
 					if(rl)add_pnt_to_doubles(pnt, *rl);
@@ -362,7 +353,7 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 			}
 		}
 		break;
-
+#if 0
 	case CircleType:
 		{
 			std::list<Point3d> plist;
@@ -378,32 +369,31 @@ int HArc::Intersects(const HeeksObj *object, std::list< double > *rl)const
 			}
 		}
 		break;
-	}
 #endif
+	}
 
 	return numi;
 }
 
 bool HArc::Intersects(const Point3d &pnt)const
 {
-#if 0 // to do
-	if(!intersect(pnt, GetCircle()))return false;
+	Point p(pnt.x, pnt.y);
+	if(!GetCircle().PointIsOn(p, TOLERANCE))return false;
 
-	if(pnt.IsEqual(A, theApp->m_geom_tol)){
+	if(pnt == A){
 		return true;
 	}
 
-	if(pnt.IsEqual(B, theApp->m_geom_tol)){
+	if(pnt == B){
 		return true;
 	}
 
-	if(A.IsEqual(B, theApp->m_geom_tol)){
+	if(A == B){
 		return false; // no size arc!
 	}
 
-	Point3d axis(C,m_axis.Direction());
-	Point3d x_axis = axis.XDirection();
-	Point3d y_axis = axis.YDirection();
+	Point3d x_axis, y_axis;
+	m_axis.arbitrary_axes(x_axis, y_axis);
 	Point3d centre = C;
 
 	double ax = Point3d(A - centre) * x_axis;
@@ -423,9 +413,6 @@ bool HArc::Intersects(const Point3d &pnt)const
 
 	// point lies on the arc, if the angle is less than the end angle
 	return pnt_angle < end_angle;
-#else
-	return false;
-#endif
 }
 
 bool HArc::FindNearPoint(const Line &ray, double *point){
