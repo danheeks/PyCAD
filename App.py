@@ -19,6 +19,10 @@ from FilterDlg import FilterDlg
 import HImage
 from Ribbon import RB
 
+SKETCH_OP_UNION = 1
+SKETCH_OP_SUBTRACT = 2
+SKETCH_OP_INTERSECT = 3
+
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
 wx_image_extensions = ['bmp','png','jpeg','jpg','gif','pcx','pnm','tif','tga','iff','xpm','ico','cur','ani'] # couldn't find GetHandlers in wxpython
@@ -61,9 +65,22 @@ class App(wx.App):
         self.select_mode = SelectMode.SelectMode()
         self.coordsys_for_P3P = None
         self.paint_registered = False
-        self.import_file_types = [] # a list of tuples, example entry:   ( ['step', 'stp'], 'Step Files' )
-        self.export_file_types = [] # a list of tuples
-        
+        self.import_file_types = [
+            (['.heeks'], 'Heeks files'),
+            (['.stl'], 'STL files'),
+            (['.svg'], 'Scalar Vector Graphics files'),
+            (['.dxf'], 'DXF files'),
+            (['.gbr', '.rs274x'], 'RS274X/Gerber files'),
+            (['.pho'], 'PHO files'),
+            ]
+        self.export_file_types = [
+            (['.stl'], 'STL files'),
+            (['.dxf'], 'DXF files'),
+            (['.cpp'], 'CPP files'),
+            (['.py'], 'OpenCAMLib python files'),
+            (['.obj'], 'Wavefront .obj files'),
+            ]
+
         save_out = sys.stdout
         save_err = sys.stderr
         wx.App.__init__(self)
@@ -212,24 +229,26 @@ class App(wx.App):
         self.frame.input_mode_canvas.RemoveAndAddAll()
         self.frame.graphics_canvas.Refresh()
         
-    def SplitSketch(self):
-        new_sketches = self.object.Split()
+    def SplitSketch(self, object):
+        sketch = object
+        sketch.__class__ = cad.Sketch
+        new_sketches = sketch.Split()
         cad.StartHistory()
-        cad.DeleteUndoably(self.object)
+        cad.DeleteUndoably(object)
         for sketch in new_sketches:
-            cad.AddUndoably(sketch, self.object.GetOwner(), None)
+            cad.AddUndoably(sketch, object.GetOwner(), None)
         cad.EndHistory()
         
-    def FitArcs(self):
+    def FitArcs(self, object):
         value = self.InputLength('Set tolerance for Fit Arcs', 'tolerance', geom.get_accuracy())
         if value != None:
             geom.set_accuracy(value)
-            sketch = self.object
+            sketch = object
             sketch.__class__ = cad.Sketch
             curve = sketch.GetCurve()
             curve.FitArcs()
             cad.StartHistory()
-            cad.DeleteUndoably(self.object)
+            cad.DeleteUndoably(object)
             cad.AddUndoably(cad.NewSketchFromCurve(curve))
             cad.EndHistory()        
         
@@ -272,9 +291,9 @@ class App(wx.App):
         type = self.object.GetType()
         if type == cad.OBJECT_TYPE_SKETCH:
             if self.object.GetNumChildren() > 1:
-                tools.append(ContextTool.CADContextTool("Split Sketch", "splitsketch", self.SplitSketch))
-                tools.append(ContextTool.CADContextTool("Fit Arcs", "fitarcs", self.FitArcs))
-                tools.append(ContextTool.CADContextTool("Offset", "offset", self.OffsetSketch))
+                tools.append(ContextTool.CADObjectContextTool(object, "Split Sketch", "splitsketch", self.SplitSketch))
+                tools.append(ContextTool.CADObjectContextTool(object, "Fit Arcs", "fitarcs", self.FitArcs))
+                tools.append(ContextTool.CADObjectContextTool(object, "Offset", "offset", self.OffsetSketch))
             tools.append(ContextTool.CADObjectContextTool(object, "Measure", "measure", self.MeasureSketch))
                 
         if type == cad.OBJECT_TYPE_STL_SOLID:
@@ -325,6 +344,9 @@ class App(wx.App):
 
         if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH):
             tools.append(ContextTool.CADContextTool('Combine sketches', 'sketchjoin', cad.CombineSelectedSketches))
+            tools.append(ContextTool.CADContextTool('Unite sketches', 'sketchunite', self.UniteSelectedSketches))
+            tools.append(ContextTool.CADContextTool('Cut sketches', 'sketchcut', self.CutSelectedSketches))
+            tools.append(ContextTool.CADContextTool('Intersect sketches', 'sketchintersect', self.IntersectSelectedSketches))
         
         first_coord_sys = None
         second_coord_sys = None
@@ -365,12 +387,12 @@ class App(wx.App):
         cad.AddUndoably(sketch)
         cad.DeleteObjectsUndoably(objects_to_delete)
         
-    def OffsetSketch(self):
+    def OffsetSketch(self, object):
         config = HeeksConfig()
         value = config.ReadFloat('SketchOffsetValue', 1.0)
         value = self.InputLength('Offset Sketch', 'Offset Value +ve for Outwards -ve for Inwards', value)
         if value == None: return
-        sketch = self.object
+        sketch = object
         sketch.__class__ = cad.Sketch
         area = sketch.GetArea()
         area.Reorder()
@@ -379,7 +401,44 @@ class App(wx.App):
         cad.AddUndoably(new_object)
         cad.ClearSelection()
         cad.Select(new_object)
+
+    def SketchOperation(self, mode):
+        objects_to_delete = []
+        area = None
         
+        for object in cad.GetSelectedObjects():
+            t = object.GetType()
+            if t == cad.OBJECT_TYPE_SKETCH:
+                objects_to_delete.append(object)
+                sketch = object
+                sketch.__class__ = cad.Sketch
+                a = sketch.GetArea()
+                if area == None:
+                    area = a
+                else:
+                    if mode == SKETCH_OP_UNION:
+                        area.Union(a)
+                    elif mode == SKETCH_OP_SUBTRACT:
+                        area.Subtract(a)
+                    elif mode == SKETCH_OP_INTERSECT:
+                        area.Intersect(a)                         
+                    
+        if area != None:
+            cad.StartHistory()
+            sketch = cad.NewSketchFromArea(area)
+            cad.AddUndoably(sketch)
+            cad.DeleteObjectsUndoably(objects_to_delete)
+            cad.EndHistory()
+        
+    def UniteSelectedSketches(self):
+        self.SketchOperation(SKETCH_OP_UNION)
+
+    def CutSelectedSketches(self):
+        self.SketchOperation(SKETCH_OP_SUBTRACT)
+    
+    def IntersectSelectedSketches(self):
+        self.SketchOperation(SKETCH_OP_INTERSECT)
+    
     def MeasureSketch(self, object):
         sketch = object
         sketch.__class__ = cad.Sketch
@@ -740,27 +799,36 @@ class App(wx.App):
         if dialog.ShowModal() != wx.ID_CANCEL:
             self.OnSaveFilepath(dialog.GetPath())
                     
-    def GetImportWildcardString(self):
-        wild_card_string1 = 'Known Files |*.heeks;*.HEEKS;*.dxf;*.DXF;*.stl'
-        wild_card_string2 = '|Heeks files (*.heeks)|*.heeks;*.HEEKS|STL files (*.stl)|*.stl;*.STL|Scalar Vector Graphics files (*.svg)|*.svg;*.SVG|DXF files (*.dxf)|*.dxf;*.DXF|RS274X/Gerber files (*.gbr,*.rs274x)|*.gbr;*.GBR;*.rs274x;*.RS274X;*.pho;*.PHO'
+    def GetWildcardString(self, import_not_export):
+        wild_card_string1 = 'Known Files |'
+        wild_card_string2 = ''
         
-        wild_card_string1, wild_card_string2 = AddToWildcardStrings(wild_card_string1, wild_card_string2, self.import_file_types)
-        
-        return wild_card_string1 + wild_card_string2
+        first = True
 
-    def GetExportWildcardString(self):
-        wild_card_string1 = 'Known Files |*.stl;*.dxf;*.cpp;*.py;*.obj'
-        wild_card_string2 = '|STL files (*.stl)|*.stl|DXF files (*.dxf)|*.dxf|CPP files (*.cpp)|*.cpp|OpenCAMLib python files (*.py)|*.py|Wavefront .obj files (*.obj)|*.obj'
-        
-        wild_card_string1, wild_card_string2 = AddToWildcardStrings(wild_card_string1, wild_card_string2, self.export_file_types)
-        
+        for suffix_list, description in (self.import_file_types if import_not_export else self.export_file_types):
+            wild_card_string2 += '|' + description + ' ('
+            imageExtStr = ''
+            imageExtStr2 = ''
+            for suffix in suffix_list:
+                if not first:
+                    wild_card_string1 += ';'
+                wild_card_string1 += '*.'
+                wild_card_string1 += suffix
+                if imageExtStr:
+                    imageExtStr += ' '
+                    imageExtStr2 += ';'
+                imageExtStr += ('*.' + suffix)
+                imageExtStr2 += ('*.' + suffix)
+            wild_card_string2 += (imageExtStr + ')|' + imageExtStr2)
+            first = False
+            
         return wild_card_string1 + wild_card_string2
-                                         
+    
     def OnImport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
         
-        dialog = wx.FileDialog(self.frame, 'Import File', default_directory, '', self.GetImportWildcardString())
+        dialog = wx.FileDialog(self.frame, 'Import File', default_directory, '', self.GetWildcardString(True))
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
@@ -795,7 +863,7 @@ class App(wx.App):
     def OnExport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ExportDirectory', self.GetDefaultDir())
-        dialog = wx.FileDialog(self.frame, 'Export File', default_directory, '', self.GetExportWildcardString(), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
+        dialog = wx.FileDialog(self.frame, 'Export File', default_directory, '', self.GetWildcardString(False), wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.CenterOnParent()
         
         if dialog.ShowModal() == wx.ID_OK:
@@ -1248,22 +1316,5 @@ class CopyObjectUndoable(cad.BaseUndoable):
     def RollBack(self):
         self.object.CopyFrom(self.old_copy)
         cad.WasModified(self.object)
-        
-def AddToWildcardStrings(wild_card_string1, wild_card_string2, file_types):
-    for suffix_list, description in file_types:
-        wild_card_string2 += '|' + description + ' ('
-        imageExtStr = ''
-        imageExtStr2 = ''
-        for suffix in suffix_list:
-            wild_card_string1 += ';*.'
-            wild_card_string1 += suffix
-            if imageExtStr:
-                imageExtStr += ' '
-                imageExtStr2 += ';'
-            imageExtStr += ('*.' + suffix)
-            imageExtStr2 += ('*.' + suffix)
-        wild_card_string2 += (imageExtStr + ')|' + imageExtStr2)
-        
-    return wild_card_string1, wild_card_string2
         
         

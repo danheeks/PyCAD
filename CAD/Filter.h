@@ -9,12 +9,13 @@ class CFilter
 {
 	std::set<int> m_types;
 public:
-	CFilter(){}
+	CFilter(bool empty_means_none = false) :m_empty_means_none(empty_means_none){}
+	bool m_empty_means_none;
 	void Clear(){ m_types.clear(); }
 	void AddType(int type){ m_types.insert(type); }
 	bool IsTypeInFilter(int type)const{
 		if (type == 0)return false;
-		if (m_types.size() == 0)return true;
+		if (m_types.size() == 0)return !m_empty_means_none;
 		return (m_types.find(type) != m_types.end());
 	}
 	unsigned int Size(){return m_types.size();}

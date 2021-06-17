@@ -1870,7 +1870,8 @@ boost::python::list GetSelectedObjects() {
 	return slist;
 }
 
-static CFilter selection_types_found;
+static CFilter selection_types_found(true);
+
 CFilter* GetSelectionTypes()
 {
 	selection_types_found.Clear();
@@ -2917,6 +2918,7 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("AddType", &CFilter::AddType)
 		.def("IsTypeInFilter", &CFilter::IsTypeInFilter)
 		.def("Size", &CFilter::Size)
+		.def_readwrite("empty_means_none", &CFilter::m_empty_means_none)
 		;
 
 	boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")

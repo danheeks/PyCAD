@@ -6286,9 +6286,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.828427"
-     inkscape:cx="789.17635"
-     inkscape:cy="620.5133"
+     inkscape:zoom="3.9999998"
+     inkscape:cx="470.06916"
+     inkscape:cy="315.96711"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -13277,6 +13277,94 @@
          id="path6650"
          d="m 897.73701,474.25542 0.38158,-0.28948 0.19738,0.0395 -0.14475,1.89474 -0.11842,0.0789 -0.46053,-0.43421 z"
          style="opacity:1;vector-effect:none;fill:#343530;fill-opacity:1;stroke:none;stroke-width:0.10526364px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </g>
+    <g
+       id="g6796">
+      <circle
+         inkscape:export-ydpi="287.90994"
+         inkscape:export-xdpi="287.90994"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchunite.png"
+         r="12"
+         cy="708.3714"
+         cx="490"
+         id="path24460-5"
+         style="fill:none;fill-opacity:1;stroke:#afafaf;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <circle
+         inkscape:export-ydpi="287.90994"
+         inkscape:export-xdpi="287.90994"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchunite.png"
+         r="12"
+         cy="714.37134"
+         cx="496"
+         id="path24462-7"
+         style="fill:none;fill-opacity:1;stroke:#afafaf;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         inkscape:export-ydpi="287.90994"
+         inkscape:export-xdpi="287.90994"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchunite.png"
+         id="path24460-5-5"
+         d="M 490.03125 696.36133 A 12 12 0 0 0 478.03125 708.36133 A 12 12 0 0 0 485.10742 719.29297 A 12 12 0 0 0 496.03125 726.36133 A 12 12 0 0 0 508.03125 714.36133 A 12 12 0 0 0 500.95312 703.42969 A 12 12 0 0 0 490.03125 696.36133 z "
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g6801"
+       inkscape:export-xdpi="288"
+       inkscape:export-ydpi="288">
+      <circle
+         inkscape:export-ydpi="287.91599"
+         inkscape:export-xdpi="287.91599"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchcut.png"
+         r="12"
+         cy="706.74182"
+         cx="527.60938"
+         id="path24460-5-52"
+         style="fill:none;fill-opacity:1;stroke:#ababab;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <circle
+         inkscape:export-ydpi="287.91599"
+         inkscape:export-xdpi="287.91599"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchcut.png"
+         r="12"
+         cy="712.74176"
+         cx="533.60938"
+         id="path24462-7-9"
+         style="fill:none;fill-opacity:1;stroke:#ababab;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         inkscape:export-ydpi="287.91599"
+         inkscape:export-xdpi="287.91599"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchcut.png"
+         id="path24460-5-5-4"
+         d="M 527.64062 694.73242 A 12 12 0 0 0 515.64062 706.73242 A 12 12 0 0 0 522.7168 717.66406 A 12 12 0 0 1 521.64062 712.73242 A 12 12 0 0 1 533.64062 700.73242 A 12 12 0 0 1 538.56445 701.80078 A 12 12 0 0 0 527.64062 694.73242 z "
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g6807"
+       inkscape:export-xdpi="288"
+       inkscape:export-ydpi="288">
+      <circle
+         inkscape:export-ydpi="288.00055"
+         inkscape:export-xdpi="288.00055"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchintersect.png"
+         r="12"
+         cy="706.99182"
+         cx="564.98438"
+         id="path24460-5-52-1"
+         style="fill:none;fill-opacity:1;stroke:#afafaf;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <circle
+         inkscape:export-ydpi="288.00055"
+         inkscape:export-xdpi="288.00055"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchintersect.png"
+         r="12"
+         cy="712.99176"
+         cx="570.98438"
+         id="path24462-7-9-4"
+         style="fill:none;fill-opacity:1;stroke:#afafaf;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         inkscape:export-ydpi="288.00055"
+         inkscape:export-xdpi="288.00055"
+         inkscape:export-filename="C:\Dev\heekscad\trunk\bitmaps\sketchintersect.png"
+         id="path24460-5-5-4-7"
+         d="M 571.01562 700.98242 A 12 12 0 0 0 559.01562 712.98242 A 12 12 0 0 0 560.0918 717.91406 A 12 12 0 0 0 565.01562 718.98242 A 12 12 0 0 0 577.01562 706.98242 A 12 12 0 0 0 575.93945 702.05078 A 12 12 0 0 0 571.01562 700.98242 z "
+         style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>
