@@ -2,6 +2,7 @@ import wx
 import cad
 import os
 import ContextTool
+import math
 
 ButtonTypePlus = 1
 ButtonTypeMinus = 2
@@ -208,7 +209,7 @@ class TreeCanvas(wx.ScrolledCanvas):
                         cad.StartHistory()
 
                         # cut the objects
-                        cad.DeleteListUndoably(self.dragged_list)
+                        cad.DeleteObjectsUndoably(self.dragged_list)
 
                         # paste the objects
                         for object in self.dragged_list:
@@ -255,6 +256,19 @@ class TreeCanvas(wx.ScrolledCanvas):
                 for tool in tools:
                     wx.GetApp().AddToolToListAndMenu(tool, menu)
                 self.PopupMenu(menu, event.GetPosition())
+                
+        if event.Dragging():
+            if event.LeftIsDown() or event.RightIsDown():
+                if (not self.dragging) and (math.fabs(self.button_down_point.x - event.GetX())>2 or math.fabs(self.button_down_point.y - event.GetY())>2):
+                    self.dragging = True
+                    self.dragged_list = cad.GetSelectedObjects()
+
+            if self.dragging:
+                self.drag_position = self.CalcUnscrolledPosition(event.GetPosition());
+                button = self.HitTest(event.GetPosition())
+                self.drag_paste_rect = wx.Rect(0, 0, 0, 0)
+                if (button != None) and (button.type == ButtonTypeLabelBefore): self.drag_paste_rect = button.rect
+                self.Refresh()
 
         if event.LeftDClick():
              if self.clicked_object:
@@ -517,5 +531,37 @@ class TreeCanvas(wx.ScrolledCanvas):
     def GetRenderSize(self):
         just_for_calculation = True
         self.Render(just_for_calculation)
+        return wx.Size(self.max_xpos, self.ypos)
+
+    def RenderDraggedList(self, just_for_calculation = False):
+        self.render_just_for_calculation = just_for_calculation
+        self.render_labels = False
+
+        if just_for_calculation:
+            self.xpos = 0
+            self.ypos = 0
+        else:
+            self.xpos = self.drag_position.x
+            self.ypos = self.drag_position.y
+
+            self.max_xpos = 0
+
+        if len(self.dragged_list) > 0:
+            prev_object = None
+            obj = None
+            for next_object in self.dragged_list:
+                if obj != None:
+                    self.RenderObject(self.IsExpanded(obj), prev_object, False, obj, next_object, 0)
+
+                prev_object = obj
+                obj = next_object
+
+            next_object = None
+            self.RenderObject(self.IsExpanded(obj), prev_object, False, obj, next_object, 0)
+
+        self.render_labels = True
+
+    def GetDraggedListSize(self):
+        self.RenderDraggedList(True)
         return wx.Size(self.max_xpos, self.ypos)
 
