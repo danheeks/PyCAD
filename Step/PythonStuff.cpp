@@ -175,6 +175,14 @@ HeeksObj* NewSketchFromFace(HeeksObj* object)
 	return new_object;
 }
 
+void FaceRadiusChange(HeeksOb* object, double new_radius)
+{
+	if (object->GetType() == CFace::m_type)
+	{
+		ChangeFaceRadius(((CFace*)object)->Face(), new_radius);
+	}
+}
+
 HeeksObj* NewSplineFromPoints(boost::python::list &list)
 {
 	std::list<gp_Pnt> p_list;
@@ -252,6 +260,7 @@ HeeksObj* NewSplineFromPoints(boost::python::list &list)
 		boost::python::def("SetShowFaceNormals", SetShowFaceNormals);
 		boost::python::def("GetShowFaceNormals", GetShowFaceNormals); 
 		boost::python::def("NewSketchFromFace", NewSketchFromFace, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("FaceRadiusChange", FaceRadiusChange);
 		boost::python::def("NewSplineFromPoints", NewSplineFromPoints, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	}
 	

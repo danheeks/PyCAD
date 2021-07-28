@@ -63,9 +63,15 @@ class SolidApp(App):
             tools.append(ContextTool.CADObjectContextTool(object, "Chamfer", "chamfer", self.ChamferEdge))
         elif t == step.GetFaceType():
             tools.append(ContextTool.CADObjectContextTool(object, "Make Sketch From Face", "face2sketch", self.FaceToSketch))
+            tools.append(ContextTool.CADObjectContextTool(object, "Make Face Radius 1mm smaller", "facerch", self.FaceRadiusChange))
         return tools
     
     def FaceToSketch(self, object):
+        sketch = step.NewSketchFromFace(object)
+        cad.AddUndoably(sketch)
+        cad.Select(sketch)
+    
+    def FaceRadiusChange(self, object):
         sketch = step.NewSketchFromFace(object)
         cad.AddUndoably(sketch)
         cad.Select(sketch)

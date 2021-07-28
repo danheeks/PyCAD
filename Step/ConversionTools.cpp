@@ -12,6 +12,7 @@
 #include "Shape.h"
 #include "strconv.h"
 #include "Curve.h"
+#include "ShapeBuild_ReShape.hxx"
 
 #include <sstream>
 #include <vector>
@@ -456,6 +457,17 @@ bool ConvertFaceToSketch2(const TopoDS_Face& face, HeeksObj* sketch, double devi
 	}
 
 	return true; // success
+}
+
+void ChangeFaceRadius(const TopoDS_Face& face, double new_radius)
+{
+	TopoDS_Shape cmpnd; // already exists
+	TopoDS_Shape theNewFace = face.Complemented();
+	Handle_ShapeBuild_ReShape rebuild = new ShapeBuild_ReShape;
+	// remove it: rebuild->Remove(theOldFace);
+	// or replace it:
+	rebuild->Replace(face, theNewFace, Standard_False);
+	TopoDS_Shape shcmpnd = rebuild->Apply(cmpnd, TopAbs_SHAPE, 1);
 }
 
 

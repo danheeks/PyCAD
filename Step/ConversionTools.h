@@ -16,3 +16,4 @@ extern bool ConvertSketchToEdges(HeeksObj *object, std::list< std::vector<TopoDS
 extern TopoDS_Wire EdgesToWire(const std::vector<TopoDS_Edge> &edges);
 extern bool SketchToWires(HeeksObj* sketch, std::list<TopoDS_Wire> &wire_list);
 extern void SketchToFace();
+extern void ChangeFaceRadius(const TopoDS_Face& face, double new_radius);
