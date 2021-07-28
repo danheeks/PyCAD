@@ -423,7 +423,7 @@ void CArea::Union(const CArea& a2)
 	c.AddPaths(pp2, ptClip, true);
 	TPolyPolygon solution;
 	c.Execute(ctUnion, solution);
-	SetFromResult(*this, solution);
+	SetFromResult(*this, solution, false);
 }
 
 // static
