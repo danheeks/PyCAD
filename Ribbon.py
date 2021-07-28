@@ -460,6 +460,10 @@ class Ribbon(RB.RibbonBar):
         else:
             toolbar.AddButton(Ribbon.next_id, title, bitmap, help_string = caption)
         toolbar.Bind(RB.EVT_RIBBONBUTTONBAR_CLICKED, on_button, id=Ribbon.next_id)
+        
+        if on_update_button != None:
+            toolbar.Bind(wx.EVT_UPDATE_UI, on_update_button, id=Ribbon.next_id)
+ 
         id_to_return = Ribbon.next_id
         Ribbon.next_id += 1
         return id_to_return
@@ -534,6 +538,12 @@ class Ribbon(RB.RibbonBar):
         HeeksConfig().WriteInt("TextMode", event.GetSelection())
 
         cad.Repaint()
+        
+    def OnInternalIdle(self):
+        if wx.UpdateUIEvent.CanUpdate(self):
+            self.UpdateWindowUI(wx.UPDATE_UI_FROMIDLE)
+        
+        
 
 if __name__ == '__main__':
     from SolidApp import SolidApp

@@ -35,12 +35,11 @@ class HTypeObjectDropDown(wx.ComboBox):
         
     def GetObjectChoices(self, object_type, obj_list):
         choices = ['None']
-        object = obj_list.GetFirstChild()
-        while object:
-            if object.GetIDGroupType() == object_type:
-                number = self.GetObjectID(object)
-                choices.append(object.GetTitle())
-            object = obj_list.GetNextChild()
+        obj = obj_list.GetFirstChild()
+        while obj:
+            if obj.GetIDGroupType() == object_type:
+                choices.append(obj.GetTitle())
+            obj = obj_list.GetNextChild()
         return choices
             
     def GetSelectedId(self):
