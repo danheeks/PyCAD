@@ -8,11 +8,11 @@
 #include "HeeksObj.h"
 #include "MarkedList.h"
 
-RemoveOrAddTool::RemoveOrAddTool(HeeksObj *object, HeeksObj *owner, HeeksObj *prev_object) : m_belongs_to_owner(false)
+RemoveOrAddTool::RemoveOrAddTool(HeeksObj *object, HeeksObj *owner, HeeksObj *add_before) : m_belongs_to_owner(false)
 {
 	m_object = object;
 	m_owner = owner;
-	m_prev_object = prev_object;
+	m_add_before = add_before;
 }
 
 RemoveOrAddTool::~RemoveOrAddTool()
@@ -44,7 +44,7 @@ void RemoveOrAddTool::Add()
 		return;
 	}
 
-	m_owner->Add(m_object, m_prev_object);
+	m_owner->Add(m_object, m_add_before);
 	m_object->m_owner = m_owner;
 
 	theApp->WasAdded(m_object);
@@ -77,7 +77,7 @@ void AddObjectTool::RollBack()
 	Remove();
 }
 
-RemoveObjectTool::RemoveObjectTool(HeeksObj *object):RemoveOrAddTool(object, object->m_owner, GetPrevObject(object))
+RemoveObjectTool::RemoveObjectTool(HeeksObj *object) :RemoveOrAddTool(object, object->m_owner, GetAddBefore(object))
 {
 	if(object)m_owner = object->m_owner;
 	else m_owner = NULL;
@@ -93,16 +93,14 @@ void RemoveObjectTool::RollBack()
 	Add();
 }
 
-HeeksObj* RemoveObjectTool::GetPrevObject(HeeksObj* object)
+HeeksObj* RemoveObjectTool::GetAddBefore(HeeksObj* object)
 {
-	HeeksObj* prev_object = NULL;
 	for (HeeksObj* child = object->m_owner->GetFirstChild(); child; child = object->m_owner->GetNextChild())
 	{
 		if (child == object)
-			break;
-		prev_object = child;
+			return object->m_owner->GetNextChild();
 	}
-	return prev_object;
+	return NULL;
 }
 
 AddObjectsTool::AddObjectsTool(const std::list<HeeksObj*> &list, HeeksObj *owner) :m_objects(list), m_owner(owner){}

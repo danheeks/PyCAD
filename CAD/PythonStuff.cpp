@@ -2019,9 +2019,9 @@ void CopyUndoably(HeeksObj* object, HeeksObj* copy_object)
 	theApp->CopyUndoably(object, copy_object);
 }
 
-void AddUndoably(HeeksObj *object, HeeksObj* owner = NULL, HeeksObj* prev_object = NULL)
+void AddUndoably(HeeksObj *object, HeeksObj* owner = NULL, HeeksObj* add_before = NULL)
 {
-	theApp->AddUndoably(object, owner, prev_object);
+	theApp->AddUndoably(object, owner, add_before);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(AddUndoablyOverloads, AddUndoably, 1, 3)
@@ -3249,7 +3249,7 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("DeleteObjectsUndoably", DeleteObjectsUndoably);
 	boost::python::def("DeleteInternalObject", DeleteInternalObject);
 	boost::python::def("GetDrawMatrix", GetDrawMatrix, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("prev_object") = NULL)));
+	boost::python::def("AddUndoably", &AddUndoably, AddUndoablyOverloads((boost::python::arg("object"), boost::python::arg("owner") = NULL, boost::python::arg("add_before") = NULL)));
 	boost::python::def("CopyUndoably", CopyUndoably);
 	boost::python::def("TransformUndoably", TransformUndoably);
 	boost::python::def("DoUndoable", DoUndoable);

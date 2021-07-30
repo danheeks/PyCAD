@@ -96,7 +96,7 @@ void HeeksObj::GetGripperPositions(std::list<GripData> *list, bool just_for_endo
 	list->push_back(GripData(GripperTypeScale, Point3d(box.m_x[3], box.m_x[4], box.m_x[2]), NULL));
 }
 
-bool HeeksObj::Add(HeeksObj* object, HeeksObj* prev_object)
+bool HeeksObj::Add(HeeksObj* object, HeeksObj* add_before)
 {
 	object->m_owner = this;
 	object->OnAdd();

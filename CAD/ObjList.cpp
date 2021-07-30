@@ -172,13 +172,13 @@ void ObjList::Remove(std::list<HeeksObj*> objects)
 	}
 }
 
-bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)
+bool ObjList::Add(HeeksObj* object, HeeksObj* add_before)
 {
 	if (object==NULL) return false;
 	if (!CanAdd(object)) return false;
 	if (std::find(m_objects.begin(), m_objects.end(), object) != m_objects.end()) return true; // It's already here.
 
-	if (m_objects.size()==0 || prev_object==NULL)
+	if (m_objects.size() == 0 || add_before == NULL)
 	{
 		m_objects.push_back(object);
 		LoopIt = m_objects.end();
@@ -188,16 +188,15 @@ bool ObjList::Add(HeeksObj* object, HeeksObj* prev_object)
 	{
 		for (LoopIt = m_objects.begin(); LoopIt != m_objects.end(); LoopIt++)
 		{
-			if (*LoopIt == prev_object)
+			if (*LoopIt == add_before)
 			{
-				LoopIt++;
 				break;
 			}
 		}
 		m_objects.insert(LoopIt, object);
 	}
 	m_index_list_valid = false;
-	HeeksObj::Add(object, prev_object);
+	HeeksObj::Add(object, add_before);
 
 	if (((!theApp->InOpenFile() || theApp->GetFileOpenOrImportType() != FileOpenTypeHeeks) && object->UsesID() && theApp->GetSetIdInAdd() && (object->m_id == 0 || (theApp->GetFileOpenOrImportType() == FileImportTypeHeeks && theApp->InOpenFile()))))
 	{

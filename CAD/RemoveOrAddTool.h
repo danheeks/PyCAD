@@ -7,7 +7,7 @@
 
 class RemoveOrAddTool:public Undoable{
 protected:
-	HeeksObj* m_prev_object;
+	HeeksObj* m_add_before;
 	bool m_belongs_to_owner;
 
 	void Add();
@@ -17,7 +17,7 @@ public:
 	HeeksObj* m_owner;
 	HeeksObj* m_object;
 
-	RemoveOrAddTool(HeeksObj *object, HeeksObj *owner, HeeksObj* prev_object);
+	RemoveOrAddTool(HeeksObj *object, HeeksObj *owner, HeeksObj* add_before);
 	virtual ~RemoveOrAddTool();
 };
 
@@ -25,7 +25,7 @@ class AddObjectTool:public RemoveOrAddTool{
 private:
 
 public:
-	AddObjectTool(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object):RemoveOrAddTool(object, owner, prev_object){}
+	AddObjectTool(HeeksObj *object, HeeksObj* owner, HeeksObj* add_before) :RemoveOrAddTool(object, owner, add_before){}
 
 	// Tool's virtual functions
 	const wchar_t* GetTitle();
@@ -34,7 +34,7 @@ public:
 };
 
 class RemoveObjectTool:public RemoveOrAddTool{
-	static HeeksObj* GetPrevObject(HeeksObj* object);
+	static HeeksObj* GetAddBefore(HeeksObj* object);
 
 public:
 	RemoveObjectTool(HeeksObj *object);

@@ -47,7 +47,7 @@ public:
 	int GetNumChildren();
 	std::list<HeeksObj *> GetChildren() const;
 	bool CanAdd(HeeksObj* object){return true;}
-	virtual bool Add(HeeksObj* object, HeeksObj* prev_object);
+	virtual bool Add(HeeksObj* object, HeeksObj* add_before);
 	virtual void Add(std::list<HeeksObj*> objects);
 	virtual void Remove(HeeksObj* object);
 	virtual void Remove(std::list<HeeksObj*> objects);

@@ -105,7 +105,7 @@ public:
 	virtual HeeksObj* PreferredPasteTarget(){return NULL;}
 	virtual bool DescendForUndo(){return true;}
 	virtual bool OneOfAKind(){return false;} // if true, then, instead of pasting, find the first object of the same type and copy object to it.
-	virtual bool Add(HeeksObj* object, HeeksObj* prev_object);
+	virtual bool Add(HeeksObj* object, HeeksObj* add_before);
 	virtual void Remove(HeeksObj* object){object->OnRemove();}
 	virtual void OnAdd(){}
 	virtual void OnAdded(HeeksObj* object){}

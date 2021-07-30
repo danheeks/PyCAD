@@ -49,7 +49,7 @@ public:
 	virtual void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element) = 0;
 	virtual void ObjectReadFromXML(HeeksObj *object, TiXmlElement* element) = 0;
 	virtual void DoUndoable(Undoable *) = 0;
-	virtual void AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object = NULL) = 0;
+	virtual void AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* add_before = NULL) = 0;
 	virtual void AddUndoably(const std::list<HeeksObj*>& list, HeeksObj* owner) = 0;
 	virtual void DeleteUndoably(HeeksObj* object) = 0;
 	virtual void DeleteUndoably(const std::list<HeeksObj*>& list) = 0;

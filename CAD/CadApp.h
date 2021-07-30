@@ -204,7 +204,7 @@ public:
 	virtual void StartHistory();
 	virtual void EndHistory(void);
 	void ClearRollingForward(void);
-	bool Add(HeeksObj* object, HeeksObj* prev_object);
+	bool Add(HeeksObj* object, HeeksObj* add_before);
 	void Remove(HeeksObj* object);
 	void Remove(std::list<HeeksObj*> objects);
 	void Transform(std::list<HeeksObj*> objects, const Matrix& m);

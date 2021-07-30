@@ -1560,9 +1560,9 @@ void CCadApp::ObserversClear()
 	m_observers_frozen = 0;
 }
 
-bool CCadApp::Add(HeeksObj *object, HeeksObj* prev_object)
+bool CCadApp::Add(HeeksObj *object, HeeksObj* add_before)
 {
-	if (!ObjList::Add(object, prev_object)) return false;
+	if (!ObjList::Add(object, add_before)) return false;
 
 	if (object->GetType() == CoordinateSystemType && (!m_in_OpenFile || (m_file_open_or_import_type != FileOpenTypeHeeks && m_file_open_or_import_type != FileImportTypeHeeks)))
 	{
@@ -1612,11 +1612,11 @@ void CCadApp::Remove(std::list<HeeksObj*> objects)
 	ObjList::Remove(objects);
 }
 
-void CCadApp::AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* prev_object)
+void CCadApp::AddUndoably(HeeksObj *object, HeeksObj* owner, HeeksObj* add_before)
 {
 	if (object == NULL)return;
 	if (owner == NULL)owner = this;
-	AddObjectTool *undoable = new AddObjectTool(object, owner, prev_object);
+	AddObjectTool *undoable = new AddObjectTool(object, owner, add_before);
 	DoUndoable(undoable);
 }
 
