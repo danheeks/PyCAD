@@ -175,7 +175,7 @@ HeeksObj* NewSketchFromFace(HeeksObj* object)
 	return new_object;
 }
 
-void FaceRadiusChange(HeeksOb* object, double new_radius)
+void FaceRadiusChange(HeeksObj* object, double new_radius)
 {
 	if (object->GetType() == CFace::m_type)
 	{
