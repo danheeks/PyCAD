@@ -1,0 +1,118 @@
+# PyCAD install for Ubuntu 20.04
+
+# install wxPython, first 2 lines to fix problem where gtk3 was not found
+# download https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04/wxPython-4.1.1-cp38-cp38-linux_x86_64.whl from
+
+# get wxPython for python3
+sudo apt install libgtk-3-dev
+sudo apt-get install python3-pip
+cd Downloads
+pip3 install wxPython-4.1.1-cp38-cp38-linux_x86_64.whl
+sudo apt-get install libsdl2-2.0-0
+
+### Get essentials ###
+```
+sudo apt-get install git build-essential debhelper cmake python3-dev freeglut3-dev
+```
+
+### Build boost python for python3 ###
+download the latest boost\
+(look here https://www.boost.org/users/download/ and copy the path for the download\
+which ends with bz2, then on RPI type wget followed by the path)\
+unzip with tar xf followed by filename\
+cd into boost folder
+```
+./bootstrap.sh --with-python-version=3.8
+sudo nano project-config.jam
+```
+change\
+project : default-build <toolset>gcc :
+to
+```
+project : default-build <toolset>gcc :
+
+import python :
+if ! [ python.configured ]
+{
+    using python : 3.8 : "/usr" :
+}
+```
+
+
+change\
+libraries = ;\
+to
+```
+libraries = --with-python ;
+```
+then
+```
+./b2
+sudo ./b2 install
+cd ../
+```
+
+
+### Fetch sources ###
+```
+git clone https://github.com/danheeks/PyCAD.git
+```
+
+### build CAD python module ###
+```
+cd PyCAD/CAD
+mkdir build
+cd build
+cmake ..
+make
+cd ../../
+cp CAD/build/cad.so ./
+```
+
+### build Geom python module ###
+```
+cd Geom
+mkdir build
+cd build
+cmake ..
+make
+cd ../../
+cp Geom/build/geom.so ./
+
+```
+
+### build Step python module ###
+( this stage still in development )
+First build OCE; hours of building; download using wget latest file ending tar.gz from:\
+https://github.com/tpaviot/oce/releases \
+
+for example 
+wget https://github.com/tpaviot/oce/archive/refs/tags/OCE-0.18.3.tar.gz
+
+unzip using tar xf\
+cd into the folder starting with oce
+```
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+cd ../../
+```
+
+build step
+```
+cd Step
+mkdir build
+cd build
+cmake ..
+make
+cd ../../
+cp Step/build/step.so ./
+
+```
+
+### try the test.py ###
+```
+python3 test.py
+```
