@@ -1,14 +1,17 @@
 # PyCAD install for Ubuntu 20.04
 
+#install wxPython with this line
+pip3 install -U wxPython
+
+or the long way
 # install wxPython, first 2 lines to fix problem where gtk3 was not found
 # download https://extras.wxpython.org/wxPython4/extras/linux/gtk3/ubuntu-20.04/wxPython-4.1.1-cp38-cp38-linux_x86_64.whl from
-
-# get wxPython for python3
 sudo apt install libgtk-3-dev
 sudo apt-get install python3-pip
 cd Downloads
 pip3 install wxPython-4.1.1-cp38-cp38-linux_x86_64.whl
 sudo apt-get install libsdl2-2.0-0
+
 
 ### Get essentials ###
 ```
@@ -21,6 +24,7 @@ download the latest boost\
 which ends with bz2, then on RPI type wget followed by the path)\
 unzip with tar xf followed by filename\
 cd into boost folder
+( where I've put 3.8, put 3.6 or whatever your python3 version is )
 ```
 ./bootstrap.sh --with-python-version=3.8
 sudo nano project-config.jam
@@ -59,6 +63,7 @@ git clone https://github.com/danheeks/PyCAD.git
 ```
 
 ### build CAD python module ###
+currently you need to edit PyCAD/CAD/CMakeLists.txt and change the boost name version number
 ```
 cd PyCAD/CAD
 mkdir build
