@@ -59,6 +59,7 @@ git clone https://github.com/danheeks/PyCAD.git
 ```
 
 ### build CAD python module ###
+currently you need to edit PyCAD/CAD/CMakeLists.txt and change the boost version number
 ```
 cd PyCAD/CAD
 mkdir build
