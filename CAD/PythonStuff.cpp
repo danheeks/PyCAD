@@ -86,11 +86,9 @@ void AddObjectToPythonList(HeeksObj* object, boost::python::list& list)
 	case StlSolidType:
 		list.append(boost::python::pointer_wrapper<CStlSolid*>((CStlSolid*)object));
 		break;
-#if 0
 	case CircleType:
 		list.append(boost::python::pointer_wrapper<HCircle*>((HCircle*)object));
 		break;
-#endif
 	default:
 		list.append(boost::python::pointer_wrapper<HeeksObj*>((HeeksObj*)object));
 		break;
@@ -972,10 +970,8 @@ double SketchGetCircleDiameter(CSketch& sketch)
 	}
 	else if (span->GetType() == CircleType)
 	{
-#if 0 // to do
 		HCircle* circle = (HCircle*)span;
 		return circle->m_radius * 2;
-#endif
 	}
 	return 0.0;
 }
@@ -994,11 +990,9 @@ boost::python::tuple SketchGetCircleCentre(CSketch& sketch)
 	}
 	else if (span->GetType() == CircleType)
 	{
-#if 0 // to do
 		HCircle* circle = (HCircle*)span;
-		const Point3d& C = circle->m_axis.Location();
-		return boost::python::make_tuple(C.X(), C.Y(), C.Z());
-#endif
+		const Point3d& C = circle->m_c;
+		return boost::python::make_tuple(C.x, C.y, C.z);
 	}
 
 	return boost::python::make_tuple(NULL);
@@ -1024,6 +1018,13 @@ CArea SketchGetArea(CSketch& sketch)
 {
 	return ObjectToArea(&sketch);
 }
+
+
+CArea CircleGetArea(HCircle& circle)
+{
+	return ObjectToArea(&circle);
+}
+
 
 void BeginTriangles()
 {
@@ -1853,6 +1854,11 @@ static boost::shared_ptr<PropertyStringReadOnly> initPropertyStringReadOnly(cons
 static boost::shared_ptr<HPoint> initHPoint(const Point3d& p)
 {
 	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp->current_color));
+}
+
+static boost::shared_ptr<HCircle> initHCircle(const Point3d& c, const Point3d& a, double r)
+{
+	return boost::shared_ptr<HCircle>(new HCircle(c, a, r, &theApp->current_color));
 }
 
 static boost::shared_ptr<GripData> initGripData(const Point3d& p, EnumGripperType t, int alternative_icon)
@@ -2767,6 +2773,11 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("GetArea", &SketchGetArea)
 		.def("RenderAsExtrusion", &RenderSketchAsExtrusion)
 		;
+
+	boost::python::class_<HCircle, boost::python::bases<IdNamedObj> >("Circle", boost::python::no_init)
+		.def("__init__", boost::python::make_constructor(&initHCircle))
+		.def("GetArea", &CircleGetArea)
+		;	
 
 	boost::python::class_<HPoint, boost::python::bases<IdNamedObj> >("Point", boost::python::no_init)
 		.def("__init__", boost::python::make_constructor(&initHPoint))
