@@ -347,21 +347,6 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar,'Text', 'text', 'Add a text object', app.OnText)
         Ribbon.AddToolBarTool(toolbar,'Dimensioning', 'dimension', 'Add a dimension', app.OnDimensioning)
         
-        panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Set Origin', self.Image('coordsys'))
-        toolbar = RB.RibbonButtonBar(panel)
-        Ribbon.AddToolBarTool(toolbar,'3 Points', 'coordsys', 'Pick 3 points', app.OnSetOrigin3Points)
-        Ribbon.AddToolBarTool(toolbar,'1 point', 'coordsys', 'Pick 1 point', app.OnSetOrigin1Point)
-        
-        panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Transformations', self.Image('movet'))
-        toolbar = RB.RibbonButtonBar(panel)
-        Ribbon.AddToolBarTool(toolbar,'Move Translate', 'movet', 'Translate selected items', app.OnMoveTranslate)
-        Ribbon.AddToolBarTool(toolbar,'Copy Translate', 'copyt', 'Copy and translate selected items', app.OnCopyTranslate)
-        Ribbon.AddToolBarTool(toolbar,'Move Rotate', 'mover', 'Rotate selected items', app.OnMoveRotate)
-        Ribbon.AddToolBarTool(toolbar,'Copy Rotate', 'copyr', 'Copy and rotate selected items', app.OnCopyRotate)
-        Ribbon.AddToolBarTool(toolbar,'Mirror', 'copym', 'Mirror selected items', app.OnMirror)
-        Ribbon.AddToolBarTool(toolbar,'Scale', 'moves', 'Scale selected items', app.OnMoveScale)
-        Ribbon.AddToolBarTool(toolbar,'Move Origin', 'coords3', 'Move selected items from one origin to another', app.OnOriginTransform)
-        
         panel = RB.RibbonPanel(self.geom_page, wx.ID_ANY, 'Snapping', self.Image('endof'))
         toolbar = RB.RibbonButtonBar(panel)
         OnOffButton('Endof', 'endof', 'endofgray', cad.GetDigitizeEnd, cad.SetDigitizeEnd, 'Snap to end point').AddToToolbar(toolbar)
@@ -371,6 +356,27 @@ class Ribbon(RB.RibbonBar):
         OnOffButton('Grid', 'snap', 'snapgray', cad.GetDigitizeSnapToGrid, cad.SetDigitizeSnapToGrid, 'Snap to grid', self.OnSnapDropdown).AddToToolbar(toolbar)
 
         self.geom_page.Realize()
+
+
+        move_page = RB.RibbonPage(self, wx.ID_ANY, 'Move', self.Image('coordsys'))
+        move_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        
+        panel = RB.RibbonPanel(move_page, wx.ID_ANY, 'Set Origin', self.Image('coordsys'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar,'3 Points', 'coordsys', 'Pick 3 points', app.OnSetOrigin3Points)
+        Ribbon.AddToolBarTool(toolbar,'1 point', 'coordsys', 'Pick 1 point', app.OnSetOrigin1Point)
+        
+        panel = RB.RibbonPanel(move_page, wx.ID_ANY, 'Transformations', self.Image('movet'))
+        toolbar = RB.RibbonButtonBar(panel)
+        Ribbon.AddToolBarTool(toolbar,'Move Translate', 'movet', 'Translate selected items', app.OnMoveTranslate)
+        Ribbon.AddToolBarTool(toolbar,'Copy Translate', 'copyt', 'Copy and translate selected items', app.OnCopyTranslate)
+        Ribbon.AddToolBarTool(toolbar,'Move Rotate', 'mover', 'Rotate selected items', app.OnMoveRotate)
+        Ribbon.AddToolBarTool(toolbar,'Copy Rotate', 'copyr', 'Copy and rotate selected items', app.OnCopyRotate)
+        Ribbon.AddToolBarTool(toolbar,'Mirror', 'copym', 'Mirror selected items', app.OnMirror)
+        Ribbon.AddToolBarTool(toolbar,'Scale', 'moves', 'Scale selected items', app.OnMoveScale)
+        Ribbon.AddToolBarTool(toolbar,'Move Origin', 'coords3', 'Move selected items from one origin to another', app.OnOriginTransform)
+
+        move_page.Realize()
         
 
         view_page = RB.RibbonPage(self, wx.ID_ANY, 'View', self.Image('view'))
