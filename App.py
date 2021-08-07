@@ -853,12 +853,14 @@ class App(wx.App):
     def RegisterImportFileTypes(self, suffix_list, description, ImportCallback):
         self.import_file_types.append((suffix_list, description))
         for suffix in suffix_list:
-            cad.RegisterImportFileType(suffix, ImportCallback)
+            cad.RegisterImportFileType(suffix.lower(), ImportCallback)
+            cad.RegisterImportFileType(suffix.upper(), ImportCallback)
         
     def RegisterExportFileTypes(self, suffix_list, description, ExportCallback):        
         self.export_file_types.append((suffix_list, description))
         for suffix in suffix_list:
-            cad.RegisterExportFileType(suffix, ExportCallback)
+            cad.RegisterExportFileType(suffix.lower(), ExportCallback)
+            cad.RegisterExportFileType(suffix.upper(), ExportCallback)
         
     def OnExport(self, e):
         config = HeeksConfig()
