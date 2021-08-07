@@ -813,12 +813,14 @@ class App(wx.App):
                 if not first:
                     wild_card_string1 += ';'
                 wild_card_string1 += '*.'
-                wild_card_string1 += suffix
+                wild_card_string1 += suffix + ';'
+                wild_card_string1 += suffix.upper()
                 if imageExtStr:
                     imageExtStr += ' '
                     imageExtStr2 += ';'
                 imageExtStr += ('*.' + suffix)
-                imageExtStr2 += ('*.' + suffix)
+                imageExtStr2 += ('*.' + suffix + ';')
+                imageExtStr2 += ('*.' + suffix.upper())
             wild_card_string2 += (imageExtStr + ')|' + imageExtStr2)
             first = False
             
@@ -853,14 +855,12 @@ class App(wx.App):
     def RegisterImportFileTypes(self, suffix_list, description, ImportCallback):
         self.import_file_types.append((suffix_list, description))
         for suffix in suffix_list:
-            cad.RegisterImportFileType(suffix.lower(), ImportCallback)
-            cad.RegisterImportFileType(suffix.upper(), ImportCallback)
+            cad.RegisterImportFileType(suffix, ImportCallback)
         
     def RegisterExportFileTypes(self, suffix_list, description, ExportCallback):        
         self.export_file_types.append((suffix_list, description))
         for suffix in suffix_list:
-            cad.RegisterExportFileType(suffix.lower(), ExportCallback)
-            cad.RegisterExportFileType(suffix.upper(), ExportCallback)
+            cad.RegisterExportFileType(suffix, ExportCallback)
         
     def OnExport(self, e):
         config = HeeksConfig()
