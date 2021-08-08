@@ -812,9 +812,8 @@ class App(wx.App):
             for suffix in suffix_list:
                 if not first:
                     wild_card_string1 += ';'
-                wild_card_string1 += '*.'
-                wild_card_string1 += suffix + ';'
-                wild_card_string1 += suffix.upper()
+                wild_card_string1 += '*.' + suffix + ';'
+                wild_card_string1 += '*.' + suffix.upper()
                 if imageExtStr:
                     imageExtStr += ' '
                     imageExtStr2 += ';'
