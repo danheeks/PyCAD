@@ -11,6 +11,7 @@
 #include "Tris.h"
 #include "HeeksGeomDxf.h"
 #include "Box.h"
+#include "Mesh.h"
 
 #define HAVE_ACOSH
 #define HAVE_ASINH
@@ -419,6 +420,50 @@ boost::python::list GetTrianglesAsCurveList(const CTris& tris)
 	return clist;
 }
 
+CMesh* CTrisGetMesh(const CTris& tris)
+{
+	return new CMesh(tris);
+}
+
+
+boost::python::tuple MeshGetFaces(const CMesh& mesh)
+{
+	boost::python::list vlist;
+	boost::python::list flist;
+
+	int next_vertex_index = 0;
+	std::map<const CMeshVertex*, int> vertex_map;
+	for (std::list<CMeshFace*>::const_iterator It = mesh.m_faces.begin(); It != mesh.m_faces.end(); It++)
+	{
+		const CMeshFace* face = *It;
+
+		boost::python::list ilist;
+
+		unsigned int size = face->m_vertices.size();
+		for (unsigned int i = 0; i < size; i++)
+		{
+			const CMeshVertex* v = face->m_vertices[i];
+			std::map<const CMeshVertex*, int>::const_iterator FindIt = vertex_map.find(v);
+			int index = -1;
+			if (FindIt == vertex_map.end()){
+				index = next_vertex_index;
+				vertex_map.insert(std::make_pair(v, next_vertex_index));
+				vlist.append(boost::python::make_tuple(v->m_x[0], v->m_x[1], v->m_x[2]));
+				next_vertex_index++;
+			}
+			else
+			{
+				index = FindIt->second;
+			}
+			ilist.append(index);
+		}
+
+		flist.append(ilist);
+	}
+
+	return boost::python::make_tuple(vlist, flist);
+}
+
 double AreaGetArea(const CArea& a)
 {
 	return a.GetArea();
@@ -823,7 +868,14 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Add", &CTrisAddTriangle, bp::args("p1", "p2", "p3"), "Add a triangles given 3 Point3D objects")
 		.def("GetFlattenedSurface", &CTris::GetFlattenedSurface, bp::return_value_policy<bp::manage_new_object>(), "returns a new Stl with all the triangles unfolded into a flat shape")
 		.def("GetTrianglesAsCurveList", &GetTrianglesAsCurveList, "returns a list of Curve objects, each one being a closed triangle")
+		.def("GetMesh", &CTrisGetMesh, bp::return_value_policy<bp::manage_new_object>(), "returns a mesh")
+
 		.def(bp::self += bp::other<CTris>())
+		;
+
+	bp::class_<CMesh>("Mesh", "Mesh(() - mesh of triangles")
+		.def(bp::init<CMesh>())
+		.def("GetFaces", &MeshGetFaces, "a tuple with a list of vertices and a list of faces with vertex indexes")
 		;
 
 	bp::enum_<FaceFlatType>("FaceFlatType", "face type for MachiningArea")

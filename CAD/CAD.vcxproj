@@ -101,7 +101,10 @@
     <ClCompile Include="..\Geom\Matrix.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Geom\Mesh.cpp" />
+    <ClCompile Include="..\Geom\OctTree.cpp" />
     <ClCompile Include="..\Geom\Offset.cpp" />
+    <ClCompile Include="..\Geom\Tris.cpp" />
     <ClCompile Include="CadApp.cpp" />
     <ClCompile Include="ConversionTools.cpp" />
     <ClCompile Include="CoordinateSystem.cpp" />
@@ -175,7 +178,10 @@
     <ClInclude Include="..\Geom\earcut.h" />
     <ClInclude Include="..\Geom\Geom.h" />
     <ClInclude Include="..\Geom\geometry.h" />
+    <ClInclude Include="..\Geom\Mesh.h" />
+    <ClInclude Include="..\Geom\OctTree.h" />
     <ClInclude Include="..\Geom\Point.h" />
+    <ClInclude Include="..\Geom\Tris.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="CadApp.h" />
     <ClInclude Include="ConversionTools.h" />

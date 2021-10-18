@@ -1680,24 +1680,19 @@ void CCadApp::TransformUndoably(const std::list<HeeksObj*> &list, const Matrix &
 	DoUndoable(undoable);
 }
 
-#if 0
-// to do
 class ReverseUndoable : public Undoable{
 	HeeksObj* m_object;
 
 public:
 	ReverseUndoable(HeeksObj* object) :m_object(object){}
 	void Run(bool redo){ CSketch::ReverseObject(m_object); }
-	const wchar_t* GetTitle(){ return _("Reverse Object"); }
+	const wchar_t* GetTitle(){ return L"Reverse Object"; }
 	void RollBack(){ CSketch::ReverseObject(m_object); }
 };
-#endif
 
 void CCadApp::ReverseUndoably(HeeksObj *object)
 {
-#if 0
 	DoUndoable(new ReverseUndoable(object));
-#endif
 }
 
 void CCadApp::Transform(std::list<HeeksObj*> objects, const Matrix& m)

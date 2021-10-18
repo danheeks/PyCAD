@@ -66,19 +66,20 @@ class App(wx.App):
         self.coordsys_for_P3P = None
         self.paint_registered = False
         self.import_file_types = [
-            (['.heeks'], 'Heeks files'),
-            (['.stl'], 'STL files'),
-            (['.svg'], 'Scalar Vector Graphics files'),
-            (['.dxf'], 'DXF files'),
-            (['.gbr', '.rs274x'], 'RS274X/Gerber files'),
-            (['.pho'], 'PHO files'),
+            (['heeks'], 'Heeks files'),
+            (['stl'], 'STL files'),
+            (['svg'], 'Scalar Vector Graphics files'),
+            (['dxf'], 'DXF files'),
+            (['gbr', '.rs274x'], 'RS274X/Gerber files'),
+            (['pho'], 'PHO files'),
             ]
         self.export_file_types = [
-            (['.stl'], 'STL files'),
-            (['.dxf'], 'DXF files'),
-            (['.cpp'], 'CPP files'),
-            (['.py'], 'OpenCAMLib python files'),
-            (['.obj'], 'Wavefront .obj files'),
+            (['stl'], 'STL files'),
+            (['3mf'], '3MF files'),
+            (['dxf'], 'DXF files'),
+            (['cpp'], 'CPP files'),
+            (['py'], 'OpenCAMLib python files'),
+            (['obj'], 'Wavefront .obj files'),
             ]
 
         save_out = sys.stdout
@@ -104,6 +105,11 @@ class App(wx.App):
         self.pageSetupData = wx.PageSetupDialogData(self.printData)
             
         wx.InitAllImageHandlers()
+        
+        # Turn on high-DPI awareness to make sure rendering is sharp on big
+        # monitors with font scaling enabled.
+        from ctypes import OleDLL
+        OleDLL('shcore').SetProcessDpiAwareness(1)
         
         config = HeeksConfig()
         
@@ -873,6 +879,9 @@ class App(wx.App):
             if suffix == 'svg':
                 import Svg
                 Svg.Export(path)
+            elif suffix == '3mf':
+                import Mf3
+                Mf3.Export(path)
             else:
                 cad.SaveFile(path)
             config.Write('ExportDirectory', dialog.GetDirectory())

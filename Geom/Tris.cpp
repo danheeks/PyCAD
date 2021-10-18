@@ -526,6 +526,7 @@ void CTris::read_from_file(const std::wstring& stl_file_path)
 
 void CTris::MakeSection(const Point& s, const Point& e, const std::string& dxf_file_path)
 {
+#if 0
 	if (s == e)
 		return;
 
@@ -569,6 +570,7 @@ void CTris::MakeSection(const Point& s, const Point& e, const std::string& dxf_f
 			dxf_writer.WriteLine(s.getBuffer(), e.getBuffer(), "0");
 		}
 	}
+#endif
 }
 
 //static
