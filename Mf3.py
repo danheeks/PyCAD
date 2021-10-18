@@ -9,9 +9,8 @@ def Export(path):
     root.set('unit', 'millimeter')
 
     resources = ET.SubElement(root, 'resources')
-    xmlobject = ET.SubElement(resources, 'object')
-    xmlobject.set('id', '1')
-    xmlobject.set('type', 'model')
+    
+    next_object_id = 1
     
     doc = cad.GetApp()
     object = doc.GetFirstChild()
@@ -19,6 +18,10 @@ def Export(path):
     while object:
         tris = object.GetTris(0.01)
         if tris != None:
+            xmlobject = ET.SubElement(resources, 'object')
+            xmlobject.set('id', str(next_object_id))
+            next_object_id += 1
+            xmlobject.set('type', 'model')
             mesh = tris.GetMesh()
             xmlmesh = ET.SubElement(xmlobject, 'mesh')
             xmlvertices = ET.SubElement(xmlmesh, 'vertices')
@@ -40,8 +43,9 @@ def Export(path):
         
     # add a build section
     build = ET.SubElement(root, 'build')
-    item = ET.SubElement(build, 'item')
-    item.set('objectid', '1')
+    for i in range(0, next_object_id):
+        item = ET.SubElement(build, 'item')
+        item.set('objectid', str(i+1))
      
     if os.path.exists(path):
         os.remove(path)
