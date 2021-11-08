@@ -262,7 +262,7 @@ int CFace::GetSurfaceType()
 	return surface_type;
 }
 
-bool CFace::IsAPlane(gp_Pln *returned_plane)
+bool CFace::IsAPlane(gp_Pln *returned_plane)const
 {
 	static const int GRID = 5;
 	BRepAdaptor_Surface surface(m_topods_face, Standard_True);
@@ -274,6 +274,11 @@ bool CFace::IsAPlane(gp_Pln *returned_plane)
 		{
 			BRepAdaptor_Surface surface(m_topods_face, Standard_True);
 			*returned_plane = surface.Plane();
+			if (m_topods_face.Orientation() == TopAbs_REVERSED)
+			{
+				*returned_plane = gp_Pln(returned_plane->Axis().Location(), -returned_plane->Axis().Direction());
+			}
+
 		}
 		return true;
 	case GeomAbs_Cylinder:
@@ -332,7 +337,15 @@ bool CFace::IsAPlane(gp_Pln *returned_plane)
 				}
 			}
 
-			if(returned_plane)*returned_plane = plane;
+			if (returned_plane)
+			{
+				if (m_topods_face.Orientation() == TopAbs_REVERSED)
+				{
+					plane = gp_Pln(plane.Axis().Location(), -plane.Axis().Direction());
+
+				}
+				*returned_plane = plane;
+			}
 			return true; // all points tested fitted the plane
 		}
 	}
@@ -399,11 +412,6 @@ void CFace::GetPlaneParams(gp_Pln &p)
 	else
 	{
 		IsAPlane(&p);
-		if(	m_topods_face.Orientation()== TopAbs_REVERSED )
-		{
-			p = gp_Pln(p.Axis().Location(), -p.Axis().Direction());
-			
-		}
 	}
 }
 
@@ -616,7 +624,7 @@ bool CFace::Orientation()
 	return (o == TopAbs_FORWARD);
 }
 
-void CFace::GetUVBox(double *uv_box)
+void CFace::GetUVBox(double *uv_box)const
 {
 	BRepAdaptor_Surface surface(m_topods_face, Standard_True);
 	uv_box[0] = surface.FirstUParameter();

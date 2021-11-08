@@ -404,6 +404,11 @@ void CTrisAddTriangle(CTris& tris, const Point3d& p0, const Point3d& p1, const P
 	tris.AddTri(x);
 }
 
+CMesh* CTrisGetMesh(const CTris& tris)
+{
+	return new CMesh(tris);
+}
+
 boost::python::list GetTrianglesAsCurveList(const CTris& tris)
 {
 	boost::python::list clist;
@@ -420,11 +425,16 @@ boost::python::list GetTrianglesAsCurveList(const CTris& tris)
 	return clist;
 }
 
-CMesh* CTrisGetMesh(const CTris& tris)
+boost::python::list CTrisGetTriangles(const CTris& tris)
 {
-	return new CMesh(tris);
+	boost::python::list clist;
+	for (std::list<CTri>::const_iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
+	{
+		const CTri& tri = *It;
+		clist.append(bp::make_tuple(bp::make_tuple(tri.x[0][0], tri.x[0][1], tri.x[0][2]), bp::make_tuple(tri.x[1][0], tri.x[1][1], tri.x[1][2]), bp::make_tuple(tri.x[2][0], tri.x[2][1], tri.x[2][2])));
+	}
+	return clist;
 }
-
 
 boost::python::tuple MeshGetFaces(const CMesh& mesh)
 {
@@ -825,7 +835,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("__init__", bp::make_constructor(&plane_constructor))
 		.def("Intof", &PlaneIntofPlane, bp::args("pl2"), "if the two planes intersect this returns the Line of intersection, else returns None")
 		.def_readwrite("normal", &Plane::normal, "unit vector normal to plane")
-		.def_readwrite("d", &Plane::d, "distance of plane to origin\nuse normal * d to get a point on the plane")
+		.def_readwrite("d", &Plane::d, "distance of plane to origin\nuse normal * (-d) to get a point on the plane")
 		;
 
 	bp::class_<Line>("Line", "Line((Point3D)p1, (Point3D)p2) - an infinite line through p1 and p2")
@@ -869,6 +879,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetFlattenedSurface", &CTris::GetFlattenedSurface, bp::return_value_policy<bp::manage_new_object>(), "returns a new Stl with all the triangles unfolded into a flat shape")
 		.def("GetTrianglesAsCurveList", &GetTrianglesAsCurveList, "returns a list of Curve objects, each one being a closed triangle")
 		.def("GetMesh", &CTrisGetMesh, bp::return_value_policy<bp::manage_new_object>(), "returns a mesh")
+		.def("GetTriangles", &CTrisGetTriangles, "returns the list of tuples of tuples")
 
 		.def(bp::self += bp::other<CTris>())
 		;

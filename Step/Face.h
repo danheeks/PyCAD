@@ -67,14 +67,14 @@ public:
 	void GetTorusParams(gp_Torus &t);
 	bool GetNurbSurfaceParams(CNurbSurfaceParams* params);
 	int GetSurfaceType();
-	bool IsAPlane(gp_Pln *returned_plane);
+	bool IsAPlane(gp_Pln *returned_plane)const;
 	std::wstring GetSurfaceTypeStr();
 	CEdge* GetFirstEdge();
 	CEdge* GetNextEdge();
 	CLoop* GetFirstLoop();
 	CLoop* GetNextLoop();
 	bool Orientation();
-	void GetUVBox(double *uv_box);
+	void GetUVBox(double *uv_box)const;
 	void GetSurfaceUVPeriod(double *uv, bool *isUPeriodic, bool *isVPeriodic);
 	CShape* GetParentBody();
 	void MakeSureMarkingGLListExists();

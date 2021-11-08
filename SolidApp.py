@@ -63,13 +63,34 @@ class SolidApp(App):
             tools.append(ContextTool.CADObjectContextTool(object, "Chamfer", "chamfer", self.ChamferEdge))
         elif t == step.GetFaceType():
             tools.append(ContextTool.CADObjectContextTool(object, "Make Sketch From Face", "face2sketch", self.FaceToSketch))
-            tools.append(ContextTool.CADObjectContextTool(object, "Make Face Radius 1mm smaller", "facerch", self.FaceRadiusChange))
+            self.context_face_plane = object.GetPlane()
+            if self.context_face_plane != None:
+                tools.append(ContextTool.CADObjectContextTool(object, "Rotate To Face", "rotface", self.RotateToFace))
+            tools.append(ContextTool.CADObjectContextTool(object, "(to do ) Make Face Radius 1mm smaller", "facerch", self.FaceRadiusChange))
         return tools
     
     def FaceToSketch(self, object):
         sketch = step.NewSketchFromFace(object)
         cad.AddUndoably(sketch)
         cad.Select(sketch)
+    
+    def RotateToFace(self, object):
+        n = self.context_face_plane.normal
+        p = n * (-self.context_face_plane.d)
+        x,y = n.ArbitraryAxes()
+        face_matrix = geom.Matrix(p, x, y)
+        inv_matrix = face_matrix.Inverse()
+        cad.StartHistory()
+        selected = cad.GetSelectedObjects()
+        # if any objects are selected, move them
+        if len(selected)>0:
+            for object in selected:
+                cad.TransformUndoably(object, inv_matrix)
+        else:
+            # move the solid
+            parent_body = object.GetParentBody()
+            cad.TransformUndoably(parent_body, inv_matrix)
+        cad.EndHistory()
     
     def FaceRadiusChange(self, object):
         sketch = step.NewSketchFromFace(object)

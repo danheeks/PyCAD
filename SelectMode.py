@@ -163,6 +163,6 @@ class SelectMode(cad.InputMode):
             self.CurrentPoint = cad.IPoint(event.x, event.y)
             
         if event.GetWheelRotation() != 0:
-            wx.GetApp().GetViewport().OnWheelRotation(event.wheelRotation, event.x, event.y)
+            wx.GetApp().GetViewport().OnWheelRotation(-event.wheelRotation, event.x, event.y)
             
                     
