@@ -3134,7 +3134,7 @@ BOOST_PYTHON_MODULE(cad) {
 		;
 
 	boost::python::enum_<GraphicsTextMode>("GraphicsTextMode")
-		.value("None", GraphicsTextModeNone)
+		.value("NoText", GraphicsTextModeNone)
 		.value("InputTitle", GraphicsTextModeInputTitle)
 		.value("FullHelp", GraphicsTextModeWithHelp)
 		;
