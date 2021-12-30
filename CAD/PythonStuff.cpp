@@ -1355,10 +1355,18 @@ boost::python::tuple GenTexture(boost::python::object buffer, boost::python::obj
 
 #define LOTS_OF_QUADS
 
-void DrawImageQuads(int width, int height, int textureWidth, unsigned int texture_number, const Point3d &bottom_left, const Point3d &bottom_right, const Point3d &top_right, const Point3d &top_left, bool no_color, bool marked)
+void DrawImageQuads(int width, int height, int textureWidth, unsigned int texture_number, const Point3d &bottom_left, const Point3d &bottom_right, const Point3d &top_right, const Point3d &top_left, float opacity, bool no_color, bool marked)
 {
+		bool blend_enabled = false;
 	if (!no_color){
-		glColor4ub(255, 255, 255, 255);
+		if (opacity<1) {
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthMask(0);
+			blend_enabled = true;
+		}
+
+		glColor4f(1.0, 1.0, 1.0, opacity);
 		if (texture_number){
 			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, texture_number);
@@ -1403,6 +1411,7 @@ void DrawImageQuads(int width, int height, int textureWidth, unsigned int textur
 	if (!no_color){
 		glDisable(GL_TEXTURE_2D);
 	}
+	if (blend_enabled)glDisable(GL_BLEND);
 }
 
 void DrawTris(const CTris& tris, bool with_normals)

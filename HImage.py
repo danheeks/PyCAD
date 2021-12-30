@@ -1,4 +1,5 @@
 from Object import Object
+from Object import PyProperty
 import geom
 import wx
 import cad
@@ -18,6 +19,7 @@ class HImage(Object):
         self.bottom_right = None
         self.top_right = None
         self.top_left = None
+        self.opacity = 1.0
         
     def GetIconFilePath(self):
         return wx.GetApp().cad_dir + '/icons/picture.png'
@@ -41,7 +43,9 @@ class HImage(Object):
         return box
      
     def GetProperties(self):
-        return []
+        properties = []
+        properties.append(PyProperty("opacity", 'opacity', self))
+        return properties
     
     def OnGlCommands(self, select, marked, no_color):
         if self.texture_number == None:
@@ -63,7 +67,7 @@ class HImage(Object):
             return
 
         if self.bottom_left != None:
-            cad.DrawImageQuads(self.width, self.height, self.textureWidth, self.texture_number, self.bottom_left, self.bottom_right, self.top_right, self.top_left, no_color, marked)
+            cad.DrawImageQuads(self.width, self.height, self.textureWidth, self.texture_number, self.bottom_left, self.bottom_right, self.top_right, self.top_left, self.opacity, no_color, marked)
             
     def GetGrippers(self, just_for_endof):
         if self.bottom_left != None:
@@ -104,6 +108,7 @@ class HImage(Object):
         cad.SetXmlValue('x30', self.top_left.x)
         cad.SetXmlValue('x31', self.top_left.y)
         cad.SetXmlValue('x32', self.top_left.z)
+        cad.SetXmlValue('opacity', self.opacity)
         Object.WriteXml(self)
 
     def ReadXml(self):
@@ -125,6 +130,7 @@ class HImage(Object):
         self.top_left.x = float(cad.GetXmlValue('x30'))
         self.top_left.y = float(cad.GetXmlValue('x31'))
         self.top_left.z = float(cad.GetXmlValue('x32'))
+        self.opacity = float(cad.GetXmlValue('opacity'))
         Object.ReadXml(self)
                 
     def MakeACopy(self):
@@ -138,6 +144,7 @@ class HImage(Object):
         self.bottom_right = geom.Point3D(o.bottom_right)
         self.top_right = geom.Point3D(o.top_right)
         self.top_left = geom.Point3D(o.top_left)
+        self.opacity = o.opacity
         Object.CopyFrom(self, o)
             
         

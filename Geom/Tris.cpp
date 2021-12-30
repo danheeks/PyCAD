@@ -1311,7 +1311,11 @@ void CTris::GetMachiningAreas(std::list<CMachiningArea>& areas)const
 		CMachiningArea a;
 		a.m_face_type = face_group.m_face_type;
 		a.m_area = face_group.m_tris.Shadow2();
-		if (a.m_area.num_curves() > 0)
+
+		CArea area_reduced(a.m_area);
+		area_reduced.Offset(0.1);
+
+		if (area_reduced.num_curves() > 0)
 		{
 			a.m_top = face_group.m_tris.m_box.MaxZ();
 			a.m_bottom = face_group.m_tris.m_box.MinZ();
