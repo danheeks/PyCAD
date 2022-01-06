@@ -400,6 +400,9 @@ public:
 	bool LineIsOn(const Point& p0, const Point& p1, double accuracy);
 };
 
+ostream & operator<<(ostream &os, const Circle &);
+
+
 // 2d box class
 class Box{
 public:

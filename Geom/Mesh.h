@@ -35,6 +35,8 @@ public:
 class CMeshFace
 {
 public:
+	int m_id; // for debugging, please remove
+
 	std::vector<CMeshVertex*> m_vertices;
 	std::vector<CMeshEdgeAndDir> m_edges;
 	bool GetNormal(Point3d &norm)const;

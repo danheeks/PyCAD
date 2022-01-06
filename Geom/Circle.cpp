@@ -118,3 +118,14 @@ bool Circle::LineIsOn(const Point& p0, const Point& p1, double accuracy)
 
 	return true;
 }
+
+ostream & operator<<(ostream &os, const Circle &c)
+{
+	if (c.m_is_a_line)
+	{
+		return os << "Circle ( actually a line ) p0 = " << c.m_p0 << " p1 = " << c.m_p1;
+	}
+
+	return os << "Circle c = " << c.pc << ", radius = " << c.radius;
+}
+

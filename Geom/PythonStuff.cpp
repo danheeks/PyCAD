@@ -575,6 +575,12 @@ static std::string Point3d__str__(const Point3d& self) {
 	return ss.str();
 }
 
+static std::string Circle__str__(const Circle& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
 static std::string CVertex__str__(const CVertex& self) {
 	std::ostringstream ss;
 	ss << self;
@@ -857,7 +863,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("Transform", &LineTransform, bp::args("m"), "transforms this Circle by the matrix")
 		.def_readwrite("c", &Circle::pc, "center point of the circle")
 		.def_readwrite("radius", &Circle::radius, "radius of the circle")
-		;
+		.def("__str__", Circle__str__);
+	;
 
 	bp::class_<CTris>("Stl", "Stl() - empty collection of triangles\nStl(file_path) - collection of triangles read in from an .stl file")
 		.def(bp::init<CTris>())

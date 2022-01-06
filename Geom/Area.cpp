@@ -634,7 +634,7 @@ bool IsInside(const Point& p, const CArea& a)
 	c.m_vertices.push_back(CVertex(Point(p.x - 0.01, p.y - 0.01)));
 	a2.m_curves.push_back(c);
 	a2.Intersect(a);
-	if(fabs(a2.GetArea()) < 0.0004)return false;
+	if(fabs(a2.GetArea()) < 0.0002)return false;
 	return true;
 }
 

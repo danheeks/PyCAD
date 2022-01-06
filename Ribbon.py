@@ -32,7 +32,10 @@ class BitmapChangingButton:
         self.ChangeBitmap()
         
     def GetRibbon(self):
-        return self.toolbar.GetParent().GetParent().GetParent()
+        ribbon = self.toolbar.GetParent().GetParent().GetParent()
+        if ribbon == None:
+            ribbon = wx.GetApp().frame.ribbon
+        return ribbon
 
     def GetHelpStr(self):
         return ''
@@ -150,7 +153,11 @@ class WindowOnOffButton(BitmapChangingButton):
         self.bitmap_path = bitmap_path
         
     def GetAuiManager(self):
-        frame = self.GetRibbon().GetParent()
+        ribbon = self.GetRibbon()
+        if ribbon == None:
+            frame = wx.GetApp().frame
+        else:
+            frame = ribbon.GetParent()            
         return frame.aui_manager
     
     def GetAuiPane(self):

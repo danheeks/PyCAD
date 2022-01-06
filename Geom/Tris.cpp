@@ -1213,13 +1213,13 @@ void WalkFacesMakingAFaceGroup(CMeshFace* face, std::list<CFaceGroup> &face_grou
 
 	std::list<CMeshFace*> to_add;
 	to_add.push_back(face);
+	unvisited_faces.erase(face);
 	CFaceGroup face_group;
 	face_group.m_face_type = GetFaceFlatType(face);
 
 	while (to_add.size() > 0)
 	{
 		CMeshFace* face = to_add.front();
-		unvisited_faces.erase(face);
 		CTri tri;
 		face->GetTri(tri);
 		face_group.m_tris.AddTri(tri.x[0]);
@@ -1235,6 +1235,7 @@ void WalkFacesMakingAFaceGroup(CMeshFace* face, std::list<CFaceGroup> &face_grou
 				if (face_type == face_group.m_face_type)
 				{
 					to_add.push_back(joining_face);
+					unvisited_faces.erase(joining_face);
 				}
 			}
 		}

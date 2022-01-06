@@ -1,8 +1,11 @@
 #include "Mesh.h"
 #include "Tris.h"
 
+int face_id = 1;
+
 CMesh::CMesh(const CTris& tris)
 {
+	face_id = 1;
 	for (std::list<CTri>::const_iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
 	{
 		const CTri& tri = *It;
@@ -40,6 +43,8 @@ CMeshVertex* CMesh::AddGetVertex(const float* x)
 void CMesh::AddTri(const float* x)
 {
 	CMeshFace* face = new CMeshFace();
+	face->m_id = face_id;
+	face_id++;
 	m_faces.push_back(face);
 
 	CMeshVertex* vertices[3];
