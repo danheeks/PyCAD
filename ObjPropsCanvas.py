@@ -41,7 +41,7 @@ class ObjPropsCanvas(PropertiesCanvas):
             properties = object.GetProperties()
             if properties:
                 for property in properties:
-                    #cad.PyIncref(property)
+                    #cad.PyIncref(property) # never delete any property objects. They are needed for undo/redo operations
                     self.AddProperty(property)
         self.inRemoveAndAddAll = False
 

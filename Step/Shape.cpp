@@ -144,7 +144,135 @@ void CShape::create_faces_and_edges()
 		Add(m_edges, NULL);
 		Add(m_vertices, NULL);
 	}
-	CreateFacesAndEdges(m_shape, m_faces, m_edges, m_vertices);
+	// create index maps
+	TopTools_IndexedMapOfShape faceMap;
+	TopTools_IndexedMapOfShape edgeMap;
+	TopTools_IndexedMapOfShape vertexMap;
+	for (TopExp_Explorer explorer(m_shape, TopAbs_FACE); explorer.More(); explorer.Next())
+	{
+		faceMap.Add(explorer.Current());
+	}
+	for (TopExp_Explorer explorer(m_shape, TopAbs_EDGE); explorer.More(); explorer.Next())
+	{
+		edgeMap.Add(explorer.Current());
+	}
+	for (TopExp_Explorer explorer(m_shape, TopAbs_VERTEX); explorer.More(); explorer.Next())
+	{
+		vertexMap.Add(explorer.Current());
+	}
+
+	std::vector<CFace*> face_array;
+	face_array.resize(faceMap.Extent() + 1);
+	std::vector<CEdge*> edge_array;
+	edge_array.resize(edgeMap.Extent() + 1);
+	std::vector<HVertex*> vertex_array;
+	vertex_array.resize(vertexMap.Extent() + 1);
+
+	// create the edge objects
+	for (int i = 1; i <= edgeMap.Extent(); i++)
+	{
+		const TopoDS_Shape &s = edgeMap(i);
+		CEdge* new_object = new CEdge(TopoDS::Edge(s));
+		edge_array[i] = new_object;
+	}
+
+	// create the vertex objects
+	for (int i = 1; i <= vertexMap.Extent(); i++)
+	{
+		const TopoDS_Shape &s = vertexMap(i);
+		HVertex* new_object = new HVertex(TopoDS::Vertex(s));
+		vertex_array[i] = new_object;
+	}
+
+	// add the edges in their face loop order
+	std::set<CEdge*> edges_added;
+	std::set<HVertex*> vertices_added;
+
+	// create the face objects
+	for (int i = 1; i <= faceMap.Extent(); i++)
+	{
+		const TopoDS_Shape &s = faceMap(i);
+		CFace* new_face_object = new CFace(TopoDS::Face(s));
+		new_face_object->SetColor(m_color);
+		m_faces->Add(new_face_object, NULL);
+		face_array[i] = new_face_object;
+
+		// create the loop objects
+		TopTools_IndexedMapOfShape loopMap;
+		for (TopExp_Explorer explorer(s, TopAbs_WIRE); explorer.More(); explorer.Next())
+		{
+			loopMap.Add(explorer.Current());
+		}
+		TopoDS_Wire outerWire = BRepTools::OuterWire(new_face_object->Face());
+		int outer_index = loopMap.FindIndex(outerWire);
+		for (int i = 1; i <= loopMap.Extent(); i++)
+		{
+			const TopoDS_Shape &s = loopMap(i);
+			CLoop* new_loop_object = new CLoop(TopoDS::Wire(s));
+			new_face_object->m_loops.push_back(new_loop_object);
+			if (outer_index == i)new_loop_object->m_is_outer = true;
+			new_loop_object->m_pface = new_face_object;
+
+			// find the loop's edges
+			for (BRepTools_WireExplorer explorer(TopoDS::Wire(s)); explorer.More(); explorer.Next())
+			{
+				CEdge* e = edge_array[edgeMap.FindIndex(explorer.Current())];
+				new_loop_object->m_edges.push_back(e);
+
+				// add the edge
+				if (edges_added.find(e) == edges_added.end())
+				{
+					m_edges->Add(e, NULL);
+					edges_added.insert(e);
+				}
+
+				// add the vertex
+				HVertex* v = vertex_array[vertexMap.FindIndex(explorer.CurrentVertex())];
+				if (vertices_added.find(v) == vertices_added.end())
+				{
+					m_vertices->Add(v, NULL);
+					vertices_added.insert(v);
+				}
+			}
+		}
+	}
+
+	// find the vertices' edges
+	for (unsigned int i = 1; i<vertex_array.size(); i++)
+	{
+		HVertex* v = vertex_array[i];
+		TopTools_IndexedMapOfShape vertexEdgeMap;
+		for (TopExp_Explorer expEdge(v->Vertex(), TopAbs_EDGE); expEdge.More(); expEdge.Next())
+		{
+			vertexEdgeMap.Add(expEdge.Current());
+		}
+		for (int i = 1; i <= vertexEdgeMap.Extent(); i++)
+		{
+			const TopoDS_Shape &s = vertexEdgeMap(i);
+			CEdge* e = edge_array[edgeMap.FindIndex(s)];
+			v->m_edges.push_back(e);
+		}
+	}
+
+	// find the faces' edges
+	for (unsigned int i = 1; i<face_array.size(); i++)
+	{
+		CFace* face = face_array[i];
+		TopTools_IndexedMapOfShape faceEdgeMap;
+		for (TopExp_Explorer expEdge(face->Face(), TopAbs_EDGE); expEdge.More(); expEdge.Next())
+		{
+			faceEdgeMap.Add(expEdge.Current());
+		}
+		for (int i = 1; i <= faceEdgeMap.Extent(); i++)
+		{
+			const TopoDS_Shape &s = faceEdgeMap(i);
+			CEdge* e = edge_array[edgeMap.FindIndex(s)];
+			face->m_edges.push_back(e);
+			e->m_faces.push_back(face);
+			bool sense = (s.IsEqual(e->Edge()) == Standard_True);
+			e->m_face_senses.push_back(sense);
+		}
+	}
 }
 
 void CShape::delete_faces_and_edges()
@@ -278,6 +406,63 @@ std::wstring CShape::StretchedName()
 	return L"Stretched Shape";
 }
 
+static std::list<int> stored_face_ids;
+static std::list<int> stored_edge_ids;
+static std::list<int> stored_vertex_ids;
+
+void CShape::save_ids()
+{
+	{
+		stored_face_ids.clear();
+		for (HeeksObj* object = m_faces->GetFirstChild(); object; object = m_faces->GetNextChild())
+		{
+			stored_face_ids.push_back(object->m_id);
+		}
+	}
+	{
+		stored_edge_ids.clear();
+		for (HeeksObj* object = m_edges->GetFirstChild(); object; object = m_edges->GetNextChild())
+		{
+			stored_edge_ids.push_back(object->m_id);
+		}
+	}
+	{
+		stored_vertex_ids.clear();
+		for (HeeksObj* object = m_vertices->GetFirstChild(); object; object = m_vertices->GetNextChild())
+		{
+			stored_vertex_ids.push_back(object->m_id);
+		}
+	}
+}
+
+void CShape::restore_ids()
+{
+	{
+		std::list<int>::iterator It = stored_face_ids.begin();
+		for (HeeksObj* object = m_faces->GetFirstChild(); object && (It != stored_face_ids.end()); object = m_faces->GetNextChild(), It++)
+		{
+			object->m_id = *It;
+		}
+		stored_face_ids.clear();
+	}
+	{
+		std::list<int>::iterator It = stored_edge_ids.begin();
+		for (HeeksObj* object = m_edges->GetFirstChild(); object && (It != stored_edge_ids.end()); object = m_edges->GetNextChild(), It++)
+		{
+			object->m_id = *It;
+		}
+		stored_edge_ids.clear();
+	}
+	{
+		std::list<int>::iterator It = stored_vertex_ids.begin();
+		for (HeeksObj* object = m_vertices->GetFirstChild(); object && (It != stored_vertex_ids.end()); object = m_vertices->GetNextChild(), It++)
+		{
+			object->m_id = *It;
+		}
+		stored_vertex_ids.clear();
+	}
+}
+
 void CShape::Transform(const Matrix &m){
 	gp_Trsf mat = make_matrix(m.e);
 
@@ -291,9 +476,12 @@ void CShape::Transform(const Matrix &m){
 	{
 		MakeTransformedShape(mat);
 	}
+
+	CShapeData shape_data(this);
 	delete_faces_and_edges();
 	KillGLLists();
 	create_faces_and_edges();
+	shape_data.SetShape(this, false);
 }
 
 // static member function

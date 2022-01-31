@@ -411,7 +411,7 @@ public:
 		PyErr_Clear();
 		return false;
 	}
-
+	
 	std::pair<bool, bool> CallReturnBool(const char* func)const
 	{
 		bool success = false;
@@ -430,6 +430,37 @@ public:
 				try
 				{
 					boost::python::detail::method_result result = f();
+					success = AfterPythonCall(main_module);
+					return std::make_pair(success, (bool)result);
+				}
+				catch (const boost::python::error_already_set&)
+				{
+				}
+				success = AfterPythonCall(main_module);
+			}
+		}
+		PyErr_Clear();
+		return std::make_pair(false, false);
+	}
+
+	std::pair<bool, bool> CallReturnBool(const char* func, HeeksObj* object)const
+	{
+		bool success = false;
+		if (boost::python::override f = this->get_override(func))
+		{
+			if (PyErr_Occurred())
+			{
+				PyErr_Clear();// clear message saying 'object has no attribute' and don't call function recursively
+			}
+			else
+			{
+				BeforePythonCall(&main_module, &globals);
+
+				// Execute the python function
+				PyLockGIL lock;
+				try
+				{
+					boost::python::detail::method_result result = f(boost::ref(object));
 					success = AfterPythonCall(main_module);
 					return std::make_pair(success, (bool)result);
 				}

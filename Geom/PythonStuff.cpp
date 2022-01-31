@@ -830,6 +830,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def(bp::self != bp::other<Point3d>())
 		.def(-bp::self)
 		.def("Normalized", &Point3d::Normalized, "returns a vector which is this vector scaled to a unit vector\nfor a (0, 0, 0) vector, this will return Point3D(0, 0, 0)")
+		.def("Normalize", &Point3d::Normalize, "scales this vector to a unit vector")
 		.def("Dist", &Point3d::Dist, bp::args("p2"), "returns the distance between this point and p2")
 		.def("Length", &Point3d::magnitude, "returns the length of the vector")
 		.def("ArbitraryAxes", &ArbitraryAxes, "returns a tuple of (x_axis, y_axis) unit vectors, which have the same relationship to this vector\nas x-axis and y-axis have to z-axis")

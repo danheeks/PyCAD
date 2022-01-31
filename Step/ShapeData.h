@@ -15,6 +15,14 @@ enum SolidTypeEnum{
 	SOLID_TYPE_CONE
 };
 
+class CFaceData
+{
+public:
+	int m_id;
+	unsigned int m_color;
+	CFaceData(int id, unsigned int color) :m_id(id), m_color(color){}
+};
+
 // used for reading and writing to the XML file
 class CShapeData{
 public:
@@ -30,7 +38,7 @@ public:
 	TiXmlElement m_xml_element;
 	std::list<int> m_vertex_ids;
 	std::list<int> m_edge_ids;
-	std::list<int> m_face_ids;
+	std::list<CFaceData> m_face_ids;
 
 	void SetShape(CShape* shape, bool apply_id);
 };

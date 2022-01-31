@@ -24,6 +24,8 @@ protected:
 
 	void create_faces_and_edges();
 	void delete_faces_and_edges();
+	void save_ids();
+	void restore_ids();
 	void CallMesh();
 	virtual void MakeTransformedShape(const gp_Trsf &mat);
 	virtual std::wstring StretchedName();

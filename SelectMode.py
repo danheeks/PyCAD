@@ -95,8 +95,7 @@ class SelectMode(cad.InputMode):
                 for object in objects: cad.Select(object)
                 self.window_box = None
             elif self.button_down_point != None:
-                if not event.controlDown:
-                    wx.GetApp().OnLeftClick(event)
+                 wx.GetApp().OnLeftClick(event)
             if self.just_one and wx.GetApp().inMainLoop and cad.GetNumSelected() > 0:
                 wx.GetApp().ExitMainLoop()
             else:

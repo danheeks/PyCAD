@@ -211,14 +211,28 @@ boost::python::object GetFacePlane(const CFace* face)
 	}
 }
 
+boost::python::list ShapeGetFaces(const CShape* shape) {
+	boost::python::list olist;
+	for (HeeksObj *object = shape->m_faces->GetFirstChild(); object; object = shape->m_faces->GetNextChild())
+	{
+		olist.append(boost::python::pointer_wrapper<CFace*>((CFace*)object));
+	}
+	return olist;
+}
+
+
 	BOOST_PYTHON_MODULE(step) {
 
-		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init);
+		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init)
+			.def("GetFaces", ShapeGetFaces);
+
 		boost::python::class_<CSolid, boost::python::bases<CShape>, boost::noncopyable >("Solid", boost::python::no_init);
+
 		boost::python::class_<CFace, boost::python::bases<HeeksObj>, boost::noncopyable >("Face", boost::python::no_init)
 			.def("GetPlane", GetFacePlane)
 			.def("GetParentBody", &CFace::GetParentBody, boost::python::return_value_policy<boost::python::reference_existing_object>())
 			;
+
 		boost::python::class_<CEdge, boost::python::bases<HeeksObj>, boost::noncopyable >("Edge", boost::python::no_init)
 			.def("Blend", &CEdge::Blend)
 			;

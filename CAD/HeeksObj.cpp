@@ -61,7 +61,7 @@ void HeeksObj::GetProperties(std::list<Property *> *list)
 {
 	list->push_back(new PropertyStringReadOnly(L"object type", GetTypeString()));
 	if (GetShortString())list->push_back(new PropertyObjectTitle(this));
-	if(UsesID())list->push_back(new PropertyInt(this, L"ID", (int*)(&m_id)));
+	if(UsesID())list->push_back(new PropertyInt(this, L"ID", (const int*)(&m_id)));
 	const HeeksColor* c = GetColor();
 	if(c)list->push_back ( new PropertyObjectColor(this) );
 	list->push_back(new PropertyCheck(this, L"visible", &m_visible));

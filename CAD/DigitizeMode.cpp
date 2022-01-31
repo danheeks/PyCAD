@@ -644,7 +644,6 @@ bool DigitizeMode::GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& d2
 
 bool DigitizeMode::GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Circle& c)
 {
-#if 1
 	PointLineOrCircle plc1 = GetLineOrCircleType(d1);
 	PointLineOrCircle plc2 = GetLineOrCircleType(d2);
 	PointLineOrCircle plc3 = GetLineOrCircleType(d3);
@@ -711,6 +710,6 @@ bool DigitizeMode::GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoi
 		c = *best_circle;
 		return true;
 	}
-#endif
+
 	return false;
 }

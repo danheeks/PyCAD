@@ -18,6 +18,8 @@ from About import AboutBox
 from FilterDlg import FilterDlg
 import HImage
 from Ribbon import RB
+import Drawing
+import LineArcDrawing
 
 SKETCH_OP_UNION = 1
 SKETCH_OP_SUBTRACT = 2
@@ -268,6 +270,7 @@ class App(wx.App):
             return
         
         copy_object = object.MakeACopy()
+        copy_object.SetID(object.GetID())
         
         if copy_object:
             if copy_object.Edit():
@@ -385,13 +388,15 @@ class App(wx.App):
         
         for object in cad.GetSelectedObjects():
             t = object.GetType()
-            if self.ObjectCanBeSketchChild(object):
+            if object.CanAddTo(sketch):
                 new_object = object.MakeACopy()
                 objects_to_delete.append(object)
                 sketch.Add(new_object)
-                
+        
+        cad.StartHistory()
         cad.AddUndoably(sketch)
         cad.DeleteObjectsUndoably(objects_to_delete)
+        cad.EndHistory()
         
     def OffsetSketch(self, object):
         config = HeeksConfig()
@@ -552,6 +557,11 @@ class App(wx.App):
         if self.inMainLoop:
             wx.MessageBox('recursive call to PickObjects')
             return
+        
+        if isinstance(filter,int):
+            filter_int = filter
+            filter = cad.Filter()
+            filter.AddType(filter_int)
         
         self.StartPickObjects(str, filter, just_one)
 
@@ -1112,19 +1122,19 @@ class App(wx.App):
         
     def OnLines(self, e):
         cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetLineArcDrawing()
+        LineArcDrawing.SetLineArcDrawing()
         
     def OnRectangles(self, e):
         cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetRectanglesDrawing()
+        Drawing.SetRectanglesDrawing()
         
     def OnObrounds(self, e):
         cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetObroundsDrawing()
+        Drawing.SetObroundsDrawing()
         
     def OnPolygons(self, e):
         cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetPolygonsDrawing()
+        Drawing.SetPolygonsDrawing()
         
     def OnCircles3p(self, e):
         cad.SetInputMode(self.select_mode) # mode to return to on ending drawing

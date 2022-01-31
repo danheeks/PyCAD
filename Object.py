@@ -39,7 +39,16 @@ class Object(cad.BaseObject):
 
     def HasEdit(self):
         return False
-
+    
+    def CanAdd(self, object):
+        return True
+    
+    def CanAddTo(self, owner):
+        return True
+    
+    def PreferredPasteTarget(self):
+        return None
+    
     def WriteXml(self):
         if self.id_named:
             if not self.title_made_from_id:cad.SetXmlValue('title', self.title)
@@ -50,7 +59,7 @@ class Object(cad.BaseObject):
 #            cad.Object.WriteObjectXml(self)
 
     def CallsObjListReadXml(self):
-        return True
+        return False
 
     def CopyFrom(self, object):
         if self.id_named:
@@ -72,14 +81,16 @@ class Object(cad.BaseObject):
         pass # gets called on ok from dialog
 
 class PyChoiceProperty(cad.Property):
-    def __init__(self, title, value_name, choices, object, alternative_values = None):
+    def __init__(self, title, value_name, choices, object, alternative_values = None, recalculate = None):
         self.title = title # to do, remove this GetTitle should use base class method
         self.value_name = value_name
         self.choices = choices
         self.alternative_values = alternative_values
+        self.recalc = recalculate
         self.pyobj = object
         cad.Property.__init__(self, cad.PROPERTY_TYPE_CHOICE, title, object)
-
+        cad.PyIncref(self)
+        
     def GetType(self):
         return cad.PROPERTY_TYPE_CHOICE
 
@@ -95,6 +106,7 @@ class PyChoiceProperty(cad.Property):
         if self.alternative_values:
             value = self.alternative_values[value]
         setattr(self.pyobj, self.value_name, value)
+        if(self.recalc):self.recalc()
 
     def GetChoices(self):
         return self.choices
@@ -111,14 +123,17 @@ class PyChoiceProperty(cad.Property):
         return getattr(self.pyobj, self.value_name)
 
 class PyPropertyLength(cad.Property):
-    def __init__(self, title, value_name, object, recalculate = None):
+    def __init__(self, title, value_name, pyobj, heeksobj = None, recalculate = None):
+        if heeksobj == None:
+            heeksobj = pyobj
         t = cad.PROPERTY_TYPE_LENGTH
-        cad.Property.__init__(self, t, title, None)
+        cad.Property.__init__(self, t, title, heeksobj)
         self.value_name = value_name
         self.title = title
         self.type = t
         self.recalc = recalculate
-        self.pyobj = object
+        self.pyobj = pyobj
+        cad.PyIncref(self)
 
     def GetType(self):
         # why is this not using base class?
@@ -151,22 +166,21 @@ class PyProperty(cad.Property):
         elif tt == geom.Point:
             t = cad.PROPERTY_TYPE_LIST
             self.children = []
-            a = getattr(object, value_name)
-            self.children.append(PyPropertyLength('X', 'x', a))
-            self.children.append(PyPropertyLength('Y', 'y', a))
+            self.children.append(PyPropertyLength('X', 'x', a, object))
+            self.children.append(PyPropertyLength('Y', 'y', a, object))
         elif tt == geom.Point3D:
             t = cad.PROPERTY_TYPE_LIST
             self.children = []
-            a = getattr(object, value_name)
-            self.children.append(PyPropertyLength('X', 'x', a))
-            self.children.append(PyPropertyLength('Y', 'y', a))
-            self.children.append(PyPropertyLength('Z', 'z', a))
-        cad.Property.__init__(self, t, title, None)
+            self.children.append(PyPropertyLength('X', 'x', a, object))
+            self.children.append(PyPropertyLength('Y', 'y', a, object))
+            self.children.append(PyPropertyLength('Z', 'z', a, object))
+        cad.Property.__init__(self, t, title, object)
         self.value_name = value_name
         self.title = title
         self.type = t
         self.recalc = recalculate
         self.pyobj = object
+        cad.PyIncref(self) # never delete any PyProperty objects. They are needed for undo/redo operations. To do - add these to a list belonging to the App and clear the list when the undo list is cleared.
 
     def GetType(self):
         # why is this not using base class?

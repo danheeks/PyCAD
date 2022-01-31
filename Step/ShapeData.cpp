@@ -26,7 +26,7 @@ CShapeData::CShapeData(CShape* shape): m_xml_element("")
 
 	for(HeeksObj* object = shape->m_faces->GetFirstChild(); object; object = shape->m_faces->GetNextChild())
 	{
-		m_face_ids.push_back(object->m_id);
+		m_face_ids.push_back(CFaceData(object->m_id, object->GetColor()->COLORREF_color()));
 	}
 
 	for(HeeksObj* object = shape->m_edges->GetFirstChild(); object; object = shape->m_edges->GetNextChild())
@@ -50,10 +50,12 @@ void CShapeData::SetShape(CShape* shape, bool apply_id)
 	shape->SetFromXMLElement(&m_xml_element);
 
 	{
-		std::list<int>::iterator It = m_face_ids.begin();
+		std::list<CFaceData>::iterator It = m_face_ids.begin();
 		for(HeeksObj* object = shape->m_faces->GetFirstChild(); object && It != m_face_ids.end(); object = shape->m_faces->GetNextChild(), It++)
 		{
-			object->SetID(*It);
+			CFaceData &face_data = *It;
+			object->SetID(face_data.m_id);
+			object->SetColor(HeeksColor((long)(face_data.m_color)));
 		}
 	}
 

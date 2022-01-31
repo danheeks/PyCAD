@@ -226,6 +226,30 @@ void BaseObject::OnRemove()
 	CallVoidReturn("OnRemove");
 }
 
+bool BaseObject::CanAdd(HeeksObj* object)
+{
+	std::pair<bool, bool> result = CallReturnBool("CanAdd", object);
+	if (result.first)
+		return result.second;
+	return ObjList::CanAdd(object);
+}
+
+bool BaseObject::CanAddTo(HeeksObj* owner)
+{
+	std::pair<bool, bool> result = CallReturnBool("CanAddTo", owner);
+	if (result.first)
+		return result.second;
+	return ObjList::CanAddTo(owner);
+}
+
+HeeksObj* BaseObject::PreferredPasteTarget()
+{
+	std::pair<bool, HeeksObj*> result = CallReturnHeeksObj("PreferredPasteTarget");
+	if (result.first)
+		return result.second;
+	return ObjList::PreferredPasteTarget();
+}
+
 bool BaseObject::SetClickMarkPoint(const Point3d &ray_start, const Point3d &ray_direction)
 {
 	std::pair<bool, bool> result = CallReturnBool("SetClickMarkPoint", ray_start, ray_direction);

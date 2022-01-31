@@ -218,6 +218,11 @@ public:
 		CallVoidReturn("OnMouse", event);
 	}
 
+	void OnFrontRender()
+	{
+		CallVoidReturn("OnFrontRender");
+	}
+
 	void OnRender()
 	{
 		CallVoidReturn("OnRender");
@@ -1455,6 +1460,16 @@ void DrawPopMatrix()
 	glPopMatrix();
 }
 
+void DrawObjectsOnFront(boost::python::list &list, bool do_depth_testing)
+{
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	return theApp->DrawObjectsOnFront(o_list, do_depth_testing);
+}
+
 void RenderScreeTextAt(const wchar_t* str1, double scale, double x, double y, double theta)
 {
 	theApp->render_screen_text_at(str1, scale, x, y, theta);
@@ -2259,9 +2274,24 @@ boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool
 	return olist;
 }
 
-Point3d Digitize(IPoint point)
+DigitizedPoint Digitize(IPoint point)
 {
-	return theApp->m_digitizing->digitize(point).m_point;
+	return theApp->m_digitizing->digitize(point);
+}
+
+DigitizedPoint GetLastDigitizePoint()
+{
+	return theApp->GetLastDigitizePoint();
+}
+
+void SetLastDigitizedPoint(const DigitizedPoint& p)
+{
+	theApp->SetLastDigitizedPoint(p);
+}
+
+void UseDigitiedPointAsReference()
+{
+	theApp->UseDigitiedPointAsReference();
 }
 
 int BaseObjectGetIndex(BaseObject& object)
@@ -2598,6 +2628,39 @@ void SetAntialiasing(bool value)
 	theApp->m_antialiasing = value;
 }
 
+boost::python::tuple TangentialArc(const Point3d &p0, const Point3d &v0, const Point3d &p1)
+{
+	Point3d centre(0, 0, 0);
+	Point3d axis(0, 0, 0);
+	bool arc_found = HArc::TangentialArc(p0, v0, p1, centre, axis);
+
+	return boost::python::make_tuple(arc_found, centre, axis);
+}
+
+boost::python::tuple GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3)
+{
+	Circle c;
+	bool found = DigitizeMode::GetTangentCircle(d1, d2, d3, c);
+	return boost::python::make_tuple(found, c);
+}
+
+boost::python::tuple GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2)
+{
+	Circle c;
+	bool found = DigitizeMode::GetCircleBetween(d1, d2, c);
+	return boost::python::make_tuple(found, c);
+}
+
+static std::string Filter__str__(const CFilter& self) {
+	std::ostringstream ss;
+	ss << self;
+	return ss.str();
+}
+
+HeeksObj* DigitizedPointGetObject1(const DigitizedPoint& d)
+{
+	return d.m_object1;
+}
 
 BOOST_PYTHON_MODULE(cad) {
 
@@ -2620,8 +2683,8 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("GetNextChild", &BaseObject::GetNextChild, boost::python::return_value_policy<boost::python::reference_existing_object>())
 		.def("GetChildren", &BaseObjectGetChildren)
 		.def("Clear", static_cast< void (BaseObject::*)(void) >(&BaseObject::Clear))
-		.def("CanAdd", &HeeksObj::CanAdd)
-		.def("CanAddTo", &HeeksObj::CanAddTo)
+		.def("CanAdd", &BaseObject::CanAdd)
+		.def("CanAddTo", &BaseObject::CanAddTo)
 		.def("CanBeDeleted", &HeeksObj::CanBeRemoved)
 		.def("CanBeCopied", &HeeksObj::CanBeCopied)
 		.def("OneOfAKind", &BaseObject::OneOfAKind_default)
@@ -2793,6 +2856,19 @@ BOOST_PYTHON_MODULE(cad) {
 //			.def_readwrite("p", &HPoint::m_p)
 		;
 
+	boost::python::class_<EndedObject, boost::python::bases<HeeksObj> >("EndedObject", boost::python::no_init)
+		.def_readwrite("A", &EndedObject::A)
+		.def_readwrite("B", &EndedObject::B)
+		;
+
+	boost::python::class_<HLine, boost::python::bases<EndedObject> >("Line", boost::python::no_init)
+		;
+
+	boost::python::class_<HArc, boost::python::bases<EndedObject> >("Arc", boost::python::no_init)
+		.def_readwrite("C", &HArc::C)
+		.def_readwrite("axis", &HArc::m_axis)
+		;
+
 	boost::python::class_<CStlSolid, boost::python::bases<HeeksObj> >("StlSolid")
 		.def(boost::python::init<CStlSolid>())
 		.def("__init__", boost::python::make_constructor(&initStlSolid))
@@ -2939,7 +3015,8 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("IsTypeInFilter", &CFilter::IsTypeInFilter)
 		.def("Size", &CFilter::Size)
 		.def_readwrite("empty_means_none", &CFilter::m_empty_means_none)
-		;
+		.def("__str__", Filter__str__);
+	;
 
 	boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
 		.def(boost::python::init<ObserverWrap>())
@@ -3160,6 +3237,7 @@ BOOST_PYTHON_MODULE(cad) {
 		.def(boost::python::init<DigitizedPoint>())
 		.def_readwrite("point", &DigitizedPoint::m_point)
 		.def_readwrite("type", &DigitizedPoint::m_type)
+		.def("GetObject1", &DigitizedPointGetObject1, boost::python::return_value_policy<boost::python::reference_existing_object>())
 		;
 
 	boost::python::class_<DrawingWrap, boost::python::bases<CInputMode>, boost::noncopyable >("Drawing")
@@ -3210,9 +3288,10 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("DrawMultMatrix", DrawMultMatrix);
 	boost::python::def("DrawPushMatrix", DrawPushMatrix);
 	boost::python::def("DrawPopMatrix", DrawPopMatrix);
+	boost::python::def("DrawObjectsOnFront", DrawObjectsOnFront);	
 	boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
 	boost::python::def("AddProperty", AddProperty);
-	boost::python::def("GetObjectFromId", &GetObjectFromId);
+	boost::python::def("GetObjectFromId", &GetObjectFromId, boost::python::args("type", "id"), "returns the object of given type with given id, or None");
 	boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));
 	boost::python::def("GetObjectNamesAndTypes", GetObjectNamesAndTypes);
 	boost::python::def("SetXmlValue", SetXmlValue);
@@ -3321,6 +3400,11 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("EndDrawing", EndDrawing);
 	boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
 	boost::python::def("Digitize", Digitize);
+	boost::python::def("GetLastDigitizePoint", GetLastDigitizePoint);
+	boost::python::def("SetLastDigitizedPoint", SetLastDigitizedPoint); 
+	boost::python::def("GetTangentCircle", GetTangentCircle);
+	boost::python::def("GetCircleBetween", GetCircleBetween);
+	boost::python::def("UseDigitiedPointAsReference", UseDigitiedPointAsReference);
 	boost::python::def("GetDigitizeEnd", GetDigitizeEnd);
 	boost::python::def("SetDigitizeEnd", SetDigitizeEnd);
 	boost::python::def("GetDigitizeInters", GetDigitizeInters);
@@ -3372,10 +3456,12 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("GetStretchShift", GetStretchShift);
 	boost::python::def("GetAntialiasing", GetAntialiasing);
 	boost::python::def("SetAntialiasing", SetAntialiasing);
+	boost::python::def("TangentialArc", TangentialArc);
 	boost::python::scope().attr("OBJECT_TYPE_UNKNOWN") = (int)UnknownType;
 	boost::python::scope().attr("OBJECT_TYPE_SKETCH") = (int)SketchType;
 	boost::python::scope().attr("OBJECT_TYPE_SKETCH_LINE") = (int)LineType;
 	boost::python::scope().attr("OBJECT_TYPE_SKETCH_ARC") = (int)ArcType;
+	boost::python::scope().attr("OBJECT_TYPE_ILINE") = (int)ILineType;
 	boost::python::scope().attr("OBJECT_TYPE_CIRCLE") = (int)CircleType;
 	boost::python::scope().attr("OBJECT_TYPE_GRIPPER") = (int)GripperType;
 	boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;

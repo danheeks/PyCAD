@@ -61,8 +61,10 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 					for (TiXmlElement* faceElem = TiXmlHandle(subsubElem).FirstChildElement("face").Element(); faceElem; faceElem = faceElem->NextSiblingElement("face"))
 					{
 						int id = 0;
+						int col;
 						faceElem->Attribute("id", &id);
-						shape_data.m_face_ids.push_back(id);
+						faceElem->Attribute("color", &col);
+						shape_data.m_face_ids.push_back(CFaceData(id, col));
 					}
 
 					// get edge ids
@@ -169,12 +171,13 @@ void WriteSolids()
 				}
 
 				// write the face ids
-				for (std::list<int>::iterator It = shape_data.m_face_ids.begin(); It != shape_data.m_face_ids.end(); It++)
+				for (std::list<CFaceData>::iterator It = shape_data.m_face_ids.begin(); It != shape_data.m_face_ids.end(); It++)
 				{
-					int id = *It;
+					CFaceData &face_data = *It;
 					TiXmlElement *face_id_element = new TiXmlElement("face");
 					index_pair_element->LinkEndChild(face_id_element);
-					face_id_element->SetAttribute("id", id);
+					face_id_element->SetAttribute("id", face_data.m_id);
+					face_id_element->SetAttribute("color", face_data.m_color);
 				}
 
 				// write the edge ids

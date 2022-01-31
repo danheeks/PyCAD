@@ -690,7 +690,10 @@ void CFace::UpdateMarkingGLList(bool marked, bool no_color)
 			{
 				// use the parent body's colour
 				CShape* parent_body = GetParentBody();
-				if (parent_body)Material(parent_body->m_color).glMaterial(parent_body->GetOpacity());
+				if (parent_body)
+				{
+					Material(m_color).glMaterial(parent_body->GetOpacity());
+				}
 				else
 				{
 					Material().glMaterial(1.0);

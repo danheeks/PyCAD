@@ -114,6 +114,7 @@
     <ClCompile Include="dxf.cpp" />
     <ClCompile Include="EndedObject.cpp" />
     <ClCompile Include="ExtrudedObj.cpp" />
+    <ClCompile Include="Filter.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Gripper.cpp" />
     <ClCompile Include="GripperSelTransform.cpp" />

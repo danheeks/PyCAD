@@ -5,6 +5,7 @@
 #pragma once
 
 #include "HeeksObj.h"
+#include "HeeksColor.h"
 
 class CEdge;
 class CLoop;
@@ -24,6 +25,7 @@ private:
 	bool m_orientation;
 #endif
 	int m_marking_gl_list; // simply has material commands, inserted in the parent body's display list
+	HeeksColor m_color;
 
 public:
 	CBox m_box;
@@ -46,6 +48,8 @@ public:
 	const wchar_t* GetIconFilePath();
 	HeeksObj *MakeACopy(void)const{ return new CFace(*this);}
 	const wchar_t* GetTypeString(void)const{return L"Face";}
+	void SetColor(const HeeksColor &col){ m_color = col; }
+	const HeeksColor* GetColor()const{ return &m_color; }
 	void GetTriangles(void(*callbackfunc)(const double* x, const double* n), double cusp, bool just_one_average_normal = false);
 	double Area()const;
 	void Transform(const Matrix &m);
