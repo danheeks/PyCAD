@@ -15,7 +15,6 @@ private:
 	PointOrWindow *point_or_window;
 	DigitizedPoint lbutton_point;
 
-	DigitizedPoint digitize1(const IPoint &input_point);
 
 public:
 	DigitizedPoint digitized_point;
@@ -36,7 +35,8 @@ public:
 	void OnFrontRender();
 	void GetProperties(std::list<Property *> *list);
 
-	DigitizedPoint Digitize(const Line &ray);
+	static DigitizedPoint digitize1(const IPoint &input_point);
+	static DigitizedPoint Digitize(const Line &ray);
 	DigitizedPoint digitize(const IPoint &point);
 	void SetOnlyCoords(HeeksObj* object, bool onoff);
 	bool OnlyCoords(HeeksObj* object);

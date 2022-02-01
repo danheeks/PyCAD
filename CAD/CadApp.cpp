@@ -17,7 +17,6 @@
 #include "RemoveOrAddTool.h"
 #include "Observer.h"
 #include "Ruler.h"
-#include "RegularShapesDrawing.h"
 #include "HDxf.h"
 #include "HXml.h"
 #include "strconv.h"

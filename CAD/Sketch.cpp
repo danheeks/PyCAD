@@ -8,7 +8,6 @@
 #include "HArc.h"
 #include "CoordinateSystem.h"
 #include "DigitizeMode.h"
-#include "Drawing.h"
 #include "Property.h"
 #include "strconv.h"
 

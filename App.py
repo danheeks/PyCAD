@@ -20,6 +20,7 @@ import HImage
 from Ribbon import RB
 import Drawing
 import LineArcDrawing
+import DigitizeMode
 
 SKETCH_OP_UNION = 1
 SKETCH_OP_SUBTRACT = 2
@@ -65,6 +66,7 @@ class App(wx.App):
         self.bitmap_path = self.cad_dir + '/bitmaps'
         self.inMainLoop = False
         self.select_mode = SelectMode.SelectMode()
+        self.digitizing = DigitizeMode.DigitizeMode()
         self.coordsys_for_P3P = None
         self.paint_registered = False
         self.import_file_types = [
@@ -463,15 +465,20 @@ class App(wx.App):
         wx.MessageBox(s)
     
     def AddPointToDrawing(self):
-        cad.AddDrawingPoint()
+        # theApp->m_digitizing->digitized_point.m_type = DigitizeInputType;
+        #((Drawing*)(theApp->input_mode_object))->AddPoint();
+        pass
         
     def EndDrawing(self):
-        cad.EndDrawing()
+        if cad.GetInputMode().DragDoneWithXOR():
+            cad.EndDrawFront()
+        cad.GetInputMode().ClearObjectsMade()
+        cad.RestoreInputMode()
     
     def GetInputModeTools(self):
         tools = []
         input_mode_class = cad.GetInputMode().__class__
-        if input_mode_class == cad.LineArcDrawing:
+        if input_mode_class == LineArcDrawing.LineArcDrawing:
             tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
             tools.append(ToolBarTool.CadToolBarTool('Stop Drawing', 'enddraw', self.EndDrawing))
         
@@ -576,17 +583,16 @@ class App(wx.App):
         
     def PickPosition(self, title):
         save_mode = cad.GetInputMode()
-        digitizing = cad.GetDigitizing()
-        digitizing.wants_to_exit_main_loop = False
-        digitizing.prompt = title
-        cad.SetInputMode(digitizing)
+        self.digitizing.wants_to_exit_main_loop = False
+        self.digitizing.prompt = title
+        cad.SetInputMode(self.digitizing)
         
         self.OnRun()
 
         return_point = None
-        if digitizing.digitized_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
+        if self.digitizing.digitized_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             import geom
-            return_point = geom.Point3D(digitizing.digitized_point.point)
+            return_point = geom.Point3D(self.digitizing.digitized_point.point)
         cad.SetInputMode(save_mode);
         return return_point
         
@@ -1167,7 +1173,7 @@ class App(wx.App):
         pass
     
     def RenderCoordSys(self):
-        p = cad.GetDigitizing().digitized_point.point
+        p = self.digitizing.digitized_point.point
         if self.coord_render_mode == 0:
             self.coordsys_for_P3P.o = p
         elif self.coord_render_mode == 1:

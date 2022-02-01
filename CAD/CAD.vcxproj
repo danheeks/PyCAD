@@ -110,7 +110,6 @@
     <ClCompile Include="CoordinateSystem.cpp" />
     <ClCompile Include="DigitizedPoint.cpp" />
     <ClCompile Include="DigitizeMode.cpp" />
-    <ClCompile Include="Drawing.cpp" />
     <ClCompile Include="dxf.cpp" />
     <ClCompile Include="EndedObject.cpp" />
     <ClCompile Include="ExtrudedObj.cpp" />
@@ -134,7 +133,6 @@
     <ClCompile Include="IdNamedObj.cpp" />
     <ClCompile Include="IdNamedObjList.cpp" />
     <ClCompile Include="LeftAndRight.cpp" />
-    <ClCompile Include="LineArcDrawing.cpp" />
     <ClCompile Include="MagDragWindow.cpp" />
     <ClCompile Include="MarkedList.cpp" />
     <ClCompile Include="ObjList.cpp" />
@@ -145,7 +143,6 @@
     <ClCompile Include="PyBaseObject.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="PyWrapper.cpp" />
-    <ClCompile Include="RegularShapesDrawing.cpp" />
     <ClCompile Include="RemoveOrAddTool.cpp" />
     <ClCompile Include="Ruler.cpp" />
     <ClCompile Include="Sketch.cpp" />
@@ -189,7 +186,6 @@
     <ClInclude Include="CoordinateSystem.h" />
     <ClInclude Include="DigitizedPoint.h" />
     <ClInclude Include="DigitizeMode.h" />
-    <ClInclude Include="Drawing.h" />
     <ClInclude Include="dxf.h" />
     <ClInclude Include="EndedObject.h" />
     <ClInclude Include="ExtrudedObj.h" />
@@ -219,7 +215,6 @@
     <ClInclude Include="IPoint.h" />
     <ClInclude Include="KeyCode.h" />
     <ClInclude Include="LeftAndRight.h" />
-    <ClInclude Include="LineArcDrawing.h" />
     <ClInclude Include="MagDragWindow.h" />
     <ClInclude Include="MarkedList.h" />
     <ClInclude Include="Material.h" />
@@ -232,7 +227,6 @@
     <ClInclude Include="PropertyChange.h" />
     <ClInclude Include="PyBaseObject.h" />
     <ClInclude Include="PyWrapper.h" />
-    <ClInclude Include="RegularShapesDrawing.h" />
     <ClInclude Include="RemoveOrAddTool.h" />
     <ClInclude Include="Ruler.h" />
     <ClInclude Include="Sketch.h" />

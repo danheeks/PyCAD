@@ -6,7 +6,6 @@
 #include "MarkedList.h"
 #include "CoordinateSystem.h"
 #include "DigitizeMode.h"
-#include "Drawing.h"
 #include "PointOrWindow.h"
 #include "Viewport.h"
 #include "GripData.h"
@@ -188,9 +187,13 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	std::list<DigitizedPoint> compare_list;
 	std::list<HeeksObj*> objects;
 	if(theApp->digitize_end || theApp->digitize_inters || theApp->digitize_centre || theApp->digitize_midpoint || theApp->digitize_nearest || theApp->digitize_tangent){
-		point_or_window->SetWithPoint(input_point);
+		IRect box;
+		box.x = input_point.x - 5;
+		box.y = input_point.y - 5;
+		box.width = 10;
+		box.height = 10;
 		theApp->m_marked_list->ignore_coords_only = true;
-		theApp->ColorPickLowestObjects(point_or_window->box_chosen, false, objects);
+		theApp->ColorPickLowestObjects(box, false, objects);
 		theApp->m_marked_list->ignore_coords_only = false;
 	}
 	if(theApp->digitize_end){

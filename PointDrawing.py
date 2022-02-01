@@ -1,20 +1,21 @@
 import cad
+from Drawing import Drawing
 
-class PointDrawing(cad.Drawing):
+class PointDrawing(Drawing):
     def __init__(self):
-        cad.Drawing.__init__(self)
+        Drawing.__init__(self)
         
     # cad.InputMode's overridden method
     def GetTitle(self):
         return "Point drawing"
-    
-    def IsAnAddLevel(self, level):
-        return True
-    
-    def NumberOfSteps(self):
+
+    def number_of_steps(self):
         return 1
+    
+    def is_an_add_level(self, level):
+        return True
         
-    def CalculateItem(self, end):
+    def calculate_item(self, end):
         if end.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             return False
 

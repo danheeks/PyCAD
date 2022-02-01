@@ -76,7 +76,7 @@ class SelectMode(cad.InputMode):
                         self.drag_gripper = object
                         self.drag_gripper.__class__ = cad.Gripper
                         self.grip_from = cad.Digitize(self.button_down_point)
-                        self.grip_to = geom.Point3D(self.grip_from)
+                        self.grip_to = cad.DigitizedPoint(self.grip_from)
                         self.drag_gripper.OnGripperGrabbed(True, self.grip_from)
                         wx.GetApp().GetViewport().EndDrawFront()
                         break
@@ -124,7 +124,7 @@ class SelectMode(cad.InputMode):
             elif event.leftDown:
                 if self.drag_gripper != None:
                     to = cad.Digitize(cad.IPoint(event.x, event.y))
-                    self.drag_gripper.OnGripperMoved(self.grip_from, to)                    
+                    self.drag_gripper.OnGripperMoved(self.grip_from.point, to.point)                    
                 elif self.button_down_point != None and (abs(self.button_down_point.x - event.x) > 2 or abs(self.button_down_point.y - event.y) > 2):
                     if self.dragging_moves_objects and self.window_box == None:
                         selected_objects_dragged = []

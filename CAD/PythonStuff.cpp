@@ -41,7 +41,6 @@
 #include "ViewRotating.h"
 #include "ViewZooming.h"
 #include "ViewPanning.h"
-#include "LineArcDrawing.h"
 #include "ConversionTools.h"
 #include "PyWrapper.h"
 #include "PyBaseObject.h"
@@ -51,7 +50,6 @@
 #include "GripperSelTransform.h"
 #include "CoordinateSystem.h"
 #include "Filter.h"
-#include "RegularShapesDrawing.h"
 
 void OnExit()
 {
@@ -218,6 +216,11 @@ public:
 		CallVoidReturn("OnMouse", event);
 	}
 
+	void OnModeChange(void)
+	{
+		CallVoidReturn("OnModeChange");
+	}
+
 	void OnFrontRender()
 	{
 		CallVoidReturn("OnFrontRender");
@@ -226,74 +229,6 @@ public:
 	void OnRender()
 	{
 		CallVoidReturn("OnRender");
-	}
-
-};
-
-class DrawingWrap : public Drawing, public cad_wrapper<Drawing>
-{
-public:
-	DrawingWrap() :Drawing(){}
-
-	void AddPoint()override
-	{
-		if (boost::python::override f = this->get_override("AddPoint"))
-		{
-			f();
-		}
-		else
-			Drawing::AddPoint();
-	}
-
-	bool calculate_item(DigitizedPoint &end)override
-	{
-		if (boost::python::override f = this->get_override("CalculateItem"))
-		{
-			bool result = f(end);
-			return result;
-		}
-		else
-			return Drawing::calculate_item(end);
-	}
-
-	bool is_an_add_level(int level)override
-	{
-		if (boost::python::override f = this->get_override("IsAnAddLevel"))
-		{
-			bool result = f(level);
-			return result;
-		}
-		return Drawing::is_an_add_level(level);
-	}
-
-	int number_of_steps()override
-	{
-		if (boost::python::override f = this->get_override("NumberOfSteps"))
-		{
-			int result = f();
-			return result;
-		}
-		return Drawing::number_of_steps();
-	}
-
-	HeeksObj* GetOwnerForDrawingObjects()override
-	{
-		std::pair<bool, HeeksObj*> result = CallReturnHeeksObj("GetOwnerForDrawingObjects");
-		if (result.first)
-			return result.second;
-		return Drawing::GetOwnerForDrawingObjects();
-	}
-
-	HeeksObj* TempObject(){
-		return Drawing::TempObject();
-	}
-
-	void ClearObjectsMade(){
-		Drawing::ClearObjectsMade();
-	}
-
-	void AddToTempObjects(HeeksObj* object){
-		return Drawing::AddToTempObjects(object);
 	}
 
 };
@@ -698,74 +633,6 @@ CInputMode* GetInputMode()
 void RestoreInputMode()
 {
 	return theApp->RestoreInputMode();
-}
-
-void SetLineArcDrawing()
-{
-	line_strip.drawing_mode = LineDrawingMode;
-	theApp->SetInputMode(&line_strip);
-}
-
-LineArcDrawing* GetLineArcDrawing()
-{
-	return &line_strip;
-}
-
-bool IsInputModeLineArc()
-{
-	return theApp->input_mode_object == &line_strip;
-}
-
-void AddDrawingPoint()
-{
-	theApp->m_digitizing->digitized_point.m_type = DigitizeInputType;
-	((Drawing*)(theApp->input_mode_object))->AddPoint();
-
-}
-
-void SetCircles3pDrawing()
-{
-	line_strip.drawing_mode = CircleDrawingMode;
-	line_strip.circle_mode = ThreePointsCircleMode;
-	theApp->SetInputMode(&line_strip);
-}
-
-void SetCircles2pDrawing()
-{
-	line_strip.drawing_mode = CircleDrawingMode;
-	line_strip.circle_mode = CentreAndPointCircleMode;
-	theApp->SetInputMode(&line_strip);
-}
-
-void SetCircle1pDrawing()
-{
-	line_strip.drawing_mode = CircleDrawingMode;
-	line_strip.circle_mode = CentreAndRadiusCircleMode;
-	theApp->SetInputMode(&line_strip);
-}
-
-void SetILineDrawing()
-{
-	line_strip.drawing_mode = ILineDrawingMode;
-	theApp->SetInputMode(&line_strip);
-}
-
-void SetRectanglesDrawing()
-{
-	regular_shapes_drawing.m_mode = RectanglesRegularShapeMode;
-	theApp->SetInputMode(&regular_shapes_drawing);
-}
-
-void SetObroundsDrawing()
-{
-	regular_shapes_drawing.m_mode = ObroundRegularShapeMode;
-	theApp->SetInputMode(&regular_shapes_drawing);
-}
-
-void SetPolygonsDrawing()
-{
-	regular_shapes_drawing.m_mode = PolygonsRegularShapeMode;
-	theApp->SetInputMode(&regular_shapes_drawing);
 }
 
 HeeksObj* NewPoint(const Point3d& p)
@@ -2249,16 +2116,6 @@ bool CanRedo()
 	return theApp->CanRedo();
 }
 
-void EndDrawing()
-{
-	if(((Drawing*)(theApp->input_mode_object))->DragDoneWithXOR())
-		theApp->m_current_viewport->EndDrawFront();
-
-	((Drawing*)(theApp->input_mode_object))->ClearObjectsMade();
-
-	theApp->RestoreInputMode();
-}
-
 boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool one_of_each, const CFilter &filter, bool just_top_level)
 {
 	window.MakePositive();
@@ -2276,7 +2133,7 @@ boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool
 
 DigitizedPoint Digitize(IPoint point)
 {
-	return theApp->m_digitizing->digitize(point);
+	return DigitizeMode::digitize1(point);
 }
 
 DigitizedPoint GetLastDigitizePoint()
@@ -3240,18 +3097,6 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("GetObject1", &DigitizedPointGetObject1, boost::python::return_value_policy<boost::python::reference_existing_object>())
 		;
 
-	boost::python::class_<DrawingWrap, boost::python::bases<CInputMode>, boost::noncopyable >("Drawing")
-		.def(boost::python::init<DrawingWrap>())
-		.def("AddPoint", &Drawing::AddPoint)
-		.def("CalculateItem", &DrawingWrap::calculate_item)
-		.def("IsAnAddLevel", &DrawingWrap::is_an_add_level)
-		.def("NumberOfSteps", &DrawingWrap::number_of_steps)
-		.def("TempObject", &DrawingWrap::TempObject, boost::python::return_value_policy<boost::python::reference_existing_object>())
-		.def("ClearObjectsMade", &DrawingWrap::ClearObjectsMade)
-		.def("AddToTempObjects", &DrawingWrap::AddToTempObjects)
-		;
-	boost::python::class_<LineArcDrawing, boost::python::bases<Drawing> >("LineArcDrawing", boost::python::no_init);
-
 	boost::python::def("OnExit", OnExit);
 	boost::python::def("Reset", CadReset);
 	boost::python::def("OpenFile", CadOpenFile);
@@ -3371,19 +3216,8 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("SetInputMode", SetInputMode);
 	boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("RestoreInputMode", RestoreInputMode);
-	boost::python::def("SetLineArcDrawing", SetLineArcDrawing);
-	boost::python::def("GetLineArcDrawing", GetLineArcDrawing, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("GetDragGripper", GetDragGripper, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("AddGripper", AddGripper);
-	boost::python::def("IsInputModeLineArc", IsInputModeLineArc);
-	boost::python::def("AddDrawingPoint", AddDrawingPoint);
-	boost::python::def("SetCircles3pDrawing", SetCircles3pDrawing);
-	boost::python::def("SetCircles2pDrawing", SetCircles2pDrawing);
-	boost::python::def("SetCircle1pDrawing", SetCircle1pDrawing);
-	boost::python::def("SetILineDrawing", SetILineDrawing);
-	boost::python::def("SetRectanglesDrawing", SetRectanglesDrawing);
-	boost::python::def("SetObroundsDrawing", SetObroundsDrawing);
-	boost::python::def("SetPolygonsDrawing", SetPolygonsDrawing);
 	boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("NewLine", NewLine, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("NewArc", NewArc, boost::python::return_value_policy<boost::python::reference_existing_object>());
@@ -3397,7 +3231,6 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("GetDrawMarked", GetDrawMarked);
 	boost::python::def("CanUndo", CanUndo);
 	boost::python::def("CanRedo", CanRedo);
-	boost::python::def("EndDrawing", EndDrawing);
 	boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
 	boost::python::def("Digitize", Digitize);
 	boost::python::def("GetLastDigitizePoint", GetLastDigitizePoint);

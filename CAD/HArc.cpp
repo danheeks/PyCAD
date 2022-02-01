@@ -12,7 +12,6 @@
 #include "tinyxml.h"
 #include "Gripper.h"
 #include "Sketch.h"
-#include "Drawing.h"
 #include "DigitizeMode.h"
 #include "Property.h"
 

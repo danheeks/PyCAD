@@ -11,7 +11,6 @@
 #include "Gripper.h"
 #include "Sketch.h"
 #include "DigitizeMode.h"
-#include "Drawing.h"
 #include "HPoint.h"
 #include "Property.h"
 
