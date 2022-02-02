@@ -39,11 +39,6 @@ class HRuler;
 class Property;
 class Observer;
 class MainHistory;
-class MagDragWindow;
-class ViewRotating;
-class ViewZooming;
-class ViewPanning;
-class DigitizeMode;
 class MarkedList;
 class GripperMode;
 class Gripper;
@@ -79,7 +74,6 @@ public:
 	CCadApp();
 	~CCadApp();
 
-	IPoint cur_mouse_pos;
 	HeeksColor current_color;
 #define NUM_BACKGROUND_COLORS 10
 	HeeksColor background_color[NUM_BACKGROUND_COLORS];
@@ -104,12 +98,6 @@ public:
 	bool m_svg_unite;
 
 	CoordinateSystem *m_current_coordinate_system;
-	CInputMode *input_mode_object;
-	MagDragWindow *magnification;
-	ViewRotating *viewrotating;
-	ViewZooming *viewzooming;
-	ViewPanning *viewpanning;
-	DigitizeMode *m_digitizing;
 	GripperMode* gripper_mode;
 	int grid_mode;
 	Gripper *drag_gripper;
@@ -130,7 +118,6 @@ public:
 	bool m_in_OpenFile;
 	bool m_mark_newly_added_objects;
 	std::wstring m_version_number;
-	std::list< void(*)(MouseEvent&) > m_lbutton_up_callbacks;
 	std::list< bool(*)() > m_is_modified_callbacks;
 	std::list< void(*)() > m_on_build_texture_callbacks;
 	std::list< void(*)(int, int) > m_beforeneworopen_callbacks;
@@ -186,8 +173,6 @@ public:
 	void OnExit();
 	void CreateLights(void);
 	void DestroyLights(void);
-	void SetInputMode(CInputMode *i);
-	void RestoreInputMode();
 	virtual void Repaint(bool soon = false);
 	void RecalculateGLLists();
 	void SetLikeNewFile(void);
@@ -302,8 +287,6 @@ public:
 	void render_screen_text_at(const wchar_t* str1, double scale, double x, double y, double theta);
 	void OnInputModeTitleChanged();
 	void OnInputModeHelpTextChanged();
-	void RefreshInputCanvas();
-	CInputMode* GetInputMode(){ return input_mode_object; }
 	void PlotSetColor(const HeeksColor &c);
 	void PlotLine(const double* s, const double* e);
 	void PlotArc(const double* s, const double* e, const double* c);
@@ -329,10 +312,6 @@ public:
 	void LinkXMLEndChild(TiXmlNode* root, TiXmlElement* pElem);
 	TiXmlElement* FirstNamedXMLChildElement(TiXmlElement* pElem, const char* name);
 	void RemoveXMLChild(TiXmlNode* pElem, TiXmlElement* child);
-	DigitizedPoint& Digitize(const IPoint&);
-	const DigitizedPoint& GetLastDigitizePoint();
-	void SetLastDigitizedPoint(const DigitizedPoint&);
-	void UseDigitiedPointAsReference();
 	void ObjectAreaString(HeeksObj* object, std::wstring &s);
 	void SetViewUnits(double units, bool write_to_config);
 	virtual void ClearSelection(bool call_OnChanged);
@@ -354,8 +333,6 @@ public:
 	HeeksObj* CreateNewPoint(const Point3d& p);
 	HeeksObj* CreateNewSketch();
 	const HeeksColor& GetCurrentColor(){ return current_color; }
-	void DrawFront();
-	void EndDrawFront();
 	HeeksObj* GetObjPointer();
 	ObjList* GetObjListPointer();
 	std::list<HeeksObj *> GetXmlWriteChildren();

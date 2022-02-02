@@ -3,10 +3,11 @@ import geom
 from LeftAndRight import LeftAndRight
 import wx
 import math
+from InputMode import InputMode
 
-class Drawing(cad.InputMode):
+class Drawing(InputMode):
     def __init__(self):
-        cad.InputMode.__init__(self)
+        InputMode.__init__(self)
         self.left_and_right = LeftAndRight()
         self.temp_object_in_list = []
         self.prev_object = None
@@ -16,27 +17,19 @@ class Drawing(cad.InputMode):
         self.draw_step = 0
         self.start_pos = None
         
-    # cad.InputMode's overridden method
     def GetTitle(self):
         return 'Drawing'
-    
-    def GetHelpText(self):
-        return ''
     
     def DragDoneWithXOR(self):
         return True
 
             
     def OnMouse(self, event):
-        if event.controlDown:
-            wx.GetApp().select_mode.OnMouse(event)
-            return                    
-
         left_and_right_pressed, event_used = self.left_and_right.LeftAndRightPressed(event)
         
         if left_and_right_pressed:
             if self.DragDoneWithXOR():
-                wx.GetApp().GetViewport().EndDrawFront()
+                wx.GetApp().EndDrawFront()
             self.ClearObjectsMade()
             cad.RestoreInputMode()
 
@@ -52,7 +45,7 @@ class Drawing(cad.InputMode):
                         self.inhibit_coordinate_change = False
                     else:
                         self.set_digitize_plane()
-                        cad.SetLastDigitizedPoint(self.button_down_point)
+                        wx.GetApp().digitizing.digitized_point = self.button_down_point
                         if self.getting_position:
                             self.inhibit_coordinate_change = True
                             self.getting_position = False
@@ -102,7 +95,7 @@ class Drawing(cad.InputMode):
         # kill focus on control being typed into
         # theApp->m_frame->m_input_canvas->DeselectProperties();
         # theApp->ProcessPendingEvents();
-        d = cad.GetLastDigitizePoint()
+        d = wx.GetApp().digitizing.digitized_point
         if d.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             return 
         calculated = False
@@ -117,7 +110,7 @@ class Drawing(cad.InputMode):
                 
         self.ClearObjectsMade()
         self.SetStartPosUndoable(d)
-        cad.UseDigitiedPointAsReference()
+        #cad.UseDigitiedPointAsReference()
         
         next_step = self.draw_step + 1
         if next_step >= self.number_of_steps():
@@ -140,15 +133,15 @@ class Drawing(cad.InputMode):
                 
     def RecalculateAndRedraw(self, point):
         self.set_digitize_plane()
-        cad.Digitize(point)
-        end = cad.GetLastDigitizePoint()
+        
+        end = wx.GetApp().digitizing.digitized_point
         if end.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             return 
         if self.is_a_draw_level(self.draw_step):
             if self.DragDoneWithXOR():
-                wx.GetApp().GetViewport().EndDrawFront()
+                wx.GetApp().EndDrawFront()
             self.calculate_item(end)
-            if self.DragDoneWithXOR():wx.GetApp().GetViewport().DrawFront()
+            if self.DragDoneWithXOR():wx.GetApp().DrawFront()
             else: cad.Repaint(True)
             
     def SetDrawStepUndoable(self, s):
@@ -164,15 +157,12 @@ class Drawing(cad.InputMode):
     def OnKeyDown(self, key_code):
         if key_code == cad.KeyCode.F1 or key_code == cad.KeyCode.Return or key_code == cad.KeyCode.Escape:
             self.ClearObjectsMade()
-            cad.RestoreInputMode()
+            self.RestoreInputMode()
             return True
         return False
 
-    def OnKeyUp(self, key_code):
-        return False 
-    
     def OnModeChange(self):
-        if not cad.GetInputMode().IsDrawing():
+        if not isinstance(wx.GetApp().input_mode_object, Drawing):
             self.SetDrawStepUndoable(0)
             
     def GetOwnerForDrawingObjects(self):
@@ -585,14 +575,14 @@ regular_shapes_drawing = RegularShapesDrawing()
 def SetRectanglesDrawing():
     global regular_shapes_drawing
     regular_shapes_drawing.mode = RectanglesRegularShapeMode
-    cad.SetInputMode(regular_shapes_drawing)    
+    wx.GetApp().SetInputMode(regular_shapes_drawing)    
     
 def SetObroundsDrawing():
     global regular_shapes_drawing
     regular_shapes_drawing.mode = ObroundRegularShapeMode
-    cad.SetInputMode(regular_shapes_drawing)    
+    wx.GetApp().SetInputMode(regular_shapes_drawing)    
     
 def SetPolygonsDrawing():
     global regular_shapes_drawing
     regular_shapes_drawing.mode = PolygonsRegularShapeMode
-    cad.SetInputMode(regular_shapes_drawing)
+    wx.GetApp().SetInputMode(regular_shapes_drawing)

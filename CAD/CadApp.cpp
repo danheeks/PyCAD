@@ -70,16 +70,12 @@ CCadApp::CCadApp()
 	background_color[1] = HeeksColor(181, 230, 29);
 	m_background_mode = BackgroundModeTwoColors;
 	current_color = HeeksColor(0, 0, 0);
-	input_mode_object = NULL;
-	cur_mouse_pos = IPoint(0, 0);
 	drag_gripper = NULL;
 	cursor_gripper = NULL;
-	magnification = new MagDragWindow();
-	viewrotating = new ViewRotating;
-	viewzooming = new ViewZooming;
-	viewpanning = new ViewPanning;
-	//m_select_mode = new CSelectMode();
-	m_digitizing = new DigitizeMode();
+	//magnification = new MagDragWindow();
+	//viewrotating = new ViewRotating;
+	//viewzooming = new ViewZooming;
+	//viewpanning = new ViewPanning;
 	digitize_end = false;
 	digitize_inters = false;
 	digitize_centre = false;
@@ -88,8 +84,8 @@ CCadApp::CCadApp()
 	digitize_tangent = false;
 	digitize_coords = true;
 	digitize_screen = false;
-	digitizing_radius = 5.0;
 	draw_to_grid = true;
+	digitizing_radius = 5.0;
 	digitizing_grid = 1.0;
 	grid_mode = 3;
 	m_rotate_mode = 1;
@@ -149,11 +145,6 @@ CCadApp::~CCadApp()
 	m_marked_list = NULL;
 	observers.clear();
 	delete history;
-	delete magnification;
-	delete m_digitizing;
-	delete viewrotating;
-	delete viewzooming;
-	delete viewpanning;
 	m_ruler->m_index = 0;
 	delete m_ruler;
 }
@@ -161,35 +152,6 @@ CCadApp::~CCadApp()
 void CCadApp::OnExit(){
 	delete history;
 	history = NULL;
-}
-
-extern void PythonOnSetInputMode();
-
-void CCadApp::SetInputMode(CInputMode *new_mode){
-	if(!new_mode)return;
-
-	m_previous_input_mode = input_mode_object;
-	new_mode->OnModeChange();
-	input_mode_object = new_mode;
-
-	RefreshInputCanvas();
-}
-
-void CCadApp::RestoreInputMode()
-{
-	if (m_previous_input_mode)
-	{
-		m_previous_input_mode->OnModeChange();
-		input_mode_object = m_previous_input_mode;
-		RefreshInputCanvas();
-		Repaint();
-		m_previous_input_mode = NULL;
-	}
-}
-
-void CCadApp::RefreshInputCanvas()
-{
-	PythonOnSetInputMode();
 }
 
 void CCadApp::CreateLights(void)
@@ -253,7 +215,6 @@ void CCadApp::Reset(){
 	m_show_grippers_on_drag = true;
 	if (m_ruler)delete m_ruler;
 	m_ruler = new HRuler();
-	RestoreInputMode();
 
 	ResetIDs();
 }
@@ -1295,7 +1256,6 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 	PythonOnGLCommands();
 	glEnable(GL_POLYGON_OFFSET_FILL);
 
-	input_mode_object->OnRender();
 	if (m_transform_gl_list)
 	{
 		glPushMatrix();
@@ -1325,27 +1285,6 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	if (m_hidden_for_drag.size() == 0 || !m_show_grippers_on_drag)m_marked_list->GrippersGLCommands(false, false);
-
-	// draw the input mode text on the top
-	if (m_graphics_text_mode != GraphicsTextModeNone)
-	{
-		std::wstring screen_text1, screen_text2;
-
-		if (input_mode_object && input_mode_object->GetTitle())
-		{
-			screen_text1.append(input_mode_object->GetTitle());
-			screen_text1.append(L"\n");
-		}
-		if (m_graphics_text_mode == GraphicsTextModeWithHelp && input_mode_object)
-		{
-			const wchar_t* help_str = input_mode_object->GetHelpText();
-			if (help_str)
-			{
-				screen_text2.append(help_str);
-			}
-		}
-		render_screen_text(screen_text1.c_str(), screen_text2.c_str());
-	}
 }
 
 void CCadApp::OnInputModeTitleChanged()
@@ -1785,9 +1724,6 @@ void CCadApp::DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth
 {
 	m_current_viewport->DrawObjectsOnFront(list, do_depth_testing);
 }
-
-CInputMode* CCadApp::GetDigitizing(){ return m_digitizing; }
-
 
 extern void PythonOnMessageBox(const wchar_t* message);
 
@@ -2567,40 +2503,6 @@ HeeksObj* CCadApp::CreateNewArc(const Point3d& s, const Point3d& e, const Point3
 HeeksObj* CCadApp::CreateNewCircle(const Point3d& c, const Point3d& a, double r){ return new HCircle(c, a, r, &current_color); }
 HeeksObj* CCadApp::CreateNewPoint(const Point3d& p){ return new HPoint(p, &current_color); }
 HeeksObj* CCadApp::CreateNewSketch(){ return new CSketch(); }
-
-void CCadApp::DrawFront()
-{
-	m_current_viewport->DrawFront();
-}
-
-void CCadApp::EndDrawFront()
-{
-	m_current_viewport->EndDrawFront();
-}
-
-static DigitizedPoint digitized_point_for_return;
-
-DigitizedPoint& CCadApp::Digitize(const IPoint& p)
-{
-	digitized_point_for_return = m_digitizing->digitize(p);
-	return digitized_point_for_return;
-}
-
-const DigitizedPoint& CCadApp::GetLastDigitizePoint()
-{
-	digitized_point_for_return = m_digitizing->digitized_point;
-	return digitized_point_for_return;
-}
-
-void CCadApp::SetLastDigitizedPoint(const DigitizedPoint& p)
-{
-	m_digitizing->digitized_point = p;
-}
-
-void CCadApp::UseDigitiedPointAsReference()
-{
-	m_digitizing->reference_point = m_digitizing->digitized_point;
-}
 
 HeeksObj* CCadApp::GetObjPointer()
 {

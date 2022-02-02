@@ -86,7 +86,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\CAD\DigitizedPoint.cpp" />
-    <ClCompile Include="..\CAD\Drawing.cpp" />
     <ClCompile Include="..\CAD\EndedObject.cpp" />
     <ClCompile Include="..\CAD\HeeksColor.cpp" />
     <ClCompile Include="..\CAD\HeeksObj.cpp" />
@@ -161,7 +160,6 @@
     <ClInclude Include="..\..\PyCAD\Geom\Curve.h" />
     <ClInclude Include="..\..\PyCAD\Geom\Point.h" />
     <ClInclude Include="..\CAD\DigitizedPoint.h" />
-    <ClInclude Include="..\CAD\Drawing.h" />
     <ClInclude Include="..\CAD\EndedObject.h" />
     <ClInclude Include="..\CAD\IdNamedObjList.h" />
     <ClInclude Include="..\CAD\LeftAndRight.h" />

@@ -16,117 +16,6 @@
 #include "HILine.h"
 #include "../Geom/Geom.h"
 
-DigitizeMode::DigitizeMode(){
-	point_or_window = new PointOrWindow(false);
-	wants_to_exit_main_loop = false;
-}
-
-DigitizeMode::~DigitizeMode(void){
-	delete point_or_window;
-}
-
-static std::wstring digitize_title_coords_string;
-
-const wchar_t* DigitizeMode::GetTitle()
-{
-	{
-		digitize_title_coords_string = prompt;
-		std::wstring xy_str;
-		digitize_title_coords_string.append(L"\n");
-
-		if (fabs(digitized_point.m_point.z) < 0.00000001)
-		{
-			wchar_t buf[256];
-			swprintf(buf, 256, L"X%g Y%g", digitized_point.m_point.x, digitized_point.m_point.y);
-			digitize_title_coords_string += buf;
-		}
-		else if (fabs(digitized_point.m_point.y) < 0.00000001)
-		{
-			wchar_t buf[256];
-			swprintf(buf, 256, L"X%g Z%g", digitized_point.m_point.x, digitized_point.m_point.z);
-			digitize_title_coords_string += buf;
-		}
-		else if (fabs(digitized_point.m_point.x) < 0.00000001)
-		{
-			wchar_t buf[256];
-			swprintf(buf, 256, L"Y%g Z%g", digitized_point.m_point.y, digitized_point.m_point.z);
-			digitize_title_coords_string += buf;
-		}
-		else
-		{
-			wchar_t buf[256];
-			swprintf(buf, 256, L"X%g Y%g Z%g", digitized_point.m_point.x, digitized_point.m_point.y, digitized_point.m_point.z);
-			digitize_title_coords_string += buf;
-		}
-
-		const wchar_t* type_str = NULL;
-		switch(digitized_point.m_type)
-		{
-		case DigitizeEndofType:
-			type_str = L"end";
-			break;
-		case DigitizeIntersType:
-			type_str = L"intersection";
-			break;
-		case DigitizeMidpointType:
-			type_str = L"midpoint";
-			break;
-		case DigitizeCentreType:
-			type_str = L"centre";
-			break;
-		case DigitizeScreenType:
-			type_str = L"screen";
-			break;
-		case DigitizeNearestType:
-			type_str = L"nearest";
-			break;
-		case DigitizeTangentType:
-			type_str = L"tangent";
-			break;
-		default:
-			break;
-		}
-
-		if(type_str)
-		{
-			digitize_title_coords_string.append(L" (");
-			digitize_title_coords_string.append(type_str);
-			digitize_title_coords_string.append(L")");
-		}
-
-		return digitize_title_coords_string.c_str();
-	}
-	return L"Digitize Mode";
-}
-
-static std::wstring digitize_help_text;
-
-const wchar_t* DigitizeMode::GetHelpText()
-{
-	digitize_help_text.assign(L"Press Esc key to cancel");
-	digitize_help_text.append(L"\n");
-	digitize_help_text.append(L"Left button to accept position");
-	return digitize_help_text.c_str();
-}
-
-void DigitizeMode::OnMouse( MouseEvent& event ){
-	if(event.LeftDown()){
-		point_or_window->OnMouse(event);
-		lbutton_point = digitize(IPoint(event.GetX(), event.GetY()));
-	}
-	else if(event.LeftUp()){
-		if(lbutton_point.m_type != DigitizeNoItemType){
-			digitized_point = lbutton_point;
-			wants_to_exit_main_loop = true;
-		}
-	}
-	else if(event.Moving()){
-		digitize(IPoint(event.GetX(), event.GetY()));
-		point_or_window->OnMouse(event);
-		theApp->RefreshInputCanvas();
-		theApp->OnInputModeTitleChanged();
-	}
-}
 
 static Matrix global_matrix_relative_to_screen;
 
@@ -148,12 +37,6 @@ static const Matrix& digitizing_matrix(bool calculate = false){
 		}
 	}
 	return global_matrix_relative_to_screen;
-}
-
-void DigitizeMode::OnModeChange(void){
-	point_or_window->reset();
-	point_or_window->OnModeChange();
-	digitize(theApp->cur_mouse_pos);
 }
 
 bool make_point_from_doubles(const std::list<double> &dlist, std::list<double>::const_iterator &It, Point3d& pnt, bool four_doubles = false)
@@ -182,7 +65,7 @@ int convert_doubles_to_pnts(const std::list<double> &dlist, std::list<Point3d> &
 	return nump;
 }
 
-DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
+DigitizedPoint digitize1(const IPoint &input_point){
 	Line ray = theApp->m_current_viewport->m_view_point.SightLine(input_point);
 	std::list<DigitizedPoint> compare_list;
 	std::list<HeeksObj*> objects;
@@ -323,7 +206,7 @@ DigitizedPoint DigitizeMode::digitize1(const IPoint &input_point){
 	return point;
 }
 
-DigitizedPoint DigitizeMode::Digitize(const Line &ray){
+DigitizedPoint Digitize(const Line &ray){
 	Plane pl(Point3d(0, 0, 0), Point3d(0, 0, 1));
 	pl.Transform(digitizing_matrix(true));
 	Point3d pnt;
@@ -361,18 +244,15 @@ DigitizedPoint DigitizeMode::Digitize(const Line &ray){
 	return point;
 }
 
-DigitizedPoint DigitizeMode::digitize(const IPoint &point){
-	digitized_point = digitize1(point);
-	return digitized_point;
-}
+#if 0
 
-void DigitizeMode::OnFrontRender(){
-	point_or_window->OnFrontRender();
-}
+// to do transfre this to python
 
 void DigitizeMode::GetProperties(std::list<Property *> *list){
 	PropertyPnt(list, NULL, &digitized_point.m_point);
 }
+
+#endif
 
 
 #if 1
@@ -432,8 +312,7 @@ static bool PointOrLineToCircle(PointLineOrCircle &plc)
 }
 #endif
 
-// static member function
-bool DigitizeMode::GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint& d2, Point3d &P1, Point3d &P2)
+bool GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint& d2, Point3d &P1, Point3d &P2)
 {
 	// calculate tangent points
 	P1 = d1.m_point;
@@ -462,8 +341,7 @@ bool DigitizeMode::GetLinePoints(const DigitizedPoint& d1, const DigitizedPoint&
 	return false;
 }
 
-// static member function
-bool DigitizeMode::GetArcPoints(const DigitizedPoint& d1, const Point3d *initial_direction, const DigitizedPoint& d2, Point3d &P1, Point3d &P2, Point3d &centre, Point3d &axis)
+bool GetArcPoints(const DigitizedPoint& d1, const Point3d *initial_direction, const DigitizedPoint& d2, Point3d &P1, Point3d &P2, Point3d &centre, Point3d &axis)
 {
 	// calculate tangent points
 	P1 = d1.m_point;
@@ -526,7 +404,7 @@ bool DigitizeMode::GetArcPoints(const DigitizedPoint& d1, const Point3d *initial
 
 
 
-bool DigitizeMode::GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, Circle& c)
+bool GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2, Circle& c)
 {
 	Point3d v = d2.m_point - d1.m_point;
 	double d = d2.m_point.Dist(d1.m_point);
@@ -536,116 +414,7 @@ bool DigitizeMode::GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoi
 	return true;
 }
 
-#if 0
-bool DigitizeMode::GetCubicSpline(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, const DigitizedPoint& d4, Handle_Geom_BSplineCurve &spline)
-{
-	Point3d s = d1.m_point;
-	Point3d e = d2.m_point;
-	Point3d c1 = d3.m_point;
-	Point3d c2 = d4.m_point;
-
-	TColgp_Array1OfPnt poles(1, 4);
-	poles.SetValue(1, s); poles.SetValue(2, c1); poles.SetValue(3, c2); poles.SetValue(4, e);
-#ifdef _DEBUG
-#undef new
-#endif
-	Handle(Geom_BezierCurve) curve = new Geom_BezierCurve(poles);
-#ifdef _DEBUG
-#define new  WXDEBUG_NEW
-#endif
-	GeomConvert_CompCurveToBSplineCurve convert(curve);
-
-	spline = convert.BSplineCurve();
-	return true;
-}
-
-bool DigitizeMode::GetQuarticSpline(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Handle_Geom_BSplineCurve &spline)
-{
-	Point3d s = d1.m_point;
-	Point3d e = d2.m_point;
-	Point3d c = d3.m_point;
-	TColgp_Array1OfPnt poles(1, 3);
-	poles.SetValue(1, s); poles.SetValue(2, c); poles.SetValue(3, e);
-#ifdef _DEBUG
-#undef new
-#endif
-	Handle(Geom_BezierCurve) curve = new Geom_BezierCurve(poles);
-#ifdef _DEBUG
-#define new  WXDEBUG_NEW
-#endif
-	GeomConvert_CompCurveToBSplineCurve convert(curve);
-
-	spline = convert.BSplineCurve();
-
-	return true;
-}
-
-bool DigitizeMode::GetRationalSpline(std::list<DigitizedPoint> &spline_points, const DigitizedPoint& d4, Handle_Geom_BSplineCurve &spline)
-{
-	TColgp_Array1OfPnt poles(1, spline_points.size() + 1);
-	int idx = 1;
-	std::list<DigitizedPoint>::iterator it;
-	for (it = spline_points.begin(); it != spline_points.end(); ++it)
-	{
-		poles.SetValue(idx, (*it).m_point);
-		idx++;
-	}
-	poles.SetValue(spline_points.size() + 1, d4.m_point);
-#ifdef _DEBUG
-#undef new
-#endif
-	Handle(Geom_BezierCurve) curve = new Geom_BezierCurve(poles);
-#ifdef _DEBUG
-#define new  WXDEBUG_NEW
-#endif
-	GeomConvert_CompCurveToBSplineCurve convert(curve);
-
-	spline = convert.BSplineCurve();
-
-	return true;
-
-}
-
-bool DigitizeMode::GetEllipse(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, gp_Elips& e)
-{
-	double d = d2.m_point.Distance(d1.m_point);
-	e.SetLocation(d1.m_point);
-	e.SetMajorRadius(d);
-	e.SetMinorRadius(d / 2);
-
-	Point3d vec = d2.m_point - d1.m_point;
-	vec = vec / d;
-	double rot = atan2(vec.y, vec.x);
-
-	Point3d up(0, 0, 1);
-	Point3d zp(0, 0, 0);
-	e.Rotate(gp_Ax1(d1.m_point, up), rot);
-
-	Point3d x_axis = e.XAxis().Direction();
-	Point3d y_axis = e.YAxis().Direction();
-	double maj_r = d;
-
-	//We have to rotate the incoming vector to be in our coordinate system
-	Point3d cir = d3.m_point - d1.m_point;
-	cir.Rotate(gp_Ax1(zp, up), -rot + M_PI / 2);
-
-	double nradius = 1 / sqrt((1 - (1 / maj_r)*(1 / maj_r)*cir.y*cir.y) / cir.x / cir.x);
-	if (nradius < maj_r)
-		e.SetMinorRadius(nradius);
-	else
-	{
-		e.SetMajorRadius(nradius);
-		e.SetMinorRadius(maj_r);
-		e.Rotate(gp_Ax1(d1.m_point, up), M_PI / 2);
-	}
-
-
-	return true;
-}
-
-#endif
-
-bool DigitizeMode::GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Circle& c)
+bool GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, Circle& c)
 {
 	PointLineOrCircle plc1 = GetLineOrCircleType(d1);
 	PointLineOrCircle plc2 = GetLineOrCircleType(d2);

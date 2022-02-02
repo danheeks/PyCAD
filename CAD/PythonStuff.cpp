@@ -155,8 +155,13 @@ public:
 	}
 };
 
-static std::wstring str_for_input_mode;
 std::list<Property *> *property_list = NULL;
+
+#if 0
+I am porting CInputMode to python.
+This will be removed
+
+static std::wstring str_for_input_mode;
 
 class InputModeWrap : public CInputMode, public cad_wrapper<CInputMode>
 {
@@ -232,6 +237,10 @@ public:
 	}
 
 };
+
+#endif
+
+
 
 void CadReset()
 {
@@ -416,25 +425,6 @@ std::wstring GetFilePathForImportExport()
 	return filepath_for_FileImportExport;
 }
 
-
-PyObject* set_input_mode_callback = NULL;
-
-void PythonOnSetInputMode()
-{
-	if (set_input_mode_callback)
-		CallPythonCallback(set_input_mode_callback);
-}
-
-void SetInputModeCallback(PyObject *callback)
-{
-	if (!PyCallable_Check(callback))
-	{
-		PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-		return;
-	}
-	set_input_mode_callback = callback;
-}
-
 std::wstring GetResFolder()
 {
 	return theApp->m_res_folder;
@@ -461,28 +451,6 @@ std::wstring GetTitleFromHeeksObj(const HeeksObj* object)
 	if (s == NULL)return L"";
 	return std::wstring(s);
 }
-
-std::wstring InputModeGetTitle(CInputMode* input_mode)
-{
-	const wchar_t* s = input_mode->GetTitle();
-	if (s == NULL)return L"";
-	return std::wstring(s);
-}
-
-boost::python::list InputModeGetProperties(CInputMode* input_mode)
-{
-	boost::python::list return_list;
-	std::list<Property*> p_list;
-	input_mode->GetProperties(&p_list);
-	for (std::list<Property*>::iterator It = p_list.begin(); It != p_list.end(); It++)
-	{
-		Property* property = *It;
-		//AddPropertyToPythonList(property, return_list);
-		return_list.append(boost::python::ptr<Property*>(property));
-	}
-	return return_list;
-}
-
 
 std::wstring BaseObjectGetTitle(const BaseObject& object)
 {
@@ -593,46 +561,6 @@ static void CallbackForGetLines(const double *p, bool start)
 void SetGetLinesPixelsPerMm(double pixels_per_mm)
 {
 	GetLines_pixels_per_mm = pixels_per_mm;
-}
-
-CInputMode* GetMagnification()
-{
-	return theApp->magnification;
-}
-
-CInputMode* GetViewRotating()
-{
-	return theApp->viewrotating;
-}
-
-CInputMode* GetViewZooming()
-{
-	return theApp->viewzooming;
-}
-
-CInputMode* GetViewPanning()
-{
-	return theApp->viewpanning;
-}
-
-DigitizeMode* GetDigitizing()
-{
-	return theApp->m_digitizing;
-}
-
-void SetInputMode(CInputMode* input_mode)
-{
-	theApp->SetInputMode(input_mode);
-}
-
-CInputMode* GetInputMode()
-{
-	return theApp->input_mode_object;
-}
-
-void RestoreInputMode()
-{
-	return theApp->RestoreInputMode();
 }
 
 HeeksObj* NewPoint(const Point3d& p)
@@ -1342,12 +1270,6 @@ void RenderScreeTextAt(const wchar_t* str1, double scale, double x, double y, do
 	theApp->render_screen_text_at(str1, scale, x, y, theta);
 }
 
-void AddProperty(Property* property)
-{
-	if (property_list)
-		property_list->push_back(property);
-}
-
 boost::python::object GetObjectFromId(int type, int id) {
 	boost::python::list olist;
 	HeeksObj* object = theApp->GetIDObject(type, id);
@@ -1730,6 +1652,13 @@ int ViewportGetHeight(CViewport& viewport)
 int ViewportGetWidth(CViewport& viewport)
 {
 	return viewport.GetViewportSize().GetWidth();
+}
+
+void ViewportSetView(CViewport& viewport)
+{
+	viewport.SetViewport();
+	viewport.m_view_point.SetProjection(false);
+	viewport.m_view_point.SetModelview();
 }
 
 static boost::shared_ptr<CStlSolid> initStlSolid(const std::wstring& title, const HeeksColor* color)
@@ -2131,26 +2060,6 @@ boost::python::list ObjectsUnderWindow(IRect window, bool only_if_fully_in, bool
 	return olist;
 }
 
-DigitizedPoint Digitize(IPoint point)
-{
-	return DigitizeMode::digitize1(point);
-}
-
-DigitizedPoint GetLastDigitizePoint()
-{
-	return theApp->GetLastDigitizePoint();
-}
-
-void SetLastDigitizedPoint(const DigitizedPoint& p)
-{
-	theApp->SetLastDigitizedPoint(p);
-}
-
-void UseDigitiedPointAsReference()
-{
-	theApp->UseDigitiedPointAsReference();
-}
-
 int BaseObjectGetIndex(BaseObject& object)
 {
 	return object.GetIndex();
@@ -2225,16 +2134,6 @@ GraphicsTextMode GetGraphicsTextMode()
 void SetGraphicsTextMode(GraphicsTextMode mode)
 {
 	theApp->m_graphics_text_mode = mode;
-}
-
-bool GetReverseZooming()
-{
-	return ViewZooming::m_reversed;
-}
-
-void SetReverseZooming(bool reversed)
-{
-	ViewZooming::m_reversed = reversed;
 }
 
 bool GetShowDatum()
@@ -2494,17 +2393,17 @@ boost::python::tuple TangentialArc(const Point3d &p0, const Point3d &v0, const P
 	return boost::python::make_tuple(arc_found, centre, axis);
 }
 
-boost::python::tuple GetTangentCircle(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3)
+boost::python::tuple GetTangentCirclePy(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3)
 {
 	Circle c;
-	bool found = DigitizeMode::GetTangentCircle(d1, d2, d3, c);
+	bool found = GetTangentCircle(d1, d2, d3, c);
 	return boost::python::make_tuple(found, c);
 }
 
-boost::python::tuple GetCircleBetween(const DigitizedPoint& d1, const DigitizedPoint& d2)
+boost::python::tuple GetCircleBetweenPy(const DigitizedPoint& d1, const DigitizedPoint& d2)
 {
 	Circle c;
-	bool found = DigitizeMode::GetCircleBetween(d1, d2, c);
+	bool found = GetCircleBetween(d1, d2, c);
 	return boost::python::make_tuple(found, c);
 }
 
@@ -2793,21 +2692,17 @@ BOOST_PYTHON_MODULE(cad) {
 		.def(boost::python::init<int, int>())
 		.def("glCommands", &CViewport::glCommands)
 		.def("WidthAndHeightChanged", &CViewport::WidthAndHeightChanged)
-		.def("OnMouseEvent", &CViewport::OnMouseEvent)
 		.def("OnMagExtents", &CViewport::OnMagExtents)
 		.def("RestorePreviousViewPoint", &CViewport::RestorePreviousViewPoint)
 		.def("ClearViewpoints", &CViewport::ClearViewpoints)
 		.def("StoreViewPoint", &CViewport::StoreViewPoint)
 		.def("GetHeight", &ViewportGetHeight)
 		.def("GetWidth", &ViewportGetWidth)
+		.def("SetView", &ViewportSetView)
 		.def("SetXOR", &CViewport::SetXOR)
 		.def("EndXOR", &CViewport::EndXOR)
-		.def("DrawFront", &CViewport::DrawFront)
-		.def("EndDrawFront", &CViewport::EndDrawFront)
 		.def("DrawWindow", &CViewport::DrawWindow)
 		.def("OnWheelRotation", &CViewport::OnWheelRotation)
-		.def_readwrite("need_update", &CViewport::m_need_update)
-		.def_readwrite("need_refresh", &CViewport::m_need_refresh)
 		.def_readwrite("orthogonal", &CViewport::m_orthogonal)
 		.def_readwrite("view_point", &CViewport::m_view_point)
 		.def_readwrite("render_on_front_done", &CViewport::m_render_on_front_done)
@@ -3033,15 +2928,6 @@ BOOST_PYTHON_MODULE(cad) {
 		.value("Special20", K_SPECIAL20)
 		;
 
-	boost::python::class_<InputModeWrap, boost::noncopyable >("InputMode")
-		.def(boost::python::init<InputModeWrap>())
-		.def("GetTitle", &InputModeGetTitle)
-		.def("GetType", &CInputMode::GetType)
-		.def("GetProperties", &InputModeGetProperties)
-		.def("OnKeyDown", &CInputMode::OnKeyDown)
-		.def("OnKeyUp", &CInputMode::OnKeyUp)
-		;
-
 	boost::python::enum_<DigitizeType>("DigitizeType")
 		.value("DIGITIZE_NO_ITEM_TYPE", DigitizeNoItemType)
 		.value("DIGITIZE_ENDOF_TYPE", DigitizeEndofType)
@@ -3053,13 +2939,6 @@ BOOST_PYTHON_MODULE(cad) {
 		.value("DIGITIZE_NEAREST_TYPE", DigitizeNearestType)
 		.value("DIGITIZE_TANGENT_TYPE", DigitizeTangentType)
 		.value("DIGITIZE_INPUT_TYPE", DigitizeInputType)
-		;
-
-	boost::python::class_<DigitizeMode, boost::python::bases<CInputMode> >("DigitizeMode", boost::python::no_init)
-		.def_readwrite("digitized_point", &DigitizeMode::digitized_point)
-		.def_readwrite("reference_point", &DigitizeMode::reference_point)
-		.def_readwrite("prompt", &DigitizeMode::prompt)
-		.def_readwrite("wants_to_exit_main_loop", &DigitizeMode::wants_to_exit_main_loop)
 		;
 
 	boost::python::enum_<SketchOrderType>("SketchOrderType")
@@ -3135,7 +3014,6 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("DrawPopMatrix", DrawPopMatrix);
 	boost::python::def("DrawObjectsOnFront", DrawObjectsOnFront);	
 	boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
-	boost::python::def("AddProperty", AddProperty);
 	boost::python::def("GetObjectFromId", &GetObjectFromId, boost::python::args("type", "id"), "returns the object of given type with given id, or None");
 	boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));
 	boost::python::def("GetObjectNamesAndTypes", GetObjectNamesAndTypes);
@@ -3161,7 +3039,6 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("RegisterOnGLCommands", RegisterOnGLCommands);
 	boost::python::def("Repaint", &PythonOnRepaint, PythonOnRepaintOverloads((boost::python::arg("soon") = false)));
 	boost::python::def("RegisterMessageBoxCallback", RegisterMessageBoxCallback);
-	boost::python::def("SetInputModeCallback", SetInputModeCallback);
 	boost::python::def("RegisterImportFileType", RegisterImportFileType);
 	boost::python::def("RegisterExportFileType", RegisterExportFileType);
 	boost::python::def("GetFilePathForImportExport", GetFilePathForImportExport);
@@ -3208,14 +3085,6 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("ChangePropertyCheck", ChangePropertyCheck);
 	boost::python::def("GetUnits", GetUnits);
 	boost::python::def("SetGetLinesPixelsPerMm", SetGetLinesPixelsPerMm);
-	boost::python::def("GetMagnification", GetMagnification, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("GetViewRotating", GetViewRotating, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("GetViewZooming", GetViewZooming, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("GetViewPanning", GetViewPanning, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("GetDigitizing", GetDigitizing, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("SetInputMode", SetInputMode);
-	boost::python::def("GetInputMode", GetInputMode, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("RestoreInputMode", RestoreInputMode);
 	boost::python::def("GetDragGripper", GetDragGripper, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("AddGripper", AddGripper);
 	boost::python::def("NewPoint", NewPoint, boost::python::return_value_policy<boost::python::reference_existing_object>());
@@ -3232,12 +3101,9 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("CanUndo", CanUndo);
 	boost::python::def("CanRedo", CanRedo);
 	boost::python::def("ObjectsUnderWindow", ObjectsUnderWindow);
-	boost::python::def("Digitize", Digitize);
-	boost::python::def("GetLastDigitizePoint", GetLastDigitizePoint);
-	boost::python::def("SetLastDigitizedPoint", SetLastDigitizedPoint); 
-	boost::python::def("GetTangentCircle", GetTangentCircle);
-	boost::python::def("GetCircleBetween", GetCircleBetween);
-	boost::python::def("UseDigitiedPointAsReference", UseDigitiedPointAsReference);
+	boost::python::def("Digitize", digitize1);
+	boost::python::def("GetTangentCircle", GetTangentCirclePy);
+	boost::python::def("GetCircleBetween", GetCircleBetweenPy);
 	boost::python::def("GetDigitizeEnd", GetDigitizeEnd);
 	boost::python::def("SetDigitizeEnd", SetDigitizeEnd);
 	boost::python::def("GetDigitizeInters", GetDigitizeInters);
@@ -3264,8 +3130,6 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("SetRotateUpright", SetRotateUpright);
 	boost::python::def("GetGraphicsTextMode", GetGraphicsTextMode);
 	boost::python::def("SetGraphicsTextMode", SetGraphicsTextMode);
-	boost::python::def("GetReverseZooming", GetReverseZooming);
-	boost::python::def("SetReverseZooming", SetReverseZooming);
 	boost::python::def("GetShowDatum", GetShowDatum);
 	boost::python::def("SetShowDatum", SetShowDatum);
 	boost::python::def("GetDatumSolid", GetDatumSolid);

@@ -54,10 +54,10 @@ class InputModeCanvas(PropertiesCanvas):
         properties = []
         
         # add the input_mode mode's properties
-        title = cad.PropertyStringReadOnly('Input Mode', cad.GetInputMode().GetTitle())
+        title = cad.PropertyStringReadOnly('Input Mode', wx.GetApp().input_mode_object.GetTitle())
         # to do         if(wxGetApp().input_mode_object->TitleHighlighted())title->m_highlighted = true;
         properties.append(title)
-        properties += cad.GetInputMode().GetProperties()
+        properties += wx.GetApp().input_mode_object.GetProperties()
 
         for property in properties:
             self.AddProperty(property)

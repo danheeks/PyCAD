@@ -55,18 +55,6 @@ public:
 	virtual void DeleteUndoably(const std::list<HeeksObj*>& list) = 0;
 	virtual Matrix* GetDrawMatrix(bool get_the_appropriate_orthogonal) = 0;
 	virtual void DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing = false) = 0;
-	virtual void DrawFront() = 0;
-	virtual CInputMode* GetDigitizing() = 0;
-	virtual void EndDrawFront() = 0;
-	virtual void OnInputModeTitleChanged() = 0;
-	virtual void RefreshInputCanvas() = 0;
-	virtual CInputMode* GetInputMode() = 0;
-	virtual void SetInputMode(CInputMode*) = 0;
-	virtual void RestoreInputMode() = 0;
-	virtual DigitizedPoint& Digitize(const IPoint&) = 0;
-	virtual const DigitizedPoint& GetLastDigitizePoint() = 0;
-	virtual void SetLastDigitizedPoint(const DigitizedPoint&) = 0;
-	virtual void UseDigitiedPointAsReference() = 0;
 	virtual void glColorEnsuringContrast(const HeeksColor &c) = 0;
 	virtual std::wstring GetResFolder()const = 0;
 	virtual HeeksObj* GetIDObject(int type, int id) = 0;

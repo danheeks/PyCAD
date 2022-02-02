@@ -3,6 +3,8 @@
 // This program is released under the BSD license. See the file COPYING for details.
 
 #pragma once
+#if 0
+to do port this to python
 
 #include "InputMode.h"
 
@@ -31,3 +33,4 @@ public:
 	void reset(void);
 	void SetWithPoint(const IPoint &point);
 };
+#endif

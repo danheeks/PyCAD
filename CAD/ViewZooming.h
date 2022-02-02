@@ -1,6 +1,8 @@
 // ViewZooming.h
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
+#if 0
+to do port this to python
 #pragma once
 
 #include "InputMode.h"
@@ -17,3 +19,4 @@ public:
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
 };
+#endif

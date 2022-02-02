@@ -4,12 +4,12 @@
 #include "Material.h"
 #include "MarkedList.h"
 
-CViewport::CViewport() :m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(0), m_h(0), m_view_point(this), m_need_update(false), m_need_refresh(false)
+CViewport::CViewport() :m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(0), m_h(0), m_view_point(this)
 {
 	theApp->m_current_viewport = this;
 }
 
-CViewport::CViewport(int w, int h) : m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(w), m_h(h), m_view_point(this), m_need_update(false), m_need_refresh(false)
+CViewport::CViewport(int w, int h) : m_frozen(false), m_refresh_wanted_on_thaw(false), m_w(w), m_h(h), m_view_point(this)
 {
 	theApp->m_current_viewport = this;
 }
@@ -190,34 +190,6 @@ void CViewport::glCommands()
 	theApp->glCommandsAll(m_view_point);
 }
 
-void CViewport::DrawFront(void){
-	if (!m_render_on_front_done){
-		FrontRender();
-		m_render_on_front_done = true;
-	}
-}
-
-void CViewport::EndDrawFront(void){
-	if (m_render_on_front_done){
-		FrontRender();
-		m_render_on_front_done = false;
-	}
-}
-
-void CViewport::FrontRender(void){
-	SetViewport();
-	m_view_point.SetProjection(false);
-	m_view_point.SetModelview();
-
-	SetXOR();
-
-	theApp->input_mode_object->OnFrontRender();
-
-	EndXOR();
-
-	m_render_on_front_done = true;
-}
-
 void CViewport::SetIdentityProjection(){
 	glViewport(0, 0, m_w, m_h);
 	glMatrixMode(GL_PROJECTION);
@@ -243,20 +215,6 @@ void CViewport::EndXOR(void){
 	glEnable(GL_DEPTH_TEST);
 	glDrawBuffer(m_save_buffer_for_XOR);
 	glFlush();
-}
-
-void CViewport::OnMouseEvent(MouseEvent& event)
-{
-	theApp->m_current_viewport = this;
-	this->m_need_refresh = false;
-	this->m_need_update = false;
-	if (theApp->input_mode_object)theApp->input_mode_object->OnMouse(event);
-
-	for (std::list< void(*)(MouseEvent&) >::iterator It = theApp->m_lbutton_up_callbacks.begin(); It != theApp->m_lbutton_up_callbacks.end(); It++)
-	{
-		void(*callbackfunc)(MouseEvent& event) = *It;
-		(*callbackfunc)(event);
-	}
 }
 
 void CViewport::OnMagExtents(bool rotate, int margin)
@@ -468,5 +426,4 @@ void CViewport::OnWheelRotation(int wheelRotation, int event_x, int event_y)
 	// so move that many pixels to keep the coordinate
 	// under the cursor approximately the same
 	m_view_point.ShiftI(IPoint((int)x_moved_by, (int)y_moved_by));
-	m_need_refresh = true;
 }

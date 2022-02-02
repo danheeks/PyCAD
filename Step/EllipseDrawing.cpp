@@ -4,6 +4,9 @@
 
 #include "stdafx.h"
 
+#if 0
+this must be ported to python and removed from here
+
 #include "EllipseDrawing.h"
 #include "HeeksObj.h"
 #include "HEllipse.h"
@@ -329,3 +332,5 @@ void EllipseDrawing::set_draw_step_not_undoable(int s)
 		spline_points.push_back(GetStartPos());
 	}
 }
+
+#endif

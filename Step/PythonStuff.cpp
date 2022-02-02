@@ -35,7 +35,6 @@
 #include "Cone.h"
 #include "App.h"
 #include "RuledSurface.h"
-#include "EllipseDrawing.h"
 #include "HEllipse.h"
 #include "HSpline.h"
 #include "ConversionTools.h"
@@ -149,11 +148,14 @@ void FilletOrChamferEdges(double rad, bool chamfer_not_fillet)
 	CShape::FilletOrChamferEdges(objects, rad, chamfer_not_fillet);
 }
 
+#if 0
+port this to python
 void SetEllipseDrawing()
 {
 	ellipse_drawing.drawing_mode = EllipseDrawingMode;
 	theApp->SetInputMode(&ellipse_drawing);
 }
+#endif
 
 void SetShowFaceNormals(bool value)
 {
@@ -285,7 +287,6 @@ boost::python::list ShapeGetFaces(const CShape* shape) {
 		boost::python::def("FuseShapes", FuseShapes);
 		boost::python::def("CommonShapes", CommonShapes);
 		boost::python::def("FilletOrChamferEdges", FilletOrChamferEdges);
-		boost::python::def("SetEllipseDrawing", SetEllipseDrawing); 
 		boost::python::def("SketchToFace", SketchToFace);
 		boost::python::def("SetShowFaceNormals", SetShowFaceNormals);
 		boost::python::def("GetShowFaceNormals", GetShowFaceNormals); 

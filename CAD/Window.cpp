@@ -1,6 +1,8 @@
 // Window.cpp
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
+#if 0
+to do port this to python
 #include "stdafx.h"
 #include "Window.h"
 #include "HeeksObj.h"
@@ -33,3 +35,4 @@ void WindowDragging::OnMouse( MouseEvent& event ){
 		window_box.height = (theApp->m_current_viewport->GetViewportSize().GetHeight() - window_box.y) - event.GetY();
 	}
 }
+#endif

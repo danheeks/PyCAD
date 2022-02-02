@@ -1,6 +1,8 @@
 // ViewPanning.cpp
 // Copyright (c) 2010, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
+#if 0
+to do port this to python
 #include "stdafx.h"
 
 #include "ViewPanning.h"
@@ -43,3 +45,4 @@ const wchar_t* ViewPanning::GetHelpText(){
 	str_for_GetHelpText = std::wstring(L"Drag with the left mouse button");
 	return str_for_GetHelpText.c_str();
 }
+#endif

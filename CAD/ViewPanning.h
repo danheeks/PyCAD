@@ -2,6 +2,8 @@
 // Copyright (c) 2010, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
 #pragma once
+#if 0
+to do port this to python
 
 #include "InputMode.h"
 
@@ -15,3 +17,4 @@ public:
 	const wchar_t* GetHelpText();
 	void OnMouse( MouseEvent& event );
 };
+#endif

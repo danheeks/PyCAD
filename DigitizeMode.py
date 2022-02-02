@@ -2,10 +2,11 @@ import cad
 import math
 import geom
 import wx
+from InputMode import InputMode
 
-class DigitizeMode(cad.InputMode):
+class DigitizeMode(InputMode):
     def __init__(self):
-        cad.InputMode.__init__(self)
+        InputMode.__init__(self)
         self.point_or_window = PointOrWindow(False)
         self.digitized_point = cad.DigitizedPoint()
         
@@ -45,7 +46,7 @@ class DigitizeMode(cad.InputMode):
         elif event.LeftUp():
             if self.lbutton_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
                 self.digitized_point = self.lbutton_point
-                self.wants_to_exit_main_loop = True
+                wx.GetApp().ExitMainLoop()
         elif event.Moving():
             self.digitized_point = cad.Digitize(cad.IPoint(event.x, event.y))
             self.point_or_window.OnMouse(event)
@@ -59,7 +60,7 @@ class DigitizeMode(cad.InputMode):
     def OnFrontRender(self):
         self.point_or_window.OnFrontRender()
 
-class PointOrWindow(cad.InputMode):
+class PointOrWindow():
     def __init__(self, wd):
         if wd: self.window = WindowDragging()
         else: self.window = None
@@ -102,7 +103,7 @@ class PointOrWindow(cad.InputMode):
         cad.DrawColor(cad.Color(255, 255, 255)) 
         wx.GetApp().GetViewport().DrawWindow(self.box_chosen, False)
              
-class WindowDragging(cad.InputMode):
+class WindowDragging():
     def __init__(self):
         self.reset()
 

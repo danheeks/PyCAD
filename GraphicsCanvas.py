@@ -56,12 +56,12 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             wx.GetApp().ShowFullScreen(False)
         else:
             key_code = Key.KeyCodeFromWx(event)
-            if not cad.GetInputMode().OnKeyDown(key_code):
+            if not wx.GetApp().input_mode_object.OnKeyDown(key_code):
                 wx.GetApp().OnKeyDown(event)
             
     def OnKeyUp(self, event):
         key_code = Key.KeyCodeFromWx(event)
-        cad.GetInputMode().OnKeyUp(key_code)
+        wx.GetApp().input_mode_object.OnKeyUp(key_code)
     
     def AppendToolsToMenu(self, menu, tools):
       for tool in tools:
@@ -89,6 +89,10 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         self.SetCurrent(self.context)
         e = Mouse.MouseEventFromWx(event)
         
+        if event.controlDown:
+            wx.GetApp().select_mode.OnMouse(e)
+            return                    
+        
         if event.RightDown():
             self.right_down_and_no_left_clicked = True
         if event.LeftIsDown(): 
@@ -98,15 +102,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
             wx.GetApp().DoDropDownMenu(self, event.GetX(), event.GetY(), event.ControlDown())
             self.right_down_and_no_left_clicked = False
         else:
-            self.viewport.OnMouseEvent(e)
-            if self.viewport.need_update: self.Update()
-            if self.viewport.need_refresh: self.Refresh()
-            
-        if event.LeftUp():
-            if cad.GetInputMode().GetType() == wx.GetApp().digitizing.GetType():
-                if wx.GetApp().digitizing.wants_to_exit_main_loop:
-                    wx.GetApp().digitizing.wants_to_exit_main_loop = False
-                    wx.GetApp().ExitMainLoop()
+            wx.GetApp().input_mode_object.OnMouse(e)
+
         event.Skip()
 
     def OnEraseBackground(self, event):
@@ -123,8 +120,30 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       self.viewport.glCommands()
       for callback in self.paint_callbacks:
           callback()
+# 
+#     // draw the input mode text on the top
+#     if (m_graphics_text_mode != GraphicsTextModeNone)
+#     {
+#         std::wstring screen_text1, screen_text2;
+# 
+#         if (input_mode_object && input_mode_object->GetTitle())
+#         {
+#             screen_text1.append(input_mode_object->GetTitle());
+#             screen_text1.append(L"\n");
+#         }
+#         if (m_graphics_text_mode == GraphicsTextModeWithHelp && input_mode_object)
+#         {
+#             const wchar_t* help_str = input_mode_object->GetHelpText();
+#             if (help_str)
+#             {
+#                 screen_text2.append(help_str);
+#             }
+#         }
+#         render_screen_text(screen_text1.c_str(), screen_text2.c_str());
+#     }
+      
       self.SwapBuffers()
       self.viewport.render_on_front_done = False
-      self.viewport.DrawFront()
+      wx.GetApp().DrawFront()
       
       return

@@ -1,6 +1,8 @@
 // ViewZooming.cpp
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
+#if 0
+to do port this to python
 #include "stdafx.h"
 
 #include "ViewZooming.h"
@@ -48,3 +50,4 @@ const wchar_t* ViewZooming::GetHelpText(){
 	str_for_GetHelpText = std::wstring(L"Drag with the left mouse button") + L"\n" + (m_reversed ? L"Forward to zoom in, Back to zoom out":L"Back to zoom in, Forward to zoom out") + L"\n" +L"Hold middle mouse button down to pan";
 	return str_for_GetHelpText.c_str();
 }
+#endif

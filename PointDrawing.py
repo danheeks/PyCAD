@@ -5,7 +5,6 @@ class PointDrawing(Drawing):
     def __init__(self):
         Drawing.__init__(self)
         
-    # cad.InputMode's overridden method
     def GetTitle(self):
         return "Point drawing"
 

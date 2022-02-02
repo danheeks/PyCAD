@@ -4,6 +4,9 @@
 
 #pragma once
 
+# if 0
+this must be ported to python
+
 #include "Drawing.h"
 #include <list>
 #include <geometry.h>
@@ -58,3 +61,5 @@ public:
 };
 
 extern EllipseDrawing ellipse_drawing;
+
+#endif

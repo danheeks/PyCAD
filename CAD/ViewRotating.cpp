@@ -1,6 +1,8 @@
 // ViewRotating.cp
 // Copyright (c) 2009, Dan Heeks
 // This program is released under the BSD license. See the file COPYING for details.
+#if 0
+to do port this to python
 #include "stdafx.h"
 
 #include "ViewRotating.h"
@@ -48,3 +50,4 @@ void ViewRotating::OnMouse( MouseEvent& event )
 //	if(event.GetWheelRotation() != 0)theApp->m_select_mode->OnMouse(event);
 
 }
+#endif

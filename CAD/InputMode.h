@@ -4,6 +4,8 @@
 
 
 #pragma once
+#if 0
+to do port this to python
 
 #include "KeyCode.h"
 
@@ -33,3 +35,4 @@ public:
 	virtual void OnRender(){}
 	virtual void GetProperties(std::list<Property *> *list){}
 };
+#endif

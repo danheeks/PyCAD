@@ -35,12 +35,10 @@ sys.path.append(pycad_dir)
 def OnMessageBox(error_message):
     wx.MessageBox(error_message)
     
-def OnInputMode():
-    wx.GetApp().OnInputMode()
-    
 def OnPaint():
     if wx.GetApp().coordsys_for_P3P != None:
         wx.GetApp().RenderCoordSys()
+    wx.GetApp().input_mode_object.OnRender()
     
 tools = []
 save_filter_for_StartPickObjects = 0
@@ -69,6 +67,9 @@ class App(wx.App):
         self.digitizing = DigitizeMode.DigitizeMode()
         self.coordsys_for_P3P = None
         self.paint_registered = False
+        self.previous_input_mode = None
+        self.input_mode_object = None
+        self.render_on_front_done = False
         self.import_file_types = [
             (['heeks'], 'Heeks files'),
             (['stl'], 'STL files'),
@@ -231,13 +232,8 @@ class App(wx.App):
         del self.hideable_windows[w]
         
     def InitCad(self):
-        cad.SetInputMode(self.select_mode);
+        self.input_mode_object = self.select_mode
         cad.SetResFolder(pycad_dir)
-        cad.SetInputModeCallback(OnInputMode)
-        
-    def OnInputMode(self):
-        self.frame.input_mode_canvas.RemoveAndAddAll()
-        self.frame.graphics_canvas.Refresh()
         
     def SplitSketch(self, object):
         sketch = object
@@ -470,14 +466,30 @@ class App(wx.App):
         pass
         
     def EndDrawing(self):
-        if cad.GetInputMode().DragDoneWithXOR():
-            cad.EndDrawFront()
-        cad.GetInputMode().ClearObjectsMade()
-        cad.RestoreInputMode()
+        if self.input_mode_object.DragDoneWithXOR():
+            self.EndDrawFront()
+        self.input_mode_object.ClearObjectsMade()
+        self.RestoreInputMode()
+        
+    def DrawFront(self):
+        if not self.render_on_front_done:
+            self.FrontRender()
+            self.render_on_front_done = True
+
+    def EndDrawFront(self):
+        if self.render_on_front_done:
+            self.FrontRender()
+            self.render_on_front_done = False
+
+    def FrontRender(self):
+        self.GetViewport().SetView()
+        self.GetViewport().SetXOR()
+        self.input_mode_object.OnFrontRender()
+        self.GetViewport().EndXOR()
     
     def GetInputModeTools(self):
         tools = []
-        input_mode_class = cad.GetInputMode().__class__
+        input_mode_class = self.input_mode_object.__class__
         if input_mode_class == LineArcDrawing.LineArcDrawing:
             tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
             tools.append(ToolBarTool.CadToolBarTool('Stop Drawing', 'enddraw', self.EndDrawing))
@@ -543,11 +555,11 @@ class App(wx.App):
         global save_filter_for_StartPickObjects
         global save_just_one_for_EndPickObjects
         global save_mode_for_EndPickObjects
-        save_mode_for_EndPickObjects = cad.GetInputMode()
+        save_mode_for_EndPickObjects = self.input_mode_object
         self.select_mode.prompt = str
         save_just_one_for_EndPickObjects = self.select_mode.just_one
         self.select_mode.just_one = just_one
-        cad.SetInputMode(self.select_mode)
+        self.SetInputMode(self.select_mode)
         save_filter_for_StartPickObjects = self.select_mode.filter
         self.select_mode.filter = filter
         
@@ -558,7 +570,7 @@ class App(wx.App):
         self.select_mode.filter = save_filter_for_StartPickObjects
         self.select_mode.prompt = ''
         self.select_mode.just_one = save_just_one_for_EndPickObjects
-        cad.SetInputMode(save_mode_for_EndPickObjects)
+        self.SetInputMode(save_mode_for_EndPickObjects)
         
     def PickObjects(self, str, filter = cad.Filter(), just_one = False):
         if self.inMainLoop:
@@ -582,10 +594,9 @@ class App(wx.App):
         self.inMainLoop = False        
         
     def PickPosition(self, title):
-        save_mode = cad.GetInputMode()
-        self.digitizing.wants_to_exit_main_loop = False
+        save_mode = self.input_mode_object
         self.digitizing.prompt = title
-        cad.SetInputMode(self.digitizing)
+        self.SetInputMode(self.digitizing)
         
         self.OnRun()
 
@@ -593,7 +604,7 @@ class App(wx.App):
         if self.digitizing.digitized_point.type != cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             import geom
             return_point = geom.Point3D(self.digitizing.digitized_point.point)
-        cad.SetInputMode(save_mode);
+        self.SetInputMode(save_mode);
         return return_point
         
     def GetViewport(self):
@@ -707,6 +718,7 @@ class App(wx.App):
         res = self.CheckForModifiedDoc()
         if res != wx.CANCEL:
             cad.Reset()
+            self.RestoreInputMode()
             self.OnNewOrOpen(False)
             cad.ClearHistory()
             cad.SetLikeNewFile()
@@ -739,6 +751,7 @@ class App(wx.App):
         if res != wx.CANCEL:
             # self.OnBeforeNewOrOpen(True, res)
             cad.Reset()
+            self.RestoreInputMode()
             if cad.OpenFile(filepath):
                 self.DoFileOpenViewMag()
                 self.OnNewOrOpen(True)
@@ -1043,7 +1056,7 @@ class App(wx.App):
         e.Enable(cad.GetNumSelected() > 0)            
     
     def OnSelectMode(self, e):
-        cad.SetInputMode(self.select_mode)
+        self.SetInputMode(self.select_mode)
         
     def OnFilter(self, e):
         dlg = FilterDlg()
@@ -1055,7 +1068,7 @@ class App(wx.App):
         self.frame.graphics_canvas.Refresh()
         
     def OnMag(self, e):
-        cad.SetInputMode(cad.GetMagnification())
+        self.SetInputMode(cad.GetMagnification())
         
     def OnMagExtents(self, e):
         self.frame.graphics_canvas.viewport.OnMagExtents(True, 6)
@@ -1094,13 +1107,13 @@ class App(wx.App):
         self.OnMagAxes(geom.Point3D(-s,s,s), geom.Point3D(s,-s,s))
         
     def OnViewRotate(self, e):
-        cad.SetInputMode(cad.GetViewRotating())
+        self.SetInputMode(cad.GetViewRotating())
         
     def OnViewZoom(self, e):
-        cad.SetInputMode(cad.GetViewZooming())
+        self.SetInputMode(cad.GetViewZooming())
         
     def OnViewPan(self, e):
-        cad.SetInputMode(cad.GetViewPanning())
+        self.SetInputMode(cad.GetViewPanning())
         
     def ShowFullScreen(self, show, style = wx.FULLSCREEN_ALL):
         if show:
@@ -1127,40 +1140,40 @@ class App(wx.App):
         self.frame.graphics_canvas.Refresh()
         
     def OnLines(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         LineArcDrawing.SetLineArcDrawing()
         
     def OnRectangles(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         Drawing.SetRectanglesDrawing()
         
     def OnObrounds(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         Drawing.SetObroundsDrawing()
         
     def OnPolygons(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         Drawing.SetPolygonsDrawing()
         
     def OnCircles3p(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetCircles3pDrawing()
         
     def OnCircles2p(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetCircles2pDrawing()
         
     def OnCircles1p(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetCircle1pDrawing()
         
     def OnILine(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
         cad.SetILineDrawing()
         
     def OnPoints(self, e):
-        cad.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetInputMode(point_drawing)
+        self.SetInputMode(self.select_mode) # mode to return to on ending drawing
+        self.SetInputMode(point_drawing)
         
     def OnGear(self, e):
         gear = Gear.Gear(1.0, 12)
@@ -1230,7 +1243,7 @@ class App(wx.App):
         y = geom.Point3D(0,1,0).Transformed(mat) - o
         new_object = cad.NewCoordinateSystem("Coordinate System", o, x, y)
         cad.ClearSelection()
-        cad.SetInputMode(self.select_mode)
+        self.SetInputMode(self.select_mode)
 
         # and pick from three points
         result = self.MakeOriginFromPickPoints(new_object, three_points)
@@ -1324,7 +1337,23 @@ class App(wx.App):
                 cad.Select(object)
         else:
             cad.ClearSelection(True)
+            
+    def SetInputMode(self, new_mode):
+        if new_mode == None: return
 
+        self.previous_input_mode = self.input_mode_object
+        new_mode.OnModeChange()
+        self.input_mode_object = new_mode
+    
+        self.frame.input_mode_canvas.Refresh()
+        
+    def RestoreInputMode(self):
+        if self.previous_input_mode:
+            self.previous_input_mode.OnModeChange()
+            self.input_mode_object = self.previous_input_mode
+            self.frame.input_mode_canvas.Refresh()
+            self.Repaint()
+            self.previous_input_mode = None
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

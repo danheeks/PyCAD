@@ -115,7 +115,7 @@ class SolidApp(App):
         cad.AddUndoably(new_object,None, None)
         cad.ClearSelection(True)
         cad.Select(new_object)
-        cad.SetInputMode(self.select_mode)
+        self.SetInputMode(self.select_mode)
         cad.EndHistory()
         cad.Repaint()
     

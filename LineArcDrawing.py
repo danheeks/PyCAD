@@ -282,7 +282,7 @@ class LineArcDrawing(Drawing):
         Drawing.OnModeChange(self)
         if self.container:
             self.container = None
-        self.ClearPrevObject()
+        self.prev_object = None
         self.previous_direction = None
 
     
@@ -291,7 +291,7 @@ line_arc_drawing = LineArcDrawing()
 def SetLineArcDrawing():
     global line_arc_drawing
     line_arc_drawing.drawing_mode = LineDrawingMode
-    cad.SetInputMode(line_arc_drawing)    
+    wx.GetApp().SetInputMode(line_arc_drawing)    
 
 
 

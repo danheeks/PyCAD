@@ -2,10 +2,11 @@ import cad
 import wx
 import geom
 from LeftAndRight import LeftAndRight
+from InputMode import InputMode
         
-class SelectMode(cad.InputMode):
+class SelectMode(InputMode):
     def __init__(self):
-        cad.InputMode.__init__(self)
+        InputMode.__init__(self)
         self.left_and_right = LeftAndRight()
         self.control_key_initially_pressed = False
         self.button_down = False
@@ -23,7 +24,6 @@ class SelectMode(cad.InputMode):
         self.ctrl_does_rotate = False
         self.filter = cad.Filter()
         
-    # cad.InputMode's overridden method
     def GetTitle(self):
         return self.prompt if self.prompt else 'Select Mode'
     
@@ -50,7 +50,7 @@ class SelectMode(cad.InputMode):
         for object in self.highlighted_objects:
             cad.DrawColor(self.highlight_color)
             object.OnGlCommands(False, False, True)
-            
+                
     def OnMouse(self, event):
         left_and_right_pressed, event_used = self.left_and_right.LeftAndRightPressed(event)
         
@@ -72,18 +72,18 @@ class SelectMode(cad.InputMode):
                 objects = cad.ObjectsUnderWindow(cad.IRect(event.x, event.y), False, True, self.filter, True)
                 for object in objects:
                     if object.GetType() == cad.OBJECT_TYPE_GRIPPER:
-                        wx.GetApp().GetViewport().DrawFront()
+                        wx.GetApp().DrawFront()
                         self.drag_gripper = object
                         self.drag_gripper.__class__ = cad.Gripper
                         self.grip_from = cad.Digitize(self.button_down_point)
                         self.grip_to = cad.DigitizedPoint(self.grip_from)
-                        self.drag_gripper.OnGripperGrabbed(True, self.grip_from)
-                        wx.GetApp().GetViewport().EndDrawFront()
+                        self.drag_gripper.OnGripperGrabbed(True, self.grip_from.point)
+                        wx.GetApp().EndDrawFront()
                         break
         elif event.LeftUp():
             if self.drag_gripper:
                 self.grip_to = cad.Digitize(cad.IPoint(event.x, event.y))
-                self.drag_gripper.OnGripperReleased(self.grip_from, self.grip_to)
+                self.drag_gripper.OnGripperReleased(self.grip_from.point, self.grip_to.point)
                 self.drag_gripper = None
             elif self.window_box:
                 if not event.controlDown:
@@ -99,7 +99,7 @@ class SelectMode(cad.InputMode):
             if self.just_one and wx.GetApp().inMainLoop and cad.GetNumSelected() > 0:
                 wx.GetApp().ExitMainLoop()
             else:
-                wx.GetApp().frame.graphics_canvas.viewport.need_refresh = True
+                wx.GetApp().frame.graphics_canvas.Refresh()
                 
         elif event.MiddleDown():
             self.middle_button_down = True
@@ -118,8 +118,7 @@ class SelectMode(cad.InputMode):
                         v.view_point.TurnVerticalI(dm)
                     else:
                         v.view_point.TurnI(dm)
-                v.need_update = True
-                v.need_refresh = True
+                wx.GetApp().frame.graphics_canvas.Update()
                 wx.GetApp().frame.graphics_canvas.Refresh()
             elif event.leftDown:
                 if self.drag_gripper != None:
@@ -142,9 +141,9 @@ class SelectMode(cad.InputMode):
                         if len(selected_objects_dragged) > 0:
                             self.drag_gripper = cad.GetDragGripper()
                             self.grip_from = cad.Digitize(self.button_down_point)
-                            self.grip_to = geom.Point3D(self.grip_from)
-                            self.drag_gripper.OnGripperGrabbed(True, self.grip_from)
-                            self.drag_gripper.OnGripperMoved(self.grip_from, self.grip_to)
+                            self.grip_to = cad.DigitizedPoint(self.grip_from)
+                            self.drag_gripper.OnGripperGrabbed(True, self.grip_from.point)
+                            self.drag_gripper.OnGripperMoved(self.grip_from.point, self.grip_to.point)
                             return
                         
                     if not self.just_one:
@@ -163,5 +162,6 @@ class SelectMode(cad.InputMode):
             
         if event.GetWheelRotation() != 0:
             wx.GetApp().GetViewport().OnWheelRotation(-event.wheelRotation, event.x, event.y)
+            wx.GetApp().frame.graphics_canvas.Refresh()
             
                     

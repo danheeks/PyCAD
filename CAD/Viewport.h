@@ -19,8 +19,6 @@ protected:
 public:
 	CViewPoint m_view_point;
 	bool m_orthogonal;
-	bool m_need_update;
-	bool m_need_refresh;
 	bool m_render_on_front_done;
 
 	CViewport();
@@ -34,9 +32,6 @@ public:
 	void StoreViewPoint(void);
 	void RestorePreviousViewPoint(void);
 	void DrawObjectsOnFront(const std::list<HeeksObj*> &list, bool do_depth_testing = false);
-	void DrawFront(void);
-	void EndDrawFront(void);
-	void FrontRender(void);
 	void SetIdentityProjection();
 	void SetXOR(void);
 	void EndXOR(void);
@@ -46,7 +41,6 @@ public:
 	void GetViewportSize(int *w, int *h){ *w = m_w; *h = m_h; }
 	int GetWidth(){ return m_w; }
 	int GetHeight(){ return m_h; }
-	void OnMouseEvent(MouseEvent& event);
 	void OnMagExtents(bool rotate, int margin);
 	void WindowMag(IRect &window_box);
 	void OnWheelRotation(int wheelRotation, int x, int y);

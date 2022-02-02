@@ -3,6 +3,8 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 
+#if 0
+to do port this to python
 #include "MagDragWindow.h"
 #include "Viewport.h"
 
@@ -47,3 +49,4 @@ void MagDragWindow::OnFrontRender(){
 		theApp->m_current_viewport->DrawWindow(window_box, false);
 	}
 }
+#endif
