@@ -31,7 +31,7 @@ class Drawing(InputMode):
             if self.DragDoneWithXOR():
                 wx.GetApp().EndDrawFront()
             self.ClearObjectsMade()
-            cad.RestoreInputMode()
+            wx.GetApp().RestoreInputMode()
 
         if not event_used:
             if event.middleDown or event.GetWheelRotation() != 0:
@@ -134,7 +134,7 @@ class Drawing(InputMode):
     def RecalculateAndRedraw(self, point):
         self.set_digitize_plane()
         
-        end = wx.GetApp().digitizing.digitized_point
+        end = cad.Digitize(point)
         if end.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             return 
         if self.is_a_draw_level(self.draw_step):
@@ -157,7 +157,7 @@ class Drawing(InputMode):
     def OnKeyDown(self, key_code):
         if key_code == cad.KeyCode.F1 or key_code == cad.KeyCode.Return or key_code == cad.KeyCode.Escape:
             self.ClearObjectsMade()
-            self.RestoreInputMode()
+            wx.GetApp().RestoreInputMode()
             return True
         return False
 

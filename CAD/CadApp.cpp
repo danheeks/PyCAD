@@ -105,7 +105,6 @@ CCadApp::CCadApp()
 	m_show_grippers_on_drag = true;
 	m_extrude_removes_sketches = false;
 	m_loft_removes_sketches = false;
-	m_graphics_text_mode = GraphicsTextModeWithHelp;// GraphicsTextModeNone;
 	m_file_open_or_import_type = FileOpenOrImportTypeOther;
 	m_set_id_in_add = true;
 	m_file_open_matrix = NULL;
@@ -1285,22 +1284,6 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	if (m_hidden_for_drag.size() == 0 || !m_show_grippers_on_drag)m_marked_list->GrippersGLCommands(false, false);
-}
-
-void CCadApp::OnInputModeTitleChanged()
-{
-	if (m_graphics_text_mode != GraphicsTextModeNone)
-	{
-		Repaint();
-	}
-}
-
-void CCadApp::OnInputModeHelpTextChanged()
-{
-	if (m_graphics_text_mode == GraphicsTextModeWithHelp)
-	{
-		Repaint();
-	}
 }
 
 void CCadApp::glCommands(bool select, bool marked, bool no_color)

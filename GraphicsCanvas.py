@@ -120,27 +120,8 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       self.viewport.glCommands()
       for callback in self.paint_callbacks:
           callback()
-# 
-#     // draw the input mode text on the top
-#     if (m_graphics_text_mode != GraphicsTextModeNone)
-#     {
-#         std::wstring screen_text1, screen_text2;
-# 
-#         if (input_mode_object && input_mode_object->GetTitle())
-#         {
-#             screen_text1.append(input_mode_object->GetTitle());
-#             screen_text1.append(L"\n");
-#         }
-#         if (m_graphics_text_mode == GraphicsTextModeWithHelp && input_mode_object)
-#         {
-#             const wchar_t* help_str = input_mode_object->GetHelpText();
-#             if (help_str)
-#             {
-#                 screen_text2.append(help_str);
-#             }
-#         }
-#         render_screen_text(screen_text1.c_str(), screen_text2.c_str());
-#     }
+          
+      wx.GetApp().RenderScreenText()
       
       self.SwapBuffers()
       self.viewport.render_on_front_done = False

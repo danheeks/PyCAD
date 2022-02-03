@@ -26,6 +26,10 @@ SKETCH_OP_UNION = 1
 SKETCH_OP_SUBTRACT = 2
 SKETCH_OP_INTERSECT = 3
 
+GraphicsTextModeNone = 0
+GraphicsTextModeInputTitle = 1
+GraphicsTextModeWithHelp = 2
+
 pycad_dir = os.path.dirname(os.path.realpath(__file__))
 HEEKS_WILDCARD_STRING = 'Heeks files |*.heeks;*.HEEKS'
 wx_image_extensions = ['bmp','png','jpeg','jpg','gif','pcx','pnm','tif','tga','iff','xpm','ico','cur','ani'] # couldn't find GetHandlers in wxpython
@@ -86,6 +90,7 @@ class App(wx.App):
             (['py'], 'OpenCAMLib python files'),
             (['obj'], 'Wavefront .obj files'),
             ]
+        self.graphics_text_mode = GraphicsTextModeWithHelp
 
         save_out = sys.stdout
         save_err = sys.stderr
@@ -178,7 +183,7 @@ class App(wx.App):
         cad.SetDigitizeSnapToGrid(config.ReadBool("Grid", True))
         
         cad.SetRotateUpright(config.ReadBool("RotateUpright", False))
-        cad.SetGraphicsTextMode(cad.GraphicsTextMode(config.ReadInt("TextMode", int(cad.GraphicsTextMode.FullHelp))))
+        self.graphics_text_mode = config.ReadInt("TextMode", GraphicsTextModeWithHelp)
         
         cad.SetBackgroundColor(0, cad.Color(config.ReadInt("BackgroundColor0", cad.Color(230, 255, 255).ref())))
         cad.SetBackgroundColor(1, cad.Color(config.ReadInt("BackgroundColor1", cad.Color(255, 255, 255).ref())))
@@ -1354,6 +1359,16 @@ class App(wx.App):
             self.frame.input_mode_canvas.Refresh()
             self.Repaint()
             self.previous_input_mode = None
+            
+    def RenderScreenText(self):
+        #draw the input mode text on the top
+        if self.graphics_text_mode != GraphicsTextModeNone:
+            if self.input_mode_object != None:
+                cad.RenderScreenText(self.input_mode_object.GetTitle() + '\n', 10.0)
+
+                if self.graphics_text_mode == GraphicsTextModeWithHelp:
+                    cad.RenderScreenText('\n\n' + self.input_mode_object.GetHelpText() + '\n', 6.5)
+            
         
 class CopyObjectUndoable(cad.BaseUndoable):
     def __init__(self, object, copy_object):

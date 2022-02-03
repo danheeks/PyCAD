@@ -73,14 +73,14 @@ class ModeButton(BitmapChangingButton):
         
 class ScreenTextButton(BitmapChangingButton):
     def __init__(self):
-        self.mode = int(cad.GetGraphicsTextMode())
+        self.mode = wx.GetApp().graphics_text_mode
         BitmapChangingButton.__init__(self, self.OnDropDown)
         
     def OnModeChanged(self):
-        cad.SetGraphicsTextMode(cad.GraphicsTextMode(self.mode))
+        wx.GetApp().graphics_text_mode = self.mode
         # remember config
         config = HeeksConfig()
-        config.WriteInt("GraphicsTextMode", self.mode)
+        config.WriteInt("TextMode", self.mode)
         
     def OnButton(self, event):
         self.mode += 1
@@ -539,7 +539,7 @@ class Ribbon(RB.RibbonBar):
         HeeksConfig().WriteBool("RotateUpright", event.IsChecked())
         
     def OnScreenText(self, event):
-        cad.SetGraphicsTextMode(cad.GraphicsTextMode(event.GetSelection()))
+        wx.GetApp().graphics_text_mode = event.GetSelection()
         HeeksConfig().WriteInt("TextMode", event.GetSelection())
 
         cad.Repaint()

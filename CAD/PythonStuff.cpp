@@ -1265,9 +1265,31 @@ void DrawObjectsOnFront(boost::python::list &list, bool do_depth_testing)
 	return theApp->DrawObjectsOnFront(o_list, do_depth_testing);
 }
 
-void RenderScreeTextAt(const wchar_t* str1, double scale, double x, double y, double theta)
+void RenderScreenText(const std::wstring &str1, double scale)
 {
-	theApp->render_screen_text_at(str1, scale, x, y, theta);
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	theApp->m_current_viewport->SetIdentityProjection();
+	theApp->background_color[0].best_black_or_white().glColor();
+	int w, h;
+	theApp->m_current_viewport->GetViewportSize(&w, &h);
+	glTranslated(2.0, h - 1.0, 0.0);
+
+	theApp->render_screen_text2(str1.c_str(), scale);
+
+	//Even though this is in reverse order, the different matrices have different stacks, and we want to exit here in the modelview
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+}
+
+void RenderScreenTextAt(const std::wstring &str1, double scale, double x, double y, double theta)
+{
+	theApp->render_screen_text_at(str1.c_str(), scale, x, y, theta);
 }
 
 boost::python::object GetObjectFromId(int type, int id) {
@@ -2126,16 +2148,6 @@ void SetRotateUpright(bool upright)
 	theApp->m_rotate_mode = upright ? 0:1;
 }
 
-GraphicsTextMode GetGraphicsTextMode()
-{
-	return theApp->m_graphics_text_mode;
-}
-
-void SetGraphicsTextMode(GraphicsTextMode mode)
-{
-	theApp->m_graphics_text_mode = mode;
-}
-
 bool GetShowDatum()
 {
 	return theApp->m_show_datum_coords_system;
@@ -2955,12 +2967,6 @@ BOOST_PYTHON_MODULE(cad) {
 		.value("MaxSketchOrderTypes", MaxSketchOrderTypes)
 		;
 
-	boost::python::enum_<GraphicsTextMode>("GraphicsTextMode")
-		.value("NoText", GraphicsTextModeNone)
-		.value("InputTitle", GraphicsTextModeInputTitle)
-		.value("FullHelp", GraphicsTextModeWithHelp)
-		;
-
 	boost::python::enum_<BackgroundMode>("BackgroundMode")
 		.value("OneColor", BackgroundModeOneColor)
 		.value("TwoColors", BackgroundModeTwoColors)
@@ -3013,7 +3019,8 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("DrawPushMatrix", DrawPushMatrix);
 	boost::python::def("DrawPopMatrix", DrawPopMatrix);
 	boost::python::def("DrawObjectsOnFront", DrawObjectsOnFront);	
-	boost::python::def("RenderScreeTextAt", &RenderScreeTextAt);
+	boost::python::def("RenderScreenTextAt", &RenderScreenTextAt);
+	boost::python::def("RenderScreenText", &RenderScreenText);
 	boost::python::def("GetObjectFromId", &GetObjectFromId, boost::python::args("type", "id"), "returns the object of given type with given id, or None");
 	boost::python::def("RegisterObjectType", &RegisterObjectType, RegisterObjectTypeOverloads((boost::python::arg("name"), boost::python::arg("callback"), boost::python::arg("add_to_filter") = true)));
 	boost::python::def("GetObjectNamesAndTypes", GetObjectNamesAndTypes);
@@ -3128,8 +3135,6 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("SetBackgroundMode", SetBackgroundMode);
 	boost::python::def("GetRotateUpright", GetRotateUpright);
 	boost::python::def("SetRotateUpright", SetRotateUpright);
-	boost::python::def("GetGraphicsTextMode", GetGraphicsTextMode);
-	boost::python::def("SetGraphicsTextMode", SetGraphicsTextMode);
 	boost::python::def("GetShowDatum", GetShowDatum);
 	boost::python::def("SetShowDatum", SetShowDatum);
 	boost::python::def("GetDatumSolid", GetDatumSolid);
