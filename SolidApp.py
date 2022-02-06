@@ -17,6 +17,7 @@ from NiceTextCtrl import DoubleCtrl
 from Ribbon import RB
 from Ribbon import Ribbon
 import ContextTool
+import EllipseDrawing
     
 def ImportSolidsFile():
     step.ImportSolidsFile(cad.GetFilePathForImportExport())
@@ -362,7 +363,7 @@ class SolidApp(App):
         self.frame.graphics_canvas.Refresh()
         
     def OnEllipse(self, e):
-        step.SetEllipseDrawing()
+        EllipseDrawing.SetEllipseDrawing()
         
     def OnSpline(self, e):
         if not self.CheckForNumberOrMore(2, [cad.OBJECT_TYPE_POINT], 'Pick one or more points to make a spline through', 'Spline Through Points'):

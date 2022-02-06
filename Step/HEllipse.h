@@ -30,7 +30,7 @@ public:
 
 	double GetRotation()const;
 	void SetRotation(double rot);
-	void SetEllipse(gp_Elips e);
+	void SetEllipse(const gp_Elips &e);
 	gp_Elips GetEllipse() const;
 
 

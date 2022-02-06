@@ -420,7 +420,7 @@ void HEllipse::ReadFromXML(TiXmlElement *pElem)
 	HeeksObj::ReadFromXML(pElem);
 }
 
-void HEllipse::SetEllipse(gp_Elips e)
+void HEllipse::SetEllipse(const gp_Elips &e)
 {
 	C = e.Location();
 	m_zdir = e.Axis().Direction();

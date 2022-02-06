@@ -38,6 +38,7 @@
 #include "HEllipse.h"
 #include "HSpline.h"
 #include "ConversionTools.h"
+#include "DigitizedPoint.h"
 
 std::wstring step_dir;
 
@@ -223,6 +224,59 @@ boost::python::list ShapeGetFaces(const CShape* shape) {
 }
 
 
+bool DigitizedPointGetEllipse(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3, gp_Elips& e)
+{
+	double d = d2.m_point.Dist(d1.m_point);
+	e.SetLocation(P2G(d1.m_point));
+	e.SetMajorRadius(d);
+	e.SetMinorRadius(d / 2);
+
+	Point3d vec = d2.m_point - d1.m_point;
+	vec = vec / d;
+	double rot = atan2(vec.y, vec.x);
+
+	gp_Dir up(0, 0, 1);
+	gp_Pnt zp(0, 0, 0);
+	e.Rotate(gp_Ax1(P2G(d1.m_point), up), rot);
+
+	gp_Dir x_axis = e.XAxis().Direction();
+	gp_Dir y_axis = e.YAxis().Direction();
+	double maj_r = d;
+
+	//We have to rotate the incoming vector to be in our coordinate system
+	gp_Pnt cir = P2G(d3.m_point - d1.m_point);
+	cir.Rotate(gp_Ax1(zp, up), -rot + M_PI / 2);
+
+	double nradius = 1 / sqrt((1 - (1 / maj_r)*(1 / maj_r)*cir.Y()*cir.Y()) / (cir.X() * cir.X()));
+	if (nradius < maj_r)
+		e.SetMinorRadius(nradius);
+	else
+	{
+		e.SetMajorRadius(nradius);
+		e.SetMinorRadius(maj_r);
+		e.Rotate(gp_Ax1(P2G(d1.m_point), up), M_PI / 2);
+	}
+
+
+	return true;
+}
+
+
+void SetEllipse(HEllipse* object, const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3)
+{
+	gp_Elips e;
+	DigitizedPointGetEllipse(d1, d2, d3, e);
+	object->SetEllipse(e);
+}
+
+static boost::shared_ptr<HEllipse> initHEllipse(const DigitizedPoint& d1, const DigitizedPoint& d2, const DigitizedPoint& d3)
+{
+	gp_Elips e;
+	DigitizedPointGetEllipse(d1, d2, d3, e);
+	return boost::shared_ptr<HEllipse>(new HEllipse(e, &theApp->GetCurrentColor()));
+}
+
+
 	BOOST_PYTHON_MODULE(step) {
 
 		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init)
@@ -244,6 +298,12 @@ boost::python::list ShapeGetFaces(const CShape* shape) {
 			.def_readwrite("height", &CCuboid::m_y)
 			.def_readwrite("depth", &CCuboid::m_z)
 			;
+
+		boost::python::class_<HEllipse, boost::python::bases<HeeksObj> >("Ellipse", boost::python::no_init)
+			.def("__init__", boost::python::make_constructor(&initHEllipse))
+			.def("SetFromDigitized", SetEllipse)
+			;
+
 
 		boost::python::def("SetResPath", SetResPath);
 		boost::python::def("SetApp", SetApp);

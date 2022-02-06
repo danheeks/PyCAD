@@ -1,6 +1,5 @@
 import cad
 import geom
-from LeftAndRight import LeftAndRight
 import wx
 import math
 from Drawing import Drawing
@@ -28,7 +27,7 @@ class SetPreviousDirection(cad.BaseUndoable):
     def Run(self, redo):
         self.drawing.previous_direction = self.new_direction
         
-    def Rollback(self):
+    def RollBack(self):
         self.drawing.previous_direction = self.old_direction
 
 class LineArcDrawing(Drawing):
@@ -36,10 +35,8 @@ class LineArcDrawing(Drawing):
         Drawing.__init__(self)
         self.previous_direction = None
         self.drawing_mode = LineDrawingMode
-        self.container = None
         self.radius_for_circle = 5.0
         self.circle_mode = ThreePointsCircleMode
-        self.add_to_sketch = True
         self.save_drawing_mode = []
 
     def set_previous_direction(self):
@@ -67,6 +64,12 @@ class LineArcDrawing(Drawing):
         if self.drawing_mode == LineDrawingMode or self.drawing_mode == ArcDrawingMode:
             return 1
         return 0
+
+    def is_a_draw_level(self, level):
+        if self.drawing_mode == CircleDrawingMode:
+            if self.circle_mode == ThreePointsCircleMode:
+                return level > 0
+        return self.is_an_add_level(level)
     
     def is_an_add_level(self, level):
         if self.drawing_mode == CircleDrawingMode:
@@ -173,7 +176,9 @@ class LineArcDrawing(Drawing):
             p2 = end.point
             if p1 == p2: return False
             if self.TempObject() == None:
-                self.AddToTempObjects(cad.NewLine(p1, p2))
+                new_object = cad.ILine(p1, p2)
+                cad.PyIncref(new_object)
+                self.AddToTempObjects(new_object)
             else:
                 self.TempObject().A = p1
                 self.TempObject().B = p2
@@ -189,45 +194,45 @@ class LineArcDrawing(Drawing):
 #                        DigitizeMode::GetArcPoints(GetStartPos(), NULL, end, p1, p2, centre, axis);
                 p1 = self.start_pos.point
                 p2 = end.point
-                radius_for_circle = p1.Dist(p2)
+                self.radius_for_circle = p1.Dist(p2)
                 if self.TempObject() == None:
-                    self.AddToTempObjects(cad.NewCircle(p1, geom.Point3D(0, 0, 1), radius_for_circle))
+                    self.AddToTempObjects(cad.NewCircle(p1, geom.Point3D(0, 0, 1), self.radius_for_circle))
                 else:
                     self.TempObject().C = p1
-                    self.TempObject().radius = radius_for_circle
+                    self.TempObject().radius = self.radius_for_circle
                 return True
     
             elif self.circle_mode == ThreePointsCircleMode:
-                found, c = cad.GetTangentCircle(GetBeforeStartPos(), GetStartPos(), end)
-                if self.TempObject() == None:
-                    self.AddToTempObjects(cad.NewCircle(c.pc, geom.Point3D(0, 0, 1), c.radius))
-                else:
-                    self.TempObject().SetCircle(c)
+                if self.draw_step == 1:
+                    # add a line for graphics
+                    if self.TempObject() == None:
+                        self.AddToTempObjects(cad.NewLine(self.start_pos.point, end.point))
+                    else:
+                        self.TempObject().A = self.start_pos.point
+                        self.TempObject().B = end.point
+                else: # draw_step = 2
+                    # add the circle
+                    found, c = cad.GetTangentCircle(self.before_start_pos, self.start_pos, end)
+                    if self.TempObject() == None:
+                        self.AddToTempObjects(cad.NewCircle(geom.Point3D(c.c.x, c.c.y, 0.0), geom.Point3D(0, 0, 1), c.radius))
+                    else:
+                        self.TempObject().SetCircle(c)
                 return True
             elif self.circle_mode == TwoPointsCircleMode:
                 found, c = cad.GetCircleBetween(self.start_pos, end)
                 if found:
                     if self.TempObject() == None:
-                        self.AddToTempObjects(cad.NewCircle(c.pc, geom.Point3D(0, 0, 1), c.radius))
+                        self.AddToTempObjects(cad.NewCircle(geom.Point3D(c.c.x, c.c.y, 0.0), geom.Point3D(0, 0, 1), c.radius))
                     else:
                         self.TempObject().SetCircle(c)
                 return True
             elif self.circle_mode == CentreAndRadiusCircleMode:
                 if self.TempObject() == None:
-                    self.AddToTempObjects(cad.NewCircle(end.point, geom.Point3D(0, 0, 1), radius_for_circle))
+                    self.AddToTempObjects(cad.NewCircle(end.point, geom.Point3D(0, 0, 1), self.radius_for_circle))
                 else:
                     self.TempObject().C = end.point
-                    self.TempObject().radius = radius_for_circle
+                    self.TempObject().radius = self.radius_for_circle
                 return True
-
-    def GetOwnerForDrawingObjects(self):
-        if self.drawing_mode == LineDrawingMode or self.drawing_mode == ArcDrawingMode:
-            if self.add_to_sketch:
-                if self.container == None:
-                    self.container = cad.NewSketch()
-                    cad.AddUndoably(self.container)
-                return self.container
-        return cad.GetApp()
 
     def GetTitle(self):
         s = 'unknown'
@@ -292,6 +297,27 @@ def SetLineArcDrawing():
     global line_arc_drawing
     line_arc_drawing.drawing_mode = LineDrawingMode
     wx.GetApp().SetInputMode(line_arc_drawing)    
-
-
+    
+def SetCircles3pDrawing():
+    global line_arc_drawing
+    line_arc_drawing.drawing_mode = CircleDrawingMode
+    line_arc_drawing.circle_mode = ThreePointsCircleMode
+    wx.GetApp().SetInputMode(line_arc_drawing)    
+    
+def SetCircles2pDrawing():
+    global line_arc_drawing
+    line_arc_drawing.drawing_mode = CircleDrawingMode
+    line_arc_drawing.circle_mode = CentreAndPointCircleMode
+    wx.GetApp().SetInputMode(line_arc_drawing)    
+    
+def SetCircle1pDrawing():
+    global line_arc_drawing
+    line_arc_drawing.drawing_mode = CircleDrawingMode
+    line_arc_drawing.circle_mode = CentreAndRadiusCircleMode
+    wx.GetApp().SetInputMode(line_arc_drawing)    
+    
+def SetILineDrawing():
+    global line_arc_drawing
+    line_arc_drawing.drawing_mode = ILineDrawingMode
+    wx.GetApp().SetInputMode(line_arc_drawing)    
 

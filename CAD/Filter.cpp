@@ -4,6 +4,11 @@
 #include "stdafx.h"
 #include "Filter.h"
 
+CFilter::CFilter(int type, bool empty_means_none):m_empty_means_none(empty_means_none)
+{
+	AddType(type);
+}
+
 bool CFilter::IsTypeInFilter(int type)const{
 	if (type == 0)return false;
 	if (m_types.size() == 0)return !m_empty_means_none;

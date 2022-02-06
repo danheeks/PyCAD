@@ -124,7 +124,7 @@ class GraphicsCanvas(glcanvas.GLCanvas):
       wx.GetApp().RenderScreenText()
       
       self.SwapBuffers()
-      self.viewport.render_on_front_done = False
+      wx.GetApp().render_on_front_done = False
       wx.GetApp().DrawFront()
       
       return

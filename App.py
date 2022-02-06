@@ -1162,19 +1162,19 @@ class App(wx.App):
         
     def OnCircles3p(self, e):
         self.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetCircles3pDrawing()
+        LineArcDrawing.SetCircles3pDrawing()
         
     def OnCircles2p(self, e):
         self.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetCircles2pDrawing()
+        LineArcDrawing.SetCircles2pDrawing()
         
     def OnCircles1p(self, e):
         self.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetCircle1pDrawing()
+        LineArcDrawing.SetCircle1pDrawing()
         
     def OnILine(self, e):
         self.SetInputMode(self.select_mode) # mode to return to on ending drawing
-        cad.SetILineDrawing()
+        LineArcDrawing.SetILineDrawing()
         
     def OnPoints(self, e):
         self.SetInputMode(self.select_mode) # mode to return to on ending drawing
@@ -1350,6 +1350,7 @@ class App(wx.App):
         new_mode.OnModeChange()
         self.input_mode_object = new_mode
     
+        self.Repaint()
         self.frame.input_mode_canvas.Refresh()
         
     def RestoreInputMode(self):

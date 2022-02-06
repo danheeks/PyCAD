@@ -9,6 +9,7 @@ class CFilter
 {
 public:
 	CFilter(bool empty_means_none = false) :m_empty_means_none(empty_means_none){}
+	CFilter(int type, bool empty_means_none = false);
 	std::set<int> m_types;
 	bool m_empty_means_none;
 	void Clear(){ m_types.clear(); }

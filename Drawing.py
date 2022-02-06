@@ -11,10 +11,13 @@ class Drawing(InputMode):
         self.left_and_right = LeftAndRight()
         self.temp_object_in_list = []
         self.prev_object = None
+        self.container = None
+        self.add_to_sketch = True
         self.button_down_point = None
         self.inhibit_coordinate_change = False
         self.getting_position = False
         self.draw_step = 0
+        self.before_start_pos = None
         self.start_pos = None
         
     def GetTitle(self):
@@ -166,6 +169,11 @@ class Drawing(InputMode):
             self.SetDrawStepUndoable(0)
             
     def GetOwnerForDrawingObjects(self):
+        if self.add_to_sketch:
+            if self.container == None:
+                self.container = cad.NewSketch()
+                cad.AddUndoably(self.container)
+            return self.container
         return cad.GetApp()
     
     def OnFrontRender(self):
@@ -186,13 +194,14 @@ class SetDrawingDrawStep(cad.BaseUndoable):
     def Run(self, redo):
         self.drawing.draw_step = self.step
         
-    def Rollback(self):
+    def RollBack(self):
         self.drawing.draw_step = self.old_step
             
 class SetDrawingPosition(cad.BaseUndoable):
     def __init__(self, drawing, pos):
         cad.BaseUndoable.__init__(self)
         self.drawing = drawing
+        self.old_before_pos = drawing.before_start_pos
         self.prev_pos = drawing.start_pos
         self.next_pos = pos
         
@@ -200,9 +209,11 @@ class SetDrawingPosition(cad.BaseUndoable):
         return "set position"
     
     def Run(self, redo):
+        self.drawing.before_start_pos = self.prev_pos
         self.drawing.start_pos = self.next_pos
         
-    def Rollback(self):
+    def RollBack(self):
+        self.drawing.before_start_pos = self.old_before_pos
         self.drawing.start_pos = self.prev_pos
 
 RectanglesRegularShapeMode = 0

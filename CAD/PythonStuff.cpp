@@ -36,6 +36,7 @@
 #include "HPoint.h"
 #include "HText.h"
 #include "HCircle.h"
+#include "HILine.h"
 #include "InputMode.h"
 #include "MagDragWindow.h"
 #include "ViewRotating.h"
@@ -1698,6 +1699,11 @@ static boost::shared_ptr<HPoint> initHPoint(const Point3d& p)
 	return boost::shared_ptr<HPoint>(new HPoint(p, &theApp->current_color));
 }
 
+static boost::shared_ptr<HILine> initHILine(const Point3d &a, const Point3d &b)
+{
+	return boost::shared_ptr<HILine>(new HILine(a, b, &theApp->current_color));
+}
+
 static boost::shared_ptr<HCircle> initHCircle(const Point3d& c, const Point3d& a, double r)
 {
 	return boost::shared_ptr<HCircle>(new HCircle(c, a, r, &theApp->current_color));
@@ -2617,7 +2623,11 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::class_<HCircle, boost::python::bases<IdNamedObj> >("Circle", boost::python::no_init)
 		.def("__init__", boost::python::make_constructor(&initHCircle))
 		.def("GetArea", &CircleGetArea)
-		;	
+		.def("SetCircle", &HCircle::SetCircle)
+		.def_readwrite("C", &HCircle::m_c)
+		.def_readwrite("radius", &HCircle::m_radius)
+		.def_readwrite("axis", &HCircle::m_axis)
+		;
 
 	boost::python::class_<HPoint, boost::python::bases<IdNamedObj> >("Point", boost::python::no_init)
 		.def("__init__", boost::python::make_constructor(&initHPoint))
@@ -2630,6 +2640,10 @@ BOOST_PYTHON_MODULE(cad) {
 		;
 
 	boost::python::class_<HLine, boost::python::bases<EndedObject> >("Line", boost::python::no_init)
+		;
+
+	boost::python::class_<HILine, boost::python::bases<EndedObject> >("ILine", boost::python::no_init)
+		.def("__init__", boost::python::make_constructor(&initHILine))
 		;
 
 	boost::python::class_<HArc, boost::python::bases<EndedObject> >("Arc", boost::python::no_init)
@@ -2717,7 +2731,6 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("OnWheelRotation", &CViewport::OnWheelRotation)
 		.def_readwrite("orthogonal", &CViewport::m_orthogonal)
 		.def_readwrite("view_point", &CViewport::m_view_point)
-		.def_readwrite("render_on_front_done", &CViewport::m_render_on_front_done)
 		;
 
 	boost::python::enum_<MouseEventType>("MouseEventType")
@@ -2774,6 +2787,7 @@ BOOST_PYTHON_MODULE(cad) {
 		;
 
 	boost::python::class_<CFilter>("Filter")
+		.def(boost::python::init<int>())
 		.def("Clear", &CFilter::Clear)
 		.def("AddType", &CFilter::AddType)
 		.def("IsTypeInFilter", &CFilter::IsTypeInFilter)

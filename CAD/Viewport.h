@@ -19,7 +19,6 @@ protected:
 public:
 	CViewPoint m_view_point;
 	bool m_orthogonal;
-	bool m_render_on_front_done;
 
 	CViewport();
 	CViewport(int w, int h);
