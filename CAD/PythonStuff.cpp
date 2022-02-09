@@ -2990,6 +2990,7 @@ BOOST_PYTHON_MODULE(cad) {
 		;
 
 	boost::python::class_<DigitizedPoint>("DigitizedPoint")
+		.def(boost::python::init<Point3d, DigitizeType>())
 		.def(boost::python::init<DigitizedPoint>())
 		.def_readwrite("point", &DigitizedPoint::m_point)
 		.def_readwrite("type", &DigitizedPoint::m_type)

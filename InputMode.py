@@ -23,8 +23,15 @@ class InputMode:
     def GetProperties(self):
         return []
     
+    def GetTools(self):
+        return []
+    
     def OnKeyDown(self, key_code):
         return False 
         
     def OnKeyUp(self, key_code):
         return False 
+
+    def DragDoneWithXOR(self):
+        return False
+    

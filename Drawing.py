@@ -4,6 +4,8 @@ from LeftAndRight import LeftAndRight
 import wx
 import math
 from InputMode import InputMode
+import ToolBarTool
+from Object import PyProperty
 
 class Drawing(InputMode):
     def __init__(self):
@@ -17,8 +19,9 @@ class Drawing(InputMode):
         self.inhibit_coordinate_change = False
         self.getting_position = False
         self.draw_step = 0
-        self.before_start_pos = None
-        self.start_pos = None
+        self.before_start_pos = cad.DigitizedPoint()
+        self.start_pos = cad.DigitizedPoint()
+        self.user_add_point = geom.Point3D(0,0,0)
         
     def GetTitle(self):
         return 'Drawing'
@@ -26,7 +29,6 @@ class Drawing(InputMode):
     def DragDoneWithXOR(self):
         return True
 
-            
     def OnMouse(self, event):
         left_and_right_pressed, event_used = self.left_and_right.LeftAndRightPressed(event)
         
@@ -48,19 +50,48 @@ class Drawing(InputMode):
                         self.inhibit_coordinate_change = False
                     else:
                         self.set_digitize_plane()
-                        wx.GetApp().digitizing.digitized_point = self.button_down_point
+                        wx.GetApp().digitizing.digitized_point = cad.DigitizedPoint(self.button_down_point)
                         if self.getting_position:
                             self.inhibit_coordinate_change = True
                             self.getting_position = False
                         else:
-                            self.AddPoint()
+                            self.AddPoint(wx.GetApp().digitizing.digitized_point)
                 elif event.RightUp():
                     # do context menu same as select mode
                     wx.GetApp().select_mode.OnMouse(event)
                 elif event.Moving():
                     if not self.inhibit_coordinate_change:
-                        self.RecalculateAndRedraw(cad.IPoint(event.x, event.y))
-                        wx.GetApp().frame.input_mode_canvas.Refresh()                        
+                        end = self.RecalculateAndRedraw(cad.IPoint(event.x, event.y))
+                        self.UpdateUserPointProperties(end)                       
+                        
+    def UpdateUserPointProperties(self, end):
+        if end != None:
+            p = wx.GetApp().frame.input_mode_canvas.pg.GetProperty('add point')
+            if p != None:
+                px = p.GetPropertyByName('X')
+                if px != None:
+                    px.SetValue(str(end.point.x))
+                py = p.GetPropertyByName('Y')
+                if py != None:
+                    py.SetValue(str(end.point.y))
+                pz = p.GetPropertyByName('Z')
+                if pz != None:
+                    pz.SetValue(str(end.point.z))
+               
+                self.user_add_point = geom.Point3D(end.point)
+                
+    def UpdatePointFromProperties(self):
+        p = wx.GetApp().frame.input_mode_canvas.pg.GetProperty('add point')
+        if p != None:
+            px = p.GetPropertyByName('X')
+            if px != None:
+                self.user_add_point.x = float(px.GetValue())
+            py = p.GetPropertyByName('Y')
+            if py != None:
+                self.user_add_point.y = float(py.GetValue())
+            pz = p.GetPropertyByName('Z')
+            if pz != None:
+                self.user_add_point.z = float(pz.GetValue())
             
     def ClearObjectsMade(self):
         self.temp_object_in_list = []
@@ -94,11 +125,7 @@ class Drawing(InputMode):
             return None
         return self.temp_object_in_list[-1]
     
-    def AddPoint(self):
-        # kill focus on control being typed into
-        # theApp->m_frame->m_input_canvas->DeselectProperties();
-        # theApp->ProcessPendingEvents();
-        d = wx.GetApp().digitizing.digitized_point
+    def AddPoint(self, d):
         if d.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             return 
         calculated = False
@@ -139,13 +166,14 @@ class Drawing(InputMode):
         
         end = cad.Digitize(point)
         if end.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
-            return 
+            return
         if self.is_a_draw_level(self.draw_step):
             if self.DragDoneWithXOR():
                 wx.GetApp().EndDrawFront()
             self.calculate_item(end)
             if self.DragDoneWithXOR():wx.GetApp().DrawFront()
             else: cad.Repaint(True)
+        return end
             
     def SetDrawStepUndoable(self, s):
         undoable = SetDrawingDrawStep(self, s)
@@ -166,7 +194,7 @@ class Drawing(InputMode):
 
     def OnModeChange(self):
         if not isinstance(wx.GetApp().input_mode_object, Drawing):
-            self.SetDrawStepUndoable(0)
+            self.draw_step = 0
             
     def GetOwnerForDrawingObjects(self):
         if self.add_to_sketch:
@@ -180,6 +208,30 @@ class Drawing(InputMode):
         if self.DragDoneWithXOR() and self.draw_step:
             for object in self.temp_object_in_list:
                 object.OnGlCommands(False, False, True)
+                
+    def GetTools(self):
+        tools = []
+        tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
+        tools.append(ToolBarTool.CadToolBarTool('Stop Drawing', 'enddraw', self.EndDrawing))
+        return tools
+    
+    def AddPointToDrawing(self):
+        # kill focus on control being typed into
+        wx.GetApp().frame.input_mode_canvas.pg.ClearSelection()
+        self.UpdatePointFromProperties()
+        d = cad.DigitizedPoint(self.user_add_point, cad.DigitizeType.DIGITIZE_INPUT_TYPE)
+        self.AddPoint(d)
+        
+    def EndDrawing(self):
+        if self.DragDoneWithXOR():
+            wx.GetApp().EndDrawFront()
+        self.ClearObjectsMade()
+        wx.GetApp().RestoreInputMode()
+        
+    def GetProperties(self):
+        properties = []
+        wx.GetApp().AddInputProperty(properties, PyProperty("add point", 'user_add_point', self))
+        return properties
             
 class SetDrawingDrawStep(cad.BaseUndoable):
     def __init__(self, drawing, s):
@@ -201,20 +253,20 @@ class SetDrawingPosition(cad.BaseUndoable):
     def __init__(self, drawing, pos):
         cad.BaseUndoable.__init__(self)
         self.drawing = drawing
-        self.old_before_pos = drawing.before_start_pos
-        self.prev_pos = drawing.start_pos
-        self.next_pos = pos
+        self.old_before_pos = cad.DigitizedPoint(drawing.before_start_pos)
+        self.prev_pos = cad.DigitizedPoint(drawing.start_pos)
+        self.next_pos = cad.DigitizedPoint(pos)
         
     def GetTitle(self):
         return "set position"
     
     def Run(self, redo):
-        self.drawing.before_start_pos = self.prev_pos
-        self.drawing.start_pos = self.next_pos
+        self.drawing.before_start_pos = cad.DigitizedPoint(self.prev_pos)
+        self.drawing.start_pos = cad.DigitizedPoint(self.next_pos)
         
     def RollBack(self):
-        self.drawing.before_start_pos = self.old_before_pos
-        self.drawing.start_pos = self.prev_pos
+        self.drawing.before_start_pos = cad.DigitizedPoint(self.old_before_pos)
+        self.drawing.start_pos = cad.DigitizedPoint(self.prev_pos)
 
 RectanglesRegularShapeMode = 0
 PolygonsRegularShapeMode = 1

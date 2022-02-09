@@ -250,6 +250,7 @@ class PropertiesCanvas( wx.Panel ):
         self.pg.Bind( wxpg.EVT_PG_PAGE_CHANGED, self.OnPropGridPageChange )
         self.pg.Bind( wxpg.EVT_PG_SELECTED, self.OnPropGridSelect )
         self.pg.Bind( wxpg.EVT_PG_RIGHT_CLICK, self.OnPropGridRightClick )
+        self.pg.Bind( wx.EVT_MOUSE_EVENTS, self.OnMouse )
 
         self.panel.SetSizer(self.topsizer)
         self.topsizer.SetSizeHints(self.panel)
@@ -269,6 +270,12 @@ class PropertiesCanvas( wx.Panel ):
         self.pg.RegisterEditor(self.trivialPropertyEditor)
         
         self.EXTRA_TOOLBAR_HEIGHT = 7 # todo set to 14 for Linux
+        
+    def OnMouse(self, event):
+        if event.LeftDown():
+            # set the focus, so that the up/down keys work
+            self.pg.SetFocus()
+        event.Skip()
 
     def FindMapItem(self, p):
         if p in self.pmap:

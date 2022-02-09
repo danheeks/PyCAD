@@ -3,6 +3,8 @@ import geom
 import wx
 import math
 from Drawing import Drawing
+from Object import PyChoiceProperty
+from Object import PyProperty
 
 LineDrawingMode = 0
 ArcDrawingMode = 1
@@ -79,10 +81,8 @@ class LineArcDrawing(Drawing):
                 return level == 0
         return level == 1
     
-    def AddPoint(self):
-        if self.drawing_mode == CircleDrawingMode:
-            Drawing.AddPoint(self)
-        elif (self.drawing_mode == LineDrawingMode) or (self.drawing_mode == ArcDrawingMode):
+    def AddPoint(self, d):
+        if (self.drawing_mode == LineDrawingMode) or (self.drawing_mode == ArcDrawingMode):
             # edit the end of the previous item to be the start of the arc
             # this only happens if we are drawing tangents to other objects
             # really need to fill the gap with whatever we are tangent around
@@ -105,10 +105,7 @@ class LineArcDrawing(Drawing):
                             arc.A = geom.Point3D(spos)
                             arc.B = geom.Point3D(epos)
                             self.AddToTempObjects(arc)
-
-            Drawing.AddPoint(self)
-        else:
-            Drawing.AddPoint(self)
+        Drawing.AddPoint(self, d)
     
     def calculate_item(self, end):
         if self.number_of_steps() > 1 and self.start_pos.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:return False
@@ -289,7 +286,14 @@ class LineArcDrawing(Drawing):
             self.container = None
         self.prev_object = None
         self.previous_direction = None
-
+        
+    def GetProperties(self):
+        properties = []
+        if self.drawing_mode == CircleDrawingMode:
+            if self.circle_mode == CentreAndRadiusCircleMode:
+                wx.GetApp().AddInputProperty(properties, PyProperty("radius", 'radius_for_circle', self))
+        properties += Drawing.GetProperties(self)
+        return properties
     
 line_arc_drawing = LineArcDrawing()
     

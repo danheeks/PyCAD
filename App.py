@@ -5,7 +5,6 @@ from Frame import Frame
 import os
 from HeeksConfig import HeeksConfig
 import ContextTool
-import ToolBarTool
 import SelectMode
 from HDialog import HDialog
 from HDialog import control_border
@@ -464,17 +463,6 @@ class App(wx.App):
             p += curve.Perim()
         s += str(p)
         wx.MessageBox(s)
-    
-    def AddPointToDrawing(self):
-        # theApp->m_digitizing->digitized_point.m_type = DigitizeInputType;
-        #((Drawing*)(theApp->input_mode_object))->AddPoint();
-        pass
-        
-    def EndDrawing(self):
-        if self.input_mode_object.DragDoneWithXOR():
-            self.EndDrawFront()
-        self.input_mode_object.ClearObjectsMade()
-        self.RestoreInputMode()
         
     def DrawFront(self):
         if not self.render_on_front_done:
@@ -493,13 +481,7 @@ class App(wx.App):
         self.GetViewport().EndXOR()
     
     def GetInputModeTools(self):
-        tools = []
-        input_mode_class = self.input_mode_object.__class__
-        if input_mode_class == LineArcDrawing.LineArcDrawing:
-            tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
-            tools.append(ToolBarTool.CadToolBarTool('Stop Drawing', 'enddraw', self.EndDrawing))
-        
-        return tools
+        return self.input_mode_object.GetTools()
     
     def SetMenuItemBitmap(self, item, tool):
         bitmap_path = tool.BitmapPath()
@@ -1351,15 +1333,15 @@ class App(wx.App):
         self.input_mode_object = new_mode
     
         self.Repaint()
-        self.frame.input_mode_canvas.Refresh()
+        self.frame.input_mode_canvas.RemoveAndAddAll()
         
     def RestoreInputMode(self):
         if self.previous_input_mode:
             self.previous_input_mode.OnModeChange()
             self.input_mode_object = self.previous_input_mode
-            self.frame.input_mode_canvas.Refresh()
-            self.Repaint()
             self.previous_input_mode = None
+            self.frame.input_mode_canvas.RemoveAndAddAll()
+            self.Repaint()
             
     def RenderScreenText(self):
         #draw the input mode text on the top
@@ -1369,6 +1351,10 @@ class App(wx.App):
 
                 if self.graphics_text_mode == GraphicsTextModeWithHelp:
                     cad.RenderScreenText('\n\n' + self.input_mode_object.GetHelpText() + '\n', 6.5)
+                    
+    def AddInputProperty(self, properties, p):
+        p.recalc = self.frame.input_mode_canvas.RemoveAndAddAll
+        properties.append(p)          
             
         
 class CopyObjectUndoable(cad.BaseUndoable):

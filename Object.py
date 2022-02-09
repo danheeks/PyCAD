@@ -126,6 +126,8 @@ class PyPropertyLength(cad.Property):
     def __init__(self, title, value_name, pyobj, heeksobj = None, recalculate = None):
         if heeksobj == None:
             heeksobj = pyobj
+        if not isinstance(heeksobj, cad.Object):
+                heeksobj = None        
         t = cad.PROPERTY_TYPE_LENGTH
         cad.Property.__init__(self, t, title, heeksobj)
         self.value_name = value_name
@@ -174,7 +176,10 @@ class PyProperty(cad.Property):
             self.children.append(PyPropertyLength('X', 'x', a, object))
             self.children.append(PyPropertyLength('Y', 'y', a, object))
             self.children.append(PyPropertyLength('Z', 'z', a, object))
-        cad.Property.__init__(self, t, title, object)
+        heeksobj = None
+        if isinstance(object, cad.Object):
+            heeksobj = object        
+        cad.Property.__init__(self, t, title, heeksobj)
         self.value_name = value_name
         self.title = title
         self.type = t
