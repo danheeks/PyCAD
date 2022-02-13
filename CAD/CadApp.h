@@ -177,7 +177,7 @@ public:
 	bool RollForward(void);
 	bool CanUndo(void);
 	bool CanRedo(void);
-	virtual void StartHistory();
+	virtual void StartHistory(bool freeze_observers = true);
 	virtual void EndHistory(void);
 	void ClearRollingForward(void);
 	bool Add(HeeksObj* object, HeeksObj* add_before);

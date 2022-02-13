@@ -89,7 +89,6 @@ class TreeCanvas(wx.ScrolledCanvas):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-        self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
         
     def ObjectRenderedIndex(self, object):
         # returns index number; 0 for first item, if object is in rendered objects
@@ -133,9 +132,6 @@ class TreeCanvas(wx.ScrolledCanvas):
                 cad.Select(self.rendered_objects[index])
         else:
             wx.GetApp().OnKeyDown(e)
-        
-    def OnKeyUp(self, e):
-        pass
         
     def OnRemoved(self, removed):
         self.SetVirtualSize(self.GetRenderSize())

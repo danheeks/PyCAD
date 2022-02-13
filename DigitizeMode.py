@@ -53,9 +53,9 @@ class DigitizeMode(InputMode):
             wx.GetApp().frame.input_mode_canvas.Refresh()
             cad.Repaint()
             
-    def OnModeChange(self):
+    def OnStart(self):
         self.point_or_window.reset()
-        self.point_or_window.OnModeChange()
+        self.point_or_window.OnStart()
         
     def OnFrontRender(self):
         self.point_or_window.OnFrontRender()
@@ -88,7 +88,7 @@ class PointOrWindow():
             else:
                 self.SetWithPoint(cad.IPoint(event.x, event.y))
                 
-    def OnModeChange(self):
+    def OnStart(self):
         self.visible = True
         
     def SetWithPoint(self, point):

@@ -48,13 +48,14 @@ private:
 	std::list<Undoable *>::iterator as_new_pos;
 	bool as_new_pos_exists;
 	bool as_new_when_at_list_start;
+	bool observers_frozen;
 
 	// History virtual function
 	void SetAsNewPos(std::list<Undoable *>::iterator &It){as_new_pos = It; as_new_pos_exists = true;}
 	void RemoveAsNewPosIfEqual(std::list<Undoable *>::iterator &It);
 
 public:
-	MainHistory(void): History(0){as_new_pos_exists = false; as_new_when_at_list_start = true;}
+	MainHistory(void) : History(0){ as_new_pos_exists = false; as_new_when_at_list_start = true; observers_frozen = false; }
 	~MainHistory(void){}
 
 	bool IsModified(void);
@@ -62,7 +63,7 @@ public:
 	void DoUndoable(Undoable *);
 	void SetAsModified();
 
-	void StartHistory();
+	void StartHistory(bool freeze_observers = true);
 	bool EndHistory(void);
 
 };

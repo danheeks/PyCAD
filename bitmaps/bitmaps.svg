@@ -6307,9 +6307,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.99999995"
-     inkscape:cx="239.50001"
-     inkscape:cy="402.50002"
+     inkscape:zoom="11.313708"
+     inkscape:cx="455.2884"
+     inkscape:cy="375.16436"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -6516,6 +6516,22 @@
        inkscape:export-filename="C:\Users\Dan\HeeksCAD\icons\sketch.png"
        inkscape:export-xdpi="45.74511"
        inkscape:export-ydpi="45.74511" />
+    <path
+       style="fill:#d0d0d0;fill-opacity:1;fill-rule:evenodd;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 421.94698,378.04027 3.00323,3.08195 22.32229,-20.65837 -3.10671,-3.21009 z"
+       id="path24188-4"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="C:\Dev\PyCAD\bitmaps\line.png"
+       inkscape:export-xdpi="337.70963"
+       inkscape:export-ydpi="337.70963" />
+    <path
+       style="fill:#d0d0d0;fill-opacity:1;fill-rule:evenodd;stroke:#606060;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 469.00259,380.97492 2.79235,-3.53629 c -10.55294,-8.5355 1.89928,-22.35354 11.86448,-14.90673 l 3.30991,-3.78833 c -14.9443,-11.25728 -33.25423,8.7721 -17.96674,22.23135 z"
+       id="path24188-4-4"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="C:\Dev\PyCAD\bitmaps\arc.png"
+       inkscape:export-xdpi="335.00012"
+       inkscape:export-ydpi="335.00012" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;line-height:0%;font-family:'Bitstream Vera Sans';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"

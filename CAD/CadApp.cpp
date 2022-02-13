@@ -1367,9 +1367,9 @@ bool CCadApp::RollForward(void)
 	return result;
 }
 
-void CCadApp::StartHistory()
+void CCadApp::StartHistory(bool freeze_observers)
 {
-	history->StartHistory();
+	history->StartHistory(freeze_observers);
 }
 
 void CCadApp::EndHistory(void)

@@ -26,7 +26,6 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_MENU, self.OnMenu, None, 10000, 12000)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-        self.Bind(wx.EVT_KEY_UP, self.OnKeyUp)
         self.viewport= cad.Viewport()
         self.Resize()
         self.paint_callbacks = []
@@ -42,48 +41,39 @@ class GraphicsCanvas(glcanvas.GLCanvas):
         self.right_down_and_no_left_clicked = False
 
     def OnSize(self, event):
-       self.Resize()
-       event.Skip()
+        self.Resize()
+        event.Skip()
 
     def OnMenu(self, event):
-      index = event.GetId() - 10000
-      tool = self.tools[index]
-      tool.Run()
+        index = event.GetId() - 10000
+        tool = self.tools[index]
+        tool.Run()
       
     def OnKeyDown(self, event):
-        k = event.GetKeyCode()
-        if k == wx.WXK_ESCAPE and wx.GetApp().frame.IsFullScreen():
-            wx.GetApp().ShowFullScreen(False)
-        else:
-            key_code = Key.KeyCodeFromWx(event)
-            if not wx.GetApp().input_mode_object.OnKeyDown(key_code):
-                wx.GetApp().OnKeyDown(event)
-            
-    def OnKeyUp(self, event):
-        key_code = Key.KeyCodeFromWx(event)
-        wx.GetApp().input_mode_object.OnKeyUp(key_code)
+        if wx.GetApp().OnKeyDown(event):
+            event.Skip()
     
     def AppendToolsToMenu(self, menu, tools):
-      for tool in tools:
-         if tool.IsSeparator():
-            menu.AppendSeparator()
-         elif tool.IsAToolList():
-            sub_menu = wx.Menu()
-            self.AppendToolsToMenu(sub_menu, tool.GetChildTools())
-            menu.AppendMenu(wx.ID_ANY, tool.GetTitle(), sub_menu)
-         else:
-            item = wx.MenuItem(menu, 10000 + self.next_tool_id, text = tool.GetTitle(), help = tool.GetToolTip())
-            str = tool.BitmapPath()
-            if len(str)>0:
-                try:
-                    image = wx.Image(res_folder + '/bitmaps/' + str + '.png')
-                    image.Rescale(24, 24)
-                    item.SetBitmap(wx.BitmapFromImage(image))
-                except:
-                    pass
-            menu.AppendItem(item)
-            self.next_tool_id = self.next_tool_id + 1
-            self.tools.append(tool)
+        for tool in tools:
+            if tool.IsSeparator():
+                u.AppendSeparator()
+            elif tool.IsAToolList():
+                sub_menu = wx.Menu()
+                self.AppendToolsToMenu(sub_menu, tool.GetChildTools())
+                menu.AppendMenu(wx.ID_ANY, tool.GetTitle(), sub_menu)
+            else:
+                item = wx.MenuItem(menu, 10000 + self.next_tool_id, text = tool.GetTitle(), help = tool.GetToolTip())
+                str = tool.BitmapPath()
+                if len(str)>0:
+                    try:
+                        image = wx.Image(res_folder + '/bitmaps/' + str + '.png')
+                        image.Rescale(24, 24)
+                        item.SetBitmap(wx.BitmapFromImage(image))
+                    except:
+                        pass
+                menu.AppendItem(item)
+                self.next_tool_id = self.next_tool_id + 1
+                self.tools.append(tool)
 
     def OnMouse(self, event):
         self.SetCurrent(self.context)

@@ -1808,10 +1808,12 @@ void SetViewUnits(double units)
 	theApp->m_view_units = units;
 }
 
-void StartHistory()
+void StartHistory(bool freeze_observers = true)
 {
-	theApp->StartHistory();
+	theApp->StartHistory(freeze_observers);
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(StartHistoryOverloads, StartHistory, 0, 1)
 
 void EndHistory()
 {
@@ -3081,7 +3083,7 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("GetViewUnits", GetViewUnits);
 	boost::python::def("SetViewUnits", SetViewUnits);
 	boost::python::def("GetApp", GetApp, boost::python::return_value_policy<boost::python::reference_existing_object>());
-	boost::python::def("StartHistory", StartHistory);
+	boost::python::def("StartHistory", &StartHistory, StartHistoryOverloads(boost::python::arg("freeze_observers")));
 	boost::python::def("EndHistory", EndHistory);
 	boost::python::def("ClearHistory", ClearHistory);
 	boost::python::def("IsModified", IsModified);

@@ -43,7 +43,7 @@ public:
 	virtual HeeksObj* GetPastIntoForOpenXML() = 0;
 	virtual void Repaint(bool soon = false) = 0;
 	virtual double GetPixelScale(void) = 0;
-	virtual void StartHistory() = 0;
+	virtual void StartHistory(bool freeze_observers = true) = 0;
 	virtual void EndHistory(void) = 0;
 	virtual HeeksObj* ReadXMLElement(TiXmlElement* pElem) = 0;
 	virtual void ObjectWriteToXML(HeeksObj *object, TiXmlElement *element) = 0;

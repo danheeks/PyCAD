@@ -11,7 +11,10 @@ class InputMode:
     def OnRender(self):
         pass
             
-    def OnModeChange(self):
+    def OnStart(self):
+        pass
+    
+    def OnEnd(self):
         pass
 
     def OnFrontRender(self):
@@ -27,9 +30,6 @@ class InputMode:
         return []
     
     def OnKeyDown(self, key_code):
-        return False 
-        
-    def OnKeyUp(self, key_code):
         return False 
 
     def DragDoneWithXOR(self):

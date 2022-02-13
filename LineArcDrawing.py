@@ -5,6 +5,8 @@ import math
 from Drawing import Drawing
 from Object import PyChoiceProperty
 from Object import PyProperty
+from HeeksConfig import HeeksConfig
+import ToolBarTool
 
 LineDrawingMode = 0
 ArcDrawingMode = 1
@@ -264,7 +266,7 @@ class LineArcDrawing(Drawing):
                 s += "centre with radius mode\n  click on centre point"
         return s
     
-    def OnKeyUp(self, key_code):
+    def OnKeyDown(self, key_code):
         if key_code == ord('A'):
             if self.drawing_mode == ArcDrawingMode:
                 # switch back to previous drawing mode
@@ -275,13 +277,13 @@ class LineArcDrawing(Drawing):
                 # switch to arc drawing mode until a is released
                 self.save_drawing_mode.append(self.drawing_mode)
                 self.drawing_mode = ArcDrawingMode
-            wx.GetApp().frame.input_mode_canvas.Refresh()
+            wx.GetApp().frame.input_mode_canvas.UpdateTitleProperty()             
             return True
-        return Drawing.OnKeyUp(self, key_code)
+        return Drawing.OnKeyDown(self, key_code)
     
-    def OnModeChange(self):
+    def OnStart(self):
         # on start of drawing mode
-        Drawing.OnModeChange(self)
+        Drawing.OnStart(self)
         if self.container:
             self.container = None
         self.prev_object = None
@@ -294,6 +296,28 @@ class LineArcDrawing(Drawing):
                 wx.GetApp().AddInputProperty(properties, PyProperty("radius", 'radius_for_circle', self))
         properties += Drawing.GetProperties(self)
         return properties
+    
+    def GetTools(self):
+        tools = Drawing.GetTools(self)
+        self.arc_drawing_tool = ToolBarTool.CadToolBarTool('Arc Drawing', 'arc' if self.drawing_mode == ArcDrawingMode else 'line', self.SetArcDrawing)
+        tools.append(self.arc_drawing_tool)
+        return tools
+    
+    def SetArcDrawing(self):
+        if self.drawing_mode == LineDrawingMode:
+            self.drawing_mode = ArcDrawingMode
+        else:
+            self.drawing_mode = LineDrawingMode
+        wx.GetApp().frame.input_mode_canvas.RecreateToolbar()    
+        wx.GetApp().frame.input_mode_canvas.SizeCode()       
+        
+    def ReadDefaultAddToSketch(self):
+        config = HeeksConfig()
+        self.add_to_sketch = config.ReadBool("LineArcAddToSketch", True)
+        
+    def WriteDefaultAddToSketch(self):
+        config = HeeksConfig()
+        config.WriteBool("LineArcAddToSketch", self.add_to_sketch)
     
 line_arc_drawing = LineArcDrawing()
     

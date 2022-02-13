@@ -13,6 +13,11 @@ History::History(int Level)
 
 void History::Run(bool redo)
 {
+	if (sub_history)
+	{
+		sub_history->Run(redo);
+		return;
+	}
 	for(std::list<Undoable *>::iterator It = m_undoables.begin(); It != m_undoables.end(); It++)
 	{
 		Undoable *u = *It;
@@ -22,7 +27,12 @@ void History::Run(bool redo)
 
 void History::RollBack(void)
 {
-	for(std::list<Undoable *>::reverse_iterator It = m_undoables.rbegin(); It != m_undoables.rend(); It++)
+	if (sub_history)
+	{
+		sub_history->RollBack();
+		return;
+	}
+	for (std::list<Undoable *>::reverse_iterator It = m_undoables.rbegin(); It != m_undoables.rend(); It++)
 	{
 		Undoable *u = *It;
 		u->RollBack();
@@ -31,7 +41,9 @@ void History::RollBack(void)
 
 bool History::InternalRollBack(void)
 {
-	if(!CanUndo())return false;
+	if (sub_history)
+		return sub_history->InternalRollBack();
+	if (!CanUndo())return false;
 	Undoable *u;
 	m_curpos--;
 	u = *m_curpos;
@@ -41,7 +53,9 @@ bool History::InternalRollBack(void)
 
 bool History::InternalRollForward(void)
 {
-	if(!CanRedo())return false;
+	if (sub_history)
+		return sub_history->InternalRollForward();
+	if (!CanRedo())return false;
 	Undoable *u = *m_curpos;
 	u->Run(true);
 	m_curpos++;
@@ -50,14 +64,18 @@ bool History::InternalRollForward(void)
 
 bool History::CanUndo(void)
 {
-	if(m_undoables.size() == 0)return false;
+	if (sub_history)
+		return sub_history->CanUndo();
+	if (m_undoables.size() == 0)return false;
 	if(m_curpos == m_undoables.begin())return false;
 	return true;
 }
 
 bool History::CanRedo(void)
 {
-	if(m_undoables.size() == 0)return false;
+	if (sub_history)
+		return sub_history->CanRedo();
+	if (m_undoables.size() == 0)return false;
 	if(m_curpos == m_undoables.end())return false;
 	return true;
 }
@@ -208,17 +226,23 @@ void MainHistory::SetAsModified()
 	as_new_pos_exists = false;
 }
 
-void MainHistory::StartHistory()
+void MainHistory::StartHistory(bool freeze_observers)
 {
-	if (level == 0)
+	if (level == 0 && freeze_observers)
+	{
 		theApp->ObserversFreeze();
+		observers_frozen = true;
+	}
 	History::StartHistory();
 }
 
 bool MainHistory::EndHistory(void)
 {
 	bool value = History::EndHistory();
-	if (level == 0)
+	if (level == 0 && observers_frozen)
+	{
 		theApp->ObserversThaw();
+		observers_frozen = false;
+	}
 	return value;
 }

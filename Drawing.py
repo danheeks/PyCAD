@@ -6,6 +6,7 @@ import math
 from InputMode import InputMode
 import ToolBarTool
 from Object import PyProperty
+from HeeksConfig import HeeksConfig
 
 class Drawing(InputMode):
     def __init__(self):
@@ -36,7 +37,7 @@ class Drawing(InputMode):
             if self.DragDoneWithXOR():
                 wx.GetApp().EndDrawFront()
             self.ClearObjectsMade()
-            wx.GetApp().RestoreInputMode()
+            wx.GetApp().SetInputMode(wx.GetApp().select_mode)
 
         if not event_used:
             if event.middleDown or event.GetWheelRotation() != 0:
@@ -157,7 +158,7 @@ class Drawing(InputMode):
                         
     def AddObjectsMade(self):
         for object in self.temp_object_in_list:
-            cad.AddUndoably(object)
+            cad.AddUndoably(object, self.GetOwnerForDrawingObjects())
         if self.DragDoneWithXOR():cad.DrawObjectsOnFront(self.temp_object_in_list, True)
         self.temp_object_in_list = []        
                 
@@ -188,13 +189,33 @@ class Drawing(InputMode):
     def OnKeyDown(self, key_code):
         if key_code == cad.KeyCode.F1 or key_code == cad.KeyCode.Return or key_code == cad.KeyCode.Escape:
             self.ClearObjectsMade()
-            wx.GetApp().RestoreInputMode()
+            wx.GetApp().SetInputMode(wx.GetApp().select_mode)
             return True
         return False
 
-    def OnModeChange(self):
-        if not isinstance(wx.GetApp().input_mode_object, Drawing):
-            self.draw_step = 0
+    def OnStart(self):
+        self.draw_step = 0
+        self.ReadDefaultValues()
+        cad.StartHistory(False)
+        
+    def OnEnd(self):
+        cad.EndHistory()
+        self.WriteDefaultValues()
+        self.container = None
+        
+    def ReadDefaultValues(self):
+        self.ReadDefaultAddToSketch()
+        
+    def ReadDefaultAddToSketch(self):
+        config = HeeksConfig()
+        self.add_to_sketch = config.ReadBool("DrawingAddToSketch", False)
+
+    def WriteDefaultValues(self):
+        self.WriteDefaultAddToSketch()
+        
+    def WriteDefaultAddToSketch(self):
+        config = HeeksConfig()
+        config.WriteBool("DrawingAddToSketch", self.add_to_sketch)
             
     def GetOwnerForDrawingObjects(self):
         if self.add_to_sketch:
@@ -213,6 +234,7 @@ class Drawing(InputMode):
         tools = []
         tools.append(ToolBarTool.CadToolBarTool('Add Point', 'add', self.AddPointToDrawing))
         tools.append(ToolBarTool.CadToolBarTool('Stop Drawing', 'enddraw', self.EndDrawing))
+        tools.append(ToolBarTool.CadToolBarTool('Get Position', 'pickpos', self.PickPosition))
         return tools
     
     def AddPointToDrawing(self):
@@ -226,11 +248,15 @@ class Drawing(InputMode):
         if self.DragDoneWithXOR():
             wx.GetApp().EndDrawFront()
         self.ClearObjectsMade()
-        wx.GetApp().RestoreInputMode()
+        wx.GetApp().SetInputMode(wx.GetApp().select_mode)
+        
+    def PickPosition(self):
+        self.getting_position = True
         
     def GetProperties(self):
         properties = []
         wx.GetApp().AddInputProperty(properties, PyProperty("add point", 'user_add_point', self))
+        wx.GetApp().AddInputProperty(properties, PyProperty("add to sketch", 'add_to_sketch', self))
         return properties
             
 class SetDrawingDrawStep(cad.BaseUndoable):

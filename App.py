@@ -20,6 +20,7 @@ from Ribbon import RB
 import Drawing
 import LineArcDrawing
 import DigitizeMode
+import Key
 
 SKETCH_OP_UNION = 1
 SKETCH_OP_SUBTRACT = 2
@@ -646,6 +647,14 @@ class App(wx.App):
         
     def OnKeyDown(self, e):
         k = e.GetKeyCode()
+        if k == wx.WXK_ESCAPE and self.frame.IsFullScreen():
+            self.ShowFullScreen(False)
+            return True
+        else:
+            key_code = Key.KeyCodeFromWx(e)
+            if wx.GetApp().input_mode_object.OnKeyDown(key_code):
+                return True
+
         if k == wx.WXK_DELETE:
             if cad.GetNumSelected() > 0:
                 self.DeleteMarkedList()
@@ -705,7 +714,7 @@ class App(wx.App):
         res = self.CheckForModifiedDoc()
         if res != wx.CANCEL:
             cad.Reset()
-            self.RestoreInputMode()
+            self.SetInputMode(self.select_mode)
             self.OnNewOrOpen(False)
             cad.ClearHistory()
             cad.SetLikeNewFile()
@@ -738,7 +747,7 @@ class App(wx.App):
         if res != wx.CANCEL:
             # self.OnBeforeNewOrOpen(True, res)
             cad.Reset()
-            self.RestoreInputMode()
+            self.SetInputMode(self.select_mode)
             if cad.OpenFile(filepath):
                 self.DoFileOpenViewMag()
                 self.OnNewOrOpen(True)
@@ -1327,21 +1336,14 @@ class App(wx.App):
             
     def SetInputMode(self, new_mode):
         if new_mode == None: return
-
+        
+        self.input_mode_object.OnEnd()
         self.previous_input_mode = self.input_mode_object
-        new_mode.OnModeChange()
+        new_mode.OnStart()
         self.input_mode_object = new_mode
     
         self.Repaint()
         self.frame.input_mode_canvas.RemoveAndAddAll()
-        
-    def RestoreInputMode(self):
-        if self.previous_input_mode:
-            self.previous_input_mode.OnModeChange()
-            self.input_mode_object = self.previous_input_mode
-            self.previous_input_mode = None
-            self.frame.input_mode_canvas.RemoveAndAddAll()
-            self.Repaint()
             
     def RenderScreenText(self):
         #draw the input mode text on the top
