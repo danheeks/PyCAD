@@ -129,7 +129,7 @@ bool CCylinder::Stretch(const Point3d &p, const Point3d &shift, void* data)
 	{
 		CCylinder* new_object = new CCylinder(m_pos, m_radius, m_height, NULL, m_color, (float)m_opacity);
 		new_object->CopyIDsFrom(this);
-		theApp->StartHistory();
+		theApp->StartHistory(L"Cylinder Strech");
 		theApp->DeleteUndoably(this);
 		theApp->AddUndoably(new_object,m_owner,NULL);
 		theApp->EndHistory();

@@ -363,7 +363,7 @@ class PropertiesCanvas( wx.Panel ):
         if properties == None:
             return
 
-        cad.StartHistory()
+        cad.StartHistory('Property Change')
         
         for property in properties:
             if property.GetType() == cad.PROPERTY_TYPE_STRING or property.GetType() == cad.PROPERTY_TYPE_LONG_STRING:
@@ -389,7 +389,7 @@ class PropertiesCanvas( wx.Panel ):
         #for changer in changers:
             #cad.DoUndoable(changer)
             
-        cad.EndHistory()
+        wx.GetApp().EndHistory()
         
         self.in_OnPropGridChange = False
 

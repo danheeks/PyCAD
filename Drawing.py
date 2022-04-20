@@ -15,7 +15,6 @@ class Drawing(InputMode):
         self.temp_object_in_list = []
         self.prev_object = None
         self.container = None
-        self.add_to_sketch = True
         self.button_down_point = None
         self.inhibit_coordinate_change = False
         self.getting_position = False
@@ -130,7 +129,7 @@ class Drawing(InputMode):
         if d.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:
             return 
         calculated = False
-        cad.StartHistory()
+        cad.StartHistory('Add Drawing Point')
         if self.is_an_add_level(self.draw_step):
             calculated = self.calculate_item(d)
             if calculated:
@@ -148,7 +147,7 @@ class Drawing(InputMode):
             next_step = self.step_to_go_to_after_last_step()
             
         self.SetDrawStepUndoable(next_step)
-        cad.EndHistory()
+        wx.GetApp().EndHistory()
         self.getting_position = False
         self.inhibit_coordinate_change = False
         cad.Repaint()
@@ -175,6 +174,11 @@ class Drawing(InputMode):
             if self.DragDoneWithXOR():wx.GetApp().DrawFront()
             else: cad.Repaint(True)
         return end
+    
+    def SetContainerUndoable(self, container):
+        undoable = SetContainer(self, container)
+        cad.PyIncref(undoable)
+        cad.DoUndoable(undoable)
             
     def SetDrawStepUndoable(self, s):
         undoable = SetDrawingDrawStep(self, s)
@@ -196,31 +200,28 @@ class Drawing(InputMode):
     def OnStart(self):
         self.draw_step = 0
         self.ReadDefaultValues()
-        cad.StartHistory(False)
+        if self.AddToSketch():
+            cad.StartHistory('Start Sketch', False)
         
     def OnEnd(self):
-        cad.EndHistory()
+        if self.AddToSketch():
+            wx.GetApp().EndHistory()
         self.WriteDefaultValues()
-        self.container = None
+        self.SetContainerUndoable(None)
         
     def ReadDefaultValues(self):
-        self.ReadDefaultAddToSketch()
-        
-    def ReadDefaultAddToSketch(self):
-        config = HeeksConfig()
-        self.add_to_sketch = config.ReadBool("DrawingAddToSketch", False)
+        pass
 
     def WriteDefaultValues(self):
-        self.WriteDefaultAddToSketch()
-        
-    def WriteDefaultAddToSketch(self):
-        config = HeeksConfig()
-        config.WriteBool("DrawingAddToSketch", self.add_to_sketch)
+        pass
+    
+    def AddToSketch(self):
+        return False
             
     def GetOwnerForDrawingObjects(self):
-        if self.add_to_sketch:
+        if self.AddToSketch():
             if self.container == None:
-                self.container = cad.NewSketch()
+                self.SetContainerUndoable(cad.NewSketch())
                 cad.AddUndoably(self.container)
             return self.container
         return cad.GetApp()
@@ -256,7 +257,6 @@ class Drawing(InputMode):
     def GetProperties(self):
         properties = []
         wx.GetApp().AddInputProperty(properties, PyProperty("add point", 'user_add_point', self))
-        wx.GetApp().AddInputProperty(properties, PyProperty("add to sketch", 'add_to_sketch', self))
         return properties
             
 class SetDrawingDrawStep(cad.BaseUndoable):
@@ -274,6 +274,22 @@ class SetDrawingDrawStep(cad.BaseUndoable):
         
     def RollBack(self):
         self.drawing.draw_step = self.old_step
+            
+class SetContainer(cad.BaseUndoable):
+    def __init__(self, drawing, container):
+        cad.BaseUndoable.__init__(self)
+        self.drawing = drawing
+        self.old_container = drawing.container
+        self.container = container
+        
+    def GetTitle(self):
+        return "set_container"
+    
+    def Run(self, redo):
+        self.drawing.container = self.container
+        
+    def RollBack(self):
+        self.drawing.container = self.old_container
             
 class SetDrawingPosition(cad.BaseUndoable):
     def __init__(self, drawing, pos):

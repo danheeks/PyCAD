@@ -687,7 +687,7 @@ void CShape::CopyIDsFrom(const CShape* shape_from)
 
 HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
 {
-	theApp->StartHistory();
+	theApp->StartHistory(L"Cut Shapes");
 	HeeksObj* return_object = NULL;
 
 #if 0
@@ -767,7 +767,6 @@ HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
 	}
 	}
 
-	theApp->EndHistory();
 	theApp->Repaint();
 
 	return return_object;

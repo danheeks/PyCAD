@@ -202,7 +202,7 @@ class TreeCanvas(wx.ScrolledCanvas):
                             break
 
                     if drag_possible:
-                        cad.StartHistory()
+                        cad.StartHistory('Drag in Objects Window')
 
                         # cut the objects
                         cad.DeleteObjectsUndoably(self.dragged_list)
@@ -225,7 +225,7 @@ class TreeCanvas(wx.ScrolledCanvas):
                             else:
                                 cad.AddUndoably(object, add_to, button.paste_before if (button != None) else None)
 
-                        cad.EndHistory()
+                        wx.GetApp().EndHistory()
                     else:
                         self.Refresh()
                 else:

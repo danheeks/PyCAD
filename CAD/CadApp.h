@@ -170,6 +170,7 @@ public:
 	bool IsModified(void);
 	void SetAsModified();
 	void ClearHistory(void);
+	int GetHistoryLevel();
 	void glCommandsAll(const CViewPoint &view_point);
 	virtual double GetPixelScale(void);
 	void DoUndoable(Undoable *);
@@ -177,8 +178,11 @@ public:
 	bool RollForward(void);
 	bool CanUndo(void);
 	bool CanRedo(void);
-	virtual void StartHistory(bool freeze_observers = true);
+	const wchar_t* GetUndoTitle();
+	const wchar_t* GetRedoTitle();
+	virtual void StartHistory(const wchar_t* title, bool freeze_observers = true);
 	virtual void EndHistory(void);
+
 	void ClearRollingForward(void);
 	bool Add(HeeksObj* object, HeeksObj* add_before);
 	void Remove(HeeksObj* object);

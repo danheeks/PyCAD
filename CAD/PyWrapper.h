@@ -621,7 +621,9 @@ public:
 				{
 					boost::python::detail::method_result result = f();
 					success = AfterPythonCall(main_module);
-					return std::make_pair(success, (std::wstring)(const wchar_t*)result);
+					const wchar_t* result_string = (const wchar_t*)result;
+					if (result_string == NULL)result_string = L"";
+					return std::make_pair(success, (std::wstring)result_string);
 				}
 				catch (const boost::python::error_already_set&)
 				{

@@ -81,7 +81,7 @@ class SolidApp(App):
         x,y = n.ArbitraryAxes()
         face_matrix = geom.Matrix(p, x, y)
         inv_matrix = face_matrix.Inverse()
-        cad.StartHistory()
+        cad.StartHistory('Rotate To Face')
         selected = cad.GetSelectedObjects()
         # if any objects are selected, move them
         if len(selected)>0:
@@ -91,7 +91,7 @@ class SolidApp(App):
             # move the solid
             parent_body = object.GetParentBody()
             cad.TransformUndoably(parent_body, inv_matrix)
-        cad.EndHistory()
+        self.EndHistory()
     
     def FaceRadiusChange(self, object):
         sketch = step.NewSketchFromFace(object)
@@ -112,12 +112,12 @@ class SolidApp(App):
         return True
     
     def AddObjectFromButton(self, new_object):
-        cad.StartHistory()
+        cad.StartHistory('Add Object From Button')
         cad.AddUndoably(new_object,None, None)
         cad.ClearSelection(True)
         cad.Select(new_object)
         self.SetInputMode(self.select_mode)
-        cad.EndHistory()
+        self.EndHistory()
         cad.Repaint()
     
     def OnSphere(self, event):
@@ -247,37 +247,37 @@ class SolidApp(App):
         
         sweep_profile = cad.GetSelectedObjects()[0]
         
-        cad.StartHistory()
+        cad.StartHistory('Sweep')
         step.CreateSweep(sweep_objects, sweep_profile, cad.Color(128, 150, 128))
-        cad.EndHistory()
+        self.EndHistory()
 
     def OnSubtract(self, event):
         if not self.CheckForNumberOrMore(2, [step.GetFaceType(), step.GetSolidType()], 'Pick two or more faces or solids, the first one will be cut by the others', 'Subtract Solids'):
             return
-        cad.StartHistory()
+        cad.StartHistory('Subtract')
         step.CutShapes()
-        cad.EndHistory()
+        self.EndHistory()
 
     def OnFuse(self, event):
         if not self.CheckForNumberOrMore(2, [step.GetSolidType()], 'Pick two or more solids to be fused together', 'Fuse Solids'):
             return
-        cad.StartHistory()
+        cad.StartHistory('Fuse')
         step.FuseShapes()
-        cad.EndHistory()
+        self.EndHistory()
 
     def OnCommon(self, event):
         if not self.CheckForNumberOrMore(2, [step.GetSolidType()], 'Pick two or more solids, only the shape that is contained by all of them will remain', 'Intersection of Solids'):
             return
-        cad.StartHistory()
+        cad.StartHistory('Common')
         step.CommonShapes()
-        cad.EndHistory()
+        self.EndHistory()
         
     def OnShadow(self, event):
         if not self.CheckForNumberOrMore(1, [step.GetSolidType(), cad.OBJECT_TYPE_STL_SOLID], 'Pick one or more solids to make a shadow sketch from', 'Shadow Sketch of Solids'):
             return
         accuracy = self.InputLength('Enter Shadow Accuracy', 'Accuracy', geom.get_accuracy())
         if accuracy:
-            cad.StartHistory()
+            cad.StartHistory('Shadow')
             geom.set_accuracy(accuracy)
             for object in cad.GetSelectedObjects():
                 stl = object.GetTris(accuracy)
@@ -286,7 +286,7 @@ class SolidApp(App):
                 #shadow.Reorder()
                 sketch = cad.NewSketchFromArea(shadow)
                 cad.AddUndoably(sketch)
-            cad.EndHistory()
+            self.EndHistory()
 
     def OnFillet(self, event):
         if not self.CheckForNumberOrMore(1, [step.GetEdgeType()], 'Pick one or more edges to add a fillet to', 'Edge Fillet'):
@@ -295,11 +295,11 @@ class SolidApp(App):
         rad = config.ReadFloat('EdgeBlendRadius', 2.0)
         rad = self.InputLength('Enter Blend Radius', 'Radius', rad)
         if rad:
-            cad.StartHistory()
+            cad.StartHistory('Fillet')
             step.FilletOrChamferEdges(rad, False)
             config.WriteFloat('EdgeBlendRadius', rad)
             cad.ClearSelection(True)
-            cad.EndHistory()
+            self.EndHistory()
 
     def OnChamfer(self, event):
         if not self.CheckForNumberOrMore(1, [step.GetEdgeType()], 'Pick one or more edges to add a chamfer to', 'Edge Chamfer'):
@@ -308,11 +308,11 @@ class SolidApp(App):
         rad = config.ReadFloat('EdgeChamferDist', 2.0)
         rad = self.InputLength('Enter Chamfer Distance', 'Distance', rad)
         if rad:
-            cad.StartHistory()
+            cad.StartHistory('Chamfer')
             step.FilletOrChamferEdges(rad, True)
             config.WriteFloat('EdgeChamferDist', rad)
             cad.ClearSelection(True)
-            cad.EndHistory()
+            self.EndHistory()
         
     def AddExtraRibbonPages(self, ribbon):        
         page = RB.RibbonPage(ribbon, wx.ID_ANY, 'Solid', ribbon.Image('solids'))
@@ -368,13 +368,13 @@ class SolidApp(App):
     def OnSpline(self, e):
         if not self.CheckForNumberOrMore(2, [cad.OBJECT_TYPE_POINT], 'Pick one or more points to make a spline through', 'Spline Through Points'):
             return
-        cad.StartHistory()
+        cad.StartHistory('Spline')
         points = []
         for object in cad.GetSelectedObjects():
             points.append(object.GetStartPoint())
         new_object = step.NewSplineFromPoints(points)
         cad.AddUndoably(new_object)
-        cad.EndHistory()
+        self.EndHistory()
 
     def GetSelectionFilterTools(self, filter):
         tools = App.GetSelectionFilterTools(self, filter)

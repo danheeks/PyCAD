@@ -1637,9 +1637,9 @@ public:
 	}
 	const wchar_t* GetTitle() override
 	{
-		std::pair<bool, std::wstring> result = CallReturnWString("GetTitle");
+		std::pair<bool, std::string> result = CallReturnString("GetTitle");
 		if (result.first)
-			return result.second.c_str();
+			return Ctt(result.second.c_str());
 		return L"";
 	}
 	void RollBack()
@@ -1808,12 +1808,12 @@ void SetViewUnits(double units)
 	theApp->m_view_units = units;
 }
 
-void StartHistory(bool freeze_observers = true)
+void StartHistory(const std::wstring& title, bool freeze_observers = true)
 {
-	theApp->StartHistory(freeze_observers);
+	theApp->StartHistory(title.c_str(), freeze_observers);
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(StartHistoryOverloads, StartHistory, 0, 1)
+BOOST_PYTHON_FUNCTION_OVERLOADS(StartHistoryOverloads, StartHistory, 1, 2)
 
 void EndHistory()
 {
@@ -1823,6 +1823,11 @@ void EndHistory()
 void ClearHistory()
 {
 	theApp->ClearHistory();
+}
+
+int GetHistoryLevel()
+{
+	return theApp->GetHistoryLevel();
 }
 
 bool IsModified()
@@ -1843,6 +1848,22 @@ void RollBack()
 void RollForward()
 {
 	theApp->RollForward();
+}
+
+std::wstring GetUndoTitle()
+{
+	const wchar_t* s = theApp->GetUndoTitle();
+	if (s == NULL)
+		return std::wstring(L"");
+	return std::wstring(s);
+}
+
+std::wstring GetRedoTitle()
+{
+	const wchar_t* s = theApp->GetRedoTitle();
+	if (s == NULL)
+		return std::wstring(L"");
+	return std::wstring(s);
 }
 
 void DeleteUndoably(HeeksObj *object)
@@ -3086,10 +3107,13 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("StartHistory", &StartHistory, StartHistoryOverloads(boost::python::arg("freeze_observers")));
 	boost::python::def("EndHistory", EndHistory);
 	boost::python::def("ClearHistory", ClearHistory);
+	boost::python::def("GetHistoryLevel", GetHistoryLevel);
 	boost::python::def("IsModified", IsModified);
 	boost::python::def("SetLikeNewFile", SetLikeNewFile);
 	boost::python::def("RollBack", RollBack);
 	boost::python::def("RollForward", RollForward);
+	boost::python::def("GetUndoTitle", GetUndoTitle);
+	boost::python::def("GetRedoTitle", GetRedoTitle);
 	boost::python::def("DeleteUndoably", DeleteUndoably);
 	boost::python::def("DeleteObjectsUndoably", DeleteObjectsUndoably);
 	boost::python::def("DeleteInternalObject", DeleteInternalObject);

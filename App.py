@@ -240,15 +240,20 @@ class App(wx.App):
         self.input_mode_object = self.select_mode
         cad.SetResFolder(pycad_dir)
         
+    def EndHistory(self):
+        cad.EndHistory()
+        # to do, update the undo and redo buttons
+        #self.undo_button.ChangeBitmap()
+        
     def SplitSketch(self, object):
         sketch = object
         sketch.__class__ = cad.Sketch
         new_sketches = sketch.Split()
-        cad.StartHistory()
+        cad.StartHistory('Split Sketch')
         cad.DeleteUndoably(object)
         for sketch in new_sketches:
             cad.AddUndoably(sketch, object.GetOwner(), None)
-        cad.EndHistory()
+        self.EndHistory()
         
     def FitArcs(self, object):
         value = self.InputLength('Set tolerance for Fit Arcs', 'tolerance', geom.get_accuracy())
@@ -258,13 +263,18 @@ class App(wx.App):
             sketch.__class__ = cad.Sketch
             curve = sketch.GetCurve()
             curve.FitArcs()
-            cad.StartHistory()
+            cad.StartHistory('Fit Arcs')
             cad.DeleteUndoably(object)
             cad.AddUndoably(cad.NewSketchFromCurve(curve))
-            cad.EndHistory()        
+            self.EndHistory()        
         
     def CopyUndoably(self, object, copy_with_new_data):
         copy_undoable = CopyObjectUndoable(object, copy_with_new_data)
+        cad.PyIncref(copy_undoable)
+        cad.DoUndoable(copy_undoable)
+
+    def CopyUndoablyWithChildren(self, object, copy_with_new_data):
+        copy_undoable = CopyObjectUndoable(object, copy_with_new_data, copy_children=True)
         cad.PyIncref(copy_undoable)
         cad.DoUndoable(copy_undoable)
 
@@ -396,10 +406,10 @@ class App(wx.App):
                 objects_to_delete.append(object)
                 sketch.Add(new_object)
         
-        cad.StartHistory()
+        cad.StartHistory('Make To Sketch')
         cad.AddUndoably(sketch)
         cad.DeleteObjectsUndoably(objects_to_delete)
-        cad.EndHistory()
+        self.EndHistory()
         
     def OffsetSketch(self, object):
         config = HeeksConfig()
@@ -438,11 +448,11 @@ class App(wx.App):
                         area.Intersect(a)                         
                     
         if area != None:
-            cad.StartHistory()
+            cad.StartHistory('Sketch Operation')
             sketch = cad.NewSketchFromArea(area)
             cad.AddUndoably(sketch)
             cad.DeleteObjectsUndoably(objects_to_delete)
-            cad.EndHistory()
+            self.EndHistory()
         
     def UniteSelectedSketches(self):
         self.SketchOperation(SKETCH_OP_UNION)
@@ -979,16 +989,16 @@ class App(wx.App):
         
     def OnCut(self, e):
         self.CopySelectedItems()
-        cad.StartHistory()
+        cad.StartHistory('Cut')
         for object in cad.GetSelectedObjects():
             cad.DeleteUndoably(object)
-        cad.EndHistory()
+        self.EndHistory()
         
     def OnUpdateCut(self, e):
         e.Enable(cad.GetNumSelected() > 0)            
                 
     def OnUpdateUndo(self, e):
-        e.Enable(cad.CanUndo())         
+        e.Enable(cad.CanUndo())     
         
     def OnUpdateRedo(self, e):
         e.Enable(cad.CanRedo())         
@@ -1043,10 +1053,10 @@ class App(wx.App):
         e.Enable(self.IsPasteReady())    
         
     def OnDelete(self, e):
-        cad.StartHistory()
+        cad.StartHistory('Delete')
         for object in cad.GetSelectedObjects():
             cad.DeleteUndoably(object)
-        cad.EndHistory()
+        self.EndHistory()
         
     def OnUpdateDelete(self, e):
         e.Enable(cad.GetNumSelected() > 0)            
@@ -1360,13 +1370,14 @@ class App(wx.App):
             
         
 class CopyObjectUndoable(cad.BaseUndoable):
-    def __init__(self, object, copy_object):
+    def __init__(self, object, copy_object, copy_children = False):
         cad.BaseUndoable.__init__(self)
         self.object = object
         self.new_copy = copy_object
         self.old_copy = object.MakeACopy()
-        self.old_copy.Clear()
-        self.new_copy.Clear()
+        if not copy_children:
+            self.old_copy.Clear()
+            self.new_copy.Clear()
         
     def Run(self, redo):
         self.object.CopyFrom(self.new_copy)

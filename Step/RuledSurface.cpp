@@ -39,7 +39,7 @@ void PickCreateRuledSurface(bool delete_sketches)
 	TopoDS_Shape shape;
 	if(CreateRuledSurface(wire_list, shape, true))
 	{
-		theApp->StartHistory();
+		theApp->StartHistory(L"Make Ruled Surface");
 		theApp->DeleteUndoably(sketches_to_delete);
 		HeeksObj* new_object = CShape::MakeObject(shape, L"Ruled Surface", SOLID_TYPE_UNKNOWN, HeeksColor(51, 45, 51), 1.0f);
 		theApp->AddUndoably(new_object, NULL, NULL);
@@ -95,7 +95,7 @@ void CreateExtrusionOrRevolution(double height_or_angle, bool solid_if_possible,
 
 	if(new_shapes.size() > 0)
 	{
-		theApp->StartHistory();
+		theApp->StartHistory(L"Make Extrusion");
 		for(std::list<TopoDS_Shape>::iterator It = new_shapes.begin(); It != new_shapes.end(); It++){
 			TopoDS_Shape& shape = *It;
 			HeeksObj* new_object = CShape::MakeObject(shape, revolution_not_extrusion ? L"Revolved Solid" : L"Extruded Solid", SOLID_TYPE_UNKNOWN, color, 1.0f);
@@ -136,7 +136,7 @@ HeeksObj* CreatePipeFromProfile(const TopoDS_Wire &spine, std::list<TopoDS_Shape
 	}
 	if(pipe_shapes.size() > 0)
 	{
-		theApp->StartHistory();
+		theApp->StartHistory(L"Create Pipe");
 		for(std::list<HeeksObj*>::iterator It = pipe_shapes.begin(); It != pipe_shapes.end(); It++)
 		{
 			HeeksObj* object = *It;

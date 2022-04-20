@@ -159,7 +159,7 @@ def Translate(copy = False):
     config.WriteFloat("TranslateToY", to.y)
     config.WriteFloat("TranslateToZ", to.z)
     
-    cad.StartHistory()
+    cad.StartHistory('Translate')
     
     if copy:
         for i in range(0, ncopies):
@@ -175,7 +175,7 @@ def Translate(copy = False):
         for object in selected_items:
             cad.TransformUndoably(object, mat)
     
-    cad.EndHistory()
+    wx.GetApp().EndHistory()
     
 class AngleAndPlaneDlg(HDialog):
     def __init__(self, angle, axis, axis_type, pos, ncopies, axial_shift, title):
@@ -436,7 +436,7 @@ def Rotate(copy = False):
     config.WriteFloat("RotatePosY", pos.y)
     config.WriteFloat("RotatePosZ", pos.z)
     
-    cad.StartHistory()
+    cad.StartHistory('Rotate')
     
     if copy:
         for i in range(0, ncopies):
@@ -456,7 +456,7 @@ def Rotate(copy = False):
         for object in selected_items:
             cad.TransformUndoably(object, mat)
     
-    cad.EndHistory()    
+    wx.GetApp().EndHistory()    
             
 class MirrorDlg(HDialog):
     def __init__(self, axis, pos, axis_type, copy, title):
@@ -684,7 +684,7 @@ def Mirror():
     config.WriteFloat("MirrorPosY", pos.y)
     config.WriteFloat("MirrorPosZ", pos.z)
     
-    cad.StartHistory()
+    cad.StartHistory('Mirror')
 
     mat = geom.Matrix()
     x, y = axis.ArbitraryAxes()
@@ -702,7 +702,7 @@ def Mirror():
         else:
             cad.TransformUndoably(object, mat)
     
-    cad.EndHistory()   
+    wx.GetApp().EndHistory()   
     
 def PickOrigin(prompt):
     filter = cad.Filter()
@@ -738,7 +738,7 @@ def OriTransform():
         wx.MessageBox("You didn't pick an origin\nTransform Cancelled!")
         return
     
-    cad.StartHistory()
+    cad.StartHistory('Origin Transform')
 
     m1 = o1.GetOrigin()
     mat = m1.Inverse()
@@ -747,7 +747,7 @@ def OriTransform():
     for object in selected_items:
         cad.TransformUndoably(object, mat)
     
-    cad.EndHistory()   
+    wx.GetApp().EndHistory()   
    
    
         
@@ -853,7 +853,7 @@ def Scale():
     config.WriteFloat("ScaleAboutPosY", pos.y)
     config.WriteFloat("ScaleAboutPosZ", pos.z)
     
-    cad.StartHistory()
+    cad.StartHistory('Scale')
     
     mat = geom.Matrix()
     mat.Translate(-pos)
@@ -868,4 +868,4 @@ def Scale():
         else:
             cad.TransformUndoably(object, mat)
 
-    cad.EndHistory()    
+    wx.GetApp().EndHistory()    

@@ -543,7 +543,7 @@ bool CCadApp::OpenFile(const wchar_t *filepath, bool import_not_open, HeeksObj* 
 	bool history_started = false;
 	if (import_not_open)
 	{
-		StartHistory();
+		StartHistory(L"Import File");
 		history_started = true;
 	}
 
@@ -1332,6 +1332,11 @@ void CCadApp::ClearHistory(void){
 	history->SetLikeNewFile();
 }
 
+int CCadApp::GetHistoryLevel()
+{
+	return history->GetLevel();
+}
+
 void CCadApp::DoUndoable(Undoable *u)
 {
 	history->DoUndoable(u);
@@ -1367,9 +1372,19 @@ bool CCadApp::RollForward(void)
 	return result;
 }
 
-void CCadApp::StartHistory(bool freeze_observers)
+const wchar_t* CCadApp::GetUndoTitle()
 {
-	history->StartHistory(freeze_observers);
+	return history->GetUndoTitle();
+}
+
+const wchar_t* CCadApp::GetRedoTitle()
+{
+	return history->GetRedoTitle();
+}
+
+void CCadApp::StartHistory(const wchar_t* title, bool freeze_observers)
+{
+	history->StartHistory(title, freeze_observers);
 }
 
 void CCadApp::EndHistory(void)
@@ -1567,7 +1582,7 @@ void CCadApp::DeleteUndoably(const std::list<HeeksObj*>& list)
 	}
 	if (list2.size() == 0)return;
 	
-	if (list2.size() > 1)StartHistory();
+	if (list2.size() > 1)StartHistory(L"Delete Objects");
 	for (std::list<HeeksObj*>::const_iterator It = list2.begin(); It != list2.end(); It++)
 	{
 		HeeksObj* object = *It;

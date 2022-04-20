@@ -261,7 +261,7 @@ bool CCone::Stretch(const Point3d &p, const Point3d &shift, void* data)
 	{
 		CCone* new_object = new CCone(new_pos, new_r1, new_r2, new_height, NULL, m_color, (float)m_opacity);
 		new_object->CopyIDsFrom(this);
-		theApp->StartHistory();
+		theApp->StartHistory(L"Strech Cone");
 		theApp->DeleteUndoably(this);
 		theApp->AddUndoably(new_object,m_owner,NULL);
 		theApp->EndHistory();

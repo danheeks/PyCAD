@@ -5,7 +5,7 @@ from HeeksConfig import HeeksConfig
 
 control_border = 2
 
-class BitmapChangingButton:
+class ChangingButton:
     def __init__(self, drop_down = None):
         self.index = None
         self.toolbar = None
@@ -40,7 +40,11 @@ class BitmapChangingButton:
     def GetHelpStr(self):
         return ''
     
-class ModeButton(BitmapChangingButton):
+    def GetBitmap(self):
+        return self.GetRibbon().Image2(wx.GetApp().bitmap_path + '/' + self.BitmapName() + '.png')
+    
+    
+class ModeButton(ChangingButton):
     def __init__(self, getter, setter, bitmap_on, bitmap_off, config_str, on_name, off_name, on_help = '', off_help = ''):
         self.getter = getter
         self.setter = setter
@@ -52,7 +56,7 @@ class ModeButton(BitmapChangingButton):
         self.on_help = on_help
         self.off_help = off_help
         self.mode = self.getter()
-        BitmapChangingButton.__init__(self)
+        ChangingButton.__init__(self)
         
     def OnButton(self, event):
         self.mode = not self.mode
@@ -60,7 +64,7 @@ class ModeButton(BitmapChangingButton):
         # remember config
         config = HeeksConfig()
         config.WriteBool(self.config_str, self.mode)
-        BitmapChangingButton.OnButton(self, event)
+        ChangingButton.OnButton(self, event)
         
     def GetName(self):
         return self.on_name if self.mode == True else self.off_name
@@ -71,10 +75,10 @@ class ModeButton(BitmapChangingButton):
     def GetHelpStr(self):
         return self.on_help if self.mode == True else self.off_help
         
-class ScreenTextButton(BitmapChangingButton):
+class ScreenTextButton(ChangingButton):
     def __init__(self):
         self.mode = wx.GetApp().graphics_text_mode
-        BitmapChangingButton.__init__(self, self.OnDropDown)
+        ChangingButton.__init__(self, self.OnDropDown)
         
     def OnModeChanged(self):
         wx.GetApp().graphics_text_mode = self.mode
@@ -87,7 +91,7 @@ class ScreenTextButton(BitmapChangingButton):
         if self.mode == 3:
             self.mode = 0
         self.OnModeChanged()
-        BitmapChangingButton.OnButton(self, event)
+        ChangingButton.OnButton(self, event)
         
     def GetName(self):
         if self.mode == 1: return 'Screen Text Title'
@@ -114,9 +118,9 @@ class ScreenTextButton(BitmapChangingButton):
         self.OnModeChanged()
         self.ChangeBitmap()
 
-class OnOffButton(BitmapChangingButton):
+class OnOffButton(ChangingButton):
     def __init__(self, name, bitmap_name, bitmap_name_off, get_fn, set_fn, help_str, drop_down = None):
-        BitmapChangingButton.__init__(self, drop_down)
+        ChangingButton.__init__(self, drop_down)
         self.name = name
         self.bitmap_name = bitmap_name
         self.bitmap_name_off = bitmap_name_off
@@ -133,7 +137,7 @@ class OnOffButton(BitmapChangingButton):
         config = HeeksConfig()
         config.WriteBool(self.name, self.on)
         
-        BitmapChangingButton.OnButton(self, event)
+        ChangingButton.OnButton(self, event)
         
     def GetName(self):
         return self.name
@@ -145,9 +149,9 @@ class OnOffButton(BitmapChangingButton):
     def GetHelpStr(self):
         return self.help_str
             
-class WindowOnOffButton(BitmapChangingButton):
+class WindowOnOffButton(ChangingButton):
     def __init__(self, name, bitmap_path):
-        BitmapChangingButton.__init__(self)
+        ChangingButton.__init__(self)
         self.name = name
         self.index = None
         self.bitmap_path = bitmap_path
@@ -190,12 +194,12 @@ class WindowOnOffButton(BitmapChangingButton):
             pane_info.Show(shown)
             self.GetAuiManager().Update()
             
-        BitmapChangingButton.OnButton(self, event)
+        ChangingButton.OnButton(self, event)
  
         
-class ColorButton(BitmapChangingButton):
+class ColorButton(ChangingButton):
     def __init__(self, name, help_str):
-        BitmapChangingButton.__init__(self)
+        ChangingButton.__init__(self)
         self.name = name
         self.help_str = help_str
         
@@ -219,7 +223,7 @@ class ColorButton(BitmapChangingButton):
         
     def OnButton(self, event):
         self.SelectNewColour()
-        BitmapChangingButton.OnButton(self, event)
+        ChangingButton.OnButton(self, event)
 
     def SelectNewColour(self):
         c = self.GetColor()
@@ -248,7 +252,25 @@ class CurrentColorButton(ColorButton):
         cad.SetCurrentColor(c)
         HeeksConfig().WriteInt("CurrentColor", c.ref())
         self.GetRibbon().GetParent().graphics_canvas.Refresh()
+        
+class UndoButton(ChangingButton):
+    def __init__(self):
+        ChangingButton.__init__(self)
+        
+    def OnButton(self, event):
+        pass # don't need to change button on button press
 
+    def BitmapName(self):
+        return 'undo'
+    
+    def GetHelpStr(self):
+        s = cad.GetUndoTitle()
+        if s == None:
+            s = 'Nothing to Undo'
+        return s
+    
+    def GetName(self):
+        return 'Undo'
     
 class BackgroundColorButton(ColorButton):
     def __init__(self, name, help_str):
@@ -306,7 +328,10 @@ class Ribbon(RB.RibbonBar):
 
         panel = RB.RibbonPanel(self.main_page, wx.ID_ANY, 'Edit', self.Image('cut'))
         toolbar = RB.RibbonButtonBar(panel)
-        Ribbon.AddToolBarTool(toolbar, "Undo", 'undo', 'Undo the previous command', app.OnUndo, app.OnUpdateUndo, None)
+        
+        app.undo_button = UndoButton()
+        app.undo_button.AddToToolbar(toolbar)
+        #Ribbon.AddToolBarTool(toolbar, "Undo", 'undo', 'Undo the previous command', app.OnUndo, app.OnUpdateUndo, None)
         Ribbon.AddToolBarTool(toolbar, "Redo", 'redo', 'Redo the next command', app.OnRedo, app.OnUpdateRedo, None)
         Ribbon.AddToolBarTool(toolbar, "Cut", 'cut', 'Cut selected items to the clipboard', app.OnCut, app.OnUpdateCut)
         Ribbon.AddToolBarTool(toolbar, "Copy", 'copy', 'Copy selected items to the clipboard', app.OnCopy, app.OnUpdateCopy)

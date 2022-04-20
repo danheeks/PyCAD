@@ -87,7 +87,7 @@ void GripperSelTransform::OnGripperReleased(const Point3d & from, const Point3d 
 {
 	theApp->DestroyTransformGLList();
 
-	theApp->StartHistory();
+	theApp->StartHistory(L"Drag Transform");
 
 	std::list<HeeksObj *> copy_marked_list = theApp->m_marked_list->list();
 

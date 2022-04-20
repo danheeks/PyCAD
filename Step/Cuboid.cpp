@@ -156,7 +156,7 @@ bool CCuboid::Stretch(const Point3d &p, const Point3d &shift, void* data)
 	{
 		CCuboid* new_object = new CCuboid(m_pos, m_x, m_y, m_z, NULL, m_color, (float)m_opacity);
 		new_object->CopyIDsFrom(this);
-		theApp->StartHistory();
+		theApp->StartHistory(L"Cuboid Stretch");
 		theApp->DeleteUndoably(this);
 		theApp->AddUndoably(new_object,m_owner,NULL);
 		theApp->EndHistory();

@@ -108,7 +108,7 @@ class LineArcDrawing(Drawing):
                             arc.B = geom.Point3D(epos)
                             self.AddToTempObjects(arc)
         Drawing.AddPoint(self, d)
-    
+
     def calculate_item(self, end):
         if self.number_of_steps() > 1 and self.start_pos.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE:return False
         if end.type == cad.DigitizeType.DIGITIZE_NO_ITEM_TYPE: return False
@@ -288,12 +288,18 @@ class LineArcDrawing(Drawing):
             self.container = None
         self.prev_object = None
         self.previous_direction = None
+    
+    def UpdateUserPointProperties(self, end):
+        Drawing.UpdateUserPointProperties(self, end)
+        p = wx.GetApp().frame.input_mode_canvas.pg.GetProperty('undo level')
+        p.SetValue(str(cad.GetHistoryLevel()))
         
     def GetProperties(self):
         properties = []
         if self.drawing_mode == CircleDrawingMode:
             if self.circle_mode == CentreAndRadiusCircleMode:
                 wx.GetApp().AddInputProperty(properties, PyProperty("radius", 'radius_for_circle', self))
+        properties.append(cad.PropertyStringReadOnly('undo level', str(cad.GetHistoryLevel())))
         properties += Drawing.GetProperties(self)
         return properties
     
@@ -309,15 +315,10 @@ class LineArcDrawing(Drawing):
         else:
             self.drawing_mode = LineDrawingMode
         wx.GetApp().frame.input_mode_canvas.RecreateToolbar()    
-        wx.GetApp().frame.input_mode_canvas.SizeCode()       
+        wx.GetApp().frame.input_mode_canvas.SizeCode()
         
-    def ReadDefaultAddToSketch(self):
-        config = HeeksConfig()
-        self.add_to_sketch = config.ReadBool("LineArcAddToSketch", True)
-        
-    def WriteDefaultAddToSketch(self):
-        config = HeeksConfig()
-        config.WriteBool("LineArcAddToSketch", self.add_to_sketch)
+    def AddToSketch(self):
+        return True       
     
 line_arc_drawing = LineArcDrawing()
     

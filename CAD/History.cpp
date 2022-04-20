@@ -5,10 +5,12 @@
 #include "HeeksObj.h"
 #include "History.h"
 
-History::History(int Level)
+History::History(const wchar_t* title, int Level)
 {
 	sub_history = NULL;
 	level = Level;
+	if (title != NULL)
+		m_title.assign(title);
 }
 
 void History::Run(bool redo)
@@ -80,15 +82,15 @@ bool History::CanRedo(void)
 	return true;
 }
 
-void History::StartHistory()
+void History::StartHistory(const wchar_t* title)
 {
 	if(sub_history)
 	{
-		sub_history->StartHistory();
+		sub_history->StartHistory(title);
 	}
 	else
 	{
-		sub_history = new History(level+1);
+		sub_history = new History(title, level+1);
 	}
 }
 
@@ -108,6 +110,27 @@ bool History::EndHistory(void)
 	{
 		return true;
 	}
+}
+
+const wchar_t* History::GetUndoTitle()
+{
+	if (sub_history)
+		return sub_history->GetUndoTitle();
+	if (!CanUndo())return NULL;
+	Undoable *u;
+	m_curpos--;
+	u = *m_curpos;
+	return u->GetTitle();
+}
+
+const wchar_t* History::GetRedoTitle()
+{
+	if (sub_history)
+		return sub_history->GetRedoTitle();
+	if (!CanRedo())return NULL;
+	Undoable *u = *m_curpos;
+	m_curpos++;
+	return u->GetTitle();
 }
 
 void History::DoUndoable(Undoable *u)
@@ -155,6 +178,13 @@ void History::ClearFromFront(void)
 void History::ClearFromCurPos(void)
 {
 	Clear(m_curpos);
+}
+
+int History::GetLevel()const
+{
+	if (sub_history)
+		return sub_history->GetLevel();
+	return level;
 }
 
 History::~History(void)
@@ -226,14 +256,14 @@ void MainHistory::SetAsModified()
 	as_new_pos_exists = false;
 }
 
-void MainHistory::StartHistory(bool freeze_observers)
+void MainHistory::StartHistory(const wchar_t* title, bool freeze_observers)
 {
 	if (level == 0 && freeze_observers)
 	{
 		theApp->ObserversFreeze();
 		observers_frozen = true;
 	}
-	History::StartHistory();
+	History::StartHistory(title);
 }
 
 bool MainHistory::EndHistory(void)
@@ -246,3 +276,4 @@ bool MainHistory::EndHistory(void)
 	}
 	return value;
 }
+

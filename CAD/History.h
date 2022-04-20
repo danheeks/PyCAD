@@ -12,6 +12,7 @@ class History: public Undoable{
 protected:
 	std::list<Undoable *>::iterator m_curpos;
 	std::list<Undoable *> m_undoables;
+	std::wstring m_title;
 
 protected:
 	History *sub_history;
@@ -21,11 +22,11 @@ protected:
 	virtual void RemoveAsNewPosIfEqual(std::list<Undoable *>::iterator &){}
 
 public:
-	History(int Level);
+	History(const wchar_t* title, int Level);
 	virtual ~History(void);
 
 	// Undoable's virtual functions
-	const wchar_t* GetTitle(){return L"";}
+	const wchar_t* GetTitle(){ return m_title.c_str(); }
 	void Run(bool redo);
 	void RollBack();
 
@@ -35,12 +36,15 @@ public:
 	bool CanRedo(void);
 	void DoUndoable(Undoable *);
 	void Add(Undoable *);
-	void StartHistory();
+	void StartHistory(const wchar_t* title);
 	bool EndHistory(void);
 	unsigned int size(void){return m_undoables.size();}
 	void Clear(std::list<Undoable *>::iterator FromIt);
 	void ClearFromFront(void);
 	void ClearFromCurPos(void);
+	int GetLevel()const;
+	const wchar_t* GetUndoTitle();
+	const wchar_t* GetRedoTitle();
 };
 
 class MainHistory: public History{
@@ -55,7 +59,7 @@ private:
 	void RemoveAsNewPosIfEqual(std::list<Undoable *>::iterator &It);
 
 public:
-	MainHistory(void) : History(0){ as_new_pos_exists = false; as_new_when_at_list_start = true; observers_frozen = false; }
+	MainHistory(void) : History(NULL, 0){ as_new_pos_exists = false; as_new_when_at_list_start = true; observers_frozen = false; }
 	~MainHistory(void){}
 
 	bool IsModified(void);
@@ -63,7 +67,6 @@ public:
 	void DoUndoable(Undoable *);
 	void SetAsModified();
 
-	void StartHistory(bool freeze_observers = true);
+	void StartHistory(const wchar_t* title, bool freeze_observers = true);
 	bool EndHistory(void);
-
 };
