@@ -63,10 +63,10 @@ set(CAD_SRC
     CoordinateSystem.cpp
     DigitizedPoint.cpp
     DigitizeMode.cpp
-    Drawing.cpp
     dxf.cpp
     EndedObject.cpp
     ExtrudedObj.cpp
+    Filter.cpp
     Grid.cpp
     Gripper.cpp
     GripperSelTransform.cpp
@@ -86,7 +86,6 @@ set(CAD_SRC
     IdNamedObj.cpp
     IdNamedObjList.cpp
     LeftAndRight.cpp
-    LineArcDrawing.cpp
     MagDragWindow.cpp
     MarkedList.cpp
     ObjList.cpp
@@ -97,7 +96,6 @@ set(CAD_SRC
     PyBaseObject.cpp
     PythonStuff.cpp
     PyWrapper.cpp
-    RegularShapesDrawing.cpp
     RemoveOrAddTool.cpp
     Ruler.cpp
     Sketch.cpp
