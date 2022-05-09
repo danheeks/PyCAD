@@ -118,8 +118,8 @@ class App(wx.App):
         
         # Turn on high-DPI awareness to make sure rendering is sharp on big
         # monitors with font scaling enabled.
-        from ctypes import OleDLL
-        OleDLL('shcore').SetProcessDpiAwareness(1)
+#        from ctypes import OleDLL
+#        OleDLL('shcore').SetProcessDpiAwareness(1)
         
         config = HeeksConfig()
         
