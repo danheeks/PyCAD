@@ -203,15 +203,18 @@ void DrawFace(TopoDS_Face face,void(*callbackfunc)(const double* x, const double
 				}
 				else
 				{
-					n[0] = myNormal(n1).X();
-					n[1] = myNormal(n1).Y();
-					n[2] = myNormal(n1).Z();
-					n[3] = myNormal(n2).X();
-					n[4] = myNormal(n2).Y();
-					n[5] = myNormal(n2).Z();
-					n[6] = myNormal(n3).X();
-					n[7] = myNormal(n3).Y();
-					n[8] = myNormal(n3).Z();
+					gp_Dir d1 = myNormal(n1).Transformed(tr);
+					gp_Dir d2 = myNormal(n2).Transformed(tr);
+					gp_Dir d3 = myNormal(n3).Transformed(tr);
+					n[0] = d1.X();
+					n[1] = d1.Y();
+					n[2] = d1.Z();
+					n[3] = d2.X();
+					n[4] = d2.Y();
+					n[5] = d2.Z();
+					n[6] = d3.X();
+					n[7] = d3.Y();
+					n[8] = d3.Z();
 				}
 
 				(*callbackfunc)(x, n);
