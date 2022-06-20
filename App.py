@@ -801,8 +801,8 @@ class App(wx.App):
         
         # filepath must end in .heeks
         if (filepath[-6:].lower()) != '.heeks':
-            filepath.append('.heeks')
-        
+            filepath += '.heeks'
+                    
         if cad.SaveFile(filepath):
             self.filepath = filepath        
             cad.SetLikeNewFile()
@@ -1113,13 +1113,13 @@ class App(wx.App):
         self.OnMagAxes(geom.Point3D(-s,s,s), geom.Point3D(s,-s,s))
         
     def OnViewRotate(self, e):
-        self.SetInputMode(cad.GetViewRotating())
+        self.SetInputMode(self.GetViewRotating())
         
     def OnViewZoom(self, e):
-        self.SetInputMode(cad.GetViewZooming())
+        self.SetInputMode(self.GetViewZooming())
         
     def OnViewPan(self, e):
-        self.SetInputMode(cad.GetViewPanning())
+        self.SetInputMode(self.GetViewPanning())
         
     def ShowFullScreen(self, show, style = wx.FULLSCREEN_ALL):
         if show:
