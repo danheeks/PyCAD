@@ -17,6 +17,10 @@
 #include "strconv.h"
 #include "App.h"
 #include <locale.h>
+#include <XSControl_WorkSession.hxx>
+#include <XSControl_TransferReader.hxx>
+#include <StepRepr_RepresentationItem.hxx>
+#include <TCollection_HAsciiString.hxx>
 
 // static member variable
 bool CShape::m_solids_found = false;
@@ -927,28 +931,51 @@ bool CShape::ImportSolidsFile(const wchar_t* filepath, bool undoably, std::map<i
 				Handle_Standard_Transient root = Reader.RootForTransfer(i);
 				Reader.TransferEntity(root);
 				TopoDS_Shape rShape = Reader.Shape(i);
-				if(index_map)
+
+				TopExp_Explorer ex;
+				for (ex.Init(rShape, TopAbs_SOLID); ex.More(); ex.Next())
 				{
-					// change the id ( and any other data ), to the one in the step file index
-					std::map<int, CShapeData>::iterator FindIt = index_map->find(i);
-					if(FindIt != index_map->end())
+					// get the shape 
+					const TopoDS_Solid& aSolid = TopoDS::Solid(ex.Current());
+					
+
+					wstring name_for_solid = L"STEP solid";
+					const Handle(XSControl_WorkSession)& theSession = Reader.WS();
+					const Handle(XSControl_TransferReader)& aTransferReader = theSession->TransferReader();
+					Handle(Standard_Transient) anEntity = aTransferReader->EntityFromShapeResult(aSolid, 1);
+					if (!(anEntity.IsNull()))
 					{
-						CShapeData& shape_data = FindIt->second;
-						HeeksObj* new_object = MakeObject(rShape, L"STEP solid", shape_data.m_solid_type, HeeksColor(191, 191, 191), 1.0f);
-						if(new_object)
-						{
-							if(undoably)theApp->AddUndoably(new_object, add_to, NULL);
-							else add_to->Add(new_object, NULL);
-							shape_data.SetShape((CShape*)new_object, true);
+						Handle(StepRepr_RepresentationItem) aReprItem = Handle(StepRepr_RepresentationItem)::DownCast(anEntity);
+
+						if (!(aReprItem.IsNull())) {
+							name_for_solid.assign(Ctt(aReprItem->Name()->ToCString()));
 						}
 					}
+
+					if (index_map)
+					{
+						// change the id ( and any other data ), to the one in the step file index
+						std::map<int, CShapeData>::iterator FindIt = index_map->find(i);
+						if (FindIt != index_map->end())
+						{
+							CShapeData& shape_data = FindIt->second;
+							HeeksObj* new_object = MakeObject(aSolid, name_for_solid.c_str(), shape_data.m_solid_type, HeeksColor(191, 191, 191), 1.0f);
+							if (new_object)
+							{
+								if (undoably)theApp->AddUndoably(new_object, add_to, NULL);
+								else add_to->Add(new_object, NULL);
+								shape_data.SetShape((CShape*)new_object, true);
+							}
+						}
+					}
+					else
+					{
+						HeeksObj* new_object = MakeObject(aSolid, name_for_solid.c_str(), SOLID_TYPE_UNKNOWN, HeeksColor(191, 191, 191), 1.0f);
+						if (undoably)theApp->AddUndoably(new_object, add_to, NULL);
+						else add_to->Add(new_object, NULL);
+					}
 				}
-				else
-				{
-					HeeksObj* new_object = MakeObject(rShape, L"STEP solid", SOLID_TYPE_UNKNOWN, HeeksColor(191, 191, 191), 1.0f);
-					if(undoably)theApp->AddUndoably(new_object, add_to, NULL);
-					else add_to->Add(new_object, NULL);
-				}
+
 			}
 		}
 		else{

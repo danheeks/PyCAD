@@ -127,7 +127,7 @@ void StepFileObject::ReadFromXML(TiXmlElement* element)
 
 void ImportSolidsFile(const std::wstring& filepath)
 {
-	CShape::ImportSolidsFile(filepath.c_str(), false);
+	CShape::ImportSolidsFile(filepath.c_str(), true);
 }
 
 void ExportSolidsFile(const std::wstring& filepath)
