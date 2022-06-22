@@ -74,6 +74,14 @@ class SolidApp(App):
         sketch = step.NewSketchFromFace(object)
         cad.AddUndoably(sketch)
         cad.Select(sketch)
+        
+    def FacesToSketches(self):
+        cad.StartHistory('Faces to Sketches')
+        for object in cad.GetSelectedObjects():
+            if object.GetType() == step.GetFaceType():
+                sketch = step.NewSketchFromFace(object)
+                cad.AddUndoably(sketch)
+        cad.EndHistory()                
     
     def RotateToFace(self, object):
         n = self.context_face_plane.normal
@@ -383,6 +391,8 @@ class SolidApp(App):
                 
         if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH) or self.SketchChildTypeInFilter(filter):
             tools.append(ContextTool.CADContextTool('Sketch to Face', 'la2face', step.SketchToFace))
+        if filter.IsTypeInFilter(step.GetFaceType()):
+            tools.append(ContextTool.CADContextTool('Faces to Sketches', 'la2face', self.FacesToSketches))
         
         return tools
 
