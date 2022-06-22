@@ -20,6 +20,7 @@ class SelectMode(InputMode):
         self.highlight_color = cad.Color(0,255,0)
         self.prompt = ''
         self.dragging_moves_objects = True
+        self.selection_need_clearing = False
         self.drag_gripper = None
         self.ctrl_does_rotate = False
         self.filter = cad.Filter()
@@ -99,6 +100,9 @@ class SelectMode(InputMode):
             if self.just_one and wx.GetApp().inMainLoop and cad.GetNumSelected() > 0:
                 wx.GetApp().ExitMainLoop()
             else:
+                if self.selection_need_clearing:
+                    cad.ClearSelection()
+                    self.selection_need_clearing = False
                 wx.GetApp().frame.graphics_canvas.Refresh()
                 
         elif event.MiddleDown():
@@ -131,6 +135,7 @@ class SelectMode(InputMode):
                         if cad.GetNumSelected() > 0:
                             objects = cad.GetSelectedObjects()
                         else:
+                            self.selection_need_clearing = True
                             objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
                             for object in objects:
                                 cad.Select(object)

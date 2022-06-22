@@ -258,7 +258,7 @@ class UndoButton(ChangingButton):
         ChangingButton.__init__(self)
         
     def OnButton(self, event):
-        pass # don't need to change button on button press
+        wx.GetApp().OnUndo(None)
 
     def BitmapName(self):
         return 'undo'
@@ -329,9 +329,9 @@ class Ribbon(RB.RibbonBar):
         panel = RB.RibbonPanel(self.main_page, wx.ID_ANY, 'Edit', self.Image('cut'))
         toolbar = RB.RibbonButtonBar(panel)
         
-        app.undo_button = UndoButton()
-        app.undo_button.AddToToolbar(toolbar)
-        #Ribbon.AddToolBarTool(toolbar, "Undo", 'undo', 'Undo the previous command', app.OnUndo, app.OnUpdateUndo, None)
+        #app.undo_button = UndoButton()
+        #app.undo_button.AddToToolbar(toolbar)
+        Ribbon.AddToolBarTool(toolbar, "Undo", 'undo', 'Undo the previous command', app.OnUndo, app.OnUpdateUndo, None)
         Ribbon.AddToolBarTool(toolbar, "Redo", 'redo', 'Redo the next command', app.OnRedo, app.OnUpdateRedo, None)
         Ribbon.AddToolBarTool(toolbar, "Cut", 'cut', 'Cut selected items to the clipboard', app.OnCut, app.OnUpdateCut)
         Ribbon.AddToolBarTool(toolbar, "Copy", 'copy', 'Copy selected items to the clipboard', app.OnCopy, app.OnUpdateCopy)

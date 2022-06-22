@@ -388,6 +388,23 @@ class App(wx.App):
         if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH_ARC): return True
         return False
     
+    def RotateSelected(self):
+        if cad.GetNumSelected()>0:
+            selbox = geom.Box3D()
+            for object in cad.GetSelectedObjects():
+                box = object.GetBox()
+                selbox.InsertBox(box)
+            centre = selbox.Center()
+                
+            tr = geom.Matrix()
+            tr.Translate(-centre)
+            tr.RotateAxis(1.57079632679489661, geom.Point3D(0,0,1))
+            tr.Translate(centre)
+            cad.StartHistory('Rotate Selected')
+            for object in cad.GetSelectedObjects():
+                cad.TransformUndoably(object, tr)
+            cad.EndHistory()
+    
     def DeleteMarkedList(self):
         to_delete = []
         for object in cad.GetSelectedObjects():
@@ -687,6 +704,8 @@ class App(wx.App):
         elif k == ord('V'):
             if e.ControlDown():
                 self.OnPaste(e)
+        elif k == ord('R'):
+            self.RotateSelected()
         else:
             return False
         return True
@@ -884,7 +903,7 @@ class App(wx.App):
                         self.filepath = filepath[:dot+1] + 'heeks'
                 self.frame.SetFrameTitle()
                 config.Write('ImportDirectory', dialog.GetDirectory())
-                cad.Repaint()
+                self.Repaint()
             
     def GetPathSuffix(self, path):
         dot = path.rfind('.')
