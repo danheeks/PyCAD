@@ -355,7 +355,7 @@ class App(wx.App):
         return tools
     
     def GetSelectionFilterTools(self, filter):
-        # get tools for the selection given filter
+        # get tools for the selection given filter; filter is actually a list of types found in selection
         tools = []
 
         if filter.Size() > 0:

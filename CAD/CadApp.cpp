@@ -2309,6 +2309,7 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 		ColorPickLowestObjects(window, false, lowest_objects);
 
 		std::set<int> types_already_added;
+		std::set<HeeksObj*> obj_set;
 
 		for (std::list<HeeksObj*>::iterator It = lowest_objects.begin(); It != lowest_objects.end(); It++)
 		{
@@ -2333,19 +2334,24 @@ void CCadApp::GetObjectsInWindow(const IRect &window, bool only_if_fully_in, boo
 						int t = object_to_use->GetType();
 						if (types_already_added.find(t) == types_already_added.end())
 						{
-							objects.push_back(object_to_use);
+							obj_set.insert(object_to_use);
 							types_already_added.insert(t);
 						}
 					}
 					else
 					{
-						objects.push_back(object_to_use);
+						obj_set.insert(object_to_use);
 					}
 				}
 
 				if (!continue_in_loop)
 					break;
 			}
+		}
+
+		for (std::set<HeeksObj*>::iterator It = obj_set.begin(); It != obj_set.end(); It++)
+		{
+			objects.push_back(*It);
 		}
 	}
 

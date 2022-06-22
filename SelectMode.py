@@ -44,6 +44,10 @@ class SelectMode(InputMode):
         if wx.GetApp().inMainLoop:
             s += '\nPress Esc key to cancel'
             s += '\nPress Return key to accept selection'
+            
+        n = cad.GetNumSelected()
+        if n > 0:
+            s += '\n' + str(n) + ' objects selected'
 
         return s
     
@@ -82,6 +86,7 @@ class SelectMode(InputMode):
                         wx.GetApp().EndDrawFront()
                         break
         elif event.LeftUp():
+            objects = None
             if self.drag_gripper:
                 self.grip_to = cad.Digitize(cad.IPoint(event.x, event.y))
                 self.drag_gripper.OnGripperReleased(self.grip_from.point, self.grip_to.point)
@@ -93,7 +98,8 @@ class SelectMode(InputMode):
                 if self.window_box.width < 0:
                     only_if_fully_in = False
                 objects = cad.ObjectsUnderWindow(self.window_box, only_if_fully_in, False, self.filter, True)
-                for object in objects: cad.Select(object)
+                for obj in objects:
+                    cad.Select(obj)
                 self.window_box = None
             elif self.button_down_point != None:
                  wx.GetApp().OnLeftClick(event)
@@ -135,10 +141,10 @@ class SelectMode(InputMode):
                         if cad.GetNumSelected() > 0:
                             objects = cad.GetSelectedObjects()
                         else:
-                            self.selection_need_clearing = True
                             objects = cad.ObjectsUnderWindow(cad.IRect(self.button_down_point.x, self.button_down_point.y), False, True, self.filter, True)
                             for object in objects:
                                 cad.Select(object)
+                                self.selection_need_clearing = True
 
                         for object in objects:
                             selected_objects_dragged.append(object)
