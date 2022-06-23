@@ -398,7 +398,7 @@ class App(wx.App):
                 
             tr = geom.Matrix()
             tr.Translate(-centre)
-            tr.RotateAxis(1.57079632679489661, geom.Point3D(0,0,1))
+            tr.RotateAxis(0.785398163397448309, geom.Point3D(0,0,1))
             tr.Translate(centre)
             cad.StartHistory('Rotate Selected')
             for object in cad.GetSelectedObjects():
