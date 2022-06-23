@@ -1,6 +1,7 @@
 import wx
 import cad
 from HDialog import HDialog
+from HDialog import control_border
 
 class FilterDlg(HDialog):
     def __init__(self):
@@ -17,11 +18,19 @@ class FilterDlg(HDialog):
                 check_box.SetValue(True)
             sizerMain.Add(check_box, 0, wx.ALL, 2)
             
-        self.MakeOkAndCancel(wx.HORIZONTAL).AddToSizer(sizerMain)
+        ok_cancel = self.MakeOkAndCancel(wx.HORIZONTAL)
+        buttonSetAll = wx.Button(self, wx.ID_ANY, "Set All")
+        ok_cancel.sizer.Add( buttonSetAll, 0, wx.ALL, control_border )
+        self.Bind(wx.EVT_BUTTON, self.OnSetAll, buttonSetAll)
+        ok_cancel.AddToSizer(sizerMain)
         
         self.SetSizer( sizerMain )
         sizerMain.SetSizeHints( self )
         sizerMain.Fit( self )
+        
+    def OnSetAll(self, event):
+        for check_box, type in self.check_boxes:
+            check_box.SetValue(True)
         
     def SetFilterFromCheckBoxes(self):
         checked_types = []
