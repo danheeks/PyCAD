@@ -61,10 +61,11 @@ class HTypeObjectDropDown(wx.ComboBox):
         i = 1
         object = self.obj_list.GetFirstChild()
         while object:
-            if self.GetObjectID(object) == id:
-                self.SetSelection(i)
-                return
-            i += 1
+            if self.object_type == object.GetType():
+                if self.GetObjectID(object) == id:
+                    self.SetSelection(i)
+                    return
+                i += 1
             object = self.obj_list.GetNextChild()
         self.SetSelection(0)
      
@@ -133,7 +134,7 @@ class HDialog(wx.Dialog):
         buttonCancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         sizerOKCancel.Add( buttonCancel, 0, wx.ALL + cancel_flag, control_border )
         buttonOK.SetDefault()
-        return HControl(wx.ALL | wx.ALIGN_RIGHT, sizerOKCancel)
+        return HControl(wx.ALL | wx.ALIGN_RIGHT, sizer = sizerOKCancel)
     
     def OnFileBrowseButton(self, event):
         dialog = wx.FileDialog(wx.GetApp().frame, "Choose File", wildcard = "All files" + " |*.*")
