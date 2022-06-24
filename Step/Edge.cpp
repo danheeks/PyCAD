@@ -10,6 +10,7 @@
 #include "Wire.h"
 #include "Gripper.h"
 #include "strconv.h"
+#include "Property.h"
 
 // static
 int CEdge::m_type = 0;
@@ -186,9 +187,7 @@ static double length_for_properties = 0.0;
 void CEdge::GetProperties(std::list<Property *> *list)
 {
 	length_for_properties = Length();
-#if 0
 	list->push_back(new PropertyLength(NULL, L"length", (const double*)(&length_for_properties)));
-#endif
 	HeeksObj::GetProperties(list);
 }
 
