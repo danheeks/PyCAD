@@ -205,8 +205,10 @@ class TreeCanvas(wx.ScrolledCanvas):
                         cad.StartHistory('Drag in Objects Window')
 
                         # cut the objects
-                        cad.DeleteObjectsUndoably(self.dragged_list)
-
+#                        cad.DeleteObjectsUndoably(self.dragged_list)
+                        for object in self.dragged_list:
+                            cad.DeleteUndoably(object)
+ 
                         # paste the objects
                         for object in self.dragged_list:
                             if object.OneOfAKind():
@@ -217,15 +219,16 @@ class TreeCanvas(wx.ScrolledCanvas):
                                         child.CopyFrom(object)
                                         one_found = True
                                         break
-
+  
                                     child = add_to.GetNextChild()
-
+  
                                 if not one_found:
                                     cad.AddUndoably(object, add_to, button.paste_before if (button != None) else None)
                             else:
                                 cad.AddUndoably(object, add_to, button.paste_before if (button != None) else None)
 
-                        wx.GetApp().EndHistory()
+                        cad.EndHistory()
+                        self.Refresh()
                     else:
                         self.Refresh()
                 else:
