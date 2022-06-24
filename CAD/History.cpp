@@ -258,7 +258,7 @@ void MainHistory::SetAsModified()
 
 void MainHistory::StartHistory(const wchar_t* title, bool freeze_observers)
 {
-	if (level == 0 && freeze_observers)
+	if ((sub_history == NULL) && freeze_observers)
 	{
 		theApp->ObserversFreeze();
 		observers_frozen = true;
@@ -269,7 +269,7 @@ void MainHistory::StartHistory(const wchar_t* title, bool freeze_observers)
 bool MainHistory::EndHistory(void)
 {
 	bool value = History::EndHistory();
-	if (level == 0 && observers_frozen)
+	if ((sub_history == NULL) && observers_frozen)
 	{
 		theApp->ObserversThaw();
 		observers_frozen = false;
