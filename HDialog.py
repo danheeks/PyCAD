@@ -49,9 +49,10 @@ class HTypeObjectDropDown(wx.ComboBox):
         i = 1
         object = self.obj_list.GetFirstChild()
         while object:
-            if i == sel:
-                return self.GetObjectID(object)
-            i += 1
+            if object.GetIDGroupType() == self.object_type:
+                if i == sel:
+                    return self.GetObjectID(object)
+                i += 1
             object = self.obj_list.GetNextChild()
         
         return 0
