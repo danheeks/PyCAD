@@ -89,4 +89,5 @@ public:
 	virtual std::list<HeeksObj *> GetXmlWriteChildren() = 0;
 	virtual bool GetDatumSolid() = 0;
 	virtual void RenderArrow() = 0;
+	virtual double GetViewUnits() = 0;
 };

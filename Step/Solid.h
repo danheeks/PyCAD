@@ -29,8 +29,8 @@ public:
 	const wchar_t* GetTypeString(void)const{return L"Solid";}
 	const wchar_t* GetIconFilePath();
 	HeeksObj *MakeACopy(void)const;
-	void SetColor(const HeeksColor &col){m_color = col;}
-	const HeeksColor* GetColor()const{return &m_color;}
+	void SetColor(const HeeksColor &col);
+	const HeeksColor* GetColor()const;
 
 	// CShape's virtual functions
 	void SetXMLElement(TiXmlElement* element);

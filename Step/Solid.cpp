@@ -49,6 +49,28 @@ const wchar_t* CSolid::GetIconFilePath()
 	return iconpath.c_str();
 }
 
+void CSolid::SetColor(const HeeksColor &col)
+{
+	if (m_faces)
+	{
+		for (HeeksObj* object = m_faces->GetFirstChild(); object; object = m_faces->GetNextChild())
+		{
+			object->SetColor(col);
+		}
+	}
+}
+
+const HeeksColor* CSolid::GetColor()const
+{
+	// faces have color now, so just return first one
+	if (m_faces)
+	{
+		HeeksObj* object = m_faces->GetFirstChild();
+		if (object)return object->GetColor();
+	}
+	return NULL;
+}
+
 void CSolid::MakeTransformedShape(const gp_Trsf &mat)
 {
 	BRepBuilderAPI_Transform myBRepTransformation(m_shape,mat);

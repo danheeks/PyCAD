@@ -16,6 +16,7 @@
 #include "Cone.h"
 #include "strconv.h"
 #include "App.h"
+#include "Property.h"
 #include <locale.h>
 #include <XSControl_WorkSession.hxx>
 #include <XSControl_TransferReader.hxx>
@@ -1357,7 +1358,6 @@ void CShape::CalculateVolumeAndCentre()
 static double volume_for_properties = 0.0;
 static double centre_of_mass[3] = { 0.0, 0.0, 0.0 };
 
-#if 0
 class CalculateVolumeProperty :public Property{
 public:
 	CalculateVolumeProperty(HeeksObj* object) :Property(object, L"calculate volume"){}
@@ -1367,21 +1367,19 @@ public:
 	Property *MakeACopy(void)const{	return new CalculateVolumeProperty(*this);}
 	void Set(bool value){
 		((CShape*)m_object)->CalculateVolumeAndCentre();
-		theApp->m_frame->RefreshProperties();
+		theApp->Repaint();
 	}
 	bool GetBool(void)const{ return false; }
 };
-#endif
 
 void CShape::GetProperties(std::list<Property *> *list)
 {
-#if 0
 	list->push_back(new PropertyDoubleLimited(this, L"opacity", &m_opacity, true, 0.0, true, 1.0));
 
 	if(m_volume_found)
 	{
 		volume_for_properties = this->m_volume;
-		volume_for_properties /= (pow(theApp->m_view_units, 3)); // convert volume to cubic units
+		volume_for_properties /= (pow(theApp->GetViewUnits(), 3)); // convert volume to cubic units
 		list->push_back(new PropertyDouble(this, L"volume", (const double*)(&volume_for_properties)));
 
 		extract(m_centre_of_mass, centre_of_mass);
@@ -1392,7 +1390,7 @@ void CShape::GetProperties(std::list<Property *> *list)
 	{
 		list->push_back(new CalculateVolumeProperty(this));
 	}
-#endif
+
 	IdNamedObjList::GetProperties(list);
 }
 

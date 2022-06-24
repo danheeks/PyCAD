@@ -334,6 +334,7 @@ public:
 	std::list<HeeksObj *> GetXmlWriteChildren();
 	bool GetDatumSolid(){ return m_datum_coords_system_solid_arrows; }
 	void RenderArrow();
+	double GetViewUnits(){ return m_view_units; }
 };
 
 extern CCadApp* theApp;
