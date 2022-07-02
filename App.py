@@ -395,11 +395,17 @@ class App(wx.App):
                 box = object.GetBox()
                 selbox.InsertBox(box)
             centre = selbox.Center()
+            
+            draw_mat = cad.GetDrawMatrix(True)
+            inv_draw_mat = draw_mat.Inverse()
                 
             tr = geom.Matrix()
             tr.Translate(-centre)
+            tr.Multiply(inv_draw_mat)
             tr.RotateAxis(0.785398163397448309, geom.Point3D(0,0,1))
+            tr.Multiply(draw_mat)
             tr.Translate(centre)
+            
             cad.StartHistory('Rotate Selected')
             for object in cad.GetSelectedObjects():
                 cad.TransformUndoably(object, tr)
