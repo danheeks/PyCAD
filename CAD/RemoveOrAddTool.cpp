@@ -95,6 +95,8 @@ void RemoveObjectTool::RollBack()
 
 HeeksObj* RemoveObjectTool::GetAddBefore(HeeksObj* object)
 {
+	if (object->m_owner == NULL)
+		return NULL;
 	for (HeeksObj* child = object->m_owner->GetFirstChild(); child; child = object->m_owner->GetNextChild())
 	{
 		if (child == object)
