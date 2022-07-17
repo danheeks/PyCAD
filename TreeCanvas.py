@@ -205,9 +205,9 @@ class TreeCanvas(wx.ScrolledCanvas):
                         cad.StartHistory('Drag in Objects Window')
 
                         # cut the objects
-#                        cad.DeleteObjectsUndoably(self.dragged_list)
-                        for object in self.dragged_list:
-                            cad.DeleteUndoably(object)
+                        cad.DeleteObjectsUndoably(self.dragged_list)
+#                        for object in self.dragged_list:
+#                            cad.DeleteUndoably(object)
  
                         # paste the objects
                         for object in self.dragged_list:

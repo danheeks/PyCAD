@@ -339,6 +339,7 @@ class Ribbon(RB.RibbonBar):
         Ribbon.AddToolBarTool(toolbar, "Delete", 'delete', 'Delete selected items', app.OnDelete, app.OnUpdateDelete)
         Ribbon.AddToolBarTool(toolbar, "Select", 'select', 'Select Mode', app.OnSelectMode)
         Ribbon.AddToolBarTool(toolbar, "Filter", 'filter', 'Edit theSelection Filter', app.OnFilter)
+        Ribbon.AddToolBarTool(toolbar, "Make Font", 'cone', 'Make the Font Lines C Code', app.OnMakeFont)
 
         self.main_page.Realize()
 

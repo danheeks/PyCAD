@@ -18,7 +18,8 @@ from Ribbon import RB
 from Ribbon import Ribbon
 import ContextTool
 import EllipseDrawing
-    
+import Gear
+   
 def ImportSolidsFile():
     step.ImportSolidsFile(cad.GetFilePathForImportExport())
     
@@ -68,8 +69,23 @@ class SolidApp(App):
             if self.context_face_plane != None:
                 tools.append(ContextTool.CADObjectContextTool(object, "Rotate To Face", "rotface", self.RotateToFace))
             tools.append(ContextTool.CADObjectContextTool(object, "(to do ) Make Face Radius 1mm smaller", "facerch", self.FaceRadiusChange))
+        elif t == Gear.type:
+            tools.append(ContextTool.CADObjectContextTool(object, "Make Solid", "gear", self.MakeGearSolid))
         return tools
     
+    def MakeGearSolid(self, object):
+        s = self.MakeGearSketch(object)
+        cad.Select(s)
+        new_solids = self.OnExtrude(None)
+        if len(new_solids)> 0:
+            cyl = step.NewCyl()
+            cyl.radius = 1
+            cyl.height = 20
+            cyl.OnApplyProperties()
+            cad.Select(new_solids[0])
+            cad.Select(cyl)
+            step.CutShapes()
+               
     def FaceToSketch(self, object):
         sketch = step.NewSketchFromFace(object)
         cad.AddUndoably(sketch)
@@ -195,7 +211,7 @@ class SolidApp(App):
             config.WriteFloat('ExtrusionHeight', height)
             config.WriteFloat('ExtrusionTaperAngle', taper_angle)
             config.WriteBool('ExtrudeToSolid', extrude_makes_a_solid)
-            step.CreateExtrusion(height, extrude_makes_a_solid, False, taper_angle, cad.Color(128, 128, 128))
+            return step.CreateExtrusion(height, extrude_makes_a_solid, False, taper_angle, cad.Color(128, 128, 128))
         
     def InputRevolutionAngle(self, angle, extrude_makes_a_solid):
         dlg = HDialog('Input Revolution Angle')

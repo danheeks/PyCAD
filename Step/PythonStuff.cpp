@@ -79,7 +79,7 @@ HeeksObj* NewCuboid()
 	return new_object;
 }
 
-HeeksObj* NewCyl()
+CCylinder* NewCyl()
 {
 	gp_Trsf mat = make_matrix(theApp->GetDrawMatrix(true)->e);
 	CCylinder* new_object = new CCylinder(gp_Ax2(gp_Pnt(0, 0, 0).Transformed(mat), gp_Dir(0, 0, 1).Transformed(mat), gp_Dir(1, 0, 0).Transformed(mat)), 5, 10, NULL, HeeksColor(191, 191, 240), 1.0f);
@@ -277,11 +277,56 @@ static boost::shared_ptr<HEllipse> initHEllipse(const DigitizedPoint& d1, const 
 }
 
 
+boost::python::list CreateExtrusionOrRevolution(double height_or_angle, bool solid_if_possible, bool revolution_not_extrusion, double taper_angle_for_extrusion, const HeeksColor &color)
+{
+	std::list<TopoDS_Shape> faces_or_wires;
+
+	std::list<HeeksObj*> objects;
+	theApp->GetSelection(objects);
+
+	ConvertToFaceOrWire(objects, faces_or_wires, (fabs(taper_angle_for_extrusion) <= 0.0000001) && solid_if_possible);
+
+	std::list<TopoDS_Shape> new_shapes;
+	Matrix m = *(theApp->GetDrawMatrix(false));
+	gp_Trsf trsf = make_matrix(m.e);
+	if (revolution_not_extrusion)
+	{
+		CreateRevolutions(faces_or_wires, new_shapes, gp_Ax1(gp_Pnt(0, 0, 0).Transformed(trsf), gp_Vec(1, 0, 0).Transformed(trsf)), height_or_angle);
+	}
+	else
+	{
+		CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(0, 0, height_or_angle).Transformed(trsf), taper_angle_for_extrusion, solid_if_possible);
+	}
+
+	boost::python::list olist;
+	if (new_shapes.size() > 0)
+	{
+		theApp->StartHistory(L"Make Extrusion");
+		for (std::list<TopoDS_Shape>::iterator It = new_shapes.begin(); It != new_shapes.end(); It++){
+			TopoDS_Shape& shape = *It;
+			HeeksObj* new_object = CShape::MakeObject(shape, revolution_not_extrusion ? L"Revolved Solid" : L"Extruded Solid", SOLID_TYPE_UNKNOWN, color, 1.0f);
+			theApp->AddUndoably(new_object, NULL, NULL);
+			olist.append(boost::python::pointer_wrapper<CShape*>((CShape*)new_object));
+		}
+		theApp->EndHistory();
+	}
+
+	for (std::list<TopoDS_Shape>::iterator It = faces_or_wires.begin(); It != faces_or_wires.end(); It++)
+	{
+		TopoDS_Shape shape = *It;
+		shape.Free();
+	}
+
+	return olist;
+}
+
 	BOOST_PYTHON_MODULE(step) {
 
 		boost::python::class_<CShape, boost::python::bases<IdNamedObjList>, boost::noncopyable >("Shape", boost::python::no_init)
-			.def("GetFaces", ShapeGetFaces);
-
+			.def("GetFaces", ShapeGetFaces)
+			.def("OnApplyProperties", &CShape::OnApplyProperties)
+			;
+		
 		boost::python::class_<CSolid, boost::python::bases<CShape>, boost::noncopyable >("Solid", boost::python::no_init);
 
 		boost::python::class_<CFace, boost::python::bases<HeeksObj>, boost::noncopyable >("Face", boost::python::no_init)
@@ -297,6 +342,11 @@ static boost::shared_ptr<HEllipse> initHEllipse(const DigitizedPoint& d1, const 
 			.def_readwrite("width", &CCuboid::m_x)
 			.def_readwrite("height", &CCuboid::m_y)
 			.def_readwrite("depth", &CCuboid::m_z)
+			;
+
+		boost::python::class_<CCylinder, boost::python::bases<CSolid>, boost::noncopyable >("Cylinder", boost::python::no_init)
+			.def_readwrite("radius", &CCylinder::m_radius)
+			.def_readwrite("height", &CCylinder::m_height)
 			;
 
 		boost::python::class_<HEllipse, boost::python::bases<HeeksObj> >("Ellipse", boost::python::no_init)

@@ -72,45 +72,6 @@ void ConvertToFaceOrWire(std::list<HeeksObj*> list, std::list<TopoDS_Shape> &fac
 	theApp->DeleteUndoably(sketches_or_faces_to_delete);
 }
 
-void CreateExtrusionOrRevolution(double height_or_angle, bool solid_if_possible, bool revolution_not_extrusion, double taper_angle_for_extrusion, const HeeksColor &color)
-{
-	std::list<TopoDS_Shape> faces_or_wires;
-
-	std::list<HeeksObj*> objects;
-	theApp->GetSelection(objects);
-
-	ConvertToFaceOrWire(objects, faces_or_wires, (fabs(taper_angle_for_extrusion) <= 0.0000001) && solid_if_possible);
-
-	std::list<TopoDS_Shape> new_shapes;
-	Matrix m = *(theApp->GetDrawMatrix(false));
-	gp_Trsf trsf = make_matrix(m.e);
-	if(revolution_not_extrusion)
-	{
-		CreateRevolutions(faces_or_wires, new_shapes, gp_Ax1(gp_Pnt(0, 0, 0).Transformed(trsf), gp_Vec(1, 0, 0).Transformed(trsf)), height_or_angle);
-	}
-	else
-	{
-		CreateExtrusions(faces_or_wires, new_shapes, gp_Vec(0, 0, height_or_angle).Transformed(trsf), taper_angle_for_extrusion, solid_if_possible);
-	}
-
-	if(new_shapes.size() > 0)
-	{
-		theApp->StartHistory(L"Make Extrusion");
-		for(std::list<TopoDS_Shape>::iterator It = new_shapes.begin(); It != new_shapes.end(); It++){
-			TopoDS_Shape& shape = *It;
-			HeeksObj* new_object = CShape::MakeObject(shape, revolution_not_extrusion ? L"Revolved Solid" : L"Extruded Solid", SOLID_TYPE_UNKNOWN, color, 1.0f);
-			theApp->AddUndoably(new_object, NULL, NULL);
-		}
-		theApp->EndHistory();
-	}
-
-	for(std::list<TopoDS_Shape>::iterator It = faces_or_wires.begin(); It != faces_or_wires.end(); It++)
-	{
-		TopoDS_Shape shape = *It;
-		shape.Free();
-	}
-}
-
 HeeksObj* CreatePipeFromProfile(const TopoDS_Wire &spine, std::list<TopoDS_Shape> &faces, const HeeksColor& color)
 {
 	std::list<HeeksObj*> pipe_shapes;

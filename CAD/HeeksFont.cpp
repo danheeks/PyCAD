@@ -4,9 +4,28 @@
 #include "HeeksFont.h"
 #include "../Geom/Geom.h"
 #include "HeeksFontData.h"
+#include "HeeksFontLineData.h"
+
+#define LINES_FOR_FONT
 
 float DrawHeeksFontString(const char* str, bool outline, bool fill)
 {
+#ifdef LINES_FOR_FONT
+	// use lines
+	int i = 0;
+	int index = 0;
+	double x_spacing = 0.16f;
+	double x_translated = 0.0f;
+
+	while (str[i] != 0)
+	{
+		double x = RenderCharLines(str[i]) + x_spacing;
+		glTranslated(x, 0.0, 0.0);
+		x_translated += x;
+		i++;
+	}
+#else
+	// use triangles
 	int i = 0;
 	int index = 0;
 	int num_c = 0;
@@ -62,8 +81,9 @@ float DrawHeeksFontString(const char* str, bool outline, bool fill)
 		}
 		i++;
 	}
+#endif
 
-	return x_translated;
+	return (float)x_translated;
 }
 
 #define NUM_DITHERS 7

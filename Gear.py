@@ -3,6 +3,8 @@ import geom
 import wx
 import cad
 import math
+from Object import PyProperty
+from Object import PyPropertyLength
 
 type = 0
 
@@ -104,8 +106,26 @@ class Gear(Object):
      
     def GetProperties(self):
         properties = []
+        properties.append(PyProperty("num teeth", 'numTeeth', self))
+        properties.append(PyProperty("module", 'module', self))
+        properties.append(PyPropertyLength("addendum offset", 'addendumOffset', self))
+        properties.append(PyPropertyLength("addendum multiplier", 'addendumMultiplier', self))
+        properties.append(PyPropertyLength("dedendum multiplier", 'dedendumMultiplier', self))
+        properties.append(PyProperty("pressure angle", 'pressureAngle', self))
+        properties.append(PyProperty("tip relief", 'tipRelief', self))
+        
+        properties += Object.GetProperties(self)
+
         return properties
 
+        self.numTeeth = num_teeth
+        self.module = mod
+        self.addendumOffset = 0.0
+        self.addendumMultiplier = 1.0
+        self.dedendumMultiplier = 1.0
+        self.pressureAngle = 0.34906585039886 # 20 degrees
+        self.tipRelief = 0.05
+        self.color = cad.Color(128, 128, 128)
         
     def GetPoints(self, tolerance):
         pitch_radius = float(self.module) * self.numTeeth * 0.5

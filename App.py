@@ -306,6 +306,26 @@ class App(wx.App):
             cad.Import(temp_file)
             new_stl.WriteStl(temp_file)
             cad.Import(temp_file)
+            
+    def MakeGearSketch(self, object):
+        pts = object.GetPoints(0.1)
+        if len(pts)>1:
+            s = cad.NewSketch()
+            first_point = None
+            prev_point = None
+            for p in pts:
+                p3d = geom.Point3D(p.x, p.y, 0)
+                if first_point == None:
+                    first_point = geom.Point3D(p3d)
+                else:
+                    s.Add(cad.NewLine(prev_point, p3d))
+                prev_point = p3d
+            s.Add(cad.NewLine(prev_point, first_point))
+            cad.AddUndoably(s)
+            
+        
+            
+        return s
 
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = []
@@ -320,6 +340,9 @@ class App(wx.App):
                 
         if type == cad.OBJECT_TYPE_STL_SOLID:
             tools.append(ContextTool.CADContextTool("Split at Z", "splitsketch", self.SplitStlAtZ))
+            
+        if type == Gear.type:
+            tools.append(ContextTool.CADObjectContextTool(object, "Make Sketch", "lines", self.MakeGearSketch))
                 
         if len(tools)>0:
             tools.append(None) # a separator
@@ -1093,6 +1116,10 @@ class App(wx.App):
         dlg = FilterDlg()
         if dlg.ShowModal() == wx.ID_OK:
             dlg.SetFilterFromCheckBoxes()
+            
+    def OnMakeFont(self, e):
+        from HeeksFontLines import ConvertHeeksLines
+        ConvertHeeksLines()        
         
     def OnMagPrevious(self, e):
         self.frame.graphics_canvas.viewport.RestorePreviousViewPoint()
