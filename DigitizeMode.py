@@ -40,7 +40,9 @@ class DigitizeMode(InputMode):
         return 'Press Esc key to cancel\nLeft button to accept position'
         
     def OnMouse( self, event ):
-        if event.LeftDown():
+        if event.middleDown or event.GetWheelRotation() != 0:
+            wx.GetApp().select_mode.OnMouse(event)
+        elif event.LeftDown():
             self.point_or_window.OnMouse(event)
             self.lbutton_point = cad.Digitize(cad.IPoint(event.x, event.y))
         elif event.LeftUp():
