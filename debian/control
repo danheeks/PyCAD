@@ -1,0 +1,16 @@
+Package: heeks2
+Source: heeks2
+Version: 0.0.1
+Section: editors
+Priority: extra
+Maintainer: Dan Heeks <danheeks@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), cmake
+Standards-Version: 3.9.3
+Homepage: https://github.com/danheeks/PyCAD
+Vcs-Git: https://github.com/danheeks/PyCAD.git
+Vcs-Browser: https://github.com/danheeks/PyCAD
+
+Package: heeks2
+Architecture: any
+Depends: ${shlibs:Depends}, python3-wxgtk4.0
+Description: CAD software using wxPython
