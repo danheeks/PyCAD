@@ -1,4 +1,3 @@
-usr/bin/heeks2
-usr/share/applications/heeks2.desktop
-usr/share/icons/hicolor/scalable/apps/heeks2.svg
-usr/share/locale
+heeks2.desktop usr/share/applications
+heeks2.svg usr/share/icons/hicolor/scalable/apps
+heeks2.sh usr/bin
