@@ -17,7 +17,6 @@ float DrawHeeksFontString(const char* str, bool outline, bool fill)
 #ifdef LINES_FOR_FONT
 	// use lines
 	int i = 0;
-	int index = 0;
 	double x_spacing = 0.16f;
 	double x_translated = 0.0f;
 
