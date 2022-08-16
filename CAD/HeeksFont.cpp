@@ -3,10 +3,14 @@
 #include <stdafx.h>
 #include "HeeksFont.h"
 #include "../Geom/Geom.h"
-#include "HeeksFontData.h"
-#include "HeeksFontLineData.h"
 
 #define LINES_FOR_FONT
+
+#ifdef LINES_FOR_FONT
+#include "HeeksFontLineData.h"
+#else
+#include "HeeksFontData.h"
+#endif
 
 float DrawHeeksFontString(const char* str, bool outline, bool fill)
 {
