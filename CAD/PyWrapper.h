@@ -51,7 +51,7 @@ public:
 				BeforePythonCall(&main_module, &globals);
 				PyLockGIL lock;
 				try{
-					PyEval_CallFunction(f.ptr(), const_cast<char*>("()"));
+					PyObject_CallFunction(f.ptr(), const_cast<char*>("()"));
 					success = AfterPythonCall(main_module);
 					return success;
 				}
