@@ -1,5 +1,6 @@
 project( heeks2 )
 cmake_minimum_required( VERSION 2.6 )
+install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/heeks2.py" DESTINATION "heeks2" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/About.py" DESTINATION "heeks2" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/App.py" DESTINATION "heeks2" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/ContextTool.py" DESTINATION "heeks2" )
@@ -38,3 +39,5 @@ install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/ToolBarTool.py" DESTINATION "heeks2"
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/ToolImage.py" DESTINATION "heeks2" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/Transform.py" DESTINATION "heeks2" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/TreeCanvas.py" DESTINATION "heeks2" )
+
+add_subdirectory( CAD )
