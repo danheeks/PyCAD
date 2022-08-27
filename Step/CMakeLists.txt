@@ -157,4 +157,24 @@ target_link_libraries(step ${Boost_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY
 set_target_properties(step PROPERTIES PREFIX "") 
 
 
+# this figures out where to install the Python modules
+execute_process(
+    COMMAND python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+    OUTPUT_VARIABLE Python_site_packages
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# strip away /usr/local/ because that is what CMAKE_INSTALL_PREFIX is set to
+# also, since there is no leading "/", it makes ${Python_site_packages} a relative path.
+STRING(REGEX REPLACE "/usr/local/(.*)$" "\\1" Python_site_packages "${Python_site_packages}" )
+STRING(REGEX REPLACE "/usr/(.*)$" "\\1" Python_site_packages "${Python_site_packages}" )
+
+message(STATUS "Python module will be installed to: " ${CMAKE_INSTALL_PREFIX}/${Python_site_packages})
+
+# this installs the python library
+install(
+    TARGETS step
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${Python_site_packages}
+)
+
 
