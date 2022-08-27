@@ -1,4 +1,4 @@
-Package: heeks2
+Package: cad
 Source: heeks2
 Version: 0.0.1
 Section: editors
@@ -10,7 +10,7 @@ Homepage: https://github.com/danheeks/PyCAD
 Vcs-Git: https://github.com/danheeks/PyCAD.git
 Vcs-Browser: https://github.com/danheeks/PyCAD
 
-Package: heeks2
+Package: cad
 Architecture: any
 Depends: ${shlibs:Depends}, python3-wxgtk4.0
 Description: CAD software using wxPython
