@@ -82,7 +82,6 @@ set(STEP_SRC
     ../Geom/Matrix.cpp
     ../Geom/Offset.cpp
     ../CAD/DigitizedPoint.cpp
-    ../CAD/Drawing.cpp
     ../CAD/EndedObject.cpp
     ../CAD/HeeksColor.cpp
     ../CAD/HeeksObj.cpp
