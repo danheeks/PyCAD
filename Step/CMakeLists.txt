@@ -27,7 +27,7 @@ message(${OpenCASCADE_INCLUDE_DIR})
 message("OpenCASCADE_LIBRARIES = ")
 message(${OpenCASCADE_LIBRARIES})
 
-#LINK_LIBRARIES("TKBRep" "TKIGES" "TKShHealing" "TKSTEP" "TKSTEP209" "TKSTEPAttr" "TKSTEPBase" "TKXSBase" "TKShapeSchema" "FWOSPlugin" "PTKernel" "TKBool" "TKCAF" "TKCDF" "TKernel" "TKFeat" "TKFillet" "TKG2d" "TKG3d" "TKGeomAlgo" "TKGeomBase" "TKHLR" "TKMath" "TKOffset" "TKPCAF" "TKPrim" "TKPShape" "TKService" "TKTopAlgo" "TKV3d" "TKMesh" "TKBO" "TKXDESTEP" "TKXCAF" "TKXCAFSchema" "TKLCAF" "TKPLCAF")
+LINK_LIBRARIES("TKBRep" "TKIGES" "TKShHealing" "TKSTEP" "TKSTEP209" "TKSTEPAttr" "TKSTEPBase" "TKXSBase" "TKShapeSchema" "FWOSPlugin" "PTKernel" "TKBool" "TKCAF" "TKCDF" "TKernel" "TKFeat" "TKFillet" "TKG2d" "TKG3d" "TKGeomAlgo" "TKGeomBase" "TKHLR" "TKMath" "TKOffset" "TKPCAF" "TKPrim" "TKPShape" "TKService" "TKTopAlgo" "TKV3d" "TKMesh" "TKBO" "TKXDESTEP" "TKXCAF" "TKXCAFSchema" "TKLCAF" "TKPLCAF")
 
 # Turn compiler warnings up to 11, at least with gcc.  
 if (CMAKE_BUILD_TOOL MATCHES "make")
