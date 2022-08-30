@@ -19,6 +19,7 @@ class Gear(Object):
         self.dedendumMultiplier = 1.0
         self.pressureAngle = 0.34906585039886 # 20 degrees
         self.tipRelief = 0.05
+        self.rootChamfer = 0.03
         self.color = cad.Color(128, 128, 128)
         
     def GetIconFilePath(self):
@@ -113,19 +114,11 @@ class Gear(Object):
         properties.append(PyPropertyLength("dedendum multiplier", 'dedendumMultiplier', self))
         properties.append(PyProperty("pressure angle", 'pressureAngle', self))
         properties.append(PyProperty("tip relief", 'tipRelief', self))
-        
+        properties.append(PyProperty("root chamfer", 'rootChamfer', self))
+                                             
         properties += Object.GetProperties(self)
 
         return properties
-
-        self.numTeeth = num_teeth
-        self.module = mod
-        self.addendumOffset = 0.0
-        self.addendumMultiplier = 1.0
-        self.dedendumMultiplier = 1.0
-        self.pressureAngle = 0.34906585039886 # 20 degrees
-        self.tipRelief = 0.05
-        self.color = cad.Color(128, 128, 128)
         
     def GetPoints(self, tolerance):
         pitch_radius = float(self.module) * self.numTeeth * 0.5
@@ -142,11 +135,15 @@ class Gear(Object):
         middle_phi_and_angle = involute_intersect(pitch_radius, base_radius)
 
         points = []
-        clearance = self.GetClearanceMM()
+        clearance = math.fabs(self.GetClearanceMM())
         
         for i in range(0, self.numTeeth):
             tooth_angle = math.pi*2*i/self.numTeeth
             next_tooth_angle = math.pi*2*(i+1)/self.numTeeth
+            
+            relief_vector = geom.Point(math.cos(tooth_angle), math.sin(tooth_angle))
+            root_vector = ~relief_vector
+            
             # incremental_angle - to space the middle point at a quarter of a cycle
             incremental_angle = 0.5*math.pi/self.numTeeth - middle_phi_and_angle[1]
             angle1 = tooth_angle - (inside_phi_and_angle[1] + incremental_angle)
@@ -154,14 +151,18 @@ class Gear(Object):
             angle3 = tooth_angle + (outside_phi_and_angle[1] + incremental_angle)
             angle4 = next_tooth_angle - (outside_phi_and_angle[1] + incremental_angle)
             
-            if math.fabs(self.GetClearanceMM()) > 0.0000000001:
-                p1 = geom.Point(math.cos(angle1) * inside_radius, math.sin(angle1) * inside_radius)
-                p2 = geom.Point(math.cos(angle2) * inside_radius, math.sin(angle2) * inside_radius)
-                v_in = ~(p2 - p1)
-                v_in.Normalize()
+            if clearance > 0.0000000001:
+                p1 = geom.Point(math.cos(angle1) * inside_radius, math.sin(angle1) * inside_radius) + relief_vector * (-clearance)
+                p2 = geom.Point(math.cos(angle2) * inside_radius, math.sin(angle2) * inside_radius) + relief_vector * (-clearance)
 
-                points.append(p1 + v_in * clearance)
-                points.append(p2 + v_in * clearance)
+                if self.rootChamfer > 0.000000001:
+                    points.append(p1 + relief_vector * self.rootChamfer)
+                    points.append(p1 + root_vector * self.rootChamfer)
+                    points.append(p2 + root_vector * (-self.rootChamfer))
+                    points.append(p2 + relief_vector * self.rootChamfer)
+                else:
+                    points.append(p1 + v_in * clearance)
+                    points.append(p2 + v_in * clearance)
 
             involute(points, tooth_angle + incremental_angle, False, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius)
             
