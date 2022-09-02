@@ -178,4 +178,4 @@ set( heeksintf_HDRS
    )
 
 file( GLOB sources ${heeksintf_SRCS} ${heeksintf_HDRS} )
-install( FILES ${sources} DESTINATION "share/heeks2/CAD" COMPONENT cad-dev )
+install( FILES ${sources} DESTINATION "share/heeks2/CAD" COMPONENT cad )
