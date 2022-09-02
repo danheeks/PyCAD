@@ -167,3 +167,21 @@ install(
     TARGETS cad
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${Python_site_packages}
 )
+
+
+
+
+
+project( cad-dev )
+cmake_minimum_required( VERSION 2.6 )
+
+set( heeksintf_SRCS
+    Arc.cpp
+   )
+   
+set( heeksintf_HDRS
+    Arc.h
+   )
+
+file( GLOB sources ${heeksintf_SRCS} ${heeksintf_HDRS} )
+install( FILES ${sources} DESTINATION "share/heeks2/CAD" COMPONENT cad-dev )
