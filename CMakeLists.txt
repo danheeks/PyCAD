@@ -45,6 +45,3 @@ install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/heekscad.png" DESTINATION "PyCAD" )
 add_subdirectory( CAD )
 add_subdirectory( Geom )
 add_subdirectory( Step )
-
-project( cad-dev )
-add_subdirectory( CAD )
