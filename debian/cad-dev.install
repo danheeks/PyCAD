@@ -1,3 +1,3 @@
-CAD/Filter.h usr/share/heeks2/PyCAD/CAD
-Geom/Arc.h usr/share/heeks2/PyCAD/Geom
-Geom/Arc.cpp usr/share/heeks2/PyCAD/Geom
+CAD/Filter.h usr/share/PyCAD/CAD
+Geom/Arc.h usr/share/PyCAD/Geom
+Geom/Arc.cpp usr/share/PyCAD/Geom
