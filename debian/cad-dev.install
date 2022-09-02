@@ -1,3 +1,1 @@
-usr/share/heeks2/CAD
-usr/share/heeks2/Geom
-usr/share/heeks2/Step
+CAD/Filter.h usr/share/heeks2/PyCAD/CAD
