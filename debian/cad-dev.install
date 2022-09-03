@@ -1,6 +1,8 @@
 CAD/App.h usr/share/PyCAD/CAD
 CAD/EndedObject.cpp usr/share/PyCAD/CAD
 CAD/EndedObject.h usr/share/PyCAD/CAD
+CAD/CoordinateSystem.cpp usr/share/PyCAD/CAD
+CAD/CoordinateSystem.h usr/share/PyCAD/CAD
 CAD/ExtrudedObj.cpp usr/share/PyCAD/CAD
 CAD/ExtrudedObj.h usr/share/PyCAD/CAD
 CAD/Filter.cpp usr/share/PyCAD/CAD
