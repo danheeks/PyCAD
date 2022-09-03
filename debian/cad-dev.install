@@ -23,6 +23,16 @@ CAD/HeeksFontData.h usr/share/PyCAD/CAD
 CAD/HeeksFontLineData.h usr/share/PyCAD/CAD
 CAD/HeeksObj.cpp usr/share/PyCAD/CAD
 CAD/HeeksObj.h usr/share/PyCAD/CAD
+CAD/History.cpp usr/share/PyCAD/CAD
+CAD/History.h usr/share/PyCAD/CAD
+CAD/IdNamedObj.cpp usr/share/PyCAD/CAD
+CAD/IdNamedObj.h usr/share/PyCAD/CAD
+CAD/IdNamedObjList.cpp usr/share/PyCAD/CAD
+CAD/IdNamedObjList.h usr/share/PyCAD/CAD
+CAD/IPoint.h usr/share/PyCAD/CAD
+CAD/Index.h usr/share/PyCAD/CAD
+CAD/ObjList.cpp usr/share/PyCAD/CAD
+CAD/ObjList.h usr/share/PyCAD/CAD
 CAD/Picking.cpp usr/share/PyCAD/CAD
 CAD/Picking.h usr/share/PyCAD/CAD
 CAD/Property.cpp usr/share/PyCAD/CAD
