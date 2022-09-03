@@ -58,6 +58,7 @@ Geom/Curve3D.cpp usr/share/PyCAD/Geom
 Geom/Curve3D.h usr/share/PyCAD/Geom
 Geom/dxf.cpp usr/share/PyCAD/Geom
 Geom/dxf.h usr/share/PyCAD/Geom
+Geom/earcut.h usr/share/PyCAD/Geom
 Geom/Finite.cpp usr/share/PyCAD/Geom
 Geom/Geom.cpp usr/share/PyCAD/Geom
 Geom/Geom.h usr/share/PyCAD/Geom
