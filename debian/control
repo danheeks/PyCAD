@@ -2,6 +2,7 @@ Source: heeks2
 Section: editors
 Priority: extra
 Maintainer: Dan Heeks <danheeks@gmail.com>
+Build-Depends: debhelper (>= 9.0.0), cmake, python3-dev, freeglut3-dev, libboost-python-dev, libopencascade-visualization-dev | liboce-visualization-dev
 Standards-Version: 3.9.3
 Homepage: https://github.com/danheeks/PyCAD
 Vcs-Git: https://github.com/danheeks/PyCAD.git
@@ -9,7 +10,6 @@ Vcs-Browser: https://github.com/danheeks/PyCAD
 
 Package: cad
 Architecture: any
-Build-Depends: debhelper (>= 9.0.0), cmake, python3-dev, freeglut3-dev, libboost-python-dev, libopencascade-visualization-dev | liboce-visualization-dev
 Depends: ${shlibs:Depends}, python3-wxgtk4.0
 Description: CAD software using wxPython
 
