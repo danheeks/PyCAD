@@ -1,6 +1,6 @@
 project( cad )
 cmake_minimum_required( VERSION 2.6 )
-install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/cad.py" DESTINATION "PyCAD" )
+install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/startcad.py" DESTINATION "PyCAD" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/About.py" DESTINATION "PyCAD" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/App.py" DESTINATION "PyCAD" )
 install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/ContextTool.py" DESTINATION "PyCAD" )
