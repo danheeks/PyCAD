@@ -167,6 +167,3 @@ install(
     TARGETS cad
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${Python_site_packages}
 )
-
-install( FILES "${CMAKE_CURRENT_SOURCE_DIR}/App.h" DESTINATION "share/heeks2/CAD" )
-
