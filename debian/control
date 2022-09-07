@@ -1,5 +1,5 @@
 Package: cad
-Source: blah
+Source: heeks2
 Version: 0.0.1
 Section: editors
 Priority: extra
@@ -15,9 +15,8 @@ Architecture: any
 Depends: ${shlibs:Depends}, python3-wxgtk4.0
 Description: CAD software using wxPython
 
-Package: cad-dev
-Architecture: all
-Section: libdevel
-Depends: ${misc:Depends}
-Description: PyCAD source code, for including in extenstions like cam
- This package contains the add-ins development files (ie. sources, headers).
+#Package: cad-dev
+#Architecture: all
+#Depends: ${misc:Depends}
+#Description: PyCAD source code, for including in extenstions like cam
+# This package contains the add-ins development files (ie. sources, headers).
