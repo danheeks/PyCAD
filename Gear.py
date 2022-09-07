@@ -20,6 +20,7 @@ class Gear(Object):
         self.pressureAngle = 0.34906585039886 # 20 degrees
         self.tipRelief = 0.05
         self.rootChamfer = 0.03
+        self.numInvoluteFacets = 10
         self.color = cad.Color(128, 128, 128)
         
     def GetIconFilePath(self):
@@ -115,6 +116,7 @@ class Gear(Object):
         properties.append(PyProperty("pressure angle", 'pressureAngle', self))
         properties.append(PyProperty("tip relief", 'tipRelief', self))
         properties.append(PyProperty("root chamfer", 'rootChamfer', self))
+        properties.append(PyProperty("num involute facets", 'numInvoluteFacets', self))        
                                              
         properties += Object.GetProperties(self)
 
@@ -164,13 +166,13 @@ class Gear(Object):
                     points.append(p1 + v_in * clearance)
                     points.append(p2 + v_in * clearance)
 
-            involute(points, tooth_angle + incremental_angle, False, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius)
+            involute(points, tooth_angle + incremental_angle, False, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, self.numInvoluteFacets)
             
             if math.fabs(self.tipRelief) > 0.00000000001:
                 points.append(point_at_rad_and_angle(outside_radius, angle3 + (self.tipRelief * 0.5)/outside_radius))
                 points.append(point_at_rad_and_angle(outside_radius, angle4 - (self.tipRelief * 0.5)/outside_radius))
 
-            involute(points, next_tooth_angle - incremental_angle, True, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius)
+            involute(points, next_tooth_angle - incremental_angle, True, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, self.numInvoluteFacets)
         
         return points
                               
@@ -205,8 +207,7 @@ def involute_intersect(r, base_radius):
     return involute_intersect1(r, base_radius, 1.0, 1.0)
     
     
-def involute(points, tooth_angle, do_reverse, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius):
-    steps = 10
+def involute(points, tooth_angle, do_reverse, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, steps):
     first = True
     
     start = steps if do_reverse else 0
