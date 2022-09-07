@@ -1,1 +1,1 @@
-python3 /usr/PyCAD/heeks2cad.py
+python3 /usr/PyCAD/startcad.py
