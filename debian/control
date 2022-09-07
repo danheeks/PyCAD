@@ -14,3 +14,9 @@ Package: cad
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: CAD software using wxPython
+
+Package: cad-dev
+Architecture: all
+Depends: ${misc:Depends}
+Description: PyCAD source code, for including in extenstions like cam
+ This package contains the add-ins development files (ie. sources, headers).
