@@ -10,11 +10,11 @@ Vcs-Browser: https://github.com/danheeks/PyCAD
 
 Package: cad
 Architecture: any
-Depends: ${shlibs:Depends}, python3-wxgtk4.0
+Depends: python3-wxgtk4.0
 Description: CAD software using wxPython
 
-#Package: cad-dev
-#Architecture: all
-#Depends: ${misc:Depends}
-#Description: PyCAD source code, for including in extenstions like cam
-# This package contains the add-ins development files (ie. sources, headers).
+Package: cad-dev
+Architecture: all
+Depends: ${misc:Depends}
+Description: PyCAD source code, for including in extenstions like cam
+ This package contains the add-ins development files (ie. sources, headers).
