@@ -165,5 +165,5 @@ message(STATUS "Python module will be installed to: " ${CMAKE_INSTALL_PREFIX}/${
 # this installs the python library
 install(
     TARGETS cad
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/${Python_site_packages}
+    LIBRARY DESTINATION /usr/lib/python3/dist-packages}
 )
