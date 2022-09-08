@@ -10,7 +10,6 @@ Vcs-Browser: https://github.com/danheeks/PyCAD
 
 Package: cad-dev
 Architecture: all
-Depends: ${misc:Depends}
 Description: PyCAD source code, for including in extenstions like cam
  This package contains the add-ins development files (ie. sources, headers).
 
