@@ -1,1 +1,1 @@
-test
+extern int a;
