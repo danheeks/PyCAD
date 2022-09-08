@@ -4,7 +4,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-override_dh_auto_install:
-
-%:
+override_dh_auto_configure:
+	cmake -DCMAKE_INSTALL_PREFIX=/usr $(EXTRA_CMAKE_ARGS)
+    %:
 	dh $@
