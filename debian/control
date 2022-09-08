@@ -15,3 +15,6 @@ Description: CAD software using wxPython
 
 Package: fgds
 Architecture: all
+Depends: ${shlibs:Depends}
+Description: PyCAD source code, for including in extenstions like cam
+ This package contains the add-ins development files (ie. sources, headers).
