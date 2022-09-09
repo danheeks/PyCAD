@@ -43,4 +43,4 @@ TreeCanvas.py usr/PyCAD
 bitmaps usr/PyCAD
 icons usr/PyCAD
 heekscad.png usr/PyCAD
-CAD/cad.so usr
+usr/lib/python3/dist-packages/cad.so usr/lib/python3/dist-packages
