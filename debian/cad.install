@@ -2,7 +2,6 @@ Heeks2.desktop usr/share/applications
 Heeks2.svg usr/share/icons/hicolor/scalable/apps
 heeks2.sh usr/bin
 startcad.py usr/PyCAD
-startcad.py usr/PyCAD
 About.py usr/PyCAD
 App.py usr/PyCAD
 ContextTool.py usr/PyCAD
