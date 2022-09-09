@@ -44,3 +44,5 @@ bitmaps usr/PyCAD
 icons usr/PyCAD
 heekscad.png usr/PyCAD
 usr/lib/python3/dist-packages/cad.so usr/lib/python3/dist-packages
+usr/lib/python3/dist-packages/geom.so usr/lib/python3/dist-packages
+usr/lib/python3/dist-packages/step.so usr/lib/python3/dist-packages
