@@ -1264,6 +1264,7 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 		glCallList(m_transform_gl_list);
 		glPopMatrix();
 	}
+	if (m_hidden_for_drag.size() == 0 || !m_show_grippers_on_drag)m_marked_list->GrippersGLCommands(false, false);
 
 	// draw the ruler
 	if (m_show_ruler && m_ruler->m_visible)
@@ -1283,7 +1284,6 @@ void CCadApp::glCommandsAll(const CViewPoint &view_point)
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	if (m_hidden_for_drag.size() == 0 || !m_show_grippers_on_drag)m_marked_list->GrippersGLCommands(false, false);
 }
 
 void CCadApp::glCommands(bool select, bool marked, bool no_color)

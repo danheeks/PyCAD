@@ -4,7 +4,9 @@
 
 #include "stdafx.h"
 #include "Gripper.h"
+#include "Material.h"
 #include "HeeksColor.h"
+#include "CoordinateSystem.h"
 
 static unsigned char circle[18] = {0x1c, 0x00, 0x63, 0x00, 0x41, 0x00, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x41, 0x00, 0x63, 0x00, 0x1c, 0x00};
 static unsigned char translation_circle[30] = {0x00, 0x80, 0x01, 0xc0, 0x00, 0x80, 0x01, 0xc0, 0x06, 0x30, 0x04, 0x10, 0x28, 0x0a, 0x78, 0x0f, 0x28, 0x0a, 0x04, 0x10, 0x06, 0x30, 0x01, 0xc0, 0x00, 0x80, 0x01, 0xc0, 0x00, 0x80};
@@ -31,73 +33,6 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 
 	if (theApp->m_dragging_moves_objects)
 	{
-		if (select && false)
-		{
-			double s = 5.0 / theApp->GetPixelScale();
-			double p[8][3] = {
-				{ -s, -s, -s },
-				{ s, -s, -s },
-				{ s, s, -s },
-				{ -s, s, -s },
-				{ -s, -s, s },
-				{ s, -s, s },
-				{ s, s, s },
-				{ -s, s, s }
-			};
-
-			for (int i = 0; i<8; i++){
-				p[i][0] += m_data.m_p.x;
-				p[i][1] += m_data.m_p.y;
-				p[i][2] += m_data.m_p.z;
-			}
-
-			glBegin(GL_TRIANGLES);
-			glVertex3dv(p[0]);
-			glVertex3dv(p[2]);
-			glVertex3dv(p[1]);
-			glVertex3dv(p[0]);
-			glVertex3dv(p[3]);
-			glVertex3dv(p[2]);
-
-			glVertex3dv(p[0]);
-			glVertex3dv(p[1]);
-			glVertex3dv(p[5]);
-			glVertex3dv(p[0]);
-			glVertex3dv(p[5]);
-			glVertex3dv(p[4]);
-
-			glVertex3dv(p[3]);
-			glVertex3dv(p[0]);
-			glVertex3dv(p[4]);
-			glVertex3dv(p[3]);
-			glVertex3dv(p[4]);
-			glVertex3dv(p[7]);
-
-			glVertex3dv(p[4]);
-			glVertex3dv(p[5]);
-			glVertex3dv(p[6]);
-			glVertex3dv(p[4]);
-			glVertex3dv(p[6]);
-			glVertex3dv(p[7]);
-
-			glVertex3dv(p[3]);
-			glVertex3dv(p[7]);
-			glVertex3dv(p[6]);
-			glVertex3dv(p[3]);
-			glVertex3dv(p[6]);
-			glVertex3dv(p[2]);
-
-			glVertex3dv(p[2]);
-			glVertex3dv(p[6]);
-			glVertex3dv(p[5]);
-			glVertex3dv(p[2]);
-			glVertex3dv(p[5]);
-			glVertex3dv(p[1]);
-
-			glEnd();
-		}
-		else
-		{
 			glRasterPos3d(m_data.m_p.x, m_data.m_p.y, m_data.m_p.z);
 			switch(m_data.m_type){
 		case GripperTypeTranslate:
@@ -141,11 +76,60 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 				break;
 			}
 			break;
+		case GripperTypeObjectScaleX:
+		case GripperTypeObjectScaleY:
+		case GripperTypeObjectScaleZ:
+		{
+			double s = 30.0 / theApp->GetPixelScale();
+			if (!no_color)
+			{
+				glEnable(GL_LIGHTING);
+				glShadeModel(GL_SMOOTH);
+			}
+			glPushMatrix();
+
+			glTranslated(m_data.m_p.x, m_data.m_p.y, m_data.m_p.z);
+
+			if (m_gripper_parent)
+			{
+				Matrix object_m;
+				m_gripper_parent->GetScaleAboutMatrix(object_m);
+				object_m.Translate(-(Point3d(0, 0, 0).Transformed(object_m))); // remove matrix translation
+				double m[16];
+				object_m.GetTransposed(m);
+				glMultMatrixd(m);
+			}
+
+			glScaled(s, s, s);
+			
+			switch (m_data.m_type){
+			case GripperTypeObjectScaleX:
+				glRotated(90, 0, 1, 0);
+				if (!no_color)Material(HeeksColor(255, 0, 0)).glMaterial(1.0);
+				break;
+			case GripperTypeObjectScaleY:
+				glRotated(90, -1, 0, 0);
+				if (!no_color)Material(HeeksColor(0, 255, 0)).glMaterial(1.0);
+				break;
+			case GripperTypeObjectScaleZ:
+			default:
+				if (!no_color)Material(HeeksColor(0, 0, 255)).glMaterial(1.0);
+				break;
+			}
+
+			CoordinateSystem::RenderArrow();
+			glPopMatrix();
+			if (!no_color)
+			{
+				glShadeModel(GL_FLAT);
+				glDisable(GL_LIGHTING);
+			}
+		}
+			break;
 		default:
 			glBitmap(9, 9, 4, 4, 10.0, 0.0, circle);
 			break;
 			}
-		}
 	}
 	else
 	{
