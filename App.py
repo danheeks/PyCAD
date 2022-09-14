@@ -972,7 +972,12 @@ class App(wx.App):
     def OnAbout(self, e):
         dlg = AboutBox(self.frame)
         dlg.ShowModal()
-                
+        
+    def GetAboutText(self):
+        return '''Open source CAD software, source code here:
+https://github.com/danheeks/PyCAD
+'''
+        
     def OnPrint(self, e):
         printDialogData = wx.PrintDialogData(self.printData)
         printer = wx.Printer(printDialogData)

@@ -14,8 +14,8 @@ class AboutBox(wx.Dialog):
         self.SetTitle(wx.GetApp().version_number.replace(' ', '.'))
         
         self.text_ctrl = wx.TextCtrl( panel, size = wx.Size(600, 400), style = wx.TE_READONLY | wx.TE_MULTILINE | wx.TE_AUTO_URL )
-        text = 'Copyright Dan Heeks 2020\nOpen source CAD software, source code here:\n'
-        text += 'https://github.com/danheeks/PyCAD\n'
+        
+        text = wx.GetApp().GetAboutText()
 
         self.text_ctrl.SetValue(text)
         
