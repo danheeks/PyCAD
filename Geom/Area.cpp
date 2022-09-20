@@ -36,6 +36,14 @@ void CArea::FitArcs(){
 	}
 }
 
+void CArea::UnFitArcs(){
+	for (std::list<CCurve>::iterator It = m_curves.begin(); It != m_curves.end(); It++)
+	{
+		CCurve& curve = *It;
+		curve.UnFitArcs();
+	}
+}
+
 Point CArea::NearestPoint(const Point& p)const
 {
 	double best_dist = 0.0;
