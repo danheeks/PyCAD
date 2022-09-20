@@ -307,15 +307,14 @@ int HLine::Intersects(const HeeksObj *object, std::list< double > *rl)const{
 	case CircleType:
 		{
 			std::list<Point3d> plist;
-			intersect(GetLine(), ((HCircle*)object)->GetCircle(), plist);
+			Line line2d(Point3d(A.x, A.y, 0.0), Point3d(B.x, B.y, 0.0));
+			intersect(line2d, ((HCircle*)object)->GetCircle(), plist);
+
 			for (std::list<Point3d>::iterator It = plist.begin(); It != plist.end(); It++)
 			{
 				Point3d& pnt = *It;
-				if(Intersects(pnt))
-				{
-					if(rl)add_pnt_to_doubles(pnt, *rl);
-					numi++;
-				}
+				if(rl)add_pnt_to_doubles(pnt, *rl);
+				numi++;
 			}
 		}
 		break;
