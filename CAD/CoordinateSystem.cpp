@@ -161,6 +161,273 @@ void CoordinateSystem::RenderArrow()
 	glEnd();
 }
 
+void CoordinateSystem::RenderRotateArrow()
+{
+	glBegin(GL_TRIANGLES);
+	// bottom
+	glNormal3d(-0.707, -0.707, 0);
+	glVertex3d(0.424, -0.424, 0);		// Point 1
+	glVertex3d(0.495, -0.495, -0.1);	// Point 2
+	glVertex3d(0.566, -0.566, 0);		// Point 3
+	glVertex3d(0.424, -0.424, 0);		// Point 1
+	glVertex3d(0.566, -0.566, 0);		// Point 3
+	glVertex3d(0.495, -0.495, 0.1);		// Point 4
+
+	//sides
+	glNormal3d(-0.707, 0.707, 0);
+	glVertex3d(0.424, -0.424, 0);		// Point 1
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.495, -0.495, 0.1);		// Point 4
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+	glNormal3d(-0.707, 0.707, 0);
+	glVertex3d(0.424, -0.424, 0);		// Point 1
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.647, -0.268, -0.1);	// Point 6
+	glVertex3d(0.495, -0.495, -0.1);	// Point 2
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.495, -0.495, -0.1);	// Point 2
+	glNormal3d(-0.707, 0.707, 0);
+	glVertex3d(0.424, -0.424, 0);		// Point 1
+
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.495, -0.495, -0.1);	// Point 2
+	glVertex3d(0.647, -0.268, -0.1);	// Point 6
+	glNormal3d(0.924, -0.383, 0);
+	glVertex3d(0.739, -0.306, 0);		// Point 7
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.495, -0.495, -0.1);	// Point 2
+	glNormal3d(0.924, -0.383, 0);
+	glVertex3d(0.739, -0.306, 0);		// Point 7
+	glNormal3d(0.707, -0.707, 0);
+	glVertex3d(0.566, -0.566, 0);		// Point 3
+
+	glNormal3d(0.707, -0.707, 0);
+	glVertex3d(0.566, -0.566, 0);		// Point 3
+	glNormal3d(0.924, -0.383, 0);
+	glVertex3d(0.739, -0.306, 0);		// Point 7
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+	glNormal3d(0.707, -0.707, 0);
+	glVertex3d(0.566, -0.566, 0);		// Point 3
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+	glVertex3d(0.495, -0.495, 0.1);		// Point 4
+
+
+	// 5, 8, 12
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+	glVertex3d(0.7, 0, 0.1);			// Point 12
+
+	// 5, 12, 9
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.7, 0, 0.1);			// Point 12
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.6, 0, 0);				// Point 9
+
+	// 10, 6, 5
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+	glVertex3d(0.647, -0.268, -0.1);	// Point 6
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+
+	// 9, 10, 5
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.6, 0, 0);				// Point 9
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+	glNormal3d(-0.924, 0.383, 0);
+	glVertex3d(0.554, -0.230, 0);		// Point 5
+
+	// 10, 7, 6
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+	glNormal3d(0.924, -0.383, 0);
+	glVertex3d(0.739, -0.306, 0);		// Point 7
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.647, -0.268, -0.1);	// Point 6
+
+	// 10, 11, 7
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+	glNormal3d(1, 0, 0);
+	glVertex3d(0.8, 0, 0);				// Point 11
+	glNormal3d(0.924, -0.383, 0);
+	glVertex3d(0.739, -0.306, 0);		// Point 7
+
+	// 11, 12, 8
+	glNormal3d(1, 0, 0);
+	glVertex3d(0.8, 0, 0);				// Point 11
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.7, 0, 0.1);			// Point 12
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+
+	// 11, 8, 7
+	glNormal3d(1, 0, 0);
+	glVertex3d(0.8, 0, 0);				// Point 11
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.647, -0.268, 0.1);		// Point 8
+	glNormal3d(0.924, -0.383, 0);
+	glVertex3d(0.739, -0.306, 0);		// Point 7
+
+
+	// 16, 9, 12
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.66, 0.223, 0.1);		// Point 16
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.6, 0, 0);				// Point 9
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.7, 0, 0.1);			// Point 12
+
+	// 16, 13, 9
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.66, 0.223, 0.1);		// Point 16
+	glNormal3d(-0.957, -0.289, 0);
+	glVertex3d(0.573, 0.173, 0);		// Point 13
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.6, 0, 0);				// Point 9
+
+	// 13, 10, 9
+	glNormal3d(-0.957, -0.289, 0);
+	glVertex3d(0.573, 0.173, 0);		// Point 13
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.6, 0, 0);				// Point 9
+ 
+	// 13, 14, 10
+	glNormal3d(-0.957, -0.289, 0);
+	glVertex3d(0.573, 0.173, 0);		// Point 13
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.66, 0.223, -0.1);		// Point 14
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+
+	// 14, 15, 11
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.66, 0.223, -0.1);		// Point 14
+	glNormal3d(0.957, 0.289, 0);
+	glVertex3d(0.747, 0.273, 0);		// Point 15
+	glNormal3d(1, 0, 0);
+	glVertex3d(0.8, 0, 0);				// Point 11
+
+	// 14, 11, 10
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.66, 0.223, -0.1);		// Point 14
+	glNormal3d(1, 0, 0);
+	glVertex3d(0.8, 0, 0);				// Point 11
+	glNormal3d(0, 0, -1);
+	glVertex3d(0.7, 0, -0.1);			// Point 10
+
+	// 15, 16, 12
+	glNormal3d(0.957, 0.289, 0);
+	glVertex3d(0.747, 0.273, 0);		// Point 15
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.66, 0.223, 0.1);		// Point 16
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.7, 0, 0.1);			// Point 12
+
+	// 15, 12, 11
+	glNormal3d(0.957, 0.289, 0);
+	glVertex3d(0.747, 0.273, 0);		// Point 15
+	glNormal3d(0, 0, 1);
+	glVertex3d(0.7, 0, 0.1);			// Point 12
+	glNormal3d(1, 0, 0);
+	glVertex3d(0.8, 0, 0);				// Point 11
+
+	// eaves
+	glNormal3d(0.5, -0.866, 0);
+	// 13, 16, 20
+	glVertex3d(0.573, 0.173, 0);		// Point 13
+	glVertex3d(0.66, 0.223, 0.1);		// Point 16
+	glVertex3d(0.66, 0.223, 0.19);		// Point 20
+
+	// 13, 20, 17
+	glVertex3d(0.573, 0.173, 0);		// Point 13
+	glVertex3d(0.66, 0.223, 0.19);		// Point 20
+	glVertex3d(0.495, 0.128, 0);		// Point 17
+
+	// 17, 18, 14
+	glVertex3d(0.495, 0.128, 0);		// Point 17
+	glVertex3d(0.66, 0.223, -0.19);		// Point 18
+	glVertex3d(0.66, 0.223, -0.1);		// Point 14
+
+	// 17, 14, 13
+	glVertex3d(0.495, 0.128, 0);		// Point 17
+	glVertex3d(0.66, 0.223, -0.1);		// Point 14
+	glVertex3d(0.573, 0.173, 0);		// Point 13
+
+	// 18, 19, 15
+	glVertex3d(0.66, 0.223, -0.19);		// Point 18
+	glVertex3d(0.825, 0.318, 0);		// Point 19
+	glVertex3d(0.747, 0.273, 0);		// Point 15
+
+	// 18, 15, 14
+	glVertex3d(0.66, 0.223, -0.19);		// Point 18
+	glVertex3d(0.747, 0.273, 0);		// Point 15
+	glVertex3d(0.66, 0.223, -0.1);		// Point 14
+
+	// 19, 20, 16
+	glVertex3d(0.825, 0.318, 0);		// Point 19
+	glVertex3d(0.66, 0.223, 0.19);		// Point 20
+	glVertex3d(0.66, 0.223, 0.1);		// Point 16
+
+	// 19, 16, 15
+	glVertex3d(0.825, 0.318, 0);		// Point 19
+	glVertex3d(0.66, 0.223, 0.1);		// Point 16
+	glVertex3d(0.747, 0.273, 0);		// Point 15
+
+	// roof
+	// 17, 21, 18
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.495, 0.128, 0);		// Point 17
+	glNormal3d(-0.782, 0.138, -0.608);
+	glVertex3d(0.5, 0.5, 0);			// Point 21
+	glNormal3d(-0.256, 0.442, -0.860);
+	glVertex3d(0.66, 0.223, -0.19);		// Point 18
+
+	// 18, 21, 19
+	glNormal3d(-0.256, 0.442, -0.860);
+	glVertex3d(0.66, 0.223, -0.19);		// Point 18
+	glNormal3d(0.271, 0.746, -0.608);
+	glVertex3d(0.5, 0.5, 0);			// Point 21
+	glNormal3d(0.489, 0.872, 0);
+	glVertex3d(0.825, 0.318, 0);		// Point 19
+
+	// 19, 21, 20
+	glNormal3d(0.489, 0.872, 0);
+	glVertex3d(0.825, 0.318, 0);		// Point 19
+	glNormal3d(0.271, 0.746, 0.608);
+	glVertex3d(0.5, 0.5, 0);			// Point 21
+	glNormal3d(-0.256, 0.442, 0.860);
+	glVertex3d(0.66, 0.223, 0.19);		// Point 20
+
+	// 20, 21, 17
+	glNormal3d(-0.256, 0.442, 0.860);
+	glVertex3d(0.66, 0.223, 0.19);		// Point 20
+	glNormal3d(-0.782, 0.138, 0.608);
+	glVertex3d(0.5, 0.5, 0);			// Point 21
+	glNormal3d(-1, 0, 0);
+	glVertex3d(0.495, 0.128, 0);		// Point 17
+	glEnd();
+
+}
+
 // static
 void CoordinateSystem::RenderDatum(bool bright, bool solid, bool no_color)
 {

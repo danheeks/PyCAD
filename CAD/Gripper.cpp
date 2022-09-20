@@ -38,9 +38,6 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 		case GripperTypeTranslate:
 			glBitmap(16, 15, 8, 7, 10.0, 0.0, translation_circle);
 			break;
-		case GripperTypeRotateObject:
-			glBitmap(16, 13, 8, 4, 10.0, 0.0, rotation_object_circle);
-			break;
 		case GripperTypeRotateObjectXY:
 			glBitmap(16, 13, 8, 4, 10.0, 0.0, rotation_object_circle);
 			break;
@@ -49,9 +46,6 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 			break;
 		case GripperTypeRotateObjectYZ:
 			glBitmap(16, 13, 8, 4, 10.0, 0.0, rotation_object_circle);
-			break;
-		case GripperTypeRotate:
-			glBitmap(16, 13, 8, 4, 10.0, 0.0, rotation_circle);
 			break;
 		case GripperTypeScale:
 			glBitmap(16, 15, 8, 7, 10.0, 0.0, scale_circle);
@@ -79,8 +73,11 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 		case GripperTypeObjectScaleX:
 		case GripperTypeObjectScaleY:
 		case GripperTypeObjectScaleZ:
+		case GripperTypeRotateObject:
+		case GripperTypeRotate:
 		{
 			double s = 30.0 / theApp->GetPixelScale();
+
 			if (!no_color)
 			{
 				glEnable(GL_LIGHTING);
@@ -106,18 +103,28 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 			case GripperTypeObjectScaleX:
 				glRotated(90, 0, 1, 0);
 				if (!no_color)Material(HeeksColor(255, 0, 0)).glMaterial(1.0);
+				CoordinateSystem::RenderArrow();
 				break;
 			case GripperTypeObjectScaleY:
 				glRotated(90, -1, 0, 0);
 				if (!no_color)Material(HeeksColor(0, 255, 0)).glMaterial(1.0);
+				CoordinateSystem::RenderArrow();
 				break;
 			case GripperTypeObjectScaleZ:
-			default:
 				if (!no_color)Material(HeeksColor(0, 0, 255)).glMaterial(1.0);
+				CoordinateSystem::RenderArrow();
+				break;
+			case GripperTypeRotateObject:
+				if (!no_color)Material(HeeksColor(255, 255, 0)).glMaterial(1.0);
+				CoordinateSystem::RenderRotateArrow();
+				break;
+			case GripperTypeRotate:
+			default:
+				if (!no_color)Material(HeeksColor(0, 255, 255)).glMaterial(1.0);
+				CoordinateSystem::RenderRotateArrow();
 				break;
 			}
 
-			CoordinateSystem::RenderArrow();
 			glPopMatrix();
 			if (!no_color)
 			{
