@@ -45,6 +45,9 @@ class HImage(Object):
     def GetProperties(self):
         properties = []
         properties.append(PyProperty("opacity", 'opacity', self))
+                                             
+        properties += Object.GetProperties(self)
+
         return properties
     
     def OnGlCommands(self, select, marked, no_color):
