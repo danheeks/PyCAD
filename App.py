@@ -378,7 +378,7 @@ class App(wx.App):
         return tools
     
     def GetSelectionFilterTools(self, filter):
-        # get tools for the selection given filter; filter is actually a list of types found in selection
+        # get tools for the selection given types found in selection
         tools = []
 
         if filter.Size() > 0:
@@ -388,10 +388,17 @@ class App(wx.App):
             tools.append(ContextTool.CADContextTool('Make to Sketch', 'makesketch', self.MakeToSketch))
 
         if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH):
-            tools.append(ContextTool.CADContextTool('Combine sketches', 'sketchjoin', cad.CombineSelectedSketches))
-            tools.append(ContextTool.CADContextTool('Unite sketches', 'sketchunite', self.UniteSelectedSketches))
-            tools.append(ContextTool.CADContextTool('Cut sketches', 'sketchcut', self.CutSelectedSketches))
-            tools.append(ContextTool.CADContextTool('Intersect sketches', 'sketchintersect', self.IntersectSelectedSketches))
+            # check number of sketches
+            sketch_count = 0
+            for obj in cad.GetSelectedObjects():
+                if obj.GetType() == cad.OBJECT_TYPE_SKETCH:
+                    sketch_count += 1
+                    if sketch_count >= 2:
+                        tools.append(ContextTool.CADContextTool('Combine sketches', 'sketchjoin', cad.CombineSelectedSketches))
+                        tools.append(ContextTool.CADContextTool('Unite sketches', 'sketchunite', self.UniteSelectedSketches))
+                        tools.append(ContextTool.CADContextTool('Cut sketches', 'sketchcut', self.CutSelectedSketches))
+                        tools.append(ContextTool.CADContextTool('Intersect sketches', 'sketchintersect', self.IntersectSelectedSketches))
+                        break
         
         first_coord_sys = None
         second_coord_sys = None
