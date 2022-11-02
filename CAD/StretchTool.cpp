@@ -28,11 +28,13 @@ const wchar_t* StretchTool::GetTitle(){
 void StretchTool::Run(bool redo){
 	m_undo_uses_add = m_object->Stretch(m_pos, m_shift, m_data);
 	m_new_pos= m_pos + m_shift;
+	theApp->WasModified(m_object); // update properties
 }
 
 void StretchTool::RollBack(){
 	if(!m_undo_uses_add){
 		Point3d unshift = -m_shift;
 		m_object->Stretch(m_new_pos, unshift, m_data);
+		theApp->WasModified(m_object); // update properties
 	}
 }
