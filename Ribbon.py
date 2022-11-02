@@ -449,6 +449,8 @@ class Ribbon(RB.RibbonBar):
         self.options_page.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         
         wx.GetApp().AddOptionsRibbonPanels(self)
+        
+        self.Bind(RB.EVT_RIBBONBAR_HELP_CLICK, self.OnRibbonHelpClick)
                 
         self.Realize()
         
@@ -573,7 +575,9 @@ class Ribbon(RB.RibbonBar):
     def OnInternalIdle(self):
         if wx.UpdateUIEvent.CanUpdate(self):
             self.UpdateWindowUI(wx.UPDATE_UI_FROMIDLE)
-        
+            
+    def OnRibbonHelpClick(self, event):
+        wx.GetApp().OnAbout(None)        
         
 
 if __name__ == '__main__':
