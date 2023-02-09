@@ -46,9 +46,6 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 		case GripperTypeRotateObjectYZ:
 			glBitmap(16, 13, 8, 4, 10.0, 0.0, rotation_object_circle);
 			break;
-		case GripperTypeScale:
-			glBitmap(16, 15, 8, 7, 10.0, 0.0, scale_circle);
-			break;
 		case GripperTypeAngle:
 			glBitmap(14, 16, 9, 11, 10.0, 0.0, angle_circle);
 			break;
@@ -74,8 +71,11 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 		case GripperTypeObjectScaleZ:
 		case GripperTypeRotateObject:
 		case GripperTypeRotate:
+		case GripperTypeScale:
 		{
 			double s = 30.0 / theApp->GetPixelScale();
+			if (m_data.m_type == GripperTypeScale)
+				s *= 0.5;
 
 			if (!no_color)
 			{
@@ -117,6 +117,11 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 				if (!no_color)Material(HeeksColor(255, 255, 0)).glMaterial(1.0);
 				CoordinateSystem::RenderRotateArrow();
 				break;
+			case GripperTypeScale:
+				if (!no_color)Material(HeeksColor(255, 255, 255)).glMaterial(1.0);
+				CoordinateSystem::RenderFootballHexagons();
+				if (!no_color)Material(HeeksColor(0, 0, 0)).glMaterial(1.0);
+				CoordinateSystem::RenderFootballPentagons();
 			case GripperTypeRotate:
 			default:
 				if (!no_color)Material(HeeksColor(0, 255, 255)).glMaterial(1.0);
