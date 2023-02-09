@@ -24,21 +24,29 @@ CShapeData::CShapeData(CShape* shape): m_xml_element("")
 	if(shape->GetType() == CSolid::m_type)m_solid_type = ((CSolid*)shape)->GetSolidType();
 	shape->SetXMLElement(&m_xml_element);
 
-	for(HeeksObj* object = shape->m_faces->GetFirstChild(); object; object = shape->m_faces->GetNextChild())
+	if (shape->m_faces)
 	{
-		m_face_ids.push_back(CFaceData(object->m_id, object->GetColor()->COLORREF_color()));
+		for (HeeksObj* object = shape->m_faces->GetFirstChild(); object; object = shape->m_faces->GetNextChild())
+		{
+			m_face_ids.push_back(CFaceData(object->m_id, object->GetColor()->COLORREF_color()));
+		}
 	}
 
-	for(HeeksObj* object = shape->m_edges->GetFirstChild(); object; object = shape->m_edges->GetNextChild())
+	if (shape->m_edges)
 	{
-		m_edge_ids.push_back(object->m_id);
+		for (HeeksObj* object = shape->m_edges->GetFirstChild(); object; object = shape->m_edges->GetNextChild())
+		{
+			m_edge_ids.push_back(object->m_id);
+		}
 	}
 
-	for(HeeksObj* object = shape->m_vertices->GetFirstChild(); object; object = shape->m_vertices->GetNextChild())
+	if (shape->m_vertices)
 	{
-		m_vertex_ids.push_back(object->m_id);
+		for (HeeksObj* object = shape->m_vertices->GetFirstChild(); object; object = shape->m_vertices->GetNextChild())
+		{
+			m_vertex_ids.push_back(object->m_id);
+		}
 	}
-
 }
 
 void CShapeData::SetShape(CShape* shape, bool apply_id)
