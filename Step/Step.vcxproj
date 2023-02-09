@@ -78,8 +78,8 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <OutputFile>..\step.pyd</OutputFile>
-      <AdditionalLibraryDirectories>$(CASROOT69)\win32\vc12\lib;$(BOOST67_PYTHON_PATH)\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;TKBRep.lib;TKIGES.lib;TKShHealing.lib;TKSTEP.lib;TKSTEP209.lib;TKSTEPAttr.lib;TKSTEPBase.lib;TKXSBase.lib;TKShapeSchema.lib;FWOSPlugin.lib;PTKernel.lib;TKBool.lib;TKCAF.lib;TKCDF.lib;TKernel.lib;TKFeat.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKHLR.lib;TKMath.lib;TKOffset.lib;TKPCAF.lib;TKPrim.lib;TKPShape.lib;TKService.lib;TKTopAlgo.lib;TKV3d.lib;TKMesh.lib;TKBO.lib;TKXDESTEP.lib;TKXCAF.lib;TKXCAFSchema.lib;TKLCAF.lib;TKPLCAF.lib;$(PYTHON3_32BIT_LIB);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\Admin\AppData\Local\Programs\Python\Python36-32\libs;$(CASROOT69)\win32\vc12\lib;$(BOOST67_PYTHON_PATH)\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;TKBRep.lib;TKIGES.lib;TKShHealing.lib;TKSTEP.lib;TKSTEP209.lib;TKSTEPAttr.lib;TKSTEPBase.lib;TKXSBase.lib;TKShapeSchema.lib;FWOSPlugin.lib;PTKernel.lib;TKBool.lib;TKCDF.lib;TKernel.lib;TKFeat.lib;TKFillet.lib;TKG2d.lib;TKG3d.lib;TKGeomAlgo.lib;TKGeomBase.lib;TKHLR.lib;TKMath.lib;TKOffset.lib;TKPrim.lib;TKPShape.lib;TKTopAlgo.lib;TKMesh.lib;TKBO.lib;TKV3d.lib;$(PYTHON3_32BIT_LIB);%(AdditionalDependencies)</AdditionalDependencies>
       <ProgramDatabaseFile>.\vc_msw\step.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
