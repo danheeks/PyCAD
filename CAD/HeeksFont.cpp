@@ -89,6 +89,26 @@ float DrawHeeksFontString(const char* str, bool outline, bool fill)
 	return (float)x_translated;
 }
 
+
+float GetHeeksFontStringWidth(const char* str)
+{
+	double x_translated = 0.0f;
+#ifdef LINES_FOR_FONT
+	// use lines
+	int i = 0;
+	double x_spacing = 0.16f;
+
+	while (str[i] != 0)
+	{
+		double x = GetLinesCharWidth(str[i]) + x_spacing;
+		x_translated += x;
+		i++;
+	}
+#endif
+
+	return (float)x_translated;
+}
+
 #define NUM_DITHERS 7
 static double dither_xy[NUM_DITHERS][2] = {
 	{ 0.0, 0.0, },

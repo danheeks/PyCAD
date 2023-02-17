@@ -74,6 +74,21 @@ def ConvertHeeksLines():
     f.write('\t\tdefault:\n\t\t\treturn 0.0;')
     f.write('\t}\n}\n')
     
+    f.write('\n\n')
+    f.write('double GetLinesCharWidth(char c)\n{\n\tswitch(c){\n')
+    
+    for i in range(32, 127):
+        c = chr(i)
+        
+        if c in chars:
+            f.write('\t\tcase ' + str(i) + ':\n')
+            ch = chars[c]
+            f.write('\t\t\treturn ' + str(ch.width * scale) + ';\n')
+        else:
+            print('missing char: ' + c)
+    f.write('\t\tdefault:\n\t\t\treturn 0.0;')
+    f.write('\t}\n}\n')
+    
     f.close()
     
     print('successfully created HeeksFontLineData.h')

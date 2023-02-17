@@ -75,10 +75,10 @@ void HText::glCommands(bool select, bool marked, bool no_color)
 			switch(m_v_justification)//0 = Baseline; 1 = Bottom; 2 = Middle; 3 = Top
 			{
 				case 0:// Baseline
-					glTranslated(0, height * 0.85, 0);
+					glTranslated(0, height * 1.52, 0);
 					break;
 				case 1:// Bottom
-					glTranslated(0, height, 0);
+					glTranslated(0, height * (-0.2), 0);
 					break;
 				case 2:// Middle
 					glTranslated(0, height*0.5, 0);
@@ -98,7 +98,11 @@ void HText::glCommands(bool select, bool marked, bool no_color)
 bool HText::GetTextSize( const std::wstring & text, float *pWidth, float *pHeight ) const
 {
 	// We're using the internal font.
+	double sx;
+	m_trsf.GetScale(sx);
 	if(!theApp->get_text_size(text.c_str(), pWidth, pHeight))return(false);
+	*pWidth *= (float)sx;
+	*pHeight *= (float)sx;
 	return(true);
 } // End GetTextSize() method
 
@@ -117,8 +121,8 @@ void HText::GetBoxPoints(std::list<Point3d> &pnts)
 	Point3d point[4];
 	point[0] = Point3d(0, 0, 0);
 	point[1] = Point3d(width, 0, 0);
-	point[2] = Point3d(0, -height, 0);
-	point[3] = Point3d(width, -height, 0);
+	point[2] = Point3d(0, height, 0);
+	point[3] = Point3d(width, height, 0);
 
 	double x = 0;
 	double y = 0;
@@ -139,7 +143,7 @@ void HText::GetBoxPoints(std::list<Point3d> &pnts)
 	switch(m_v_justification)//0 = Baseline; 1 = Bottom; 2 = Middle; 3 = Top
 	{
 	case 0:// Baseline
-		y = height * 0.85;
+		y = height * 0.0;
 		break;
 	case 1:// Bottom
 		y = height;
@@ -158,7 +162,7 @@ void HText::GetBoxPoints(std::list<Point3d> &pnts)
 
 	for(int i = 0; i<4; i++)
 	{
-		point[i].Transform(shift);
+		//point[i].Transform(shift);
 		point[i].Transform(m_trsf);
 		pnts.push_back(point[i]);
 	}
@@ -183,7 +187,7 @@ HeeksObj *HText::MakeACopy(void)const
 
 void HText::Transform(const Matrix& m)
 {
-	m_trsf = m * m_trsf;
+	m_trsf = m_trsf * m;
 }
 
 void HText::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
@@ -203,24 +207,22 @@ void HText::GetGripperPositions(std::list<GripData> *list, bool just_for_endof)
 
 void HText::GetProperties(std::list<Property *> *list)
 {
-#if 0  // to do
-	list->push_back(new PropertyTrsf(_("orientation"), m_trsf, this, on_set_trsf));
+	list->push_back(PropertyTrsf(this, L"orientation", &m_trsf));
 	{
 		std::list< std::wstring > choices;
-		choices.push_back ( std::wstring ( _("left") ) );
-		choices.push_back ( std::wstring ( _("center") ) );
-		choices.push_back ( std::wstring ( _("right") ) );
-		list->push_back(new PropertyChoice(_("horizontal justification"),  choices, m_h_justification, this, on_set_hj ) );
+		choices.push_back ( std::wstring ( L"left" ) );
+		choices.push_back ( std::wstring ( L"center" ) );
+		choices.push_back ( std::wstring ( L"right" ) );
+		list->push_back(new PropertyChoice(this, L"horizontal justification", choices, &m_h_justification ) );
 	}
 	{
 		std::list< std::wstring > choices;
-		choices.push_back ( std::wstring ( _("baseline") ) );
-		choices.push_back ( std::wstring ( _("bottom") ) );
-		choices.push_back ( std::wstring ( _("middle") ) );
-		choices.push_back ( std::wstring ( _("top") ) );
-		list->push_back(new PropertyChoice(_("vertical justification"),  choices, m_v_justification, this, on_set_vj ) );
+		choices.push_back ( std::wstring ( L"baseline" ) );
+		choices.push_back ( std::wstring ( L"bottom" ) );
+		choices.push_back ( std::wstring ( L"middle" ) );
+		choices.push_back ( std::wstring ( L"top" ) );
+		list->push_back(new PropertyChoice(this, L"vertical justification", choices, &m_v_justification ) );
 	}
-#endif
 
 	ObjList::GetProperties(list);
 }
