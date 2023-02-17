@@ -469,6 +469,7 @@ class App(wx.App):
         value = config.ReadFloat('SketchOffsetValue', 1.0)
         value = self.InputLength('Offset Sketch', 'Offset Value +ve for Outwards -ve for Inwards', value)
         if value == None: return
+        config.WriteFloat('SketchOffsetValue', value)
         sketch = object
         sketch.__class__ = cad.Sketch
         area = sketch.GetArea()
