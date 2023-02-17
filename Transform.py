@@ -167,7 +167,7 @@ def Translate(copy = False):
             mat.Translate((to - fromp) * (i + 1))
             for object in selected_items:
                 new_object = object.MakeACopy()
-                object.GetOwner().Add(new_object)
+                cad.AddUndoably(new_object, object.GetOwner())
                 cad.TransformUndoably(new_object, mat)
     else:
         mat = geom.Matrix()
@@ -439,14 +439,16 @@ def Rotate(copy = False):
     cad.StartHistory('Rotate')
     
     if copy:
+        dshift = float(axial_shift) / ncopies
         for i in range(0, ncopies):
             mat = geom.Matrix()
             mat.Translate(-pos)
-            mat.RotateAxis(angle * 0.0174532925199433 *  (i + 1), axis)
+            mat.RotateAxis(angle * 0.0174532925199433 * (i + 1), axis)
             mat.Translate(pos)
+            mat.Translate(axis * (dshift* (i+1)))
             for object in selected_items:
                 new_object = object.MakeACopy()
-                object.GetOwner().Add(new_object)
+                cad.AddUndoably(new_object, object.GetOwner())
                 cad.TransformUndoably(new_object, mat)
     else:
         mat = geom.Matrix()
