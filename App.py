@@ -199,6 +199,9 @@ class App(wx.App):
             default_directory = os.path.dirname(os.path.realpath(default_directory))
             
         return default_directory
+    
+    def GetDefaultFilename(self):
+        return 'Untitled.heeks'
         
     def LoadRecentFiles(self, config):
         for i in range(0, self.MAX_RECENT_FILES):
@@ -871,13 +874,7 @@ class App(wx.App):
     def OnSave(self, e):
         if self.filepath:
             return self.OnSaveFilepath(self.filepath)
-
-        dialog = wx.FileDialog(self.frame, 'Save File', self.GetDefaultDir(), '', HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
-        dialog.SetFilterIndex(0)
-        dialog.CenterOnParent()
-        if dialog.ShowModal() == wx.ID_CANCEL:
-            return wx.ID_CANCEL
-        return self.OnSaveFilepath(dialog.GetPath())
+        self.OnSaveAs(e)
             
     def OnUpdateSave(self, e):
         e.Enable(cad.IsModified())            
@@ -888,7 +885,7 @@ class App(wx.App):
             default_filepath = self.filepath
         else:
             default_directory = self.GetDefaultDir()
-            default_filepath = ''            
+            default_filepath = self.GetDefaultFilename()
         
         dialog = wx.FileDialog(self.frame, 'Save File', default_directory, default_filepath, HEEKS_WILDCARD_STRING, wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT)
         dialog.SetFilterIndex(0)
