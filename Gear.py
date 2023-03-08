@@ -21,6 +21,7 @@ class Gear(Object):
         self.tipRelief = 0.05
         self.rootChamfer = 0.03
         self.numInvoluteFacets = 10
+        self.thickness = 5.0
         self.color = cad.Color(128, 128, 128)
         
     def GetIconFilePath(self):
@@ -41,15 +42,8 @@ class Gear(Object):
         
     def SetColor(self, col):
         self.color = col
-
-    def OnGlCommands(self, select, marked, no_color):
-        points = self.GetPoints(0.1)
-        if len(points) == 0:
-            return
         
-        cad.DrawPushMatrix()
-        cad.DrawMultMatrix(self.tm)
-        
+    def GlLinesOneSide(self, no_color, points, square):
         if not no_color:
             cad.DrawContrastBlackOrWhite()
         cad.BeginLines()
@@ -57,6 +51,23 @@ class Gear(Object):
             cad.GlVertex2D(point)
         cad.GlVertex2D(points[0])
         cad.EndLinesOrTriangles()
+        cad.BeginLines()
+        for point in square:
+            cad.GlVertex2D(point)
+        cad.GlVertex2D(square[0])
+        cad.EndLinesOrTriangles()
+
+    def OnGlCommands(self, select, marked, no_color):
+        points = self.GetPoints(0.1)
+        if len(points) == 0:
+            return
+        
+        square = [geom.Point(2,0), geom.Point(0,-2), geom.Point(-2,0), geom.Point(0,2), geom.Point(2,0)]
+        
+        cad.DrawPushMatrix()
+        cad.DrawMultMatrix(self.tm)
+        
+        self.GlLinesOneSide(no_color, points, square)
         
         a = geom.Area()
         c = geom.Curve()
@@ -64,8 +75,69 @@ class Gear(Object):
             c.Append(point)
         c.Append(points[0])
         a.Append(c)
+        c2 = geom.Curve()
+        for point in square:
+            c2.Append(point)
+        c2.Append(square[0])
+        a.Append(c2)
         
         t_list = a.GetTrianglesList()
+
+        if not no_color:
+            cad.DrawColor(self.color)
+        for t in reversed(t_list):
+            cad.DrawTris(t, True)
+            
+        # draw all the front faces
+        prev_point = points[-1]
+        cad.BeginTriangles()
+        for point in points:
+            p0 = geom.Point3D(prev_point.x, prev_point.y, 0)
+            p1 = geom.Point3D(point.x, point.y, 0)
+            p2 = geom.Point3D(point.x, point.y, self.thickness)
+            p3 = geom.Point3D(prev_point.x, prev_point.y, self.thickness)
+            cad.GlVertex(p0)
+            cad.GlVertex(p1)
+            cad.GlVertex(p2)
+            cad.GlVertex(p0)
+            cad.GlVertex(p2)
+            cad.GlVertex(p3)
+            prev_point = point
+        prev_point =square[-1]
+        for point in square:
+            p0 = geom.Point3D(prev_point.x, prev_point.y, 0)
+            p1 = geom.Point3D(point.x, point.y, 0)
+            p2 = geom.Point3D(point.x, point.y, self.thickness)
+            p3 = geom.Point3D(prev_point.x, prev_point.y, self.thickness)
+            cad.GlVertex(p0)
+            cad.GlVertex(p1)
+            cad.GlVertex(p2)
+            cad.GlVertex(p0)
+            cad.GlVertex(p2)
+            cad.GlVertex(p3)
+            prev_point = point
+            
+        cad.EndLinesOrTriangles()
+
+        if not no_color:
+            cad.DrawContrastBlackOrWhite()
+        for point in points:
+            cad.BeginLines()
+            cad.GlVertex(geom.Point3D(point.x, point.y, 0))
+            cad.GlVertex(geom.Point3D(point.x, point.y, self.thickness))
+            cad.EndLinesOrTriangles()
+        for point in square:
+            cad.BeginLines()
+            cad.GlVertex(geom.Point3D(point.x, point.y, 0))
+            cad.GlVertex(geom.Point3D(point.x, point.y, self.thickness))
+            cad.EndLinesOrTriangles()
+            
+        trans = geom.Matrix()
+        trans.Translate(geom.Point3D(0,0,self.thickness))
+        cad.DrawMultMatrix(trans)  
+          
+        self.GlLinesOneSide(no_color, points, square)
+        
         if not no_color:
             cad.DrawColor(self.color)
         for t in t_list:
@@ -77,10 +149,30 @@ class Gear(Object):
             
     def WriteXml(self):
         cad.SetXmlMatrix('tm', self.tm)
+        cad.SetXmlValue('numTeeth', self.numTeeth)
+        cad.SetXmlValue('module', self.module)
+        cad.SetXmlValue('addendumOffset', self.addendumOffset)
+        cad.SetXmlValue('addendumMultiplier', self.addendumMultiplier)
+        cad.SetXmlValue('dedendumMultiplier', self.dedendumMultiplier)
+        cad.SetXmlValue('pressureAngle', self.pressureAngle)
+        cad.SetXmlValue('tipRelief', self.tipRelief)
+        cad.SetXmlValue('rootChamfer', self.rootChamfer)
+        cad.SetXmlValue('numInvoluteFacets', self.numInvoluteFacets)
+        cad.SetXmlValue('thickness', self.thickness)
         Object.WriteXml(self)
 
     def ReadXml(self):
         self.tm = cad.GetXmlMatrix('tm')
+        self.numTeeth = cad.GetXmlInt('numTeeth', self.numTeeth)
+        self.module = cad.GetXmlFloat('module', self.module)
+        self.addendumOffset = cad.GetXmlFloat('addendumOffset', self.addendumOffset)
+        self.addendumMultiplier = cad.GetXmlFloat('addendumMultiplier', self.addendumMultiplier)
+        self.dedendumMultiplier = cad.GetXmlFloat('dedendumMultiplier', self.dedendumMultiplier)
+        self.pressureAngle = cad.GetXmlFloat('pressureAngle', self.pressureAngle)
+        self.tipRelief = cad.GetXmlFloat('tipRelief', self.tipRelief)
+        self.rootChamfer = cad.GetXmlFloat('rootChamfer', self.rootChamfer)
+        self.numInvoluteFacets = cad.GetXmlInt('numInvoluteFacets', self.numInvoluteFacets)
+        self.thickness = cad.GetXmlFloat('thickness', self.thickness)
         Object.ReadXml(self)
                 
     def MakeACopy(self):
@@ -116,7 +208,8 @@ class Gear(Object):
         properties.append(PyProperty("pressure angle", 'pressureAngle', self))
         properties.append(PyProperty("tip relief", 'tipRelief', self))
         properties.append(PyProperty("root chamfer", 'rootChamfer', self))
-        properties.append(PyProperty("num involute facets", 'numInvoluteFacets', self))        
+        properties.append(PyProperty("num involute facets", 'numInvoluteFacets', self))
+        properties.append(PyPropertyLength("thickness", 'thickness', self))
                                              
         properties += Object.GetProperties(self)
 
