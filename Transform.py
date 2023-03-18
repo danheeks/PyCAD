@@ -167,6 +167,7 @@ def Translate(copy = False):
             mat.Translate((to - fromp) * (i + 1))
             for object in selected_items:
                 new_object = object.MakeACopy()
+                new_object.SetID(0) # make a new id for copy
                 cad.AddUndoably(new_object, object.GetOwner())
                 cad.TransformUndoably(new_object, mat)
     else:
@@ -448,6 +449,7 @@ def Rotate(copy = False):
             mat.Translate(axis * (dshift* (i+1)))
             for object in selected_items:
                 new_object = object.MakeACopy()
+                new_object.SetID(0) # make a new id for copy
                 cad.AddUndoably(new_object, object.GetOwner())
                 cad.TransformUndoably(new_object, mat)
     else:
@@ -699,6 +701,7 @@ def Mirror():
         if copy:
             if object.CanBeCopied():
                 object = object.MakeACopy()
+                object.SetID(0) # make a new id for copy
                 object.Transform(mat)
                 cad.AddUndoably(object)
         else:
@@ -865,6 +868,7 @@ def Scale():
         if copy:
             if object.CanBeCopied():
                 object = object.MakeACopy()
+                object.SetID(0) # make a new id for copy
                 object.Transform(mat)
                 cad.AddUndoably(object)
         else:
