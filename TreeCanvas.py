@@ -41,7 +41,7 @@ class TreeObserver(cad.Observer):
         self.tree_canvas.Refresh()
         
     def OnClear(self):
-        self.tree_canvas.SetVirtualSize(self.tree_canvas.GetRenderSize())
+        #self.tree_canvas.SetVirtualSize(self.tree_canvas.GetRenderSize())
         self.tree_canvas.Refresh()
         
 class TreeCanvas(wx.ScrolledCanvas):
@@ -134,15 +134,15 @@ class TreeCanvas(wx.ScrolledCanvas):
             wx.GetApp().OnKeyDown(e)
         
     def OnRemoved(self, removed):
-        self.SetVirtualSize(self.GetRenderSize())
+        #self.SetVirtualSize(self.GetRenderSize())
         self.Refresh()
 
     def OnAdded(self, added):
-        self.SetVirtualSize(self.GetRenderSize())
+        #self.SetVirtualSize(self.GetRenderSize())
         self.Refresh()
 
     def OnModified(self, modified):
-        self.SetVirtualSize(self.GetRenderSize())
+        #self.SetVirtualSize(self.GetRenderSize())
         self.Refresh()
     
     def OnPaint(self, event):
@@ -173,7 +173,7 @@ class TreeCanvas(wx.ScrolledCanvas):
             if button:
                 if button.type == ButtonTypePlus or button.type == ButtonTypeMinus:
                     self.SetExpanded(button.obj, button.type == ButtonTypePlus)
-                    self.SetVirtualSize(self.GetRenderSize())
+                    #self.SetVirtualSize(self.GetRenderSize())
                     self.Refresh()
                 else:
                     self.OnLabelLeftDown(button.obj, event)
@@ -401,27 +401,30 @@ class TreeCanvas(wx.ScrolledCanvas):
                 else: self.dc.DrawBitmap(self.bmp_branch_end, self.xpos, self.ypos)
 
 
-    def RenderBranchIcons(self, object, next_object, expanded, level):
+    def RenderBranchIcons(self, object, next_object, expanded, level, render):
         # render initial branches
         for i in range(0, level):
-            if not self.render_just_for_calculation and i > 0:
+            if render and i > 0:
                 end_child = self.end_child_list[i]
                 if not end_child: self.dc.DrawBitmap(self.bmp_branch_trunk, self.xpos, self.ypos)
             self.xpos += 16
 
         # render + or -
-        if not self.render_just_for_calculation: self.RenderBranchIcon(object, next_object, expanded, level)
+        if render: self.RenderBranchIcon(object, next_object, expanded, level)
         self.xpos += 16
 
     def RenderObject(self, expanded, prev_object, prev_object_expanded, object, next_object, level):
         save_x = self.xpos
 
-        self.RenderBranchIcons(object, next_object, expanded, level)
+        #render = ( not self.render_just_for_calculation and self.ypos >= self.pTopLeft[1] + 40 and self.ypos <= self.pBottomRight[1] - 40 )
+        render = not self.render_just_for_calculation
+        self.RenderBranchIcons(object, next_object, expanded, level, render)
 
         label_start_x = self.xpos
         
+        
         # find icon info
-        if not self.render_just_for_calculation:
+        if render:
             self.dc.DrawBitmap(wx.Bitmap(object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, self.ypos)
             self.rendered_objects.append(object)
 
@@ -429,7 +432,7 @@ class TreeCanvas(wx.ScrolledCanvas):
 
         str = object.GetTitle()
         
-        if not self.render_just_for_calculation:
+        if render:
             if self.render_labels and cad.ObjectMarked(object):
                 self.dc.SetBackgroundMode(wx.SOLID)
                 self.dc.SetTextBackground(wx.BLUE)
@@ -440,15 +443,15 @@ class TreeCanvas(wx.ScrolledCanvas):
             self.dc.DrawText(str, self.xpos, self.ypos)
 
         text_width = 0
-        if self.render_just_for_calculation or not self.render_labels:
-            # just make a guess, we don't have a valid m_dc
-            text_width = 10 * len(str)
-        else:
+        if render and self.render_labels:
             text_size = self.GetTextExtent(str)
             text_width = text_size.GetWidth()
+        else:
+            # just make a guess, we don't have a valid m_dc
+            text_width = 10 * len(str)
 
         label_end_x = self.xpos + 8 + text_width
-        if not self.render_just_for_calculation and self.render_labels:
+        if render and self.render_labels:
             self.AddLabelButton(expanded, prev_object, prev_object_expanded, object, next_object, label_start_x, label_end_x)
 
         if label_end_x > self.max_xpos: self.max_xpos = label_end_x
@@ -476,6 +479,10 @@ class TreeCanvas(wx.ScrolledCanvas):
         self.end_child_list.pop()
 
     def Render(self, just_for_calculation = False):
+        size = self.GetClientSize()
+        self.pTopLeft = self.CalcUnscrolledPosition(0, 0)
+        self.pBottomRight = self.CalcUnscrolledPosition(size.x, size.y)
+
         self.render_just_for_calculation = just_for_calculation
         if not just_for_calculation:
             if os.name == 'nt':
@@ -483,12 +490,9 @@ class TreeCanvas(wx.ScrolledCanvas):
                 self.dc.SetFont(font)
 
                 # draw a white background rectangle
-                size = self.GetClientSize()
-                pTopLeft = self.CalcUnscrolledPosition(0, 0)
-                pBottomRight = self.CalcUnscrolledPosition(size.x, size.y)
                 self.dc.SetBrush(wx.Brush("white"))
                 self.dc.SetPen(wx.Pen("white"))
-                self.dc.DrawRectangle(wx.Rect(pTopLeft, pBottomRight))
+                self.dc.DrawRectangle(wx.Rect(self.pTopLeft, self.pBottomRight))
 
             # set background
             self.dc.SetBackgroundMode(wx.SOLID)
