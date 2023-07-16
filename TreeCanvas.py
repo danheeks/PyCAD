@@ -44,9 +44,9 @@ class TreeObserver(cad.Observer):
         #self.tree_canvas.SetVirtualSize(self.tree_canvas.GetRenderSize())
         self.tree_canvas.Refresh()
         
-class TreeCanvas(wx.ScrolledCanvas):
+class TreeCanvas(wx.Panel):
     def __init__(self, parent):
-        wx.ScrolledCanvas.__init__(self, parent)
+        wx.Panel.__init__(self, parent)
         self.observer = TreeObserver(self)
         cad.RegisterObserver(self.observer)
         self.LButton = False
@@ -68,6 +68,8 @@ class TreeCanvas(wx.ScrolledCanvas):
         self.tree_buttons = []
         self.clicked_object = None
         self.rendered_objects = []
+        self.xscroll = 0
+        self.yscroll = 0
         
         self.bmp_branch_plus = wx.Bitmap(pycad_dir + "/icons/branch_plus.png", wx.BITMAP_TYPE_ANY)
         self.bmp_branch_minus = wx.Bitmap(pycad_dir + "/icons/branch_minus.png", wx.BITMAP_TYPE_ANY)
@@ -82,13 +84,22 @@ class TreeCanvas(wx.ScrolledCanvas):
         self.render_just_for_calculation = False
         self.render_labels = True
         self.end_child_list = []
-
-        self.SetScrollRate(10, 10)
-        self.SetVirtualSize(wx.Size(92, 97))
+        
+        #self.SetScrollRate(10, 10)
+        #self.SetVirtualSize(wx.Size(92, 97))
         
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_SCROLLWIN_TOP, self.OnScrollTop)
+        self.Bind(wx.EVT_SCROLLWIN_BOTTOM, self.OnScrollBottom)
+        self.Bind(wx.EVT_SCROLLWIN_LINEUP, self.OnScrollLineUp)
+        self.Bind(wx.EVT_SCROLLWIN_LINEDOWN, self.OnScrollLineDown)
+        self.Bind(wx.EVT_SCROLLWIN_PAGEUP, self.OnScrollPageUp)
+        self.Bind(wx.EVT_SCROLLWIN_PAGEDOWN, self.OnScrollPageDown)
+        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self.OnScrollThumbTrack)
+        self.Bind(wx.EVT_SCROLLWIN_THUMBRELEASE, self.OnScrollThumbRelease)
         
     def ObjectRenderedIndex(self, object):
         # returns index number; 0 for first item, if object is in rendered objects
@@ -147,7 +158,6 @@ class TreeCanvas(wx.ScrolledCanvas):
     
     def OnPaint(self, event):
         self.dc = wx.PaintDC(self)
-        self.DoPrepareDC(self.dc)
         self.Render()
         self.dc = None
 
@@ -416,8 +426,8 @@ class TreeCanvas(wx.ScrolledCanvas):
     def RenderObject(self, expanded, prev_object, prev_object_expanded, object, next_object, level):
         save_x = self.xpos
 
-        #render = ( not self.render_just_for_calculation and self.ypos >= self.pTopLeft[1] + 40 and self.ypos <= self.pBottomRight[1] - 40 )
-        render = not self.render_just_for_calculation
+        render = ( not self.render_just_for_calculation and self.ypos >= self.pTopLeft[1] + 20 and self.ypos <= self.pBottomRight[1] - 20 )
+        #render = not self.render_just_for_calculation
         self.RenderBranchIcons(object, next_object, expanded, level, render)
 
         label_start_x = self.xpos
@@ -477,6 +487,9 @@ class TreeCanvas(wx.ScrolledCanvas):
                 child = next_child
 
         self.end_child_list.pop()
+        
+    def CalcUnscrolledPosition(self, x, y):
+        return x + self.xscroll, y + self.yscroll
 
     def Render(self, just_for_calculation = False):
         size = self.GetClientSize()
@@ -567,4 +580,50 @@ class TreeCanvas(wx.ScrolledCanvas):
     def GetDraggedListSize(self):
         self.RenderDraggedList(True)
         return wx.Size(self.max_xpos, self.ypos)
+
+    def SizeCode(self):
+        size = self.GetClientSize()
+        render_size = self.GetRenderSize()
+        if render_size.y > size.y:
+            self.SetScrollbar(wx.VERTICAL, 50, 20, 100)
+#        else:
+#            self.SetScrollbars(0, 0, 0, 0)
+        
+    def OnSize(self, event):
+        self.SizeCode()
+        
+        self.Bind(wx.EVT_SCROLLWIN_TOP, self.OnScrollTop)
+        self.Bind(wx.EVT_SCROLLWIN_BOTTOM, self.OnScrollBottom)
+        self.Bind(wx.EVT_SCROLLWIN_LINEUP, self.OnScrollLineUp)
+        self.Bind(wx.EVT_SCROLLWIN_LINEDOWN, self.OnScrollLineDown)
+        self.Bind(wx.EVT_SCROLLWIN_PAGEUP, self.OnScrollPageUp)
+        self.Bind(wx.EVT_SCROLLWIN_PAGEDOWN, self.OnScrollPageDown)
+        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self.OnScrollThumbTrack)
+        self.Bind(wx.EVT_SCROLLWIN_THUMBRELEASE, self.OnScrollThumbRelease)
+        
+    def OnScrollTop(self, event):
+        print('top')
+        
+    def OnScrollBottom(self, event):
+        print('bottom')
+        
+    def OnScrollLineUp(self, event):
+        print('line up')
+        
+    def OnScrollLineDown(self, event):
+        print('line down')
+        
+    def OnScrollPageUp(self, event):
+        print('page up')
+        
+    def OnScrollPageDown(self, event):
+        print('page down')
+        
+    def OnScrollThumbTrack(self, event):
+        print('thumb track')
+        
+    def OnScrollThumbRelease(self, event):
+        print('thumb release')
+        
+
 
