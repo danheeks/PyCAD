@@ -284,7 +284,14 @@ class TreeCanvas(wx.Panel):
                  wx.GetApp().EditUndoably(self.clicked_object)
                  
         if event.GetWheelRotation() != 0:
-            print('Wheel Rotation ' + str(event.GetWheelRotation()) + ' at X' + str(event.GetX()) + ', Y' + str(event.GetY()))
+            self.yscroll -= event.GetWheelRotation() / 7
+            if self.yscroll < 0:
+                self.yscroll = 0
+            max_yscroll = self.ypos - self.client_size.y
+            if self.yscroll > max_yscroll:
+                self.yscroll = max_yscroll
+            self.SizeCode()
+            self.Refresh()
 
         event.Skip()
         
@@ -379,6 +386,7 @@ class TreeCanvas(wx.Panel):
             cad.Select(object, True)
     
     def RenderBranchIcon(self, object, next_object, expanded, level):
+        y = self.ypos - self.yscroll
         num_children = object.GetNumChildren()
         if num_children > 0:
             if level:
@@ -386,32 +394,32 @@ class TreeCanvas(wx.Panel):
                 if next_object:
                     # not at end
                     if expanded:
-                        self.dc.DrawBitmap(self.bmp_branch_minus, self.xpos, self.ypos)
+                        self.dc.DrawBitmap(self.bmp_branch_minus, self.xpos, y)
                         if self.render_labels: self.AddPlusOrMinusButton(object, False)
                     else:
-                        self.dc.DrawBitmap(self.bmp_branch_plus, self.xpos, self.ypos)
+                        self.dc.DrawBitmap(self.bmp_branch_plus, self.xpos, y)
                         if self.render_labels: self.AddPlusOrMinusButton(object, True)
                 else:
                     # not at end
                     if expanded:
-                        self.dc.DrawBitmap(self.bmp_branch_end_minus, self.xpos, self.ypos)
+                        self.dc.DrawBitmap(self.bmp_branch_end_minus, self.xpos, y)
                         if self.render_labels: self.AddPlusOrMinusButton(object, False)
                     else:
-                        self.dc.DrawBitmap(self.bmp_branch_end_plus, self.xpos, self.ypos)
+                        self.dc.DrawBitmap(self.bmp_branch_end_plus, self.xpos, y)
                         if self.render_labels: self.AddPlusOrMinusButton(object, True)
             else:
                 # without branches
                 if expanded:
-                    self.dc.DrawBitmap(self.bmp_minus, self.xpos, self.ypos)
+                    self.dc.DrawBitmap(self.bmp_minus, self.xpos, y)
                     if self.render_labels: self.AddPlusOrMinusButton(object, False)
                 else:
-                    self.dc.DrawBitmap(self.bmp_plus, self.xpos, self.ypos)
+                    self.dc.DrawBitmap(self.bmp_plus, self.xpos, y)
                     if self.render_labels:self.AddPlusOrMinusButton(object, True)
         else:
             if level > 0:
                 # just branches
-                if next_object: self.dc.DrawBitmap(self.bmp_branch_split, self.xpos, self.ypos)
-                else: self.dc.DrawBitmap(self.bmp_branch_end, self.xpos, self.ypos)
+                if next_object: self.dc.DrawBitmap(self.bmp_branch_split, self.xpos, y)
+                else: self.dc.DrawBitmap(self.bmp_branch_end, self.xpos, y)
 
 
     def RenderBranchIcons(self, object, next_object, expanded, level, render):
@@ -419,7 +427,7 @@ class TreeCanvas(wx.Panel):
         for i in range(0, level):
             if render and i > 0:
                 end_child = self.end_child_list[i]
-                if not end_child: self.dc.DrawBitmap(self.bmp_branch_trunk, self.xpos, self.ypos)
+                if not end_child: self.dc.DrawBitmap(self.bmp_branch_trunk, self.xpos, self.ypos - self.yscroll)
             self.xpos += 16
 
         # render + or -
@@ -428,8 +436,9 @@ class TreeCanvas(wx.Panel):
 
     def RenderObject(self, expanded, prev_object, prev_object_expanded, object, next_object, level):
         save_x = self.xpos
+        y = self.ypos - self.yscroll
 
-        render = ( not self.render_just_for_calculation and self.ypos >= self.pTopLeft[1] + 20 and self.ypos <= self.pBottomRight[1] - 20 )
+        render = ( not self.render_just_for_calculation and y > -18 and y <= self.client_size.y )
         #render = not self.render_just_for_calculation
         self.RenderBranchIcons(object, next_object, expanded, level, render)
 
@@ -438,7 +447,7 @@ class TreeCanvas(wx.Panel):
         
         # find icon info
         if render:
-            self.dc.DrawBitmap(wx.Bitmap(object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, self.ypos)
+            self.dc.DrawBitmap(wx.Bitmap(object.GetIconFilePath(), wx.BITMAP_TYPE_ANY), self.xpos, y)
             self.rendered_objects.append(object)
 
         self.xpos += 16
@@ -453,7 +462,7 @@ class TreeCanvas(wx.Panel):
             else:
                 self.dc.SetBackgroundMode(wx.TRANSPARENT)
                 self.dc.SetTextForeground(wx.BLACK)
-            self.dc.DrawText(str, self.xpos, self.ypos)
+            self.dc.DrawText(str, self.xpos, y)
 
         text_width = 0
         if render and self.render_labels:
@@ -585,17 +594,19 @@ class TreeCanvas(wx.Panel):
         return wx.Size(self.max_xpos, self.ypos)
 
     def SizeCode(self):
-        size = self.GetClientSize()
         render_size = self.GetRenderSize()
-        if render_size.y > size.y:
-            scroll_units = size.y
-            handle_size = int( float(size.y) / render_size[1] * scroll_units )
+        if render_size.y > self.client_size.y:
+            scroll_units = self.client_size.y
+            real_to_scroll = float(self.client_size.y) / render_size[1]
+            handle_size = float(self.client_size.y) * real_to_scroll
             position = int( float(self.yscroll) / render_size[1] * scroll_units )
             self.SetScrollbar(wx.VERTICAL, position, handle_size, scroll_units)
-#        else:
-#            self.SetScrollbars(0, 0, 0, 0)
+        else:
+            self.SetScrollbar(wx.VERTICAL, 0, 0, 0)
+            self.yscroll = 0
         
     def OnSize(self, event):
+        self.client_size = self.GetClientSize()
         self.SizeCode()
         
     def OnScrollTop(self, event):
@@ -605,22 +616,49 @@ class TreeCanvas(wx.Panel):
         print('bottom')
         
     def OnScrollLineUp(self, event):
-        print('line up')
+        self.yscroll -= 18
+        if self.yscroll < 0:
+            self.yscroll = 0
+        self.SizeCode()
+        self.Refresh()
         
     def OnScrollLineDown(self, event):
-        print('line down')
+        self.yscroll += 18
+        max_yscroll = self.ypos - self.client_size.y
+        if self.yscroll > max_yscroll:
+            self.yscroll = max_yscroll
+        self.SizeCode()
+        self.Refresh()
         
     def OnScrollPageUp(self, event):
-        print('page up')
+        self.yscroll -= self.client_size.y
+        if self.yscroll < 0:
+            self.yscroll = 0
+        self.SizeCode()
+        self.Refresh()
         
     def OnScrollPageDown(self, event):
-        print('page down')
+        self.yscroll += self.client_size.y
+        max_yscroll = self.ypos - self.client_size.y
+        if self.yscroll > max_yscroll:
+            self.yscroll = max_yscroll
+        self.SizeCode()
+        self.Refresh()
+
         
     def OnScrollThumbTrack(self, event):
-        print('thumb track')
+        scroll_units = self.client_size.y
+        real_to_scroll = float(self.client_size.y - 1) / self.ypos
+        self.yscroll = int( float(event.GetPosition()) /real_to_scroll)
+        max_yscroll = self.ypos - self.client_size.y
+        if self.yscroll > max_yscroll:
+            self.yscroll = max_yscroll
+        self.SizeCode()
+        self.Refresh()
+        
         
     def OnScrollThumbRelease(self, event):
-        print('thumb release')
+        pass
         
 
 
