@@ -164,9 +164,9 @@ class TreeCanvas(wx.Panel):
     def OnEraseBackground(self, event):
         pass # Do nothing, to avoid flashing on MSW
         
-    def HitTest(self, pt):
+    def HitTest(self, x, y):
         for b in self.tree_buttons:
-            unscrolled_pt = self.CalcUnscrolledPosition(pt)
+            unscrolled_pt = self.CalcUnscrolledPosition(x, y)
             if b.rect.Contains(unscrolled_pt):
                 return b
 
@@ -178,7 +178,7 @@ class TreeCanvas(wx.Panel):
             self.SetFocus()  # so middle wheel works
             
         if event.LeftDown():
-            button = self.HitTest(event.GetPosition())
+            button = self.HitTest(event.GetX(), event.GetY())
  
             if button:
                 if button.type == ButtonTypePlus or button.type == ButtonTypeMinus:
@@ -198,7 +198,7 @@ class TreeCanvas(wx.Panel):
                 self.dragging = False
 
                 # find the object to drop on to
-                button = self.HitTest(event.GetPosition())
+                button = self.HitTest(event.GetX(), event.GetY())
 
                 if (button == None) or not cad.ObjectMarked(button.obj): # can only drop on to an item other than one of the items being dragged
                     # test drop possible
@@ -250,7 +250,7 @@ class TreeCanvas(wx.Panel):
             self.waiting_until_left_up = False
 
         if event.RightDown():
-            button = self.HitTest(event.GetPosition())
+            button = self.HitTest(event.GetX(), event.GetY())
             self.clicked_object = None
             if (button != None) and (button.type == ButtonTypeLabelBefore or button.type == ButtonTypeLabel):
                 self.clicked_object = button.obj
@@ -273,8 +273,8 @@ class TreeCanvas(wx.Panel):
                     self.dragged_list = cad.GetSelectedObjects()
 
             if self.dragging:
-                self.drag_position = self.CalcUnscrolledPosition(event.GetPosition());
-                button = self.HitTest(event.GetPosition())
+                self.drag_position = self.CalcUnscrolledPosition(event.GetX(), event.GetY());
+                button = self.HitTest(event.GetX(), event.GetY())
                 self.drag_paste_rect = wx.Rect(0, 0, 0, 0)
                 if (button != None) and (button.type == ButtonTypeLabelBefore): self.drag_paste_rect = button.rect
                 self.Refresh()
@@ -282,6 +282,9 @@ class TreeCanvas(wx.Panel):
         if event.LeftDClick():
              if self.clicked_object:
                  wx.GetApp().EditUndoably(self.clicked_object)
+                 
+        if event.GetWheelRotation() != 0:
+            print('Wheel Rotation ' + str(event.GetWheelRotation()) + ' at X' + str(event.GetX()) + ', Y' + str(event.GetY()))
 
         event.Skip()
         
@@ -585,21 +588,15 @@ class TreeCanvas(wx.Panel):
         size = self.GetClientSize()
         render_size = self.GetRenderSize()
         if render_size.y > size.y:
-            self.SetScrollbar(wx.VERTICAL, 50, 20, 100)
+            scroll_units = size.y
+            handle_size = int( float(size.y) / render_size[1] * scroll_units )
+            position = int( float(self.yscroll) / render_size[1] * scroll_units )
+            self.SetScrollbar(wx.VERTICAL, position, handle_size, scroll_units)
 #        else:
 #            self.SetScrollbars(0, 0, 0, 0)
         
     def OnSize(self, event):
         self.SizeCode()
-        
-        self.Bind(wx.EVT_SCROLLWIN_TOP, self.OnScrollTop)
-        self.Bind(wx.EVT_SCROLLWIN_BOTTOM, self.OnScrollBottom)
-        self.Bind(wx.EVT_SCROLLWIN_LINEUP, self.OnScrollLineUp)
-        self.Bind(wx.EVT_SCROLLWIN_LINEDOWN, self.OnScrollLineDown)
-        self.Bind(wx.EVT_SCROLLWIN_PAGEUP, self.OnScrollPageUp)
-        self.Bind(wx.EVT_SCROLLWIN_PAGEDOWN, self.OnScrollPageDown)
-        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self.OnScrollThumbTrack)
-        self.Bind(wx.EVT_SCROLLWIN_THUMBRELEASE, self.OnScrollThumbRelease)
         
     def OnScrollTop(self, event):
         print('top')
