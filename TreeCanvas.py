@@ -41,12 +41,12 @@ class TreeObserver(cad.Observer):
         self.tree_canvas.Refresh()
         
     def OnClear(self):
-        #self.tree_canvas.SetVirtualSize(self.tree_canvas.GetRenderSize())
+        self.tree_canvas.SizeCode()
         self.tree_canvas.Refresh()
         
-class TreeCanvas(wx.Panel):
+class TreeCanvas(wx.Window):
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+        wx.Window.__init__(self, parent)
         self.observer = TreeObserver(self)
         cad.RegisterObserver(self.observer)
         self.LButton = False
@@ -70,6 +70,8 @@ class TreeCanvas(wx.Panel):
         self.rendered_objects = []
         self.xscroll = 0
         self.yscroll = 0
+        self.client_size = None
+        self.up_down_key_waiting = None  # True for up, False for down, None for none
         
         self.bmp_branch_plus = wx.Bitmap(pycad_dir + "/icons/branch_plus.png", wx.BITMAP_TYPE_ANY)
         self.bmp_branch_minus = wx.Bitmap(pycad_dir + "/icons/branch_minus.png", wx.BITMAP_TYPE_ANY)
@@ -84,22 +86,16 @@ class TreeCanvas(wx.Panel):
         self.render_just_for_calculation = False
         self.render_labels = True
         self.end_child_list = []
-        
-        #self.SetScrollRate(10, 10)
-        #self.SetVirtualSize(wx.Size(92, 97))
-        
+
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_MOUSE_EVENTS, self.OnMouse)
         self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
         self.Bind(wx.EVT_SIZE, self.OnSize)
-        self.Bind(wx.EVT_SCROLLWIN_TOP, self.OnScrollTop)
-        self.Bind(wx.EVT_SCROLLWIN_BOTTOM, self.OnScrollBottom)
         self.Bind(wx.EVT_SCROLLWIN_LINEUP, self.OnScrollLineUp)
         self.Bind(wx.EVT_SCROLLWIN_LINEDOWN, self.OnScrollLineDown)
         self.Bind(wx.EVT_SCROLLWIN_PAGEUP, self.OnScrollPageUp)
         self.Bind(wx.EVT_SCROLLWIN_PAGEDOWN, self.OnScrollPageDown)
         self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self.OnScrollThumbTrack)
-        self.Bind(wx.EVT_SCROLLWIN_THUMBRELEASE, self.OnScrollThumbRelease)
         
     def ObjectRenderedIndex(self, object):
         # returns index number; 0 for first item, if object is in rendered objects
@@ -110,50 +106,98 @@ class TreeCanvas(wx.Panel):
                 return i
             i += 1
         return -1
+    
+    def HandleUpDownKey(self, up):
+        sel = cad.GetSelectedObjects()
+        index = -1
+        if len(sel) > 0:
+            index = self.ObjectRenderedIndex(sel[-1])
+            
+            if up:
+                # up
+                if index == 0:
+                    # got to the top of visible objects, scroll up
+                    if self.yscroll == 0:
+                        return
+                    self.yscroll -= 18
+                    if self.yscroll < 0:
+                        self.yscroll = 0
+                    self.up_down_key_waiting = True
+                    self.SizeCode()
+                    self.Refresh()
+                    return                
+                index -= 1
+                if index == 0:
+                    self.yscroll /= 18
+                    self.yscroll = int(self.yscroll)
+                    self.yscroll *= 18
+                    self.SizeCode()
+                    self.Refresh()
+            else:
+                # down
+                if index == len(self.rendered_objects)-1:
+                    # at the bottom of visible items, scroll down
+                    max_yscroll = self.ypos - self.client_size.y
+                    if self.yscroll == max_yscroll:
+                        return
+                    self.yscroll += 18
+                    if self.yscroll > max_yscroll:
+                        self.yscroll = max_yscroll
+                    self.up_down_key_waiting = False
+                    self.SizeCode()
+                    self.Refresh()
+                    return                    
+                index += 1
+                if index == len(self.rendered_objects)-1:
+                    mod = 18 + self.yscroll % 18 - self.client_size.y % 18
+                    if mod != 0:
+                        self.yscroll += mod
+                        max_yscroll = self.ypos - self.client_size.y
+                        if self.yscroll > max_yscroll:
+                            self.yscroll = max_yscroll
+                        self.SizeCode()
+                        self.Refresh()
+        
+        cad.ClearSelection(True)
+        
+        if len(self.rendered_objects):
+            cad.Select(self.rendered_objects[index])
         
     def OnKeyDown(self, e):
         k = e.GetKeyCode()
+
         if k == wx.WXK_UP:
-            sel = cad.GetSelectedObjects()
-            index = -1
-            if len(sel) > 0:
-                index = self.ObjectRenderedIndex(sel[-1])
-                if index > 0:
-                    index -= 1
-            if (index == -1) and (len(self.rendered_objects) > 0):
-                index = len(self.rendered_objects) - 1
-            
-            cad.ClearSelection(True)
-            
-            if len(self.rendered_objects):
-                cad.Select(self.rendered_objects[index])
+            self.HandleUpDownKey(True)
         elif k == wx.WXK_DOWN:
-            sel = cad.GetSelectedObjects()
-            index = -1
-            if len(sel) > 0:
-                index = self.ObjectRenderedIndex(sel[-1])
-                if index < len(self.rendered_objects)-1:
-                    index += 1
-            if (index == -1) and (len(self.rendered_objects) > 0):
-                index = 0
-            
-            cad.ClearSelection(True)
-            
-            if len(self.rendered_objects):
-                cad.Select(self.rendered_objects[index])
+            self.HandleUpDownKey(False)
+        elif k == wx.WXK_PAGEUP:
+            if self.yscroll > 0:
+                self.yscroll -= self.client_size.y
+                if self.yscroll < 0:
+                    self.yscroll = 0
+                self.SizeCode()
+                self.Refresh()
+        elif k == wx.WXK_PAGEDOWN:
+            max_yscroll = self.ypos - self.client_size.y
+            if self.yscroll < max_yscroll:
+                self.yscroll += self.client_size.y
+                if self.yscroll > max_yscroll:
+                    self.yscroll = max_yscroll
+                self.SizeCode()
+                self.Refresh()
         else:
             wx.GetApp().OnKeyDown(e)
         
     def OnRemoved(self, removed):
-        #self.SetVirtualSize(self.GetRenderSize())
+        self.SizeCode()
         self.Refresh()
 
     def OnAdded(self, added):
-        #self.SetVirtualSize(self.GetRenderSize())
+        self.SizeCode()
         self.Refresh()
 
     def OnModified(self, modified):
-        #self.SetVirtualSize(self.GetRenderSize())
+        self.SizeCode()
         self.Refresh()
     
     def OnPaint(self, event):
@@ -183,7 +227,7 @@ class TreeCanvas(wx.Panel):
             if button:
                 if button.type == ButtonTypePlus or button.type == ButtonTypeMinus:
                     self.SetExpanded(button.obj, button.type == ButtonTypePlus)
-                    #self.SetVirtualSize(self.GetRenderSize())
+                    self.SizeCode()
                     self.Refresh()
                 else:
                     self.OnLabelLeftDown(button.obj, event)
@@ -555,6 +599,11 @@ class TreeCanvas(wx.Panel):
                 self.dc.SetPen(wx.Pen("black"))
                 self.dc.SetBrush(wx.Brush("black"))
                 self.dc.DrawRectangle(self.drag_paste_rect)
+                
+        if not just_for_calculation:
+            if self.up_down_key_waiting != None:
+                self.HandleUpDownKey(self.up_down_key_waiting)
+                self.up_down_key_waiting = None
 
     def GetRenderSize(self):
         just_for_calculation = True
@@ -594,6 +643,8 @@ class TreeCanvas(wx.Panel):
         return wx.Size(self.max_xpos, self.ypos)
 
     def SizeCode(self):
+        if self.client_size == None:
+            return
         render_size = self.GetRenderSize()
         if render_size.y > self.client_size.y:
             scroll_units = self.client_size.y
@@ -608,12 +659,6 @@ class TreeCanvas(wx.Panel):
     def OnSize(self, event):
         self.client_size = self.GetClientSize()
         self.SizeCode()
-        
-    def OnScrollTop(self, event):
-        print('top')
-        
-    def OnScrollBottom(self, event):
-        print('bottom')
         
     def OnScrollLineUp(self, event):
         self.yscroll -= 18
@@ -655,10 +700,6 @@ class TreeCanvas(wx.Panel):
             self.yscroll = max_yscroll
         self.SizeCode()
         self.Refresh()
-        
-        
-    def OnScrollThumbRelease(self, event):
-        pass
         
 
 
