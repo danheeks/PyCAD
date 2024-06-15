@@ -436,6 +436,20 @@ boost::python::list CTrisGetTriangles(const CTris& tris)
 	return clist;
 }
 
+
+boost::python::list CTrisSplit(const CTris& t)
+{
+	std::list<CTris> tri_list;
+	t.Split(tri_list);
+	boost::python::list python_list;
+	for (std::list<CTris>::const_iterator It = tri_list.begin(); It != tri_list.end(); It++)
+	{
+		const CTris& tris = *It;
+		python_list.append(tris);
+	}
+	return python_list;
+}
+
 boost::python::tuple MeshGetFaces(const CMesh& mesh)
 {
 	boost::python::list vlist;
@@ -889,6 +903,7 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetTrianglesAsCurveList", &GetTrianglesAsCurveList, "returns a list of Curve objects, each one being a closed triangle")
 		.def("GetMesh", &CTrisGetMesh, bp::return_value_policy<bp::manage_new_object>(), "returns a mesh")
 		.def("GetTriangles", &CTrisGetTriangles, "returns the list of tuples of tuples")
+		.def("Split", &CTrisSplit, "returns a list of new Stl objects")
 
 		.def(bp::self += bp::other<CTris>())
 		;

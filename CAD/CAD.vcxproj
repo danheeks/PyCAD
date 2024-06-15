@@ -202,6 +202,7 @@
     <ClInclude Include="HeeksColor.h" />
     <ClInclude Include="HeeksFont.h" />
     <ClInclude Include="HeeksFontData.h" />
+    <ClInclude Include="HeeksFontLineData.h" />
     <ClInclude Include="HeeksObj.h" />
     <ClInclude Include="HILine.h" />
     <ClInclude Include="History.h" />

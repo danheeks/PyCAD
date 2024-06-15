@@ -39,6 +39,7 @@ public:
 
 	int GetType()const{return StlSolidType;}
 	const wchar_t* GetTypeString(void)const{return L"STL Solid";}
+	const wchar_t* GetXMLTypeString(void)const { return L"STLSolid"; }
 	const wchar_t* GetIconFilePath();
 	void GetProperties(std::list<Property *> *list);
 	void glCommands(bool select, bool marked, bool no_color);

@@ -83,4 +83,5 @@ public:
 	void GetMachiningAreas(std::list<CMachiningArea>& areas)const;
 	CTris* GetFlattenedSurface()const;
 	bool SplitAtZ(double z, CTris& new_tris);
+	void Split(std::list<CTris> &new_tris)const; // split into separate lumps
 };

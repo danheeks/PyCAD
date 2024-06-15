@@ -132,3 +132,26 @@ CMeshEdgeAndDir CMesh::AddEdge(CMeshVertex* v0, CMeshVertex* v1)
 	v1->m_e.push_back(CMeshEdgeAndDir(e, false));
 	return CMeshEdgeAndDir(e, true);
 }
+
+void CMesh::FindJoined(CMeshFace* face, std::set< CMeshFace* >& joined)
+{
+	std::list<CMeshFace*> to_try;
+	to_try.push_back(face);
+
+	while (to_try.size() > 0)
+	{
+		CMeshFace* f = to_try.front();
+		joined.insert(f);
+		to_try.pop_front();
+		std::list<CMeshFace*> joining_faces;
+		f->GetJoiningFaces(joining_faces);
+		for (std::list<CMeshFace*>::iterator It = joining_faces.begin(); It != joining_faces.end(); It++)
+		{
+			CMeshFace* joining_face = *It;
+			if (joined.find(joining_face) == joined.end())
+			{
+				to_try.push_back(joining_face);
+			}
+		}
+	}
+}

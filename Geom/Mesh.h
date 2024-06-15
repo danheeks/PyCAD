@@ -58,6 +58,8 @@ public:
 
 	void AddTri(const float* x);
 	CMeshEdgeAndDir AddEdge(CMeshVertex* v0, CMeshVertex* v1);
+	void FindJoined(CMeshFace* face, std::set< CMeshFace* > &joined);
+
 };
 
 class CMeshEdgeAndDir

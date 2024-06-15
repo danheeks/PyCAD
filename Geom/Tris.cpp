@@ -1483,3 +1483,34 @@ bool CTris::SplitAtZ(double z, CTris& new_tris)
 
 	return split_done;
 }
+
+
+void CTris::Split(std::list<CTris> &new_tris)const
+{
+	CMesh mesh(*this);
+
+	// walk the mesh
+	std::set< CMeshFace* > walked; // set of already walked faces
+
+	for (std::list<CMeshFace*>::iterator It = mesh.m_faces.begin(); It != mesh.m_faces.end(); It++)
+	{
+		CMeshFace* face = *It;
+		if (walked.find(face) == walked.end())// if not already walked
+		{
+			std::set< CMeshFace* > joined;
+			joined.insert(face);
+			mesh.FindJoined(face, joined);
+			// make a new set of tris
+			CTris new_t;
+			for (std::set< CMeshFace* >::iterator JIt = joined.begin(); JIt != joined.end(); JIt++)
+			{
+				CMeshFace* j_face = *JIt;
+				CTri tri;
+				j_face->GetTri(tri);
+				new_t.m_tris.push_back(tri);
+				walked.insert(j_face);
+			}
+			new_tris.push_back(new_t);
+		}
+	}
+}

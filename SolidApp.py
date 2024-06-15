@@ -107,14 +107,9 @@ class SolidApp(App):
         inv_matrix = face_matrix.Inverse()
         cad.StartHistory('Rotate To Face')
         selected = cad.GetSelectedObjects()
-        # if any objects are selected, move them
-        if len(selected)>0:
-            for object in selected:
-                cad.TransformUndoably(object, inv_matrix)
-        else:
-            # move the solid
-            parent_body = object.GetParentBody()
-            cad.TransformUndoably(parent_body, inv_matrix)
+        # move the solid
+        parent_body = object.GetParentBody()
+        cad.TransformUndoably(parent_body, inv_matrix)
         self.EndHistory()
     
     def FaceRadiusChange(self, object):

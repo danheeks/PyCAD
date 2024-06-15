@@ -748,12 +748,18 @@ static void write_py_triangle(const double* x, const double* n)
 	(*ofs_for_write_stl_triangle) << "s.addTriangle(ocl.Triangle(ocl.Point(" << x[0] << ", " << x[1] << ", " << x[2] << "), ocl.Point(" << x[3] << ", " << x[4] << ", " << x[5] << "), ocl.Point(" << x[6] << ", " << x[7] << ", " << x[8] << ")))" << endl;
 }
 
+double normal_for_cpp[3] = { 0.0, 0.0, 0.0 };
+
 static void write_cpp_triangle(const double* x, const double* n)
 {
+	if ((fabs(n[0]) > 0.999999) || (fabs(n[1]) > 0.999999) || (fabs(n[2]) > 0.999999))
+		return;
+	const double* p = x;
 	for (int i = 0; i<3; i++)
 	{
-		(*ofs_for_write_stl_triangle) << "glNormal3d(" << n[i * 3 + 0] << ", " << n[i * 3 + 1] << ", " << n[i * 3 + 2] << ");" << endl;
-		(*ofs_for_write_stl_triangle) << "glVertex3d(" << x[i * 3 + 0] << ", " << x[i * 3 + 1] << ", " << x[i * 3 + 2] << ");" << endl;
+		(*ofs_for_write_stl_triangle) << "glNormal3d(" << p[0] << ", " << p[1] << ", " << p[2] << ");" << endl;
+		(*ofs_for_write_stl_triangle) << "glVertex3d(" << p[0] << ", " << p[1] << ", " << p[2] << ");" << endl;
+		p += 3;
 	}
 }
 
@@ -1026,6 +1032,9 @@ void CCadApp::SaveCPPFile(const std::list<HeeksObj*>& objects, const wchar_t *fi
 
 	// write all the objects
 	ofs_for_write_stl_triangle = &ofs;
+	normal_for_cpp[0] = 0.0;
+	normal_for_cpp[1] = 0.0;
+	normal_for_cpp[2] = 0.0;
 	for (std::list<HeeksObj*>::const_iterator It = objects.begin(); It != objects.end(); It++)
 	{
 		HeeksObj* object = *It;

@@ -19,6 +19,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetBox(CBox &box);
 	const wchar_t* GetTypeString(void)const{return L"Infinite Line";}
+	const wchar_t* GetXMLTypeString(void)const { return L"InfiniteLine"; }
 	HeeksObj *MakeACopy(void)const;
 	const wchar_t* GetIconFilePath();
 	void GetGripperPositions(std::list<GripData> *list, bool just_for_endof);

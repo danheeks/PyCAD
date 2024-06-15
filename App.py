@@ -89,6 +89,7 @@ class App(wx.App):
             (['cpp'], 'CPP files'),
             (['py'], 'OpenCAMLib python files'),
             (['obj'], 'Wavefront .obj files'),
+            (['wrl'], 'VRML files for KiCAD'),
             ]
         self.graphics_text_mode = GraphicsTextModeWithHelp
 
@@ -164,7 +165,7 @@ class App(wx.App):
         self.RegisterImportFileTypes(wx_image_extensions, 'Picture Files', ImportImageFile)
         import Svg
         self.RegisterExportFileTypes(['svg'], 'Svg Files', Svg.Export)
-    
+     
     def OnNewOrOpen(self, open):
         pass
     
@@ -310,6 +311,25 @@ class App(wx.App):
             new_stl.WriteStl(temp_file)
             cad.Import(temp_file)
             
+    def SplitStl(self):
+        temp_file = wx.StandardPaths.Get().GetTempDir() + '/split.stl'
+        self.object.WriteSTL(0.001, temp_file)
+        
+        stl = geom.Stl(temp_file)
+                
+        new_stls = stl.Split()
+        
+        if len(new_stls) > 1:
+            print('len(new_stls) = ' + str(len(new_stls)))
+            cad.StartHistory('Split STL')
+            cad.DeleteUndoably(self.object)
+            
+            for stl in new_stls:
+                stl.WriteStl(temp_file)
+                cad.Import(temp_file)
+                
+            cad.EndHistory()
+            
     def MakeGearSketch(self, object):
         pts = object.GetPoints(0.1)
         if len(pts)>1:
@@ -343,6 +363,7 @@ class App(wx.App):
                 
         if type == cad.OBJECT_TYPE_STL_SOLID:
             tools.append(ContextTool.CADContextTool("Split at Z", "splitsketch", self.SplitStlAtZ))
+            tools.append(ContextTool.CADContextTool("Split", "splitsketch", self.SplitStl))
             
         if type == Gear.type:
             tools.append(ContextTool.CADObjectContextTool(object, "Make Sketch", "lines", self.MakeGearSketch))
@@ -477,6 +498,7 @@ class App(wx.App):
         sketch.__class__ = cad.Sketch
         area = sketch.GetArea()
         area.Reorder()
+        geom.set_fitarcs(False)
         area.Offset(-value)
         new_object = cad.NewSketchFromArea(area)
         cad.AddUndoably(new_object)
@@ -950,7 +972,7 @@ class App(wx.App):
         for suffix in suffix_list:
             cad.RegisterImportFileType(suffix, ImportCallback)
         
-    def RegisterExportFileTypes(self, suffix_list, description, ExportCallback):        
+    def RegisterExportFileTypes(self, suffix_list, description, ExportCallback):   
         self.export_file_types.append((suffix_list, description))
         for suffix in suffix_list:
             cad.RegisterExportFileType(suffix, ExportCallback)
@@ -970,6 +992,9 @@ class App(wx.App):
             elif suffix == '3mf':
                 import Mf3
                 Mf3.Export(path)
+            elif suffix == 'wrl':
+                import Wrl
+                Wrl.Export(path)
             else:
                 cad.SaveFile(path)
             config.Write('ExportDirectory', dialog.GetDirectory())
@@ -1129,7 +1154,7 @@ https://github.com/danheeks/PyCAD
             
     def OnMakeFont(self, e):
         from HeeksFontLines import ConvertHeeksLines
-        ConvertHeeksLines()        
+        ConvertHeeksLines(1)        
         
     def OnMagPrevious(self, e):
         self.frame.graphics_canvas.viewport.RestorePreviousViewPoint()
