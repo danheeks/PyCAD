@@ -81,6 +81,7 @@ class App(wx.App):
             (['dxf'], 'DXF files'),
             (['gbr', '.rs274x'], 'RS274X/Gerber files'),
             (['pho'], 'PHO files'),
+            (['wrl'], 'VRML files for KiCAD'),
             ]
         self.export_file_types = [
             (['stl'], 'STL files'),
@@ -950,7 +951,14 @@ class App(wx.App):
         
         if dialog.ShowModal() == wx.ID_OK:
             filepath = dialog.GetPath()
-            res = cad.Import(filepath)
+            suffix = self.GetPathSuffix(filepath)
+            if suffix == 'wrl':
+                import Wrl
+                cad.StartHistory('Import Wrl')
+                res = Wrl.Import(filepath)
+                cad.EndHistory()
+            else:
+                res = cad.Import(filepath)
             if res:
                 self.DoFileOpenViewMag()
                 if self.filepath == None:
