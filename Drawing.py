@@ -380,6 +380,14 @@ class RegularShapesDrawing(Drawing):
             
         return True
     
+    def GetProperties(self):
+        properties = super().GetProperties()
+        wx.GetApp().AddInputProperty(properties, PyProperty("number of sides", 'number_of_side_for_polygon', self))
+        wx.GetApp().AddInputProperty(properties, PyProperty("rectangle radius", 'rect_radius', self))
+        wx.GetApp().AddInputProperty(properties, PyProperty("obround radius", 'obround_radius', self))
+        wx.GetApp().AddInputProperty(properties, PyProperty("polygon inscribed", 'polygon_inscribed', self))
+        return properties
+    
     def CalculateRectangle(self, x, y, p0, p1, p2, p3, xdir, ydir, zdir):
         radii_wanted = False
         x_lines_disappear = False
