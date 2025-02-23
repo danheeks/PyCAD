@@ -91,6 +91,7 @@ class App(wx.App):
             (['py'], 'OpenCAMLib python files'),
             (['obj'], 'Wavefront .obj files'),
             (['wrl'], 'VRML files for KiCAD'),
+            (['js'], 'javascript 2d context for sketches'),
             ]
         self.graphics_text_mode = GraphicsTextModeWithHelp
 
@@ -1003,6 +1004,9 @@ class App(wx.App):
             elif suffix == 'wrl':
                 import Wrl
                 Wrl.Export(path)
+            elif suffix == 'js':
+                import Js
+                Js.Export(path)
             else:
                 cad.SaveFile(path)
             config.Write('ExportDirectory', dialog.GetDirectory())
