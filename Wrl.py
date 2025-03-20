@@ -102,7 +102,6 @@ class WrlImporter:
         f = open(path, 'r')
         while True:
             line = f.readline()
-            print(str(self.line_number))
             if not line:
                 break
             self.line_number += 1
