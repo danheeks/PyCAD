@@ -117,9 +117,10 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 				CoordinateSystem::RenderRotateArrow();
 				break;
 			case GripperTypeScale:
-				if (!no_color)Material(HeeksColor(255, 255, 255)).glMaterial(1.0);
+				glScaled(0.6, 0.6, 0.6);
+				if (!no_color)Material(HeeksColor(255, 165, 0)).glMaterial(1.0);
 				CoordinateSystem::RenderFootballHexagons();
-				if (!no_color)Material(HeeksColor(0, 0, 0)).glMaterial(1.0);
+				//if (!no_color)Material(HeeksColor(255, 180, 180)).glMaterial(1.0);
 				CoordinateSystem::RenderFootballPentagons();
 			case GripperTypeRotate:
 			default:

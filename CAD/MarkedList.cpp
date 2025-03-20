@@ -42,20 +42,44 @@ void MarkedList::delete_move_grips(bool check_app_grippers){
 
 void MarkedList::create_move_grips(){
 	delete_move_grips(true);
-	int number_of_grips_made = 0;
-	std::list<HeeksObj*>::iterator Iter ;
-	for(Iter = m_list.begin(); Iter != m_list.end() && number_of_grips_made<1000; Iter++){
-		HeeksObj* object = *Iter;
-		if(object->GetType() == GripperType)continue;
-		std::list<GripData> vl;
-		std::list<GripData>::iterator It;
-		object->GetGripperPositionsTransformed(&vl, false);
-		for(It = vl.begin(); It != vl.end() && number_of_grips_made<1000; It++)
-		{
-			move_grips.push_back(new GripperSelTransform(*It, object));
-			number_of_grips_made++;
+
+	if (m_list.size() <= 20)
+	{
+		std::list<HeeksObj*>::iterator Iter ;
+		for(Iter = m_list.begin(); Iter != m_list.end(); Iter++){
+			HeeksObj* object = *Iter;
+			if(object->GetType() == GripperType)continue;
+			std::list<GripData> vl;
+			object->GetGripperPositionsTransformed(&vl, false);
+			for(std::list<GripData>::iterator It = vl.begin(); It != vl.end(); It++)
+			{
+				move_grips.push_back(new GripperSelTransform(*It, object));
+			}
 		}
 	}
+	else
+	{
+		CBox box;
+		std::list<HeeksObj*>::iterator Iter;
+		for (Iter = m_list.begin(); Iter != m_list.end(); Iter++) {
+			HeeksObj* object = *Iter;
+			object->GetBox(box);
+		}
+		if (box.m_valid)
+		{
+			std::list<GripData> vl;
+			vl.push_back(GripData(GripperTypeTranslate, Point3d(box.m_x[0], box.m_x[1], box.m_x[2]), NULL));
+			vl.push_back(GripData(GripperTypeRotateObject, Point3d(box.m_x[3], box.m_x[1], box.m_x[2]), NULL));
+			vl.push_back(GripData(GripperTypeRotateObject, Point3d(box.m_x[0], box.m_x[4], box.m_x[2]), NULL));
+			vl.push_back(GripData(GripperTypeScale, Point3d(box.m_x[3], box.m_x[4], box.m_x[2]), NULL));
+			for (std::list<GripData>::iterator It = vl.begin(); It != vl.end(); It++)
+			{
+				move_grips.push_back(new GripperSelTransform(*It, NULL));
+			}
+		}
+
+	}
+
 }
 
 void MarkedList::update_move_grips(){
