@@ -30,17 +30,17 @@ CStlTri::CStlTri(const double* t)
 	x[2][2] = (float)t[8];
 }
 
-CStlSolid::CStlSolid(const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
+CStlSolid::CStlSolid(const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge_gl_list(0), m_show_edges(true), m_clicked_triangle(0){
 	m_title.assign(GetTypeString());
 }
 
-CStlSolid::CStlSolid() : m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0), m_show_edges(true) {
+CStlSolid::CStlSolid() : m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_show_edges(true), m_clicked_triangle(0) {
 	m_title.assign(GetTypeString());
 }
 
 #ifdef UNICODE
 // constructor for the Boost Python interface
-CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0), m_show_edges(true) {
+CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_show_edges(true), m_clicked_triangle(0) {
 	m_title.assign(GetTypeString());
 	read_from_file(filepath.c_str());
 
