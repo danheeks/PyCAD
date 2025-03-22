@@ -412,3 +412,8 @@ class SolidApp(App):
         if filter.IsTypeInFilter(step.GetEllipseType()): return True
         if filter.IsTypeInFilter(step.GetSplineType()): return True
         return False
+    
+if __name__ == "__main__":
+    app = SolidApp()
+    app.MainLoop()
+

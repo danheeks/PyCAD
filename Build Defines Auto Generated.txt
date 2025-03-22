@@ -1,0 +1,2 @@
+#define MyAppName "HeeksCAD"
+#define MyVersion "2.0"
