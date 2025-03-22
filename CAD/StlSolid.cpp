@@ -34,13 +34,13 @@ CStlSolid::CStlSolid(const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge
 	m_title.assign(GetTypeString());
 }
 
-CStlSolid::CStlSolid() : m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
+CStlSolid::CStlSolid() : m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0), m_show_edges(true) {
 	m_title.assign(GetTypeString());
 }
 
 #ifdef UNICODE
 // constructor for the Boost Python interface
-CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
+CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_color), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0), m_show_edges(true) {
 	m_title.assign(GetTypeString());
 	read_from_file(filepath.c_str());
 
@@ -51,7 +51,7 @@ CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_colo
 }
 #endif
 
-CStlSolid::CStlSolid(const wchar_t* filepath, const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0){
+CStlSolid::CStlSolid(const wchar_t* filepath, const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0), m_show_edges(true) {
 	m_title.assign(GetTypeString());
 	read_from_file(filepath);
 
@@ -257,12 +257,13 @@ void CStlSolid::GetProperties(std::list<Property *> *list)
 	wchar_t buf[32];
 	swprintf(buf, 32, L"%d", (int)(m_list.size()));
 	list->push_back(new PropertyStringReadOnly(L"Number of Triangles", buf));
+	list->push_back(new PropertyCheck(this, L"Show Edges", &m_show_edges));
 	HeeksObj::GetProperties(list);
 }
 
 void CStlSolid::glCommands(bool select, bool marked, bool no_color){
 	bool draw_faces = (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewFacesOnly);
-	bool draw_edges = (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewEdgesOnly);
+	bool draw_edges = m_show_edges && (theApp->m_solid_view_mode == SolidViewFacesAndEdges || theApp->m_solid_view_mode == SolidViewEdgesOnly);
 
 	if (draw_faces)
 	{
@@ -476,6 +477,7 @@ void CStlSolid::GetTriangles(void(*callbackfunc)(const double* x, const double* 
 void CStlSolid::WriteToXML(TiXmlElement *element)
 {
 	element->SetAttribute("col", m_color.COLORREF_color());
+	element->SetAttribute("show_edges", m_show_edges ? 1 : 0);
 
 	for(std::list<CStlTri>::iterator It = m_list.begin(); It != m_list.end(); It++)
 	{
@@ -501,6 +503,7 @@ void CStlSolid::ReadFromXML(TiXmlElement *element)
 {
 	int int_value;
 	if (element->Attribute("col", &int_value))m_color = HeeksColor((long)int_value);
+	if (element->Attribute("show_edges", &int_value))m_show_edges = (int_value != 0);
 
 	// loop through all the "tri" objects
 	double x[3][3];
@@ -523,7 +526,7 @@ void CStlSolid::ReadFromXML(TiXmlElement *element)
 	HeeksObj::ReadFromXML(element);
 }
 
-void CStlSolid::AddTriangle(float* t)
+void CStlSolid::AddTriangle(const float* t)
 {
 	CStlTri tri(t);
 	m_list.push_back(tri);

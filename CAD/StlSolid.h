@@ -19,6 +19,7 @@ private:
 	int m_edge_gl_list;
 	CBox m_box;
 	std::wstring m_title;
+	bool m_show_edges;
 
 	void read_from_file(const wchar_t* filepath);
 
@@ -58,6 +59,6 @@ public:
 	void WriteToXML(TiXmlElement *element); 
 	void ReadFromXML(TiXmlElement *element);
 
-	void AddTriangle(float* t); // 9 floats
+	void AddTriangle(const float* t); // 9 floats
 };
 

@@ -436,7 +436,6 @@ boost::python::list CTrisGetTriangles(const CTris& tris)
 	return clist;
 }
 
-
 boost::python::list CTrisSplit(const CTris& t)
 {
 	std::list<CTris> tri_list;
@@ -904,6 +903,8 @@ BOOST_PYTHON_MODULE(geom) {
 		.def("GetMesh", &CTrisGetMesh, bp::return_value_policy<bp::manage_new_object>(), "returns a mesh")
 		.def("GetTriangles", &CTrisGetTriangles, "returns the list of tuples of tuples")
 		.def("Split", &CTrisSplit, "returns a list of new Stl objects")
+		.def("Unwrap", &CTris::Unwrap, bp::return_value_policy<bp::manage_new_object>(), "returns a new Stl with all the triangles unwrapped from a bar at a given radius")
+		.def("SplitToSmallerTriangles", &CTris::SplitToSmallerTriangles, bp::return_value_policy<bp::manage_new_object>(), "returns a new Stl with all the triangles no bigger than max_length")
 
 		.def(bp::self += bp::other<CTris>())
 		;

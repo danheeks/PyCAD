@@ -2349,6 +2349,19 @@ CSketch* NewSketchFromArea(const CArea& area)
 	return new_sketch;
 }
 
+CStlSolid* NewStlSolidFromStl(const CTris& tris)
+{
+	CStlSolid* new_solid = new CStlSolid();
+
+	for (std::list<CTri>::const_iterator It = tris.m_tris.begin(); It != tris.m_tris.end(); It++)
+	{
+		const CTri& tri = *It;
+		new_solid->AddTriangle(tri.x[0]);
+	}
+
+	return new_solid;
+}
+
 void RenderSketchAsExtrusion(CSketch& sketch, double start_depth, double final_depth)
 {
 	CArea area = SketchGetArea(sketch);
@@ -3194,6 +3207,7 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::def("SetCurrentColor", SetCurrentColor);
 	boost::python::def("NewSketchFromCurve", NewSketchFromCurve, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("NewSketchFromArea", NewSketchFromArea, boost::python::return_value_policy<boost::python::reference_existing_object>());
+	boost::python::def("NewStlSolidFromStl", NewStlSolidFromStl, boost::python::return_value_policy<boost::python::reference_existing_object>());
 	boost::python::def("CombineSelectedSketches", CombineSelectedSketches);
 	boost::python::def("GetStretchPoint", GetStretchPoint);
 	boost::python::def("GetStretchShift", GetStretchShift);

@@ -1514,3 +1514,116 @@ void CTris::Split(std::list<CTris> &new_tris)const
 		}
 	}
 }
+
+CTris* CTris::Unwrap(double radius)const
+{
+	CTris* new_solid = new CTris();
+
+	for (std::list<CTri>::const_iterator It = m_tris.begin(); It != m_tris.end(); It++)
+	{
+		const CTri& tri = *It;
+		float x[3][3];
+		for (int i = 0; i < 3; i++)
+		{
+			x[i][0] = tri.x[i][0];
+			x[i][1] = (float)(atan2(tri.x[i][2], tri.x[i][1]) * radius);
+			x[i][2] = sqrt(tri.x[i][2] * tri.x[i][2] + tri.x[i][1] * tri.x[i][1]);
+		}
+		new_solid->AddTri(x[0]);
+	}
+
+	return new_solid;
+}
+
+void make_half_point(const float* x0, const float* x1, float* half_point)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		half_point[i] = (x0[i] + x1[i]) * 0.5f;
+	}
+}
+
+CTris* CTris::SplitToSmallerTriangles(double max_length)const
+{
+	CTris* new_solid = new CTris();
+	std::list<CTri> tris_to_do = m_tris;
+
+	while (tris_to_do.size() > 0)
+	{
+		const CTri& tri_to_do = tris_to_do.front();
+		bool split_done = false;
+
+		// find longest length
+		Point3d p[3];
+		for (int i = 0; i < 3; i++)
+			p[i] = Point3d(tri_to_do.x[i][0], tri_to_do.x[i][1], tri_to_do.x[i][2]);
+
+		double len0 = p[0].Dist(p[1]);
+		double len1 = p[1].Dist(p[2]);
+		double len2 = p[2].Dist(p[0]);
+
+		double longest_length = len0;
+		int longest_index = 0;
+		if (len1 > longest_length)
+		{
+			longest_index = 1;
+			longest_length = len1;
+		}
+		if (len2 > longest_length)
+		{
+			longest_index = 2;
+			longest_length = len2;
+		}
+
+		if(longest_length > max_length)
+		{
+			// split into 2 triangles
+			int tests[3][2] = { {0, 1}, {1, 2}, {2, 0} };
+			
+			float half_point[3];
+			make_half_point(tri_to_do.x[tests[longest_index][0]], tri_to_do.x[tests[longest_index][1]], half_point);
+			CTri t0, t1;
+			for (int i = 0; i < 3; i++)
+			{
+				switch (longest_index)
+				{
+				case 0:
+					t0.x[0][i] = tri_to_do.x[0][i];
+					t0.x[1][i] = half_point[i];
+					t0.x[2][i] = tri_to_do.x[2][i];
+					t1.x[0][i] = half_point[i];
+					t1.x[1][i] = tri_to_do.x[1][i];
+					t1.x[2][i] = tri_to_do.x[2][i];
+					break;
+				case 1:
+					t0.x[0][i] = tri_to_do.x[0][i];
+					t0.x[1][i] = tri_to_do.x[1][i];
+					t0.x[2][i] = half_point[i];
+					t1.x[0][i] = tri_to_do.x[0][i];
+					t1.x[1][i] = half_point[i];
+					t1.x[2][i] = tri_to_do.x[2][i];
+					break;
+				default:
+					t0.x[0][i] = tri_to_do.x[0][i];
+					t0.x[1][i] = tri_to_do.x[1][i];
+					t0.x[2][i] = half_point[i];
+					t1.x[0][i] = half_point[i];
+					t1.x[1][i] = tri_to_do.x[1][i];
+					t1.x[2][i] = tri_to_do.x[2][i];
+					break;
+				}
+			}
+			tris_to_do.push_back(t0);
+			tris_to_do.push_back(t1);
+		}
+		else // split not done
+		{
+			// add to list
+			new_solid->AddTri(tri_to_do.x[0]);
+		}
+
+		tris_to_do.pop_front();
+	}
+
+	return new_solid;
+}

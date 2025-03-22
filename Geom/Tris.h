@@ -84,4 +84,6 @@ public:
 	CTris* GetFlattenedSurface()const;
 	bool SplitAtZ(double z, CTris& new_tris);
 	void Split(std::list<CTris> &new_tris)const; // split into separate lumps
+	CTris* Unwrap(double radius)const;
+	CTris* SplitToSmallerTriangles(double max_length)const;
 };
