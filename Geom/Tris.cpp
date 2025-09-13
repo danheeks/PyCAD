@@ -1523,13 +1523,28 @@ CTris* CTris::Unwrap(double radius)const
 	{
 		const CTri& tri = *It;
 		float x[3][3];
+
+		double wrap_around_distance = radius * 2 * PI;
+		double half_wrap = wrap_around_distance * 0.5;
+		double y0 = 0.0;
+
 		for (int i = 0; i < 3; i++)
 		{
 			x[i][0] = tri.x[i][0];
-			x[i][1] = (float)(atan2(tri.x[i][2], tri.x[i][1]) * radius);
+
+			double y = atan2(tri.x[i][2], tri.x[i][1]) * radius;
+			if (i == 0)
+			{
+				y0 = y;
+			}
+			else
+			{
+				while (y > y0 + half_wrap)y -= wrap_around_distance; // bring y into the same rotation as first vertex
+			}
+
+			x[i][1] = (float)y;
 			x[i][2] = sqrt(tri.x[i][2] * tri.x[i][2] + tri.x[i][1] * tri.x[i][1]);
 		}
-		new_solid->AddTri(x[0]);
 	}
 
 	return new_solid;

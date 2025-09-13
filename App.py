@@ -410,7 +410,7 @@ class App(wx.App):
         if filter.Size() > 0:
             tools.append(ContextTool.CADContextTool('Delete Marked Items', 'delete', self.DeleteMarkedList))
                 
-        if self.SketchChildTypeInFilter(filter):
+        if self.SketchChildTypeInFilter(filter) or filter.IsTypeInFilter(cad.OBJECT_TYPE_TEXT):
             tools.append(ContextTool.CADContextTool('Make to Sketch', 'makesketch', self.MakeToSketch))
 
         if filter.IsTypeInFilter(cad.OBJECT_TYPE_SKETCH):
@@ -480,10 +480,13 @@ class App(wx.App):
         
         for object in cad.GetSelectedObjects():
             t = object.GetType()
-            if object.CanAddTo(sketch):
-                new_object = object.MakeACopy()
-                objects_to_delete.append(object)
-                sketch.Add(new_object)
+            if t == cad.OBJECT_TYPE_TEXT:
+                print('text object, title = ' + object.GetTitle())
+            else:
+                if object.CanAddTo(sketch):
+                    new_object = object.MakeACopy()
+                    objects_to_delete.append(object)
+                    sketch.Add(new_object)
         
         cad.StartHistory('Make To Sketch')
         cad.AddUndoably(sketch)

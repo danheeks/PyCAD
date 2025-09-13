@@ -218,6 +218,7 @@ bool AfterPythonCall(PyObject *main_module)
 		if (PyCallable_Check(callback))
 		{
 			// add an entry in map from name to 
+			xml_read_callbacks.erase(name_c);
 			xml_read_callbacks.insert(std::make_pair(name_c, callback));
 		}
 

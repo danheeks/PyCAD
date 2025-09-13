@@ -2832,6 +2832,9 @@ BOOST_PYTHON_MODULE(cad) {
 		.def("__str__", Filter__str__);
 	;
 
+	boost::python::class_<HText, boost::python::bases<ObjList> >("Text", boost::python::no_init)
+	;
+
 	boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
 		.def(boost::python::init<ObserverWrap>())
 		;
@@ -3224,6 +3227,7 @@ BOOST_PYTHON_MODULE(cad) {
 	boost::python::scope().attr("OBJECT_TYPE_POINT") = (int)PointType;
 	boost::python::scope().attr("OBJECT_TYPE_STL_SOLID") = (int)StlSolidType;
 	boost::python::scope().attr("OBJECT_TYPE_COORD_SYS") = (int)CoordinateSystemType;
+	boost::python::scope().attr("OBJECT_TYPE_TEXT") = (int)TextType;
 	boost::python::scope().attr("PROPERTY_TYPE_INVALID") = (int)InvalidPropertyType;
 	boost::python::scope().attr("PROPERTY_TYPE_STRING") = (int)StringPropertyType;
 	boost::python::scope().attr("PROPERTY_TYPE_LONG_STRING") = (int)LongStringPropertyType;
