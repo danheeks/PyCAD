@@ -44,6 +44,52 @@ const wchar_t* HText::GetIconFilePath()
 	return iconpath.c_str();
 }
 
+double HText::GetScale() const
+{
+	double sx;
+	m_trsf.GetScale(sx);
+	return sx;
+}
+
+void HText::GetOffset(double& x, double& y)const
+{
+	x = 0.0;
+	y = 0.0;
+	float width, height;
+	if (GetTextSize(m_text, &width, &height))
+	{
+		switch (m_h_justification)
+		{
+		case 0:// Left
+			break;
+		case 1:// Center
+			x = -width * 0.5;
+			break;
+		case 2:// Right
+			x = -width;
+			break;
+		default:
+			break;
+		}
+		switch (m_v_justification)//0 = Baseline; 1 = Bottom; 2 = Middle; 3 = Top
+		{
+		case 0:// Baseline
+			y = height * 1.52;
+			break;
+		case 1:// Bottom
+			y = height * (-0.2);
+			break;
+		case 2:// Middle
+			y = height * 0.5;
+			break;
+		case 3:// Top
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void HText::glCommands(bool select, bool marked, bool no_color)
 {
 	glPushMatrix();
@@ -56,40 +102,10 @@ void HText::glCommands(bool select, bool marked, bool no_color)
 	if(!no_color)theApp->glColorEnsuringContrast(m_color);
 
 	// We're using the internal font
-		float width, height;
-		if (GetTextSize( m_text, &width, &height ))
-		{
-			switch(m_h_justification)
-			{
-				case 0:// Left
-					break;
-				case 1:// Center
-					glTranslated(-width*0.5, 0, 0);
-					break;
-				case 2:// Right
-					glTranslated(-width, 0, 0);
-					break;
-				default:
-					break;
-			}
-			switch(m_v_justification)//0 = Baseline; 1 = Bottom; 2 = Middle; 3 = Top
-			{
-				case 0:// Baseline
-					glTranslated(0, height * 1.52, 0);
-					break;
-				case 1:// Bottom
-					glTranslated(0, height * (-0.2), 0);
-					break;
-				case 2:// Middle
-					glTranslated(0, height*0.5, 0);
-					break;
-				case 3:// Top
-					break;
-				default:
-					break;
-			}
-		}
-		theApp->render_text(m_text.c_str(), select, 1.0, 0.2 /(theApp->GetPixelScale() * sx));
+	double x, y;
+	GetOffset(x, y);
+	glTranslated(x, y, 0);
+	theApp->render_text(m_text.c_str(), select, 1.0, 0.2 /(theApp->GetPixelScale() * sx));
 	glPopMatrix();
 
 	ObjList::glCommands(select, marked, no_color);

@@ -12,7 +12,7 @@ def GetCharCurves(c, x, curves):
         c.Append(geom.Point(x + 0.072712534751542, 0.09394747113073515))
         c.Append(geom.Point(x + 0.076404075922666, 0.053326747349465145))
         curves.append(c)
-        return 0.14402406447227198     
+        return 0.14402406447227198
     elif c == 34:
         c = geom.Curve()
         c.Append(geom.Point(x + 0.043986599099894, 1.0227038305673648))
@@ -1452,6 +1452,6 @@ def GetTextCurves(str):
     
     x = 0.0
     for c in str:
-        x += GetCharCurves(ord(c), x, curves)
+        x += GetCharCurves(ord(c), x, curves) + 0.16
         
     return curves

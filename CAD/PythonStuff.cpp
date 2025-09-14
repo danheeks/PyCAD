@@ -799,6 +799,14 @@ boost::python::tuple SketchGetCircleCentre(CSketch& sketch)
 	return boost::python::make_tuple(NULL);
 }
 
+
+boost::python::tuple HTextGetOffset(HText& text)
+{
+	double x, y;
+	text.GetOffset(x, y);
+	return boost::python::make_tuple(x, y);
+}
+
 void SketchWriteDXF(CSketch& sketch, std::wstring filepath)
 {
 	std::list<HeeksObj*> objects;
@@ -2833,7 +2841,10 @@ BOOST_PYTHON_MODULE(cad) {
 	;
 
 	boost::python::class_<HText, boost::python::bases<ObjList> >("Text", boost::python::no_init)
-	;
+		.def("GetScale", &HText::GetScale)
+		.def("GetOffset", &HTextGetOffset)
+		.def("GetMatrix", &HText::GetMatrix)
+		;
 
 	boost::python::class_<ObserverWrap, boost::noncopyable >("Observer")
 		.def(boost::python::init<ObserverWrap>())

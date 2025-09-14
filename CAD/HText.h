@@ -48,4 +48,7 @@ public:
 	bool CanAdd(HeeksObj* object);
 
 	bool GetTextSize( const std::wstring & text, float *pWidth, float *pHeight ) const;
+	double GetScale() const;
+	void GetOffset(double& x, double& y)const;
+	Matrix GetMatrix()const { return m_trsf; }
 };

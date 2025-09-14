@@ -484,9 +484,17 @@ class App(wx.App):
             t = object.GetType()
             if t == cad.OBJECT_TYPE_TEXT:
                 from TextCurve import GetTextCurves
+                object.__class__ = cad.Text
+                m = geom.Matrix()
+                x,y = object.GetOffset()
+                m.Translate(geom.Point3D(0,-1,0))
+                m.Scale(1.6)
+                m.Translate(geom.Point3D(x,y,0))
+                m.Multiply(object.GetMatrix())
                 curves = GetTextCurves(object.GetTitle())
                 for c in curves:
                     s = cad.NewSketchFromCurve(c)
+                    s.Transform(m)
                     cad.AddUndoably(s)                
             else:
                 if object.CanAddTo(sketch):
