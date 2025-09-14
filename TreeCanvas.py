@@ -317,7 +317,7 @@ class TreeCanvas(wx.Window):
                     self.dragged_list = cad.GetSelectedObjects()
 
             if self.dragging:
-                self.drag_position = self.CalcUnscrolledPosition(event.GetX(), event.GetY());
+                self.drag_position = wx.Point(self.CalcUnscrolledPosition(event.GetX(), event.GetY()))
                 button = self.HitTest(event.GetX(), event.GetY())
                 self.drag_paste_rect = wx.Rect(0, 0, 0, 0)
                 if (button != None) and (button.type == ButtonTypeLabelBefore): self.drag_paste_rect = button.rect
@@ -549,8 +549,8 @@ class TreeCanvas(wx.Window):
 
     def Render(self, just_for_calculation = False):
         size = self.GetClientSize()
-        self.pTopLeft = self.CalcUnscrolledPosition(0, 0)
-        self.pBottomRight = self.CalcUnscrolledPosition(size.x, size.y)
+        self.pTopLeft = wx.Point(self.CalcUnscrolledPosition(0, 0))
+        self.pBottomRight = wx.Point(self.CalcUnscrolledPosition(size.x, size.y))
 
         self.render_just_for_calculation = just_for_calculation
         if not just_for_calculation:
