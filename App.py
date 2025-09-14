@@ -477,18 +477,23 @@ class App(wx.App):
     def MakeToSketch(self):
         objects_to_delete = []
         sketch = cad.NewSketch()
+
+        cad.StartHistory('Make To Sketch')
         
         for object in cad.GetSelectedObjects():
             t = object.GetType()
             if t == cad.OBJECT_TYPE_TEXT:
-                print('text object, title = ' + object.GetTitle())
+                from TextCurve import GetTextCurves
+                curves = GetTextCurves(object.GetTitle())
+                for c in curves:
+                    s = cad.NewSketchFromCurve(c)
+                    cad.AddUndoably(s)                
             else:
                 if object.CanAddTo(sketch):
                     new_object = object.MakeACopy()
                     objects_to_delete.append(object)
                     sketch.Add(new_object)
         
-        cad.StartHistory('Make To Sketch')
         cad.AddUndoably(sketch)
         cad.DeleteObjectsUndoably(objects_to_delete)
         self.EndHistory()
