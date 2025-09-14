@@ -51,7 +51,7 @@ CStlSolid::CStlSolid(const std::wstring& filepath) :m_color(theApp->current_colo
 }
 #endif
 
-CStlSolid::CStlSolid(const wchar_t* filepath, const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge_gl_list(0), m_clicked_triangle(0), m_show_edges(true) {
+CStlSolid::CStlSolid(const wchar_t* filepath, const HeeksColor* col) :m_color(*col), m_gl_list(0), m_edge_gl_list(0)), m_show_edges(true), m_clicked_triangle(0 {
 	m_title.assign(GetTypeString());
 	read_from_file(filepath);
 
