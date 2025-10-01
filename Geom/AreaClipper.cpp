@@ -1,5 +1,7 @@
 // AreaClipper.cpp
 
+#if 0
+
 // implements CArea methods using Angus Johnson's "Clipper"
 
 #include "Area.h"
@@ -499,3 +501,5 @@ void UnFitArcs(CCurve &curve)
 		curve.m_vertices.push_back(vertex);
 	}
 }
+
+#endif

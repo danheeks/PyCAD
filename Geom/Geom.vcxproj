@@ -77,6 +77,7 @@
   <ItemGroup>
     <ClCompile Include="Arc.cpp" />
     <ClCompile Include="Area.cpp" />
+    <ClCompile Include="AreaCavC.cpp" />
     <ClCompile Include="AreaClipper.cpp" />
     <ClCompile Include="AreaDxf.cpp" />
     <ClCompile Include="AreaOrderer.cpp" />
@@ -96,7 +97,6 @@
     <ClCompile Include="OctTree.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
-    <ClCompile Include="Test.cpp" />
     <ClCompile Include="Tris.cpp" />
   </ItemGroup>
   <ItemGroup>
