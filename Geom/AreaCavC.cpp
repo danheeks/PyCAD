@@ -69,7 +69,7 @@ cavc::Polyline<double> convertCurveToPolyline(const CCurve& curve) {
             bulge = std::tan(delta / 4.0);
         }
 
-        polyline.addVertex(v.m_p.x, v.m_p.y, bulge);
+        polyline.addVertex(prev.x, prev.y, bulge);
         prev = v.m_p;
     }
 
