@@ -87,6 +87,7 @@
   <ItemGroup>
     <ClCompile Include="..\Geom\Arc.cpp" />
     <ClCompile Include="..\Geom\Area.cpp" />
+    <ClCompile Include="..\Geom\AreaCavC.cpp" />
     <ClCompile Include="..\Geom\AreaClipper.cpp" />
     <ClCompile Include="..\Geom\AreaOrderer.cpp" />
     <ClCompile Include="..\Geom\AreaPocket.cpp" />
