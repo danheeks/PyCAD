@@ -18,10 +18,6 @@ void CArea::Intersect(const CArea& a2)
 {
 }
 
-void CArea::Union(const CArea& a2)
-{
-}
-
 // static
 CArea CArea::UniteCurves(std::list<CCurve> &curves)
 {
@@ -78,6 +74,20 @@ cavc::Polyline<double> convertCurveToPolyline(const CCurve& curve) {
     return polyline;
 }
 
+std::vector<cavc::Polyline<double>> convertAreaToPolylines(const CArea& area)
+{
+    std::vector<cavc::Polyline<double>> result;
+
+    for (std::list<CCurve>::const_iterator It = area.m_curves.begin(); It != area.m_curves.end(); It++)
+    {
+        const CCurve& curve = *It;
+        cavc::Polyline<double> polyline = convertCurveToPolyline(curve);
+        result.push_back(std::move(polyline));
+    }
+
+    return result;
+}
+
 void convertAreaToLoopSet(const CArea& area, cavc::OffsetLoopSet<double> &loopSet)
 {
     for (std::list<CCurve>::const_iterator It = area.m_curves.begin(); It != area.m_curves.end(); It++)
@@ -127,39 +137,15 @@ Point arcCenter(const Point& P0, const Point& P1, double bulge)
     return { mx + h * px, my + h * py };
 }
 
-
-
-CArea convertOffsetResultToArea(const cavc::OffsetLoopSet<double>& offsetResult)
+void polyLineToCurve(const cavc::Polyline<double>& poly, CCurve &curve)
 {
-    CArea area;
+    const cavc::PlineVertex<double>* prev_v = NULL;
 
-    // Helper lambda to convert a CavalierContours polyline to a CCurve
-    auto polyToCurve = [](const cavc::Polyline<double>& poly) -> CCurve
+    for (const auto& v : poly.vertexes())
     {
-        CCurve curve;
-        const cavc::PlineVertex<double>* prev_v = NULL;
-
-        for (const auto& v : poly.vertexes())
-        {
-            CVertex cv;
-            cv.m_p.x = v.x();
-            cv.m_p.y = v.y();
-
-            if (prev_v != NULL)
-            {
-                if (!prev_v->bulgeIsZero())
-                {
-                    cv.m_c = arcCenter(curve.m_vertices.back().m_p, cv.m_p, prev_v->bulge());
-                    cv.m_type = (prev_v->bulge() > 0) ? 1 : -1;
-                }
-            }
-            curve.m_vertices.push_back(cv);
-
-            prev_v = &v;
-        }
-
         CVertex cv;
-        cv.m_p = curve.m_vertices.front().m_p;
+        cv.m_p.x = v.x();
+        cv.m_p.y = v.y();
 
         if (prev_v != NULL)
         {
@@ -171,19 +157,41 @@ CArea convertOffsetResultToArea(const cavc::OffsetLoopSet<double>& offsetResult)
         }
         curve.m_vertices.push_back(cv);
 
-        return curve;
-    };
+        prev_v = &v;
+    }
+
+    CVertex cv;
+    cv.m_p = curve.m_vertices.front().m_p;
+
+    if (prev_v != NULL)
+    {
+        if (!prev_v->bulgeIsZero())
+        {
+            cv.m_c = arcCenter(curve.m_vertices.back().m_p, cv.m_p, prev_v->bulge());
+            cv.m_type = (prev_v->bulge() > 0) ? 1 : -1;
+        }
+    }
+    curve.m_vertices.push_back(cv);
+}
+
+CArea convertOffsetResultToArea(const cavc::OffsetLoopSet<double>& offsetResult)
+{
+    CArea area;
 
     // Convert all counter-clockwise loops (outer boundaries)
     for (const auto& ccw : offsetResult.ccwLoops)
     {
-        area.m_curves.push_back(polyToCurve(ccw.polyline));
+        CCurve curve;
+        polyLineToCurve(ccw.polyline, curve);
+        area.m_curves.push_back(curve);
     }
 
     // Convert all clockwise loops (islands)
     for (const auto& cw : offsetResult.cwLoops)
     {
-        area.m_curves.push_back(polyToCurve(cw.polyline));
+        CCurve curve;
+        polyLineToCurve(cw.polyline, curve);
+        area.m_curves.push_back(curve);
     }
 
     return area;
@@ -191,19 +199,7 @@ CArea convertOffsetResultToArea(const cavc::OffsetLoopSet<double>& offsetResult)
 
 void CArea::Offset(double inwards_value)
 {
-      cavc::OffsetLoopSet<double> loopSet;
-
-#if 0
-      cavc::Polyline<double> outerCCWLoop;
-      outerCCWLoop.addVertex(0, 0, 0);
-      outerCCWLoop.addVertex(10, 0, 0);
-      outerCCWLoop.addVertex(10, 10, 0);
-      outerCCWLoop.addVertex(0, 10, 0);
-      outerCCWLoop.isClosed() = true;
-
-      loopSet.ccwLoops.push_back({ 0, outerCCWLoop, cavc::createApproxSpatialIndex(outerCCWLoop) });
-#endif
-
+    cavc::OffsetLoopSet<double> loopSet;
 
     convertAreaToLoopSet(*this, loopSet);
 
@@ -212,6 +208,46 @@ void CArea::Offset(double inwards_value)
     cavc::OffsetLoopSet<double> offsetResult = alg.compute(loopSet, offsetDelta);
 
     *this = convertOffsetResultToArea(offsetResult);
+}
+
+CArea convertPolylinesToArea(const std::vector<cavc::Polyline<double>>& plines)
+{
+    CArea area;
+
+    for (auto const& pl : plines)
+    {
+        CCurve curve;
+        polyLineToCurve(pl, curve);
+        area.m_curves.push_back(curve);
+    }
+
+    return area;
+}
+
+
+void CArea::Union(const CArea& a2)
+{
+    auto plines1 = convertAreaToPolylines(*this);
+    auto plines2 = convertAreaToPolylines(a2);
+
+    std::vector<cavc::Polyline<double>> current = plines1;
+
+    for (auto& p2 : plines2)
+    {
+        std::vector<cavc::Polyline<double>> next;
+        for (auto& p1 : current)
+        {
+            cavc::CombineResult<double> res =
+                cavc::combinePolylines(p1, p2, cavc::PlineCombineMode::Union);
+
+            // For Union we just take the resulting "remaining" polylines
+            next.insert(next.end(), res.remaining.begin(), res.remaining.end());
+            next.insert(next.end(), res.subtracted.begin(), res.subtracted.end());
+        }
+        current = std::move(next);
+    }
+
+    *this = convertPolylinesToArea(current);
 }
 
 
