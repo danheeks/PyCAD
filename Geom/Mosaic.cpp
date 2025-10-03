@@ -75,36 +75,36 @@ void Mosaic::Insert(const Span& span, bool reversed)
 	std::list<Point> all_pts;
 
 	std::list<MosaicSpan> copy_spans = m_spans;
-	for (std::list<MosaicSpan>::iterator It = m_spans.begin(); It != m_spans.end(); It++)
+	for (std::list<MosaicSpan>::iterator It = copy_spans.begin(); It != copy_spans.end(); It++)
 	{
-		MosaicSpan& mspan = *It;
+		MosaicSpan* mspan = &(*It);
 		std::list<Point> pts;
-		mspan.m_span.Intersect(span, pts);
+		mspan->m_span.Intersect(span, pts);
 
 		// split span
 		for (std::list<Point>::iterator PIt = pts.begin(); PIt != pts.end(); PIt++)
 		{
 			Point& p = *PIt;
-			if (p == mspan.m_span.m_p || p == mspan.m_span.m_v.m_p)
+			if (p == mspan->m_span.m_p || p == mspan->m_span.m_v.m_p)
 				continue; // don't split start or end points
 
 			m_nodes.push_back(MosaicNode(p)); // add a new node at the split point
 			MosaicNode* new_node = &(m_nodes.back());
 
 			// disconnect end of span
-			mspan.m_end_node->Disconnect(&mspan);
-			MosaicNode* old_end_node = mspan.m_end_node;
-			CVertex old_end_vertex = mspan.m_span.m_v;
-			mspan.m_end_node = new_node;
-			mspan.m_span.m_v.m_p = p;
-			new_node->Connect(&mspan, false);
+			mspan->m_end_node->Disconnect(mspan);
+			MosaicNode* old_end_node = mspan->m_end_node;
+			CVertex old_end_vertex = mspan->m_span.m_v;
+			mspan->m_end_node = new_node;
+			mspan->m_span.m_v.m_p = p;
+			new_node->Connect(mspan, false);
 
 			// add mosaic span
 			Span span(p, old_end_vertex);
 			m_spans.push_back(MosaicSpan(span, new_node, old_end_node));
-			MosaicSpan* new_span = &m_spans.back();
-			new_span->m_start_node->Connect(new_span, true);
-			new_span->m_end_node->Connect(new_span, false);
+			mspan = &m_spans.back();
+			mspan->m_start_node->Connect(mspan, true);
+			mspan->m_end_node->Connect(mspan, false);
 		}
 
 		for (std::list<Point>::iterator PIt = pts.begin(); PIt != pts.end(); PIt++)
@@ -191,17 +191,15 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 		MosaicSpan* span_to_do = spans_to_do.front();
 
 		// ignore if already processed
-		if (spans_done.find(span_to_do) != spans_done.end())
-		{
-			spans_to_do.pop_front();
-			continue;
-		}
+		if (spans_done.find(span_to_do) != spans_done.end()){ spans_to_do.pop_front(); continue; }
 
+		// mark as done
 		spans_done.insert(span_to_do);
 
+		// start curve with this span
 		CCurve curve;
 		curve.append(span_to_do->m_span.m_p);
-		curve.append(span_to_do->m_span.m_v);  // start curve with this span
+		curve.append(span_to_do->m_span.m_v);  
 
 		MosaicNode* start_node = span_to_do->m_start_node;
 		MosaicNode* working_node = span_to_do->m_end_node;
