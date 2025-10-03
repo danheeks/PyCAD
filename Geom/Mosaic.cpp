@@ -94,12 +94,13 @@ void Mosaic::Insert(const Span& span, bool reversed)
 			// disconnect end of span
 			mspan.m_end_node->Disconnect(&mspan);
 			MosaicNode* old_end_node = mspan.m_end_node;
+			CVertex old_end_vertex = mspan.m_span.m_v;
 			mspan.m_end_node = new_node;
 			mspan.m_span.m_v.m_p = p;
 			new_node->Connect(&mspan, false);
 
 			// add mosaic span
-			Span span(p, mspan.m_span.m_v);
+			Span span(p, old_end_vertex);
 			m_spans.push_back(MosaicSpan(span, new_node, old_end_node));
 			MosaicSpan* new_span = &m_spans.back();
 			new_span->m_start_node->Connect(new_span, true);
@@ -205,7 +206,7 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 		MosaicNode* start_node = span_to_do->m_start_node;
 		MosaicNode* working_node = span_to_do->m_end_node;
 
-		while (working_node != NULL && working_node != start_node)
+		while (working_node != NULL)
 		{
 			// where to go next
 
@@ -227,13 +228,6 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 					It = working_node->m_span_list.begin(); // keep looping
 
 				MosaicSpanConnector& connector = *It;
-				if (connector.m_span == span_to_do)
-				{
-					// we've run out of viable spans
-					area.append(curve);
-					working_node = NULL;
-					break;
-				}
 
 				if (connector.m_forward)
 				{
@@ -243,6 +237,19 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 
 					// move on to the next node
 					working_node = connector.m_span->m_end_node;
+					span_to_do = connector.m_span;
+
+					if (working_node == start_node)
+					{
+						area.append(curve);
+						working_node = NULL;
+					}
+					break;
+				}
+				else
+				{
+					// no entry. We started badly
+					working_node = NULL;
 					break;
 				}
 			}

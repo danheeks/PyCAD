@@ -1513,6 +1513,7 @@ void Span::Split(const std::list<Point>& pts, std::list<Span>& spans)const
 	{
 		Point p = It->second;
 		if (p == m_p)continue;
+		if (p == current_start)continue;
 		Span span = *this;
 		span.m_p = current_start;
 		span.m_v.m_p = p;
