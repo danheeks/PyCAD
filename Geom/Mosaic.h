@@ -24,6 +24,7 @@ public:
 
 	MosaicNode(const Point& p);
 	void Connect(MosaicSpan *span, bool forward);
+	void Disconnect(MosaicSpan* span);
 };
 
 class MosaicSpan
@@ -52,5 +53,5 @@ public:
 	void Insert(const CArea& area, bool reversed = false);
 	void Insert(const Span& span, bool reversed);
 	void GetResult(CArea& area, MosaicResultType result_type = MosaicResultTypeTurnRight);
-	void FindNode(const Point& p, MosaicNode* node);
+	void FindNode(const Point& p, MosaicNode** node);
 };
