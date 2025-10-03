@@ -94,6 +94,7 @@
     <ClCompile Include="HeeksGeomDxf.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Mosaic.cpp" />
     <ClCompile Include="OctTree.cpp" />
     <ClCompile Include="Offset.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
@@ -115,6 +116,7 @@
     <ClInclude Include="HeeksGeomDxf.h" />
     <ClInclude Include="MachiningArea.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Mosaic.h" />
     <ClInclude Include="OctTree.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="PythonStuff.h" />

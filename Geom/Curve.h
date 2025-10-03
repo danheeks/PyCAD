@@ -72,6 +72,7 @@ public:
 	double GetRadius()const;
 	Span Offset(double offset);	// offset span method
 	bool IsOn(Circle& c, double tol)const;
+	void Split(const std::list<Point>& pts, std::list<Span>& spans)const;
 };
 
 ostream & operator<<(ostream &os, const Span &);

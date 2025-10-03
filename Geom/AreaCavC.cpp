@@ -5,6 +5,7 @@
 // implements CArea methods using "Cavalier Contours" https://github.com/jbuckmccready/CavalierContours
 
 #include "Area.h"
+#include "Mosaic.h"
 
 bool CArea::HolesLinked(){ return false; }
 
@@ -227,27 +228,11 @@ CArea convertPolylinesToArea(const std::vector<cavc::Polyline<double>>& plines)
 
 void CArea::Union(const CArea& a2)
 {
-    auto plines1 = convertAreaToPolylines(*this);
-    auto plines2 = convertAreaToPolylines(a2);
-
-    std::vector<cavc::Polyline<double>> current = plines1;
-
-    for (auto& p2 : plines2)
-    {
-        std::vector<cavc::Polyline<double>> next;
-        for (auto& p1 : current)
-        {
-            cavc::CombineResult<double> res =
-                cavc::combinePolylines(p1, p2, cavc::PlineCombineMode::Union);
-
-            // For Union we just take the resulting "remaining" polylines
-            next.insert(next.end(), res.remaining.begin(), res.remaining.end());
-            next.insert(next.end(), res.subtracted.begin(), res.subtracted.end());
-        }
-        current = std::move(next);
-    }
-
-    *this = convertPolylinesToArea(current);
+    Mosaic mosaic;
+    mosaic.Insert(*this);
+    mosaic.Insert(a2);
+    m_curves.clear();
+    mosaic.GetResult(*this);
 }
 
 

@@ -6,6 +6,7 @@
 #include "Arc.h"
 #include "Area.h"
 #include "geometry.h"
+#include <map>
 
 const Point operator*(const double &d, const Point &p){ return p * d;}
 
@@ -1490,6 +1491,42 @@ bool Span::IsOn(Circle& c, double tol)const
 	if (!c.PointIsOn(mid_point, tol))
 		return false;
 	return true;
+}
+
+void Span::Split(const std::list<Point>& pts, std::list<Span>& spans)const
+{
+	// order the points along this span
+	std::multimap<double, Point> ordered_points;
+	for (std::list<Point>::const_iterator It = pts.begin(); It != pts.end(); It++)
+	{
+		const Point& p = *It;
+		double t;
+		if (On(p, &t))
+		{
+			ordered_points.insert(std::make_pair(t, p));
+		}
+	}
+
+	// loop through the points adding spans
+	Point current_start = m_p;
+	for (std::multimap<double, Point>::iterator It = ordered_points.begin(); It != ordered_points.end(); It++)
+	{
+		Point p = It->second;
+		if (p == m_p)continue;
+		Span span = *this;
+		span.m_p = current_start;
+		span.m_v.m_p = p;
+		spans.push_back(span);
+		current_start = p;
+	}
+
+	if (current_start != m_v.m_p)
+	{
+		Span span = *this;
+		span.m_p = current_start;
+		spans.push_back(span);
+	}
+
 }
 
 ostream & operator<<(ostream &os, const Span &span)
