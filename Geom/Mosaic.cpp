@@ -78,7 +78,7 @@ void Mosaic::CopySpanPointers(std::list<MosaicSpan*>& copy_spans)
 	}
 }
 
-void Mosaic::Insert(const Span& span, bool reversed)
+void Mosaic::Insert(const Span& span)
 {
 	// find intersections with each existing span
 	std::list<Point> all_pts;
@@ -168,7 +168,8 @@ void Mosaic::Insert(const CArea& area, bool reversed)
 		for (std::list<Span>::iterator SpIt = spans.begin(); SpIt != spans.end(); SpIt++)
 		{
 			Span& span = *SpIt;
-			Insert(span, reversed);
+			if (reversed)span.Reverse();
+			Insert(span);
 		}
 	}
 }
@@ -186,6 +187,71 @@ void Mosaic::FindNode(const Point& p, MosaicNode** node)
 	}
 }
 
+static std::list<MosaicSpanConnector>::iterator WorkingNodeSpanIt;
+static std::list<MosaicSpanConnector>::reverse_iterator WorkingNodeSpanReverseIt;
+static MosaicResultType WorkingNodeResultType;
+static MosaicNode* StartNode;
+static MosaicNode* WorkingNode;
+static MosaicSpan* SpanToDo;
+
+static void IncrementIterator()
+{
+	if(WorkingNodeResultType == MosaicResultTypeTurnLeft)
+	{
+		WorkingNodeSpanReverseIt++;
+		if (WorkingNodeSpanReverseIt == WorkingNode->m_span_list.rend())
+			WorkingNodeSpanReverseIt = WorkingNode->m_span_list.rbegin(); // keep looping
+	}
+	else
+	{
+		WorkingNodeSpanIt++;
+		if (WorkingNodeSpanIt == WorkingNode->m_span_list.end())
+			WorkingNodeSpanIt = WorkingNode->m_span_list.begin(); // keep looping
+	}
+}
+
+static void SetStartIterator()
+{
+	if (WorkingNodeResultType == MosaicResultTypeTurnLeft)
+	{
+		WorkingNodeSpanReverseIt = WorkingNode->m_span_list.rbegin();
+		for (; WorkingNodeSpanReverseIt != WorkingNode->m_span_list.rend(); WorkingNodeSpanReverseIt++)
+		{
+			MosaicSpanConnector& connector = *WorkingNodeSpanReverseIt;
+			if (connector.m_span == SpanToDo)
+			{
+				break;
+			}
+		}
+	}
+	else
+	{
+		WorkingNodeSpanIt = WorkingNode->m_span_list.begin();
+		for (; WorkingNodeSpanIt != WorkingNode->m_span_list.end(); WorkingNodeSpanIt++)
+		{
+			MosaicSpanConnector& connector = *WorkingNodeSpanIt;
+			if (connector.m_span == SpanToDo)
+			{
+				break;
+			}
+		}
+	}
+
+	IncrementIterator(); // move on to the one after the current span
+}
+
+static MosaicSpanConnector& CurrentConnector()
+{
+	if (WorkingNodeResultType == MosaicResultTypeTurnLeft)
+	{
+		return *WorkingNodeSpanReverseIt;
+	}
+	else
+	{
+		return *WorkingNodeSpanIt;
+	}
+}
+
 void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 {
 	// walk the structure until every span has been walked
@@ -193,47 +259,36 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 	CopySpanPointers(spans_to_do);
 
 	std::set<MosaicSpan*> spans_done;
+	WorkingNodeResultType = result_type;
 
 	while (spans_to_do.size() > 0)
 	{
-		MosaicSpan* span_to_do = spans_to_do.front();
+		SpanToDo = spans_to_do.front();
 
 		// ignore if already processed
-		if (spans_done.find(span_to_do) != spans_done.end()){ spans_to_do.pop_front(); continue; }
+		if (spans_done.find(SpanToDo) != spans_done.end()){ spans_to_do.pop_front(); continue; }
 
 		// mark as done
-		spans_done.insert(span_to_do);
+		spans_done.insert(SpanToDo);
 
 		// start curve with this span
 		CCurve curve;
-		curve.append(span_to_do->m_span.m_p);
-		curve.append(span_to_do->m_span.m_v);  
+		curve.append(SpanToDo->m_span.m_p);
+		curve.append(SpanToDo->m_span.m_v);
 
-		MosaicNode* start_node = span_to_do->m_start_node;
-		MosaicNode* working_node = span_to_do->m_end_node;
+		StartNode = SpanToDo->m_start_node;
+		WorkingNode = SpanToDo->m_end_node;
 
-		while (working_node != NULL)
+		while (WorkingNode != NULL)
 		{
 			// where to go next
 
 			// find current span on the node
-			std::list<MosaicSpanConnector>::iterator It = working_node->m_span_list.begin();
-			for (; It != working_node->m_span_list.end(); It++)
-			{
-				MosaicSpanConnector& connector = *It;
-				if (connector.m_span == span_to_do)
-				{
-					break;
-				}
-			}
+			SetStartIterator();
 
-			It++; // move on to the one after the current span
-			for (;;It++)
+			for (;;IncrementIterator())
 			{
-				if (It == working_node->m_span_list.end())
-					It = working_node->m_span_list.begin(); // keep looping
-
-				MosaicSpanConnector& connector = *It;
+				MosaicSpanConnector& connector = CurrentConnector();
 
 				if (connector.m_forward)
 				{
@@ -242,20 +297,20 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 					spans_done.insert(connector.m_span);
 
 					// move on to the next node
-					working_node = connector.m_span->m_end_node;
-					span_to_do = connector.m_span;
+					WorkingNode = connector.m_span->m_end_node;
+					SpanToDo = connector.m_span;
 
-					if (working_node == start_node)
+					if (WorkingNode == StartNode)
 					{
 						area.append(curve);
-						working_node = NULL;
+						WorkingNode = NULL;
 					}
 					break;
 				}
 				else
 				{
 					// no entry. We started badly
-					working_node = NULL;
+					WorkingNode = NULL;
 					break;
 				}
 			}

@@ -54,7 +54,7 @@ public:
 	Mosaic();
 
 	void Insert(const CArea& area, bool reversed = false);
-	void Insert(const Span& span, bool reversed);
+	void Insert(const Span& span);
 	void GetResult(CArea& area, MosaicResultType result_type = MosaicResultTypeTurnRight);
 	void FindNode(const Point& p, MosaicNode** node);
 };
