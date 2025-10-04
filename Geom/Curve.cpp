@@ -1405,7 +1405,12 @@ void ArcArcIntof(const Span& arc0, const Span& arc1, std::list<Point> &pts) {
 		if (arc0.On(pLeft) && arc1.On(pLeft))
 			pts.push_back(pLeft);
 		if (arc0.On(pRight) && arc1.On(pRight))
-			pts.push_back(pRight);
+		{
+			if(arc0.m_v.m_type > 0)
+				pts.push_back(pRight);
+			else 
+				pts.push_front(pRight);// make sure they are ordered along a clockwise arc
+		}
 	}
 }
 

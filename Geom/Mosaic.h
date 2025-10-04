@@ -47,6 +47,9 @@ class Mosaic
 {
 	std::list<MosaicNode> m_nodes;
 	std::list<MosaicSpan> m_spans;
+
+	void CopySpanPointers(std::list<MosaicSpan*>& copy_spans);
+
 public:
 	Mosaic();
 

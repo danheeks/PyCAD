@@ -69,15 +69,26 @@ Mosaic::Mosaic()
 
 }
 
+void Mosaic::CopySpanPointers(std::list<MosaicSpan*>& copy_spans)
+{
+	for (std::list<MosaicSpan>::iterator It = m_spans.begin(); It != m_spans.end(); It++)
+	{
+		MosaicSpan* mspan = &(*It);
+		copy_spans.push_back(mspan);
+	}
+}
+
 void Mosaic::Insert(const Span& span, bool reversed)
 {
 	// find intersections with each existing span
 	std::list<Point> all_pts;
 
-	std::list<MosaicSpan> copy_spans = m_spans;
-	for (std::list<MosaicSpan>::iterator It = copy_spans.begin(); It != copy_spans.end(); It++)
+	std::list<MosaicSpan*> copy_spans;
+	CopySpanPointers(copy_spans);
+
+	for (std::list<MosaicSpan*>::iterator It = copy_spans.begin(); It != copy_spans.end(); It++)
 	{
-		MosaicSpan* mspan = &(*It);
+		MosaicSpan* mspan = *It;
 		std::list<Point> pts;
 		mspan->m_span.Intersect(span, pts);
 
@@ -179,10 +190,7 @@ void Mosaic::GetResult(CArea& area, MosaicResultType result_type)
 {
 	// walk the structure until every span has been walked
 	std::list<MosaicSpan*> spans_to_do;
-	for (std::list<MosaicSpan>::iterator It = m_spans.begin(); It != m_spans.end(); It++)
-	{
-		spans_to_do.push_back(&(*It));
-	}
+	CopySpanPointers(spans_to_do);
 
 	std::set<MosaicSpan*> spans_done;
 
