@@ -11,10 +11,6 @@ bool CArea::HolesLinked(){ return false; }
 
 static const double M_PI = 3.1415926535897932;
 
-void CArea::Intersect(const CArea& a2)
-{
-}
-
 // static
 CArea CArea::UniteCurves(std::list<CCurve> &curves)
 {
@@ -240,7 +236,14 @@ void CArea::Subtract(const CArea& a2)
     mosaic.GetResult(*this, MosaicResultTypeTurnLeft);
 }
 
-
+void CArea::Intersect(const CArea& a2)
+{
+    Mosaic mosaic;
+    mosaic.Insert(*this);
+    mosaic.Insert(a2);
+    m_curves.clear();
+    mosaic.GetResult(*this, MosaicResultTypeTurnLeft);
+}
 
 void CArea::Thicken(double value)
 {
