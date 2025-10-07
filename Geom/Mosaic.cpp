@@ -158,19 +158,24 @@ void Mosaic::Insert(const Span& span)
 	}
 }
 
+void Mosaic::Insert(const CCurve& curve, bool reversed = false)
+{
+	std::list<Span> spans;
+	curve.GetSpans(spans);
+	for (std::list<Span>::iterator SpIt = spans.begin(); SpIt != spans.end(); SpIt++)
+	{
+		Span& span = *SpIt;
+		if (reversed)span.Reverse();
+		Insert(span);
+	}
+}
+
 void Mosaic::Insert(const CArea& area, bool reversed)
 {
 	for (std::list<CCurve>::const_iterator It = area.m_curves.begin(); It != area.m_curves.end(); It++)
 	{
 		const CCurve& curve = *It;
-		std::list<Span> spans;
-		curve.GetSpans(spans);
-		for (std::list<Span>::iterator SpIt = spans.begin(); SpIt != spans.end(); SpIt++)
-		{
-			Span& span = *SpIt;
-			if (reversed)span.Reverse();
-			Insert(span);
-		}
+		Insert(curve, reversed);
 	}
 }
 

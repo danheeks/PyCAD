@@ -7,6 +7,8 @@
 #include "Area.h"
 #include "Mosaic.h"
 
+#include <set>
+
 bool CArea::HolesLinked(){ return false; }
 
 static const double M_PI = 3.1415926535897932;
@@ -220,6 +222,23 @@ CArea convertPolylinesToArea(const std::vector<cavc::Polyline<double>>& plines)
 
 void CArea::Union(const CArea& a2)
 {
+
+    std::set<const CCurve*> curves_to_add;
+
+    for (std::list<CCurve>::const_iterator It = a2.m_curves.begin(); It != a2.m_curves.end(); It++)
+    {
+        const CCurve& curve = *It;
+        for (std::list<CCurve>::const_iterator ThisIt = m_curves.begin(); ThisIt != m_curves.end(); ThisIt++)
+        {
+            const CCurve& this_curve = *ThisIt;
+            std::list<Point> pts;
+            curve.CurveIntersections(this_curve, pts);
+            if (pts.size() > 0)
+            {
+                curves_to_add.insert(&this_curve);
+                curves_to_add.insert(&curve);
+            }
+
     Mosaic mosaic;
     mosaic.Insert(*this);
     mosaic.Insert(a2);
