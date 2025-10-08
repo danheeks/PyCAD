@@ -223,7 +223,7 @@ CArea convertPolylinesToArea(const std::vector<cavc::Polyline<double>>& plines)
 void CArea::Union(const CArea& a2)
 {
 
-    std::set<const CCurve*> curves_to_add;
+    std::set<const CCurve*> intersecting_curves;
 
     for (std::list<CCurve>::const_iterator It = a2.m_curves.begin(); It != a2.m_curves.end(); It++)
     {
@@ -235,9 +235,21 @@ void CArea::Union(const CArea& a2)
             curve.CurveIntersections(this_curve, pts);
             if (pts.size() > 0)
             {
-                curves_to_add.insert(&this_curve);
-                curves_to_add.insert(&curve);
+                intersecting_curves.insert(&this_curve);
+                intersecting_curves.insert(&curve);
             }
+        }
+    }
+
+    // process any non-intersecting curves
+    for (std::list<CCurve>::const_iterator It = a2.m_curves.begin(); It != a2.m_curves.end(); It++)
+        const CCurve& curve = *It;
+
+        if(intersecting_curves.find(&curve) == intersecting_curves.end())
+        {
+            // this curve did not intersect any curves
+
+    }
 
     Mosaic mosaic;
     mosaic.Insert(*this);
