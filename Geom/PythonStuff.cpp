@@ -30,8 +30,6 @@
 #pragma implementation
 #endif
 
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
 #include <boost/foreach.hpp>
 #include <boost/python.hpp>
 #include <boost/python/module.hpp>
