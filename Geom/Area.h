@@ -77,6 +77,7 @@ public:
 	void SpanIntersections(const Span& span, std::list<Point> &pts)const; 
 	void CurveIntersections(const CCurve& curve, std::list<Point> &pts)const; 
 	void InsideCurves(const CCurve& curve, std::list<CCurve> &curves_inside)const;
+	bool PointInside(const Point& point)const;
 	CArea Swept(const Point& vector)const;
 	void Transform(const Matrix& matrix);
 	void GetTriangles(std::list<CTris> &tri_list)const;

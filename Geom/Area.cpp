@@ -737,6 +737,20 @@ void CArea::InsideCurves(const CCurve& curve, std::list<CCurve> &curves_inside)c
 	}
 }
 
+bool CArea::PointInside(const Point& point)const
+{
+	// using a line from outside of area to the point
+	CBox2D box;
+	this->GetBox(box);
+	if (!box.m_valid)return false;
+	Point p0(box.MinX() - 1.0, point.y);
+	Span span(p0, CVertex(point));
+	std::list<Point> pts;
+	this->SpanIntersections(span, pts);
+	bool inside = (pts.size() % 2) != 0; // inside if odd number of intersections
+	return inside;
+}
+
 CArea CArea::Swept(const Point& vector)const
 {
 	// make a sweep area by uniting lots of lozenges

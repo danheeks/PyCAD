@@ -158,7 +158,7 @@ void Mosaic::Insert(const Span& span)
 	}
 }
 
-void Mosaic::Insert(const CCurve& curve, bool reversed = false)
+void Mosaic::Insert(const CCurve& curve, bool reversed)
 {
 	std::list<Span> spans;
 	curve.GetSpans(spans);

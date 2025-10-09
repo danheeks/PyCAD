@@ -241,19 +241,33 @@ void CArea::Union(const CArea& a2)
         }
     }
 
+    // use a mosaic ( network )
+    Mosaic mosaic;
+
+    // add a the curves that intersect another
+    for (std::set<const CCurve*>::iterator It = intersecting_curves.begin(); It != intersecting_curves.end(); It++)
+    {
+        const CCurve* curve = *It;
+        mosaic.Insert(*curve);
+    }
+
     // process any non-intersecting curves
     for (std::list<CCurve>::const_iterator It = a2.m_curves.begin(); It != a2.m_curves.end(); It++)
+    {    
         const CCurve& curve = *It;
 
         if(intersecting_curves.find(&curve) == intersecting_curves.end())
         {
             // this curve did not intersect any curves
 
+            // if it is outside of area, then use it
+            if (!this->PointInside(curve.m_vertices.front().m_p))
+            {
+                mosaic.Insert(curve);
+            }
+        }
     }
 
-    Mosaic mosaic;
-    mosaic.Insert(*this);
-    mosaic.Insert(a2);
     m_curves.clear();
     mosaic.GetResult(*this);
 }
