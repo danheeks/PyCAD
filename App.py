@@ -1502,4 +1502,7 @@ class CopyObjectUndoable(cad.BaseUndoable):
         self.object.CopyFrom(self.old_copy)
         cad.WasModified(self.object)
         
-        
+if __name__ == "__main__":        
+    app = App()
+    app.MainLoop()
+
