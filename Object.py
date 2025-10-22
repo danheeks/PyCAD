@@ -233,3 +233,15 @@ class PyProperty(cad.Property):
 
     def GetProperties(self):
         return self.children
+
+class PyPropertyDoubleScaled(PyProperty):
+    def __init__(self, title, value_name, object, scale, recalculate = None):
+        PyProperty.__init__(self, title, value_name, object, recalculate)
+        self.scale = scale
+
+    def SetFloat(self, value):
+        setattr(self.pyobj, self.value_name, value / self.scale)
+        if(self.recalc):self.recalc()
+
+    def GetFloat(self):
+        return getattr(self.pyobj, self.value_name) * self.scale

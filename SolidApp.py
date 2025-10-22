@@ -70,22 +70,9 @@ class SolidApp(App):
                 tools.append(ContextTool.CADObjectContextTool(object, "Rotate To Face", "rotface", self.RotateToFace))
             tools.append(ContextTool.CADObjectContextTool(object, "(to do ) Make Face Radius 1mm smaller", "facerch", self.FaceRadiusChange))
         elif t == Gear.type:
-            tools.append(ContextTool.CADObjectContextTool(object, "Make Solid", "gear", self.MakeGearSolid))
+            tools.append(ContextTool.CADContextTool("Make Solid", "gear", object.MakeSolid))
         return tools
-    
-    def MakeGearSolid(self, object):
-        s = self.MakeGearSketch(object)
-        cad.Select(s)
-        new_solids = self.OnExtrude(None)
-        if len(new_solids)> 0:
-            cyl = step.NewCyl()
-            cyl.radius = 1
-            cyl.height = 20
-            cyl.OnApplyProperties()
-            cad.Select(new_solids[0])
-            cad.Select(cyl)
-            step.CutShapes()
-               
+              
     def FaceToSketch(self, object):
         sketch = step.NewSketchFromFace(object)
         cad.AddUndoably(sketch)

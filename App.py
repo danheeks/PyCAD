@@ -332,26 +332,6 @@ class App(wx.App):
                 
             cad.EndHistory()
             
-    def MakeGearSketch(self, object):
-        pts = object.GetPoints(0.1)
-        if len(pts)>1:
-            s = cad.NewSketch()
-            first_point = None
-            prev_point = None
-            for p in pts:
-                p3d = geom.Point3D(p.x, p.y, 0)
-                if first_point == None:
-                    first_point = geom.Point3D(p3d)
-                else:
-                    s.Add(cad.NewLine(prev_point, p3d))
-                prev_point = p3d
-            s.Add(cad.NewLine(prev_point, first_point))
-            cad.AddUndoably(s)
-            
-        
-            
-        return s
-
     def GetObjectTools(self, object, control_pressed, from_tree_canvas = False):
         tools = []
         self.object = object
@@ -368,7 +348,7 @@ class App(wx.App):
             tools.append(ContextTool.CADContextTool("Split", "splitsketch", self.SplitStl))
             
         if type == Gear.type:
-            tools.append(ContextTool.CADObjectContextTool(object, "Make Sketch", "lines", self.MakeGearSketch))
+            tools.append(ContextTool.CADContextTool("Make Sketch", "lines", object.MakeSketch))
                 
         if len(tools)>0:
             tools.append(None) # a separator
