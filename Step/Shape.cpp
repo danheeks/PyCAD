@@ -694,46 +694,6 @@ HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
 {
 	theApp->StartHistory(L"Cut Shapes");
 	HeeksObj* return_object = NULL;
-
-#if 0
-	if(list_in.front()->GetType() == GroupType)
-	{
-		CGroup* group = (CGroup*)list_in.front();
-		CGroup* newgroup = new CGroup();
-		theApp->AddUndoably(newgroup,group->m_owner,NULL);
-
-		std::list<HeeksObj*> children;
-		HeeksObj* child = group->GetFirstChild();
-		while(child)
-		{
-			children.push_back(child);
-			child = group->GetNextChild();
-		}
-
-		std::list<HeeksObj*>::iterator iter = children.begin();
-		while(iter != children.end())
-		{
-			std::list<HeeksObj*> newlist;
-			std::list<HeeksObj*>::const_iterator it = list_in.begin();
-			while(it!=list_in.end())
-			{
-				newlist.push_back(*it);
-				++it;
-			}
-			newlist.pop_front();
-			newlist.push_front(*iter);
-			HeeksObj* newshape = CutShapes(newlist,false);
-			theApp->DeleteUndoably(newshape);
-			theApp->AddUndoably(newshape,newgroup, NULL);
-			++iter;
-		}
-
-		theApp->DeleteUndoably(group);
-		theApp->DeleteUndoably(list_in);
-		return_object = newgroup;
-	}
-	else
-#endif
 	{
 
 	// subtract from the first one in the list all the others
@@ -773,6 +733,7 @@ HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
 	}
 
 	theApp->Repaint();
+        theApp->EndHistory();
 
 	return return_object;
 }
