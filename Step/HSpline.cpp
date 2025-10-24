@@ -576,3 +576,48 @@ void HSpline::Reverse()
 {
 	m_spline->Reverse();
 }
+
+Point3d HSpline::GetStartTangent()
+{
+	if (!m_spline.IsNull())
+	{
+		// Get the start parameter value of the BSpline
+		Standard_Real firstParam = m_spline->FirstParameter();
+
+		// Evaluate position and first derivative at end
+		gp_Pnt Pstart;
+		gp_Vec Vstart;
+
+		m_spline->D1(firstParam, Pstart, Vstart);
+
+		// normalize if you only care about direction
+		gp_Vec startTangentDir = Vstart.Normalized();
+
+		return Point3d(startTangentDir.X(), startTangentDir.Y(), startTangentDir.Z());
+	}
+
+	return Point3d(0, 0, 0);
+}
+
+Point3d HSpline::GetEndTangent()
+{
+	if (!m_spline.IsNull())
+	{
+		// Get the end parameter value of the BSpline
+		Standard_Real lastParam = m_spline->LastParameter();
+
+		// Evaluate position and first derivative at end
+		gp_Pnt Pend;
+		gp_Vec Vend;
+
+		m_spline->D1(lastParam, Pend, Vend);
+
+		// normalize if you only care about direction
+		gp_Vec endTangentDir = Vend.Normalized();
+
+		return Point3d(endTangentDir.X(), endTangentDir.Y(), endTangentDir.Z());
+	}
+
+	return Point3d(0, 0, 0);
+
+}

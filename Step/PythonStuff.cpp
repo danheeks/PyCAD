@@ -191,7 +191,7 @@ void FaceRadiusChange(HeeksObj* object, double new_radius)
 	}
 }
 
-HeeksObj* NewSplineFromPoints(boost::python::list &list, Point3d *start_vector = NULL, Point3d *end_vector = NULL)
+HSpline* NewSplineFromPoints(boost::python::list &list, Point3d *start_vector = NULL, Point3d *end_vector = NULL)
 {
 	std::list<gp_Pnt> p_list;
 	for (int i = 0; i < len(list); ++i)
@@ -382,6 +382,10 @@ boost::python::list CreateExtrusionOrRevolution(boost::python::list& list, doubl
 			.def("SetFromDigitized", SetEllipse)
 			;
 
+		boost::python::class_<HSpline, boost::python::bases<EndedObject> >("Spline", boost::python::no_init)
+			.def("GetStartTangent", &HSpline::GetStartTangent)
+			.def("GetEndTangent", &HSpline::GetEndTangent)
+			;
 
 		boost::python::def("SetResPath", SetResPath);
 		boost::python::def("SetApp", SetApp);

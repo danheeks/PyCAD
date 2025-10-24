@@ -178,26 +178,28 @@ class Gear(Object):
             involute_points2 = []
             involute(involute_points2, next_tooth_angle - incremental_angle, True, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, self.numInvoluteFacets)
             
+            # make involute splines
+            three_d_pts = []
+            for p in prev_involute_points:
+                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+            previous_spline = step.NewSplineFromPoints(three_d_pts)
+
+            three_d_pts = []
+            for p in involute_points:
+                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+            uphill_spline = step.NewSplineFromPoints(three_d_pts)
+           
+            three_d_pts = []
+            for p in involute_points2:
+                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+            downhill_spline = step.NewSplineFromPoints(three_d_pts)
+            
             # root profile
             points = []
             # start with end of involute
             points.append(prev_involute_points[-1])
-            # set start vector in the same direction as the end of the involute
-            start_vector = None
-            if math.fabs(self.rootRoundness) > 0.0001:
-                start_vector = prev_involute_points[-1] - prev_involute_points[-2]
-                start_vector.Normalize()
-                start_vector = start_vector * (self.rootClearance * self.rootRoundness)
-                start_vector = geom.Point3D(start_vector.x, start_vector.y, 0.0)
             # add a mid point
             points.append(geom.Point(math.cos(tooth_angle) * inside_radius, math.sin(tooth_angle) * inside_radius) + relief_vector * (-self.rootClearance))
-            # set end vector in the same direction as the start of the next involute
-            end_vector = None
-            if math.fabs(self.rootRoundness) > 0.0001:
-                end_vector = involute_points[1] - involute_points[0]
-                end_vector.Normalize()
-                end_vector = end_vector * (self.rootClearance * self.rootRoundness)
-                end_vector = geom.Point3D(end_vector.x, end_vector.y, 0.0)
             # end with the start of the next involute
             points.append(involute_points[0])
             
@@ -205,13 +207,10 @@ class Gear(Object):
             three_d_pts = []
             for p in points:
                 three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
-            s.Add( step.NewSplineFromPoints(three_d_pts, start_vector, end_vector) )
+            s.Add( step.NewSplineFromPoints(three_d_pts, previous_spline.GetEndTangent(), uphill_spline.GetStartTangent()) )
             
             # up hill involute            
-            three_d_pts = []
-            for p in involute_points:
-                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
-            s.Add( step.NewSplineFromPoints(three_d_pts) )
+            s.Add( uphill_spline )
             
             # tip relief
             points = []
@@ -232,10 +231,7 @@ class Gear(Object):
                 prev_point = p3d
 
             # downhill involute
-            three_d_pts = []
-            for p in involute_points2:
-                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
-            s.Add( step.NewSplineFromPoints(three_d_pts) )
+            s.Add( downhill_spline )
 
         return s
 

@@ -42,4 +42,6 @@ public:
 	int PickPriority(){ return 2; } // lines
 
 	void Reverse();
+	Point3d GetStartTangent();
+	Point3d GetEndTangent();
 };
