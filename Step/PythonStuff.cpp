@@ -117,25 +117,34 @@ void CreateSweepPy(boost::python::list &list, HeeksObj* profile, const HeeksColo
 	CreateSweep(o_list, profile, true, color);
 }
 
-void CutShapes()
+HeeksObj* CutShapes(boost::python::list& list)
 {
-	std::list<HeeksObj*> objects;
-	theApp->GetSelection(objects);
-	CShape::CutShapes(objects);
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	return CShape::CutShapes(o_list);
 }
 
-void FuseShapes()
+HeeksObj* FuseShapes(boost::python::list& list)
 {
-	std::list<HeeksObj*> objects;
-	theApp->GetSelection(objects);
-	CShape::FuseShapes(objects);
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	return CShape::FuseShapes(o_list);
 }
 
-void CommonShapes()
+HeeksObj* CommonShapes(boost::python::list& list)
 {
-	std::list<HeeksObj*> objects;
-	theApp->GetSelection(objects);
-	CShape::CommonShapes(objects);
+	std::list<HeeksObj*> o_list;
+	for (int i = 0; i < len(list); ++i)
+	{
+		o_list.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
+	return CShape::CommonShapes(o_list);
 }
 
 void FilletOrChamferEdges(double rad, bool chamfer_not_fillet)
@@ -182,7 +191,7 @@ void FaceRadiusChange(HeeksObj* object, double new_radius)
 	}
 }
 
-HeeksObj* NewSplineFromPoints(boost::python::list &list)
+HeeksObj* NewSplineFromPoints(boost::python::list &list, Point3d *start_vector = NULL, Point3d *end_vector = NULL)
 {
 	std::list<gp_Pnt> p_list;
 	for (int i = 0; i < len(list); ++i)
@@ -192,9 +201,32 @@ HeeksObj* NewSplineFromPoints(boost::python::list &list)
 		p_list.push_back(gp);
 	}
 
-	HSpline* new_object = new HSpline(p_list, &theApp->GetCurrentColor());
+	gp_Vec startVec;
+	gp_Vec* pStartVec = NULL;
+	if (start_vector != NULL)
+	{
+		startVec.SetX(start_vector->x);
+		startVec.SetY(start_vector->y);
+		startVec.SetZ(start_vector->z);
+		pStartVec = &startVec;
+	}
+
+	gp_Vec endVec;
+	gp_Vec* pEndVec = NULL;
+	if (end_vector != NULL)
+	{
+		endVec.SetX(end_vector->x);
+		endVec.SetY(end_vector->y);
+		endVec.SetZ(end_vector->z);
+		pEndVec = &endVec;
+	}
+
+	HSpline* new_object = new HSpline(p_list, &theApp->GetCurrentColor(), pStartVec, pEndVec);
 	return new_object;
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(NewSplineFromPointsOverloads, NewSplineFromPoints, 1, 3)
+
 
 boost::python::object GetFacePlane(const CFace* face)
 {
@@ -273,12 +305,15 @@ static boost::shared_ptr<HEllipse> initHEllipse(const DigitizedPoint& d1, const 
 }
 
 
-boost::python::list CreateExtrusionOrRevolution(double height_or_angle, bool solid_if_possible, bool revolution_not_extrusion, double taper_angle_for_extrusion, const HeeksColor &color)
+boost::python::list CreateExtrusionOrRevolution(boost::python::list& list, double height_or_angle, bool solid_if_possible, bool revolution_not_extrusion, double taper_angle_for_extrusion, const HeeksColor &color)
 {
 	std::list<TopoDS_Shape> faces_or_wires;
 
 	std::list<HeeksObj*> objects;
-	theApp->GetSelection(objects);
+	for (int i = 0; i < len(list); ++i)
+	{
+		objects.push_back(boost::python::extract<HeeksObj*>(list[i]));
+	}
 
 	ConvertToFaceOrWire(objects, faces_or_wires, (fabs(taper_angle_for_extrusion) <= 0.0000001) && solid_if_possible);
 
@@ -297,14 +332,11 @@ boost::python::list CreateExtrusionOrRevolution(double height_or_angle, bool sol
 	boost::python::list olist;
 	if (new_shapes.size() > 0)
 	{
-		theApp->StartHistory(L"Make Extrusion");
 		for (std::list<TopoDS_Shape>::iterator It = new_shapes.begin(); It != new_shapes.end(); It++){
 			TopoDS_Shape& shape = *It;
 			HeeksObj* new_object = CShape::MakeObject(shape, revolution_not_extrusion ? L"Revolved Solid" : L"Extruded Solid", SOLID_TYPE_UNKNOWN, color, 1.0f);
-			theApp->AddUndoably(new_object, NULL, NULL);
 			olist.append(boost::python::pointer_wrapper<CShape*>((CShape*)new_object));
 		}
-		theApp->EndHistory();
 	}
 
 	for (std::list<TopoDS_Shape>::iterator It = faces_or_wires.begin(); It != faces_or_wires.end(); It++)
@@ -389,15 +421,15 @@ boost::python::list CreateExtrusionOrRevolution(double height_or_angle, bool sol
 		boost::python::def("CreateSweep", CreateSweepPy);
 		boost::python::def("ImportSolidsFile", ImportSolidsFile);
 		boost::python::def("ExportSolidsFile", ExportSolidsFile);
-		boost::python::def("CutShapes", CutShapes);
-		boost::python::def("FuseShapes", FuseShapes);
-		boost::python::def("CommonShapes", CommonShapes);
+		boost::python::def("CutShapes", CutShapes, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("FuseShapes", FuseShapes, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("CommonShapes", CommonShapes, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("FilletOrChamferEdges", FilletOrChamferEdges);
 		boost::python::def("SketchToFace", SketchToFace);
 		boost::python::def("SetShowFaceNormals", SetShowFaceNormals);
 		boost::python::def("GetShowFaceNormals", GetShowFaceNormals); 
 		boost::python::def("NewSketchFromFace", NewSketchFromFace, boost::python::return_value_policy<boost::python::reference_existing_object>());
 		boost::python::def("FaceRadiusChange", FaceRadiusChange);
-		boost::python::def("NewSplineFromPoints", NewSplineFromPoints, boost::python::return_value_policy<boost::python::reference_existing_object>());
+		boost::python::def("NewSplineFromPoints", &NewSplineFromPoints, (boost::python::arg("points"), boost::python::arg("start_vector") = (Point3d*)NULL,	boost::python::arg("end_vector") = (Point3d*)NULL), boost::python::return_value_policy<boost::python::reference_existing_object>());
 	}
 	

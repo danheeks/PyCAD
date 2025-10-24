@@ -70,7 +70,7 @@ class SolidApp(App):
                 tools.append(ContextTool.CADObjectContextTool(object, "Rotate To Face", "rotface", self.RotateToFace))
             tools.append(ContextTool.CADObjectContextTool(object, "(to do ) Make Face Radius 1mm smaller", "facerch", self.FaceRadiusChange))
         elif t == Gear.type:
-            tools.append(ContextTool.CADContextTool("Make Solid", "gear", object.MakeSolid))
+            tools.append(ContextTool.CADContextTool("Make Solid", "gear", object.AddSolid))
         return tools
               
     def FaceToSketch(self, object):
@@ -260,13 +260,17 @@ class SolidApp(App):
     def OnSubtract(self, event):
         if not self.CheckForNumberOrMore(2, [step.GetFaceType(), step.GetSolidType()], 'Pick two or more faces or solids, the first one will be cut by the others', 'Subtract Solids'):
             return
+        objects = cad.GetSelectedObjects()
+        cad.ClearSelection(True)
         cad.StartHistory('Subtract')
-        step.CutShapes()
+        step.CutShapes(objects)
         self.EndHistory()
 
     def OnFuse(self, event):
         if not self.CheckForNumberOrMore(2, [step.GetSolidType()], 'Pick two or more solids to be fused together', 'Fuse Solids'):
             return
+        objects = cad.GetSelectedObjects()
+        cad.ClearSelection(True)
         cad.StartHistory('Fuse')
         step.FuseShapes()
         self.EndHistory()
@@ -274,6 +278,8 @@ class SolidApp(App):
     def OnCommon(self, event):
         if not self.CheckForNumberOrMore(2, [step.GetSolidType()], 'Pick two or more solids, only the shape that is contained by all of them will remain', 'Intersection of Solids'):
             return
+        objects = cad.GetSelectedObjects()
+        cad.ClearSelection(True)
         cad.StartHistory('Common')
         step.CommonShapes()
         self.EndHistory()

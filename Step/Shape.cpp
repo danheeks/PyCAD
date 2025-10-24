@@ -690,15 +690,12 @@ void CShape::CopyIDsFrom(const CShape* shape_from)
 	}
 }
 
-HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
+HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in)
 {
-	theApp->StartHistory(L"Cut Shapes");
 	HeeksObj* return_object = NULL;
-	{
 
 	// subtract from the first one in the list all the others
 	std::list<TopoDS_Shape> shapes;
-	std::list<HeeksObj*> delete_list;
 	HeeksObj* first_solid = NULL;
 
 	for(std::list<HeeksObj*>::const_iterator It = list_in.begin(); It != list_in.end(); It++){
@@ -707,13 +704,11 @@ HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
 		{
 			shapes.push_back(((CSolid*)object)->Shape());
 			if(first_solid == NULL)first_solid = object;
-			delete_list.push_back(object);
 		}
 		else if (object->GetType() == CFace::m_type)
 		{
 			shapes.push_back(((CFace*)object)->Face());
 			if(first_solid == NULL)first_solid = object;
-			delete_list.push_back(object);
 		}
 	}
 
@@ -723,17 +718,8 @@ HeeksObj* CShape::CutShapes(std::list<HeeksObj*> &list_in, bool dodelete)
 	if(Cut(shapes, new_shape))
 	{
 		HeeksObj* new_object = CShape::MakeObject(new_shape, ((CShape*)first_solid)->m_title_made_from_id ? std::wstring(L"Result of Cut Operation").c_str() : ((CShape*)first_solid)->m_title.c_str(), SOLID_TYPE_UNKNOWN, ((CShape*)first_solid)->m_color, (float)(((CShape*)first_solid)->m_opacity));
-		theApp->AddUndoably(new_object, NULL, NULL);
-		if(dodelete)
-		{
-			theApp->DeleteUndoably(delete_list);
-		}
 		return_object = new_object;
 	}
-	}
-
-	theApp->Repaint();
-        theApp->EndHistory();
 
 	return return_object;
 }
@@ -754,8 +740,6 @@ HeeksObj* CShape::FuseShapes(std::list<HeeksObj*> &list_in)
 			}
 		}
 	}
-
-	theApp->Repaint();
 
 	return s1;
 }
@@ -781,8 +765,6 @@ HeeksObj* CShape::CommonShapes(std::list<HeeksObj*> &list_in)
 			}
 		}
 	}
-
-	theApp->Repaint();
 
 	return s1;
 }

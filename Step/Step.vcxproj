@@ -101,6 +101,7 @@
     <ClCompile Include="..\CAD\tinyxmlparser.cpp" />
     <ClCompile Include="..\Geom\Arc.cpp" />
     <ClCompile Include="..\Geom\Area.cpp" />
+    <ClCompile Include="..\Geom\AreaCavC.cpp" />
     <ClCompile Include="..\Geom\AreaClipper.cpp" />
     <ClCompile Include="..\Geom\AreaOrderer.cpp" />
     <ClCompile Include="..\Geom\AreaPocket.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="..\Geom\Curve.cpp" />
     <ClCompile Include="..\Geom\Finite.cpp" />
     <ClCompile Include="..\Geom\Matrix.cpp" />
+    <ClCompile Include="..\Geom\Mosaic.cpp" />
     <ClCompile Include="..\Geom\Offset.cpp" />
     <ClCompile Include="Cone.cpp" />
     <ClCompile Include="ConversionTools.cpp" />
@@ -164,6 +166,7 @@
     <ClInclude Include="..\CAD\IdNamedObjList.h" />
     <ClInclude Include="..\CAD\LeftAndRight.h" />
     <ClInclude Include="..\CAD\ObjList.h" />
+    <ClInclude Include="..\Geom\Mosaic.h" />
     <ClInclude Include="Cone.h" />
     <ClInclude Include="ConversionTools.h" />
     <ClInclude Include="CoordinateSystem.h" />

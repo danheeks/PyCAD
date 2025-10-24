@@ -15,7 +15,7 @@ public:
 	HSpline();
 	HSpline(const Geom_BSplineCurve &s, const HeeksColor* col);
 	HSpline(const Handle_Geom_BSplineCurve s, const HeeksColor* col);
-	HSpline(const std::list<gp_Pnt> &points, const HeeksColor* col);
+	HSpline(const std::list<gp_Pnt> &points, const HeeksColor* col, const gp_Vec* startVec = NULL, const gp_Vec* endVec = NULL);
 	HSpline(const HSpline &c);
 
 	const HSpline& operator=(const HSpline &c);

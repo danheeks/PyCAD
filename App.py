@@ -348,7 +348,7 @@ class App(wx.App):
             tools.append(ContextTool.CADContextTool("Split", "splitsketch", self.SplitStl))
             
         if type == Gear.type:
-            tools.append(ContextTool.CADContextTool("Make Sketch", "lines", object.MakeSketch))
+            tools.append(ContextTool.CADContextTool("Make Sketch", "lines", object.AddSketch))
                 
         if len(tools)>0:
             tools.append(None) # a separator

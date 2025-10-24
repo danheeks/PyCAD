@@ -73,7 +73,7 @@ public:
 	void SetOpacity(float opacity);
 	void CalculateVolumeAndCentre();
 
-	static HeeksObj* CutShapes(std::list<HeeksObj*> &list,bool dodelete=true);
+	static HeeksObj* CutShapes(std::list<HeeksObj*> &list);
 	static HeeksObj* FuseShapes(std::list<HeeksObj*> &list);
 	static HeeksObj* CommonShapes(std::list<HeeksObj*> &list);
 	static void FilletOrChamferEdges(std::list<HeeksObj*> &list, double radius, bool chamfer_not_fillet = false);

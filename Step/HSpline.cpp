@@ -38,7 +38,7 @@ HSpline::HSpline(Handle_Geom_BSplineCurve s, const HeeksColor* col):EndedObject(
 	SetColor(*col);
 }
 
-HSpline::HSpline(const std::list<gp_Pnt> &points, const HeeksColor* col):EndedObject()
+HSpline::HSpline(const std::list<gp_Pnt> &points, const HeeksColor* col, const gp_Vec* startVec, const gp_Vec* endVec):EndedObject()
 {
 	Standard_Boolean periodicity = points.front().IsEqual(points.back(), TOLERANCE);
 
@@ -60,7 +60,23 @@ HSpline::HSpline(const std::list<gp_Pnt> &points, const HeeksColor* col):EndedOb
 	}
 
 	GeomAPI_Interpolate anInterpolation(Array, periodicity, Precision::Approximation());
+
+	// If tangents provided, load them before performing interpolation
+	if (startVec && endVec)
+	{
+		anInterpolation.Load(*startVec, *endVec, Standard_True);
+	}
+	else if (startVec)
+	{
+		anInterpolation.Load(*startVec, gp_Vec(0, 0, 0), Standard_False); // only start
+	}
+	else if (endVec)
+	{
+		anInterpolation.Load(gp_Vec(0, 0, 0), *endVec, Standard_False); // only end
+	}
+
 	anInterpolation.Perform();
+
 	m_spline = anInterpolation.Curve();
 	gp_Pnt p;
 	m_spline->D0(m_spline->FirstParameter(), p);
