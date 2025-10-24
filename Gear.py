@@ -13,6 +13,7 @@ class Gear(Object):
     def __init__(self, mod = 1.0, num_teeth = 12):
         Object.__init__(self, 0)
         self.tm = geom.Matrix()
+        self.solid = None
         self.numTeeth = num_teeth
         self.module = mod
         self.addendumOffset = 0.0
@@ -20,7 +21,8 @@ class Gear(Object):
         self.dedendumMultiplier = 1.0
         self.pressureAngle = 0.34906585039886 # 20 degrees
         self.tipRelief = 0.05
-        self.rootChamfer = 0.03
+        self.rootClearance = 0.1
+        self.rootRoundness = 0.25
         self.numInvoluteFacets = 10
         self.thickness = 5.0
         self.color = cad.Color(128, 128, 128)
@@ -44,116 +46,18 @@ class Gear(Object):
     def SetColor(self, col):
         self.color = col
         
-    def GlLinesOneSide(self, no_color, point_list, square):
-        if not no_color:
-            cad.DrawContrastBlackOrWhite()
-        cad.BeginLines()
+    def KillGLLists(self):
+        self.solid = None
         
-        for points in point_list:
-            for point in points:
-                cad.GlVertex2D(point)
-            cad.GlVertex2D(points[0])
-            
-        cad.EndLinesOrTriangles()
-        cad.BeginLines()
-        for point in square:
-            cad.GlVertex2D(point)
-        cad.GlVertex2D(square[0])
-        cad.EndLinesOrTriangles()
+    def OnRecalculate(self):
+        self.KillGLLists()
+        wx.GetApp().Repaint()
 
     def OnGlCommands(self, select, marked, no_color):
-        point_list = self.GetPoints()
-        if len(point_list) == 0:
-            return
+        if self.solid == None:
+            self.solid = self.MakeSolid()
         
-        square = [geom.Point(2,0), geom.Point(0,-2), geom.Point(-2,0), geom.Point(0,2), geom.Point(2,0)]
-        
-        cad.DrawPushMatrix()
-        cad.DrawMultMatrix(self.tm)
-        
-        self.GlLinesOneSide(no_color, point_list, square)
-        
-        a = geom.Area()
-        c = geom.Curve()
-
-        for points in point_list:
-            size = len(points)
-            i = 0
-            for point in points:
-                i+=1
-                if i < size:
-                    c.Append(point)
-        c.Append(point_list[0][0])
-        a.Append(c)
-        c2 = geom.Curve()
-        for point in square:
-            c2.Append(point)
-        c2.Append(square[0])
-        a.Append(c2)
-        
-        t_list = a.GetTrianglesList()
-
-        if not no_color:
-            cad.DrawColor(self.color)
-        for t in reversed(t_list):
-            cad.DrawTris(t, True)
-            
-        # draw all the front faces
-        for points in point_list:
-            prev_point = points[-1]
-            cad.BeginTriangles()
-            for point in points:
-                p0 = geom.Point3D(prev_point.x, prev_point.y, 0)
-                p1 = geom.Point3D(point.x, point.y, 0)
-                p2 = geom.Point3D(point.x, point.y, self.thickness)
-                p3 = geom.Point3D(prev_point.x, prev_point.y, self.thickness)
-                cad.GlVertex(p0)
-                cad.GlVertex(p1)
-                cad.GlVertex(p2)
-                cad.GlVertex(p0)
-                cad.GlVertex(p2)
-                cad.GlVertex(p3)
-                prev_point = point
-            prev_point =square[-1]
-            for point in square:
-                p0 = geom.Point3D(prev_point.x, prev_point.y, 0)
-                p1 = geom.Point3D(point.x, point.y, 0)
-                p2 = geom.Point3D(point.x, point.y, self.thickness)
-                p3 = geom.Point3D(prev_point.x, prev_point.y, self.thickness)
-                cad.GlVertex(p0)
-                cad.GlVertex(p1)
-                cad.GlVertex(p2)
-                cad.GlVertex(p0)
-                cad.GlVertex(p2)
-                cad.GlVertex(p3)
-                prev_point = point
-            
-            cad.EndLinesOrTriangles()
-
-        if not no_color:
-            cad.DrawContrastBlackOrWhite()
-        for points in point_list:
-            cad.BeginLines()
-            cad.GlVertex(geom.Point3D(points[0].x, points[0].y, 0))
-            cad.GlVertex(geom.Point3D(points[0].x, points[0].y, self.thickness))
-            cad.EndLinesOrTriangles()
-        for point in square:
-            cad.BeginLines()
-            cad.GlVertex(geom.Point3D(point.x, point.y, 0))
-            cad.GlVertex(geom.Point3D(point.x, point.y, self.thickness))
-            cad.EndLinesOrTriangles()
-            
-        trans = geom.Matrix()
-        trans.Translate(geom.Point3D(0,0,self.thickness))
-        cad.DrawMultMatrix(trans)  
-          
-        self.GlLinesOneSide(no_color, point_list, square)
-        
-        if not no_color:
-            cad.DrawColor(self.color)
-        for t in t_list:
-            cad.DrawTris(t, True)
-        cad.DrawPopMatrix()
+        self.solid.OnGlCommands(select, marked, no_color)
             
     def Transform(self, mat):
         self.tm.Multiply(mat)
@@ -167,7 +71,8 @@ class Gear(Object):
         cad.SetXmlValue('dedendumMultiplier', self.dedendumMultiplier)
         cad.SetXmlValue('pressureAngle', self.pressureAngle)
         cad.SetXmlValue('tipRelief', self.tipRelief)
-        cad.SetXmlValue('rootChamfer', self.rootChamfer)
+        cad.SetXmlValue('rootClearance', self.rootClearance)
+        cad.SetXmlValue('rootRoundness', self.rootRoundness)        
         cad.SetXmlValue('numInvoluteFacets', self.numInvoluteFacets)
         cad.SetXmlValue('thickness', self.thickness)
         Object.WriteXml(self)
@@ -181,7 +86,8 @@ class Gear(Object):
         self.dedendumMultiplier = cad.GetXmlFloat('dedendumMultiplier', self.dedendumMultiplier)
         self.pressureAngle = cad.GetXmlFloat('pressureAngle', self.pressureAngle)
         self.tipRelief = cad.GetXmlFloat('tipRelief', self.tipRelief)
-        self.rootChamfer = cad.GetXmlFloat('rootChamfer', self.rootChamfer)
+        self.rootClearance = cad.GetXmlFloat('rootClearance', self.rootClearance)
+        self.rootRoundness = cad.GetXmlFloat('rootRoundness', self.rootRoundness)
         self.numInvoluteFacets = cad.GetXmlInt('numInvoluteFacets', self.numInvoluteFacets)
         self.thickness = cad.GetXmlFloat('thickness', self.thickness)
         Object.ReadXml(self)
@@ -204,63 +110,77 @@ class Gear(Object):
         angle = 0.0
         for i in range(0, 20):
             p = geom.Point3D(outside_radius * math.cos(angle), outside_radius * math.sin(angle), 0.0)
+            pz = geom.Point3D(p.x, p.y, self.thickness)
             p.Transform(self.tm)
+            pz.Transform(self.tm)
             box.InsertPoint(p.x, p.y, p.z)
+            box.InsertPoint(pz.x, pz.y, pz.z)
             angle += angle_step
         return box
      
     def GetProperties(self):
         properties = []
-        properties.append(PyProperty("num teeth", 'numTeeth', self))
-        properties.append(PyProperty("module", 'module', self))
-        properties.append(PyPropertyLength("addendum offset", 'addendumOffset', self))
-        properties.append(PyPropertyLength("addendum multiplier", 'addendumMultiplier', self))
-        properties.append(PyPropertyLength("dedendum multiplier", 'dedendumMultiplier', self))
-        properties.append(PyPropertyDoubleScaled("pressure angle", 'pressureAngle', self, 180.0 / math.pi))
-        properties.append(PyProperty("tip relief", 'tipRelief', self))
-        properties.append(PyProperty("root chamfer", 'rootChamfer', self))
-        properties.append(PyProperty("num involute facets", 'numInvoluteFacets', self))
-        properties.append(PyPropertyLength("thickness", 'thickness', self))
+        properties.append(PyProperty("num teeth", 'numTeeth', self, self.OnRecalculate))
+        properties.append(PyProperty("module", 'module', self, self.OnRecalculate))
+        properties.append(PyPropertyLength("addendum offset", 'addendumOffset', self, recalculate = self.OnRecalculate))
+        properties.append(PyPropertyLength("addendum multiplier", 'addendumMultiplier', self, recalculate = self.OnRecalculate))
+        properties.append(PyPropertyLength("dedendum multiplier", 'dedendumMultiplier', self, recalculate = self.OnRecalculate))
+        properties.append(PyPropertyDoubleScaled("pressure angle", 'pressureAngle', self, 180.0 / math.pi, self.OnRecalculate))
+        properties.append(PyProperty("tip relief", 'tipRelief', self, self.OnRecalculate))
+        properties.append(PyProperty("root clearance", 'rootClearance', self, self.OnRecalculate))
+        properties.append(PyProperty("root roundness", 'rootRoundness', self, self.OnRecalculate))
+        properties.append(PyProperty("num involute facets", 'numInvoluteFacets', self, self.OnRecalculate))
+        properties.append(PyPropertyLength("thickness", 'thickness', self, recalculate = self.OnRecalculate))
                                              
         properties += Object.GetProperties(self)
 
         return properties
     
+    def AddSketch(self):
+        cad.AddUndoably(self.MakeSketch())
+        
     def MakeSketch(self):
         point_list = self.GetPoints()
         import step
-        
-        for pts in point_list:
-            s = cad.NewSketch()
-            three_d_pts = []
-            for p in pts:
-                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
-            s.Add( step.NewSplineFromPoints(three_d_pts) )
-            cad.AddUndoably(s)
+        s = cad.NewSketch()
+        for pts, spline in point_list:
+            if spline:
+                # add a spline
+                three_d_pts = []
+                for p in pts:
+                    three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+                s.Add( step.NewSplineFromPoints(three_d_pts) )
+            else:
+                # add lines
+                prev_point = None
+                for p in pts:
+                    p3d = geom.Point3D(p.x, p.y, 0)
+                    if prev_point != None:
+                        s.Add(cad.NewLine(prev_point, p3d))
+                    prev_point = p3d
         return s
 
+    def AddSolid(self):
+        cad.AddUndoably(self.MakeSolid())
+        
     def MakeSolid(self):
-        s = self.MakeSketch()
-        if s == None:
-            return
-        cad.Select(s)
-        new_solids = wx.GetApp().OnExtrude(None)
-        if len(new_solids) == 0:
-            return
         import step
-        cyl = step.NewCyl()
-        cyl.radius = 1
-        cyl.height = 20
-        cyl.OnApplyProperties()
-        cad.Select(new_solids[0])
-        cad.Select(cyl)
-        step.CutShapes()
-        cad.EndHistory() # to do, remove this when PyCAD issue #3 ( mismatched StaryHistory in CutShapes ) is fixed
-        cad.ClearSelection()
+        objects = [self.MakeSketch()]        
+        new_solids = step.CreateExtrusion(objects, self.thickness, True, False, 0.0, cad.Color(128, 128, 128))
+        s = new_solids[0]
+        if s != None:
+            # subtract cylinder in the middle
+            cyl = step.NewCyl()
+            cyl.radius = 1
+            cyl.height = 20
+            cyl.OnApplyProperties()
+            objects = [s, cyl]
+            s = step.CutShapes(objects)
+        return s
         
     def GetPoints(self):
         # returns a list of list of Points, where each list of points could be splined
-        point_list = []
+        point_list = [] # list of tuples ( points - list of Point, spline - to be splined or not )
         
         pitch_radius = float(self.module) * self.numTeeth * 0.5
         inside_radius = pitch_radius - self.dedendumMultiplier*self.module
@@ -275,8 +195,6 @@ class Gear(Object):
         tip_relief_phi_and_angle = involute_intersect(outside_radius - self.tipRelief, base_radius)
         middle_phi_and_angle = involute_intersect(pitch_radius, base_radius)
 
-        clearance = math.fabs(self.GetClearanceMM())
-        
         for i in range(0, self.numTeeth):
             tooth_angle = math.pi*2*i/self.numTeeth
             next_tooth_angle = math.pi*2*(i+1)/self.numTeeth
@@ -286,61 +204,57 @@ class Gear(Object):
             
             # incremental_angle - to space the middle point at a quarter of a cycle
             incremental_angle = 0.5*math.pi/self.numTeeth - middle_phi_and_angle[1]
-            angle1 = tooth_angle - (inside_phi_and_angle[1] + incremental_angle)
-            angle2 = tooth_angle + (inside_phi_and_angle[1] + incremental_angle);
-            angle3 = tooth_angle + (outside_phi_and_angle[1] + incremental_angle)
-            angle4 = next_tooth_angle - (outside_phi_and_angle[1] + incremental_angle)
 
+            # get the previous tooth's involute points
             prev_involute_points = []
             involute(prev_involute_points, tooth_angle - incremental_angle, True, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, self.numInvoluteFacets)
 
+            # get the up hill involute points
             involute_points = []
             involute(involute_points, tooth_angle + incremental_angle, False, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, self.numInvoluteFacets)
 
+            # get the downhill involute points
             involute_points2 = []
             involute(involute_points2, next_tooth_angle - incremental_angle, True, inside_phi_and_angle, tip_relief_phi_and_angle, base_radius, self.numInvoluteFacets)
             
             # root profile
             points = []
+            # start with end of involute
             points.append(prev_involute_points[-1])
-            if clearance > 0.0000000001:
-                p1 = geom.Point(math.cos(angle1) * inside_radius, math.sin(angle1) * inside_radius) + relief_vector * (-clearance)
-                p2 = geom.Point(math.cos(angle2) * inside_radius, math.sin(angle2) * inside_radius) + relief_vector * (-clearance)
-                if self.rootChamfer > 0.000000001:
-                    points.append(p1 + relief_vector * self.rootChamfer)
-                    points.append(p1 + root_vector * self.rootChamfer)
-                    points.append(p2 + root_vector * (-self.rootChamfer))
-                    points.append(p2 + relief_vector * self.rootChamfer)
-                else:
-                    points.append(p1 + v_in * clearance)
-                    points.append(p2 + v_in * clearance)
+            # add a point to continue the same direction as the involute
+            if math.fabs(self.rootRoundness) > 0.0001:
+                end_vector = prev_involute_points[-1] - prev_involute_points[-2]
+                end_vector.Normalize()
+                points.append(prev_involute_points[-1] + end_vector * (self.rootClearance * self.rootRoundness))
+            # add a mid point
+            points.append(geom.Point(math.cos(tooth_angle) * inside_radius, math.sin(tooth_angle) * inside_radius) + relief_vector * (-self.rootClearance))
+            # add a point the start the direction at the end
+            if math.fabs(self.rootRoundness) > 0.0001:
+                start_vector = involute_points[0] - involute_points[1]
+                start_vector.Normalize()
+                points.append(involute_points[0] + start_vector * (self.rootClearance * self.rootRoundness))
+            # end with the start of the next involute
             points.append(involute_points[0])
-            point_list.append(points)
+            point_list.append((points, False))
             
             # up hill involute            
-            point_list.append(involute_points)
+            point_list.append((involute_points, True))
             
             # tip relief
             points = []
             points.append(involute_points[-1])
             if math.fabs(self.tipRelief) > 0.00000000001:
+                angle3 = tooth_angle + (outside_phi_and_angle[1] + incremental_angle)
+                angle4 = next_tooth_angle - (outside_phi_and_angle[1] + incremental_angle)
                 points.append(point_at_rad_and_angle(outside_radius, angle3 + (self.tipRelief * 0.5)/outside_radius))
                 points.append(point_at_rad_and_angle(outside_radius, angle4 - (self.tipRelief * 0.5)/outside_radius))
             points.append(involute_points2[0])
-            point_list.append(points)
+            point_list.append((points, False))
 
-            point_list.append(involute_points2)
+            # downhill involute
+            point_list.append((involute_points2, True))
         
         return point_list
-                              
-    def GetClearanceMM(self):
-        # 12 teeth clearance 0.8
-        # 20 teeth clearance 0.55
-        # 52 teeth clearance 0.4
-        # 100000 teeth clearance 0.1
-
-        return (8.4 / ( 7.2 + self.numTeeth/2.5 )) * self.module
-
 
 def point_at_phi(phi, base_radius):
     x = base_radius * phi
