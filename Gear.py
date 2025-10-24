@@ -140,47 +140,8 @@ class Gear(Object):
         cad.AddUndoably(self.MakeSketch())
         
     def MakeSketch(self):
-        point_list = self.GetPoints()
         import step
         s = cad.NewSketch()
-        for pts, spline in point_list:
-            if spline:
-                # add a spline
-                three_d_pts = []
-                for p in pts:
-                    three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
-                s.Add( step.NewSplineFromPoints(three_d_pts) )
-            else:
-                # add lines
-                prev_point = None
-                for p in pts:
-                    p3d = geom.Point3D(p.x, p.y, 0)
-                    if prev_point != None:
-                        s.Add(cad.NewLine(prev_point, p3d))
-                    prev_point = p3d
-        return s
-
-    def AddSolid(self):
-        cad.AddUndoably(self.MakeSolid())
-        
-    def MakeSolid(self):
-        import step
-        objects = [self.MakeSketch()]        
-        new_solids = step.CreateExtrusion(objects, self.thickness, True, False, 0.0, cad.Color(128, 128, 128))
-        s = new_solids[0]
-        if s != None:
-            # subtract cylinder in the middle
-            cyl = step.NewCyl()
-            cyl.radius = 1
-            cyl.height = 20
-            cyl.OnApplyProperties()
-            objects = [s, cyl]
-            s = step.CutShapes(objects)
-        return s
-        
-    def GetPoints(self):
-        # returns a list of list of Points, where each list of points could be splined
-        point_list = [] # list of tuples ( points - list of Point, spline - to be splined or not )
         
         pitch_radius = float(self.module) * self.numTeeth * 0.5
         inside_radius = pitch_radius - self.dedendumMultiplier*self.module
@@ -221,24 +182,36 @@ class Gear(Object):
             points = []
             # start with end of involute
             points.append(prev_involute_points[-1])
-            # add a point to continue the same direction as the involute
+            # set start vector in the same direction as the end of the involute
+            start_vector = None
             if math.fabs(self.rootRoundness) > 0.0001:
-                end_vector = prev_involute_points[-1] - prev_involute_points[-2]
-                end_vector.Normalize()
-                points.append(prev_involute_points[-1] + end_vector * (self.rootClearance * self.rootRoundness))
+                start_vector = prev_involute_points[-1] - prev_involute_points[-2]
+                start_vector.Normalize()
+                start_vector = start_vector * (self.rootClearance * self.rootRoundness)
+                start_vector = geom.Point3D(start_vector.x, start_vector.y, 0.0)
             # add a mid point
             points.append(geom.Point(math.cos(tooth_angle) * inside_radius, math.sin(tooth_angle) * inside_radius) + relief_vector * (-self.rootClearance))
-            # add a point the start the direction at the end
+            # set end vector in the same direction as the start of the next involute
+            end_vector = None
             if math.fabs(self.rootRoundness) > 0.0001:
-                start_vector = involute_points[0] - involute_points[1]
-                start_vector.Normalize()
-                points.append(involute_points[0] + start_vector * (self.rootClearance * self.rootRoundness))
+                end_vector = involute_points[1] - involute_points[0]
+                end_vector.Normalize()
+                end_vector = end_vector * (self.rootClearance * self.rootRoundness)
+                end_vector = geom.Point3D(end_vector.x, end_vector.y, 0.0)
             # end with the start of the next involute
             points.append(involute_points[0])
-            point_list.append((points, False))
+            
+            # add a spline
+            three_d_pts = []
+            for p in points:
+                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+            s.Add( step.NewSplineFromPoints(three_d_pts, start_vector, end_vector) )
             
             # up hill involute            
-            point_list.append((involute_points, True))
+            three_d_pts = []
+            for p in involute_points:
+                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+            s.Add( step.NewSplineFromPoints(three_d_pts) )
             
             # tip relief
             points = []
@@ -249,12 +222,40 @@ class Gear(Object):
                 points.append(point_at_rad_and_angle(outside_radius, angle3 + (self.tipRelief * 0.5)/outside_radius))
                 points.append(point_at_rad_and_angle(outside_radius, angle4 - (self.tipRelief * 0.5)/outside_radius))
             points.append(involute_points2[0])
-            point_list.append((points, False))
+
+            # add lines
+            prev_point = None
+            for p in points:
+                p3d = geom.Point3D(p.x, p.y, 0)
+                if prev_point != None:
+                    s.Add(cad.NewLine(prev_point, p3d))
+                prev_point = p3d
 
             # downhill involute
-            point_list.append((involute_points2, True))
+            three_d_pts = []
+            for p in involute_points2:
+                three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
+            s.Add( step.NewSplineFromPoints(three_d_pts) )
+
+        return s
+
+    def AddSolid(self):
+        cad.AddUndoably(self.MakeSolid())
         
-        return point_list
+    def MakeSolid(self):
+        import step
+        objects = [self.MakeSketch()]        
+        new_solids = step.CreateExtrusion(objects, self.thickness, True, False, 0.0, cad.Color(128, 128, 128))
+        s = new_solids[0]
+        if s != None:
+            # subtract cylinder in the middle
+            cyl = step.NewCyl()
+            cyl.radius = 1
+            cyl.height = 20
+            cyl.OnApplyProperties()
+            objects = [s, cyl]
+            s = step.CutShapes(objects)
+        return s
 
 def point_at_phi(phi, base_radius):
     x = base_radius * phi
