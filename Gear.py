@@ -14,8 +14,11 @@ class Gear(Object):
         Object.__init__(self, 0)
         self.tm = geom.Matrix()
         self.solid = None
+        self.rackSolid = None
+        self.start_grip_point = None
         self.numTeeth = num_teeth
         self.module = mod
+        self.xOffset = 0.0   # profile shift coefficient (x)
         self.addendumOffset = 0.0
         self.addendumMultiplier = 1.0
         self.dedendumMultiplier = 1.0
@@ -25,6 +28,8 @@ class Gear(Object):
         self.rootRoundness = 0.25
         self.numInvoluteFacets = 10
         self.thickness = 5.0
+        self.gripper_point = None
+        self.showRack = False
         self.color = cad.Color(128, 128, 128)
         
     def GetIconFilePath(self):
@@ -48,6 +53,7 @@ class Gear(Object):
         
     def KillGLLists(self):
         self.solid = None
+        self.rackSolid = None
         
     def OnRecalculate(self):
         self.KillGLLists()
@@ -56,9 +62,34 @@ class Gear(Object):
     def OnGlCommands(self, select, marked, no_color):
         if self.solid == None:
             self.solid = self.MakeSolid()
-        
-        self.solid.OnGlCommands(select, marked, no_color)
             
+        if self.showRack and self.rackSolid == None:
+            self.rackSolid = self.MakeRackSolid()
+            
+        cad.DrawPushMatrix()
+        cad.DrawMultMatrix(self.tm)
+            
+        rot = geom.Matrix()
+        radius = self.module * self.numTeeth * 0.5
+        rot.Rotate(self.gripper_point.y / radius) # y coordinate is rotation in radians
+
+
+        cad.DrawPushMatrix()
+        cad.DrawMultMatrix(rot)  
+        self.solid.OnGlCommands(select, marked, no_color)
+        cad.DrawPopMatrix()
+        
+        if self.showRack:
+            rackm = geom.Matrix()
+            rackm.Translate(geom.Point3D(0, self.gripper_point.y, 0))
+            cad.DrawPushMatrix()
+            cad.DrawMultMatrix(rackm)  
+            self.rackSolid.OnGlCommands(select, marked, no_color)
+            cad.DrawPopMatrix()
+
+        cad.DrawPopMatrix()
+        
+        
     def Transform(self, mat):
         self.tm.Multiply(mat)
             
@@ -66,6 +97,7 @@ class Gear(Object):
         cad.SetXmlMatrix('tm', self.tm)
         cad.SetXmlValue('numTeeth', self.numTeeth)
         cad.SetXmlValue('module', self.module)
+        cad.SetXmlValue('xOffset', self.xOffset)
         cad.SetXmlValue('addendumOffset', self.addendumOffset)
         cad.SetXmlValue('addendumMultiplier', self.addendumMultiplier)
         cad.SetXmlValue('dedendumMultiplier', self.dedendumMultiplier)
@@ -75,12 +107,14 @@ class Gear(Object):
         cad.SetXmlValue('rootRoundness', self.rootRoundness)        
         cad.SetXmlValue('numInvoluteFacets', self.numInvoluteFacets)
         cad.SetXmlValue('thickness', self.thickness)
+        cad.SetXmlValue('showRack', self.showRack)        
         Object.WriteXml(self)
 
     def ReadXml(self):
         self.tm = cad.GetXmlMatrix('tm')
         self.numTeeth = cad.GetXmlInt('numTeeth', self.numTeeth)
         self.module = cad.GetXmlFloat('module', self.module)
+        self.xOffset = cad.GetXmlFloat('xOffset', self.xOffset)
         self.addendumOffset = cad.GetXmlFloat('addendumOffset', self.addendumOffset)
         self.addendumMultiplier = cad.GetXmlFloat('addendumMultiplier', self.addendumMultiplier)
         self.dedendumMultiplier = cad.GetXmlFloat('dedendumMultiplier', self.dedendumMultiplier)
@@ -90,6 +124,7 @@ class Gear(Object):
         self.rootRoundness = cad.GetXmlFloat('rootRoundness', self.rootRoundness)
         self.numInvoluteFacets = cad.GetXmlInt('numInvoluteFacets', self.numInvoluteFacets)
         self.thickness = cad.GetXmlFloat('thickness', self.thickness)
+        self.showRack = cad.GetXmlBool('showRack', self.showRack)
         Object.ReadXml(self)
                 
     def MakeACopy(self):
@@ -122,6 +157,7 @@ class Gear(Object):
         properties = []
         properties.append(PyProperty("num teeth", 'numTeeth', self, self.OnRecalculate))
         properties.append(PyProperty("module", 'module', self, self.OnRecalculate))
+        properties.append(PyPropertyLength("x offset", 'xOffset', self, recalculate=self.OnRecalculate))
         properties.append(PyPropertyLength("addendum offset", 'addendumOffset', self, recalculate = self.OnRecalculate))
         properties.append(PyPropertyLength("addendum multiplier", 'addendumMultiplier', self, recalculate = self.OnRecalculate))
         properties.append(PyPropertyLength("dedendum multiplier", 'dedendumMultiplier', self, recalculate = self.OnRecalculate))
@@ -131,6 +167,7 @@ class Gear(Object):
         properties.append(PyProperty("root roundness", 'rootRoundness', self, self.OnRecalculate))
         properties.append(PyProperty("num involute facets", 'numInvoluteFacets', self, self.OnRecalculate))
         properties.append(PyPropertyLength("thickness", 'thickness', self, recalculate = self.OnRecalculate))
+        properties.append(PyProperty("show rack", 'showRack', self, self.OnRecalculate))
                                              
         properties += Object.GetProperties(self)
 
@@ -141,15 +178,15 @@ class Gear(Object):
         
     def MakeSketch(self):
         import step
-        s = cad.NewSketch()
-        
+        sketch = cad.NewSketch()
+             
         pitch_radius = float(self.module) * self.numTeeth * 0.5
-        inside_radius = pitch_radius - self.dedendumMultiplier*self.module
-        outside_radius = pitch_radius + (self.addendumMultiplier*self.module + self.addendumOffset)
         base_radius = pitch_radius * math.cos(self.pressureAngle)
+        outside_radius = pitch_radius + self.addendumMultiplier * self.module + self.addendumOffset + self.xOffset * self.module * self.module * math.tan(self.pressureAngle)
+        inside_radius = pitch_radius - self.dedendumMultiplier * self.module
 
         if inside_radius < base_radius:
-             inside_radius = base_radius
+           inside_radius = base_radius
         
         inside_phi_and_angle = involute_intersect(inside_radius, base_radius)
         outside_phi_and_angle = involute_intersect(outside_radius, base_radius)
@@ -165,6 +202,9 @@ class Gear(Object):
             
             # incremental_angle - to space the middle point at a quarter of a cycle
             incremental_angle = 0.5*math.pi/self.numTeeth - middle_phi_and_angle[1]
+            
+            # angle between tooth center and one flank rotated to take into account xOffset
+            incremental_angle -= (2.0 * self.xOffset * self.module * math.tan(self.pressureAngle)) / (2.0 * pitch_radius)
 
             # get the previous tooth's involute points
             prev_involute_points = []
@@ -207,10 +247,10 @@ class Gear(Object):
             three_d_pts = []
             for p in points:
                 three_d_pts.append( geom.Point3D(p.x, p.y, 0) )
-            s.Add( step.NewSplineFromPoints(three_d_pts, previous_spline.GetEndTangent(), uphill_spline.GetStartTangent()) )
+            sketch.Add( step.NewSplineFromPoints(three_d_pts, previous_spline.GetEndTangent(), uphill_spline.GetStartTangent()) )
             
             # up hill involute            
-            s.Add( uphill_spline )
+            sketch.Add( uphill_spline )
             
             # tip relief
             points = []
@@ -227,13 +267,52 @@ class Gear(Object):
             for p in points:
                 p3d = geom.Point3D(p.x, p.y, 0)
                 if prev_point != None:
-                    s.Add(cad.NewLine(prev_point, p3d))
+                    sketch.Add(cad.NewLine(prev_point, p3d))
                 prev_point = p3d
 
             # downhill involute
-            s.Add( downhill_spline )
+            sketch.Add( downhill_spline )
 
-        return s
+        return sketch
+    
+    def MakeRackSketch(self):
+        sketch = cad.NewSketch()
+        
+        num_rack_teeth = 6 # on each side, so twice this
+
+        pitch_radius = float(self.module) * self.numTeeth * 0.5
+        
+        # spacing between teeth
+        pitch = math.pi * float(self.module)
+        
+        left_x = pitch_radius - self.module + self.xOffset * self.module
+        right_x = left_x + self.module * 2
+        rack_side_x = right_x + self.module
+        pressureAngle_y = math.tan(self.pressureAngle) * 2.0 * self.module
+        tip_or_root_y = (pitch - (2 * pressureAngle_y)) * 0.5
+        
+        points = []
+        
+        for i in range(num_rack_teeth, -num_rack_teeth - 1, -1):
+            points.append(geom.Point(right_x, tip_or_root_y * 0.5 + pressureAngle_y + pitch * i))
+            points.append(geom.Point(left_x, tip_or_root_y * 0.5 + pitch * i))
+            points.append(geom.Point(left_x, -tip_or_root_y * 0.5 + pitch * i))
+            points.append(geom.Point(right_x, -tip_or_root_y * 0.5 - pressureAngle_y + pitch * i))
+            points.append(geom.Point(right_x, -tip_or_root_y * 1.5 - pressureAngle_y + pitch * i))
+            
+        # finish off the shape
+        points.append(geom.Point(rack_side_x, points[-1].y))
+        points.append(geom.Point(rack_side_x, points[0].y))
+        points.append(points[0])
+
+        # add lines
+        prev_point = None
+        for p in points:
+            p3d = geom.Point3D(p.x, p.y, 0)
+            if prev_point != None:
+                sketch.Add(cad.NewLine(prev_point, p3d))
+            prev_point = p3d
+        return sketch
 
     def AddSolid(self):
         cad.AddUndoably(self.MakeSolid())
@@ -251,7 +330,32 @@ class Gear(Object):
             cyl.OnApplyProperties()
             objects = [s, cyl]
             s = step.CutShapes(objects)
+            
+            # calculate the gripper point
+            box = s.GetBox()
+            self.gripper_point = geom.Point3D(box.MaxX(), 0, self.thickness)
         return s
+    
+    def MakeRackSolid(self):
+        import step
+        objects = [self.MakeRackSketch()]        
+        new_solids = step.CreateExtrusion(objects, self.thickness, True, False, 0.0, cad.Color(128, 128, 128))
+        s = new_solids[0]
+        return s
+    
+    def GetGrippers(self, just_for_endof):
+        if self.gripper_point != None:
+            cad.AddGripper(cad.GripData(self.gripper_point, cad.GripperType.Stretch, 0))
+        
+    def Stretch(self):
+        self.start_grip_point = None
+        
+    def StretchTemporary(self):
+        if self.start_grip_point == None:
+            self.start_grip_point = geom.Point3D(self.gripper_point)
+        shift = cad.GetStretchShift()
+        self.gripper_point.y = self.start_grip_point.y + shift.y
+
 
 def point_at_phi(phi, base_radius):
     x = base_radius * phi

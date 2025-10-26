@@ -128,6 +128,15 @@ Point3d GetStretchShift()
 
 }
 
+bool BaseObject::StretchTemporary(const Point3d& p, const Point3d& shift, void* data)
+{
+	Stretch_point = p;
+	Stretch_shift = shift;
+	if (!CallVoidReturn("StretchTemporary"))
+		return ObjList::StretchTemporary(p, shift, data);
+	return false;
+}
+
 bool BaseObject::Stretch(const Point3d &p, const Point3d &shift, void* data)
 {
 	Stretch_point = p;

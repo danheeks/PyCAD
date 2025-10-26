@@ -27,7 +27,7 @@ public:
 	void glCommands(bool select, bool marked, bool no_color);
 	void GetProperties(std::list<Property *> *list);
 	void GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof);
-	bool StretchTemporary(const Point3d &p, const Point3d &shift, void* data){ return false; } // don't support dynamic stretching yet
+	bool StretchTemporary(const Point3d& p, const Point3d& shift, void* data);
 	bool Stretch(const Point3d &p, const Point3d &shift, void* data);
 	void Transform(const Matrix &m);
 	void GetBox(CBox &box);
