@@ -31,7 +31,7 @@ class SolidApp(App):
         App.__init__(self)
 
     def GetAppTitle(self):
-        return 'Solid CAD ( Computer Aided Design )'
+        return 'Heeks CAD 2 ( Computer Aided Design )'
        
     def GetAppConfigName(self):
         return 'HeeksCADSolid'
