@@ -6,7 +6,7 @@
    height="1052.3622047"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
    sodipodi:docname="bitmaps.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.1"
@@ -4945,7 +4945,7 @@
        y1="441.36218"
        x2="112"
        y2="441.36218"
-       gradientTransform="matrix(1.0833334,0,0,1.1538462,-8.3333334,-67.901877)" />
+       gradientTransform="matrix(1.0833334,0,0,1.1538462,1.6666666,114.56517)" />
     <radialGradient
        inkscape:collect="always"
        xlink:href="#linearGradient700"
@@ -5967,13 +5967,14 @@
        cy="431.11218"
        fx="23.75"
        fy="431.11218"
-       r="15" />
+       r="15"
+       gradientTransform="matrix(0.8666666,0,0,0.8666669,13.676778,240.3703)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient4723"
        id="linearGradient4720"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.0833334,0,0,1.1538462,31.666667,21.744575)"
+       gradientTransform="matrix(1.0833334,0,0,1.1538462,36.666667,114.21162)"
        x1="88"
        y1="441.36218"
        x2="112"
@@ -6307,14 +6308,14 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.313708"
-     inkscape:cx="455.2884"
-     inkscape:cy="375.16436"
+     inkscape:zoom="0.99999996"
+     inkscape:cx="-116"
+     inkscape:cy="619.50003"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1920"
-     inkscape:window-height="1017"
+     inkscape:window-height="1009"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:snap-global="false"
@@ -6324,10 +6325,17 @@
      inkscape:snap-bbox="true"
      inkscape:snap-grids="true"
      inkscape:object-nodes="false"
-     inkscape:pagecheckerboard="0">
+     inkscape:pagecheckerboard="0"
+     inkscape:showpageshadow="2"
+     inkscape:deskcolor="#d1d1d1">
     <inkscape:grid
        type="xygrid"
-       id="grid2383" />
+       id="grid2383"
+       originx="0"
+       originy="0"
+       spacingy="1"
+       spacingx="1"
+       units="px" />
   </sodipodi:namedview>
   <metadata
      id="metadata7">
@@ -6598,99 +6606,75 @@
        x="235"
        y="604.82922" />
     <g
-       id="g4701"
-       inkscape:export-filename="C:\Users\Dan\HeeksCAD\icons\sphere.png"
-       inkscape:export-xdpi="45"
-       inkscape:export-ydpi="45"
-       transform="translate(5,92.467048)">
-      <path
-         transform="translate(4.5000003,89.5)"
-         d="m 45,437.36218 a 15,15 0 0 1 -15,15 15,15 0 0 1 -15,-15 15,15 0 0 1 15,-15 15,15 0 0 1 15,15 z"
-         sodipodi:ry="15"
-         sodipodi:rx="15"
-         sodipodi:cy="437.36218"
-         sodipodi:cx="30"
+       id="g1">
+      <circle
          id="path24282"
-         style="fill:#fbd0d0;fill-opacity:1;stroke:#d46a68;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         sodipodi:type="arc" />
-      <path
-         transform="matrix(0.8666666,0,0,0.8666669,8.6767779,147.90325)"
-         d="m 45,437.36218 a 15,15 0 0 1 -15,15 15,15 0 0 1 -15,-15 15,15 0 0 1 15,-15 15,15 0 0 1 15,15 z"
-         sodipodi:ry="15"
-         sodipodi:rx="15"
-         sodipodi:cy="437.36218"
-         sodipodi:cx="30"
+         style="fill:#fbd0d0;fill-opacity:1;stroke:#272f4d;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         cx="39.5"
+         cy="619.32922"
+         r="15" />
+      <ellipse
          id="path24284"
-         style="fill:url(#radialGradient4699);fill-opacity:1;stroke:none;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         sodipodi:type="arc" />
+         style="fill:url(#radialGradient4699);fill-opacity:1;stroke:none;stroke-width:1.73333;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         cx="39.676777"
+         cy="619.4176"
+         rx="12.999999"
+         ry="13.000004" />
     </g>
     <g
-       id="g4711"
-       inkscape:export-filename="C:\Users\Dan\HeeksCAD\bitmaps\cube.png"
-       inkscape:export-xdpi="270"
-       inkscape:export-ydpi="270"
-       transform="translate(5,92.467048)">
+       id="g2">
       <path
          id="path24326"
-         d="M 70.353553,512.36218 L 85.353553,517.36218 L 70.353553,522.36218 L 55.353553,517.36218 L 70.353553,512.36218 z"
-         style="fill:#c0ffc2;fill-opacity:1;fill-rule:evenodd;stroke:#04a000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         d="m 75.353553,604.82923 15,5 -15,5 -15,-5 z"
+         style="fill:#c0ffc2;fill-opacity:1;fill-rule:evenodd;stroke:#272f4d;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          id="path24328"
-         d="M 55.353553,517.36218 L 55.353553,537.36218 L 70.353553,542.36218 L 70.353553,522.36218 L 55.353553,517.36218 z"
-         style="fill:#80ff83;fill-opacity:1;fill-rule:evenodd;stroke:#04a000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         d="m 60.353553,609.82923 v 20 l 15,5 v -20 z"
+         style="fill:#80ff83;fill-opacity:1;fill-rule:evenodd;stroke:#272f4d;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          id="path24330"
-         d="M 85.353553,517.36218 L 85.353553,537.36218 L 70.353553,542.36218 L 70.353553,522.36218 L 85.353553,517.36218 z"
-         style="fill:#40ff40;fill-opacity:1;fill-rule:evenodd;stroke:#10a000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         d="m 90.353553,609.82923 v 20 l -15,5 v -20 z"
+         style="fill:#40ff40;fill-opacity:1;fill-rule:evenodd;stroke:#272f4d;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          sodipodi:nodetypes="ccccc"
          id="path24332"
-         d="M 70.353554,514.36218 L 79.353554,517.36218 L 70.353554,520.36218 L 61.353554,517.36218 L 70.353554,514.36218 z"
+         d="m 75.353554,606.82923 9,3 -9,3 -9,-3 z"
          style="fill:#8aff80;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          sodipodi:nodetypes="ccccc"
          id="path24334"
-         d="M 57.353554,520.36218 L 57.457721,535.67468 L 68.353554,539.36218 L 68.353554,524.15385 L 57.353554,520.36218 z"
+         d="m 62.353554,612.82923 0.104167,15.3125 10.895833,3.6875 V 616.6209 Z"
          style="fill:#43c33c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
          sodipodi:nodetypes="ccccc"
          id="path24336"
-         d="M 83.353554,520.36218 L 83.353554,535.88302 L 72.353554,539.36218 L 72.353554,523.94552 L 83.353554,520.36218 z"
+         d="m 88.353554,612.82923 v 15.52084 l -11,3.47916 v -15.41666 z"
          style="fill:#00c00e;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
     <g
-       id="g6712"
-       inkscape:export-filename="C:\Users\Dan\Heeks Software\HeeksCAD\bitmaps\cyl.png"
-       inkscape:export-xdpi="270"
-       inkscape:export-ydpi="270"
-       transform="translate(10,182.46705)">
-      <path
-         d="m 115,427.36218 a 15,5 0 0 1 -15,5 15,5 0 0 1 -15,-5 15,5 0 0 1 15,-5 15,5 0 0 1 15,5 z"
-         sodipodi:ry="5"
-         sodipodi:rx="15"
-         sodipodi:cy="427.36218"
-         sodipodi:cx="100"
+       id="g3">
+      <ellipse
          id="path24346"
-         style="fill:#c0c0ff;fill-opacity:1;stroke:#0000a0;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         sodipodi:type="arc" />
-      <path
-         transform="matrix(0.8000001,0,0,0.6000031,19.999985,170.94356)"
-         d="m 115,427.36218 a 15,5 0 0 1 -15,5 15,5 0 0 1 -15,-5 15,5 0 0 1 15,-5 15,5 0 0 1 15,5 z"
-         sodipodi:ry="5"
-         sodipodi:rx="15"
-         sodipodi:cy="427.36218"
-         sodipodi:cx="100"
+         style="fill:#c0c0ff;fill-opacity:1;stroke:#272f4d;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         cx="110"
+         cy="609.82922"
+         rx="15"
+         ry="5" />
+      <ellipse
          id="path24351"
-         style="fill:#8080ff;fill-opacity:1;stroke:none;stroke-width:5.09039307;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         sodipodi:type="arc" />
+         style="fill:#8080ff;fill-opacity:1;stroke:none;stroke-width:3.52674;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         cx="109.99999"
+         cy="609.82922"
+         rx="12.000002"
+         ry="3.0000155" />
       <path
          sodipodi:nodetypes="csccscc"
-         d="M 115,427.36218 C 115,430.12218 108.28,432.36218 100,432.36218 C 91.72,432.36218 85,430.12218 85,427.36218 L 85,447.36218 C 85,450.12218 91.72,452.36218 100,452.36218 C 108.28,452.36218 115,450.12218 115,447.36218 L 115,427.36218 z"
-         style="fill:#8080ff;fill-opacity:1;stroke:#0000a0;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
+         d="m 125,609.82923 c 0,2.76 -6.72,5 -15,5 -8.28,0 -15,-2.24 -15,-5 v 20 c 0,2.76 6.72,5 15,5 8.28,0 15,-2.24 15,-5 z"
+         style="fill:#8080ff;fill-opacity:1;stroke:#272f4d;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
          id="path24348" />
       <path
          sodipodi:nodetypes="csccscc"
-         d="M 113,432.13141 C 112,433.36218 107,434.51604 100,434.43911 C 93,434.36218 88,433.36218 87,432.13141 L 87,447.13141 C 87,448.28526 91.03,450.59295 100,450.59295 C 108.97,450.59295 113,448.28526 113,447.13141 L 113,432.13141 z"
+         d="m 123,614.59846 c -1,1.23077 -6,2.38463 -13,2.3077 -7,-0.0769 -12,-1.07693 -13,-2.3077 v 15 c 0,1.15385 4.03,3.46154 13,3.46154 8.97,0 13,-2.30769 13,-3.46154 z"
          style="fill:url(#linearGradient6707);fill-opacity:1;stroke:none;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
          id="path24358" />
     </g>
@@ -7213,19 +7197,15 @@
          style="opacity:1;fill:#a0a0a0;fill-opacity:1;stroke:#606060;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
     <g
-       id="g4729"
-       inkscape:export-filename="C:\Users\Dan\HeeksCAD\icons\cone.png"
-       inkscape:export-xdpi="45"
-       inkscape:export-ydpi="45"
-       transform="translate(5,92.467048)">
+       id="g4">
       <path
          sodipodi:nodetypes="ccscc"
-         d="M 140,512.36218 L 125,537.36218 C 125,540.12218 131.72,542.36218 140,542.36218 C 148.28,542.36218 155,540.12218 155,537.36218 L 140,512.36218 z"
-         style="fill:#feff80;fill-opacity:1;stroke:#9ea000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
+         d="m 145,604.82923 -15,25 c 0,2.76 6.72,5 15,5 8.28,0 15,-2.24 15,-5 z"
+         style="fill:#feff80;fill-opacity:1;stroke:#272f4d;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
          id="path5134" />
       <path
          sodipodi:nodetypes="ccscc"
-         d="M 140,516.00862 L 127.39535,537.49125 C 128.60715,538.68627 132.64122,540.23939 140,540.23939 C 147.5389,540.23939 151.58834,538.60931 152.68856,537.40417 L 140,516.00862 z"
+         d="m 145,608.47567 -12.60465,21.48263 c 1.2118,1.19502 5.24587,2.74814 12.60465,2.74814 7.5389,0 11.58834,-1.63008 12.68856,-2.83522 z"
          style="fill:url(#linearGradient4720);fill-opacity:1;stroke:none;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1"
          id="path5136" />
     </g>

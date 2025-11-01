@@ -91,7 +91,7 @@ class Gear(Object):
     def OnGlCommands(self, select, marked, no_color):
         cad.DrawPushMatrix()
         cad.DrawMultMatrix(self.tm)
-            
+        
         if self.showRack2:
             if self.rackSolid2 == None:
                 self.rackSolid2 = self.MakeRackSolid(True)
@@ -104,7 +104,7 @@ class Gear(Object):
             # for gear2 rotate it 180 degrees
             rot.Rotate(math.pi)
             cad.DrawMultMatrix(rot)
-            self.rackSolid2.OnGlCommands(select, marked, no_color)
+            self.rackSolid2.OnGlCommands(False, marked, no_color)
             cad.DrawPopMatrix()
         else:
             if self.solid == None:
@@ -114,7 +114,7 @@ class Gear(Object):
             rot.Rotate(self.gripper_point.y / radius) # y coordinate is rotation in radians
             cad.DrawPushMatrix()
             cad.DrawMultMatrix(rot)  
-            self.solid.OnGlCommands(select, marked, no_color)
+            self.solid.OnGlCommands(False, marked, no_color)
             cad.DrawPopMatrix()
         
         if self.showRack:
@@ -124,7 +124,7 @@ class Gear(Object):
             rackm.Translate(geom.Point3D(0, self.gripper_point.y, 0))
             cad.DrawPushMatrix()
             cad.DrawMultMatrix(rackm)  
-            self.rackSolid.OnGlCommands(select, marked, no_color)
+            self.rackSolid.OnGlCommands(False, marked, no_color)
             cad.DrawPopMatrix()
         else:
             if self.solid2 == None:
@@ -138,7 +138,7 @@ class Gear(Object):
             # for gear2 rotate it 180 degrees + half a tooth
             rot.Rotate(-self.gripper_point.y / radius + math.pi / self.numTeeth2 + math.pi) # y coordinate is rotation in radians
             cad.DrawMultMatrix(rot)  
-            self.solid2.OnGlCommands(select, marked, no_color)
+            self.solid2.OnGlCommands(False, marked, no_color)
             cad.DrawPopMatrix()
 
         cad.DrawPopMatrix()
@@ -453,7 +453,7 @@ class Gear(Object):
         thickness = self.thickness2 if gear2 else self.thickness
         new_solids = step.CreateExtrusion(objects, thickness, True, False, 0.0, cad.Color(128, 128, 128))
         s = new_solids[0]
-        if s != None and not gear2:
+        if s != None:
             # subtract cylinder in the middle
             cyl = step.NewCyl()
             cyl.radius = 1
