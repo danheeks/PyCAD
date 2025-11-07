@@ -9,7 +9,7 @@
 #include "HArc.h"
 #include "Gripper.h"
 #include "DigitizeMode.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 #include "Sketch.h"
 #include "../Geom/Geom.h"
 

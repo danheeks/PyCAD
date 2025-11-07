@@ -76,7 +76,17 @@ void GripperSelTransform::OnGripperMoved( Point3d & from, const Point3d & to){
 
 	Matrix object_m;
 
-	if (theApp->m_marked_list->list().size() > 0)theApp->m_marked_list->list().front()->GetScaleAboutMatrix(object_m);
+	if (theApp->m_marked_list->list().size() > 0)
+	{
+		if (!theApp->m_marked_list->list().front()->GetScaleAboutMatrix(object_m))
+		{
+			// return the bottom left corner of the box
+			CBox box;
+			theApp->m_marked_list->list().front()->GetBox(box);
+			if (box.m_valid)
+				object_m.Translate(box.m_x[0], box.m_x[1], box.m_x[2]);
+		}
+	}
 
 	MakeMatrix ( from, to, object_m, theApp->m_drag_matrix );
 
@@ -113,7 +123,17 @@ void GripperSelTransform::OnGripperReleased(const Point3d & from, const Point3d 
 		{
 			Matrix mat;
 			Matrix object_m;
-			if (theApp->m_marked_list->list().size() > 0)theApp->m_marked_list->list().front()->GetScaleAboutMatrix(object_m);
+			if (theApp->m_marked_list->list().size() > 0)
+			{
+				if (!theApp->m_marked_list->list().front()->GetScaleAboutMatrix(object_m))
+				{
+					// return the bottom left corner of the box
+					CBox box;
+					theApp->m_marked_list->list().front()->GetBox(box);
+					if (box.m_valid)
+						object_m.Translate(box.m_x[0], box.m_x[1], box.m_x[2]);
+				}
+			}
 			MakeMatrix ( from, to, object_m, mat );
 			theApp->TransformUndoably(object, mat);
 		}

@@ -12,7 +12,7 @@
 #include "Sketch.h"
 #include "DigitizeMode.h"
 #include "HPoint.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 
 HLine::HLine(const HLine &line):EndedObject(){
 	operator=(line);

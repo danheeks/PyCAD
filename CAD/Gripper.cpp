@@ -88,8 +88,15 @@ void Gripper::glCommands(bool select, bool marked, bool no_color){
 			if (m_gripper_parent)
 			{
 				Matrix object_m;
-				m_gripper_parent->GetScaleAboutMatrix(object_m);
-				object_m.Translate(-(Point3d(0, 0, 0).Transformed(object_m))); // remove matrix translation
+				if (!m_gripper_parent->GetScaleAboutMatrix(object_m))
+				{
+					// return the bottom left corner of the box
+					CBox box;
+					m_gripper_parent->GetBox(box);
+					if (box.m_valid)
+						object_m.Translate(box.m_x[0], box.m_x[1], box.m_x[2]);
+				}
+				object_m.Translate(-(Point3d(0, 0, 0).Transformed(object_m))); // remove matrix translation ( just leave rotation )
 				double m[16];
 				object_m.GetTransposed(m);
 				glMultMatrixd(m);

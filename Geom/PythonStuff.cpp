@@ -641,6 +641,18 @@ boost::python::object CurveIsACircle(const CCurve& curve, double tol)
 	}
 }
 
+
+static CCurve MakeCircleCurveAtPoint(const Point& centre, double radius)
+{
+	Point p0 = centre + Point(radius, 0.0);
+	Point p1 = centre + Point(-radius, 0.0);
+	CCurve curve;
+	curve.append(p0);
+	curve.append(CVertex(1, p1, centre));
+	curve.append(CVertex(1, p0, centre));
+	return curve;
+}
+
 BOOST_PYTHON_MODULE(geom) {
 
 	bp::docstring_options local_docstring_options(true, true, false); // This will enable user-defined docstrings and python signatures, while disabling the C++ signatures
@@ -937,4 +949,6 @@ BOOST_PYTHON_MODULE(geom) {
 	bp::def("get_accuracy", get_accuracy, "get the tolerance used for fitting arcs");
 	bp::def("set_fitarcs", set_fitarcs, "set to True if Area.FitArcs() is to be called automatically for boolean Area operations and Offset");
 	bp::def("get_fitarcs", get_fitarcs, "see set_fitarcs for description");
+	bp::def("MakeCircleCurveAtPoint", MakeCircleCurveAtPoint, bp::args("p", "r"), "given centre point and radius\nreturns a Curve");
+	
 }

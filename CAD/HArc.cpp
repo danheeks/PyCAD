@@ -13,7 +13,7 @@
 #include "Gripper.h"
 #include "Sketch.h"
 #include "DigitizeMode.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 
 HArc::HArc(const HArc &line):EndedObject(){
 	operator=(line);

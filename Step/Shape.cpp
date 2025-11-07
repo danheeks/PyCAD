@@ -16,7 +16,7 @@
 #include "Cone.h"
 #include "strconv.h"
 #include "App.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 #include <locale.h>
 #include <XSControl_WorkSession.hxx>
 #include <XSControl_TransferReader.hxx>

@@ -88,7 +88,7 @@ public:
 	virtual int GetCentrePoints(Point3d &pos, Point3d &pos2){ if (GetCentrePoint(pos))return 1; return 0; }
 	virtual bool GetMidPoint(Point3d &pos){ return false; }
 	virtual void Reverse(){}
-	virtual bool GetScaleAboutMatrix(Matrix &m);
+	virtual bool GetScaleAboutMatrix(Matrix& m) { return false; }
 	virtual void GetProperties(std::list<Property *> *list);
 	virtual void GetOnEdit(bool(**callback)(HeeksObj*)){ *callback = NULL; } // returns a function for doing edit with a dialog
 	virtual bool ValidateProperties(){return true;}

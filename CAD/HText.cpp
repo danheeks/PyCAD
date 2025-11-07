@@ -3,7 +3,7 @@
 // This program is released under the BSD license. See the file COPYING for details.
 #include "stdafx.h"
 #include "HText.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 #include "Gripper.h"
 #include "GripData.h"
 #include "strconv.h"

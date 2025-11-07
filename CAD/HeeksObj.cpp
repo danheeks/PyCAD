@@ -67,16 +67,6 @@ void HeeksObj::GetProperties(std::list<Property *> *list)
 	list->push_back(new PropertyCheck(this, L"visible", &m_visible));
 }
 
-bool HeeksObj::GetScaleAboutMatrix(Matrix &m)
-{
-	// return the bottom left corner of the box
-	CBox box;
-	GetBox(box);
-	if(!box.m_valid)return false;
-	m.Translate(box.m_x[0], box.m_x[1], box.m_x[2]);
-	return true;
-}
-
 void HeeksObj::GetGripperPositionsTransformed(std::list<GripData> *list, bool just_for_endof)
 {
 	GetGripperPositions(list,just_for_endof);

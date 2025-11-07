@@ -6,7 +6,7 @@
 #include "Group.h"
 #include "strconv.h"
 #include "GripData.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 
 CGroup::CGroup()
 {

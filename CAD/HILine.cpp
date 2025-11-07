@@ -9,7 +9,7 @@
 //#include "HCircle.h"
 #include "HPoint.h"
 #include "Gripper.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 
 HILine::HILine(const HILine &line):EndedObject(){
 	operator=(line);

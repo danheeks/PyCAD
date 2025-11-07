@@ -142,6 +142,7 @@
     <ClCompile Include="PointOrWindow.cpp" />
     <ClCompile Include="Property.cpp" />
     <ClCompile Include="PropertyChange.cpp" />
+    <ClCompile Include="PropertyGeom.cpp" />
     <ClCompile Include="PyBaseObject.cpp" />
     <ClCompile Include="PythonStuff.cpp" />
     <ClCompile Include="PyWrapper.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="PointOrWindow.h" />
     <ClInclude Include="Property.h" />
     <ClInclude Include="PropertyChange.h" />
+    <ClInclude Include="PropertyGeom.h" />
     <ClInclude Include="PyBaseObject.h" />
     <ClInclude Include="PyWrapper.h" />
     <ClInclude Include="RemoveOrAddTool.h" />

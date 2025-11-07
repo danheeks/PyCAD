@@ -7,7 +7,7 @@
 #include "GripData.h"
 #include "Material.h"
 #include "strconv.h"
-#include "Property.h"
+#include "PropertyGeom.h"
 
 double CoordinateSystem::size = 30;
 bool CoordinateSystem::size_is_pixels = true;
