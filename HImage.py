@@ -64,7 +64,10 @@ class HImage(Object):
                 self.bottom_right = geom.Point3D(self.width,0,0)
                 self.top_right = geom.Point3D(self.width,self.height,0)
                 self.top_left = geom.Point3D(0,self.height,0)
-            self.texture_number, self.textureWidth = cad.GenTexture(image.GetData(), None, self.width, self.height, image.HasAlpha())
+            alphaBuffer = None
+            if image.HasAlpha():
+                alphaBuffer = image.GetAlphaBuffer()
+            self.texture_number, self.textureWidth = cad.GenTexture(image.GetData(), alphaBuffer, self.width, self.height, image.HasAlpha())
         
         if self.texture_number == 0:
             return
