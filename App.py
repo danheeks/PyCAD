@@ -111,7 +111,8 @@ class App(wx.App):
             
     def OnInit(self):
         self.RegisterMessageBoxCallback()
-        self.InitCad()
+        self.input_mode_object = self.select_mode
+        cad.SetResFolder(pycad_dir)
         self.RegisterObjectTypes()
         
         self.printData = wx.PrintData()
@@ -241,10 +242,6 @@ class App(wx.App):
         
     def RemoveHideableWindow(self, w):
         del self.hideable_windows[w]
-        
-    def InitCad(self):
-        self.input_mode_object = self.select_mode
-        cad.SetResFolder(pycad_dir)
         
     def EndHistory(self):
         cad.EndHistory()
@@ -939,6 +936,18 @@ class App(wx.App):
             
         return wild_card_string1 + wild_card_string2
     
+    def ImportFile(self, filepath):
+        suffix = self.GetPathSuffix(filepath)
+        res = False # return value, True if file imported
+        if suffix == 'wrl':
+            import Wrl
+            cad.StartHistory('Import Wrl')
+            res = Wrl.Import(filepath)
+            cad.EndHistory()
+        else:
+            res = cad.Import(filepath)
+        return res
+    
     def OnImport(self, e):
         config = HeeksConfig()
         default_directory = config.Read('ImportDirectory', self.GetDefaultDir())
@@ -948,14 +957,8 @@ class App(wx.App):
         
         if dialog.ShowModal() == wx.ID_OK:
             filepath = dialog.GetPath()
-            suffix = self.GetPathSuffix(filepath)
-            if suffix == 'wrl':
-                import Wrl
-                cad.StartHistory('Import Wrl')
-                res = Wrl.Import(filepath)
-                cad.EndHistory()
-            else:
-                res = cad.Import(filepath)
+            res = self.ImportFile(filepath)
+
             if res:
                 self.DoFileOpenViewMag()
                 if self.filepath == None:

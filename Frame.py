@@ -8,6 +8,19 @@ from ObjPropsCanvas import ObjPropsCanvas
 from Ribbon import Ribbon
 from HeeksConfig import HeeksConfig
 
+########################################################################
+class MyFileDropTarget(wx.FileDropTarget):
+    def __init__(self, window):
+        wx.FileDropTarget.__init__(self)
+    
+    def OnDropFiles(self, x, y, filenames):
+        imported = False
+        for filename in filenames:
+            res = wx.GetApp().ImportFile(filename)
+            if res:
+                imported = True
+        return imported
+
 class Frame(wx.Frame):
     def __init__(self, parent, id=-1, pos=wx.DefaultPosition, size=wx.DefaultSize, style=wx.DEFAULT_FRAME_STYLE, name=wx.FrameNameStr):
         wx.Frame.__init__(self, parent, id, '', pos, size, style, name)
@@ -55,6 +68,9 @@ class Frame(wx.Frame):
         self.Bind(wx.EVT_MOVE, self.OnMove)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.gears = []
+        
+        file_drop_target = MyFileDropTarget(self)
+        self.SetDropTarget(file_drop_target)
         
     def MakeGraphicsCanvas(self):
         return GraphicsCanvas(self)
